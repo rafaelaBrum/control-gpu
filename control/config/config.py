@@ -15,8 +15,6 @@ class Config(object):
 
         if path is None:
             path = os.environ['SETUP_PATH']
-            # path = os.getcwd()
-            # print(Path(path))
 
         if file_name is None:
             file_name = os.environ['SETUP_FILE']

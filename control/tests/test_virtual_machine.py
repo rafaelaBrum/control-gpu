@@ -32,14 +32,11 @@ def test_virtual_machine():
         market='on-demand'
     )
 
-    # vm.instance_id = 'i-092d66eb884f2930e'
-
     vm.deploy()
 
     vm.prepare_vm()
 
     vm.terminate()
-    # print(vm.check_task(task))
 
 
 if __name__ == "__main__":

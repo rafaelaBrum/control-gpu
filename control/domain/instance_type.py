@@ -17,7 +17,7 @@ class InstanceType:
         self.cpu_credits = None
         self.id = None
 
-        config = EC2Config(file_name='setup.cfg')
+        config = EC2Config()
 
         self.boot_overhead_seconds = config.boot_overhead
         self.interruption_overhead_seconds = config.interruption_overhead
