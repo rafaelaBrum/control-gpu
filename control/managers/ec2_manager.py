@@ -228,7 +228,7 @@ class EC2Manager(CloudManager):
         # '''
 
         zone = self.ec2_conf.zone
-        interruption_behaviour = 'terminate'
+        interruption_behaviour = 'stop'
 
         parameters = {
             'ImageId': image_id,
