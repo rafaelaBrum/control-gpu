@@ -288,7 +288,7 @@ class VirtualMachine:
                 # Start Daemon
                 logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-                cmd_daemon = "ls"
+                cmd_daemon = "ls tests"
                 # cmd_daemon = "python3 {} " \
                 #              "--vm_user {} " \
                 #              "--root_path {} " \
@@ -311,7 +311,8 @@ class VirtualMachine:
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
-                print(self.ssh.execute_command(cmd_screen, output=True))
+                stdout, stderr, retcode = self.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
 
                 self.deploy_overhead = datetime.now() - self.start_deploy
 
@@ -324,6 +325,8 @@ class VirtualMachine:
     # and delete volume (if delete_volume = True)
     # Return True if success otherwise return False
     def terminate(self, delete_volume=True):
+
+        logging.info("<VirtualMachine>: Terminanting instance {} ".format(self.instance_id))
 
         terminate_start = datetime.now()
 
