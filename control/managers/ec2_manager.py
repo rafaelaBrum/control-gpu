@@ -22,7 +22,7 @@ class EC2Manager(CloudManager):
 
     def __init__(self):
 
-        self.ec2_conf = EC2Config(file_name='setup.cfg')
+        self.ec2_conf = EC2Config()
 
         self.client = boto3.client('ec2')
         self.resource = boto3.resource('ec2')
