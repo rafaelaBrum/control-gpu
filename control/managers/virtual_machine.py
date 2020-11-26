@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 
 import uuid
 import logging
-# import os
 
 
 # Class to control the virtual machine in the cloud
@@ -154,9 +153,6 @@ class VirtualMachine:
                 #         device=self.loader.filesys_conf.device
                 #     )
 
-                # Assuming files are in S3
-                self.__create_s3()
-
                 return True
 
             else:
@@ -210,6 +206,7 @@ class VirtualMachine:
         # prepare S3FS
         cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
                                                         self.manager.credentials.secret_key)
+
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
         # Mount the bucket
@@ -255,6 +252,9 @@ class VirtualMachine:
 
             # try to open the connection
             if self.ssh.open_connection():
+
+                # Assuming files are in S3
+                self.__create_s3()
 
                 # logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
                 #                                                                    self.loader.filesys_conf.path))

@@ -34,9 +34,9 @@ def __prepare_logging():
 def test_virtual_machine():
     instance = InstanceType(
         provider=CloudManager.EC2,
-        instance_type='t2.nano',
+        instance_type='t2.micro',
         image_id='ami-0d1a4eacad59b7a5b',
-        memory=0.5,
+        memory=1,
         vcpu=1,
         restrictions={'on-demand': 1,
                       'preemptible': 1},
