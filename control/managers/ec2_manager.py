@@ -1,6 +1,7 @@
 from control.managers.cloud_manager import CloudManager
 
 from control.config.ec2_config import EC2Config
+from control.config.s3_config import S3Config
 
 import boto3
 
@@ -23,6 +24,7 @@ class EC2Manager(CloudManager):
     def __init__(self):
 
         self.ec2_conf = EC2Config()
+        self.s3_conf = S3Config()
 
         self.client = boto3.client('ec2')
         self.resource = boto3.resource('ec2')
@@ -185,7 +187,7 @@ class EC2Manager(CloudManager):
 
         parameters = {
 
-            'ImageId':image_id,
+            'ImageId': image_id,
             'InstanceType': instance_type,
             'KeyName': self.ec2_conf.key_name,
             'MaxCount': 1,

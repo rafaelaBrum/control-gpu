@@ -154,6 +154,9 @@ class VirtualMachine:
                 #         device=self.loader.filesys_conf.device
                 #     )
 
+                # Assuming files are in S3
+                self.__create_s3()
+
                 return True
 
             else:
@@ -200,32 +203,32 @@ class VirtualMachine:
     #         logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
     #         self.ssh.execute_command(cmd4, output=True)
     #
-    # def __create_s3(self, path):
-    #
-    #     logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
-    #
-    #     # prepare S3FS
-    #     cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
-    #                                                     self.manager.credentials.secret_key)
-    #     cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
-    #
-    #     # Mount the bucket
-    #     cmd3 = 'sudo s3fs {} ' \
-    #            '-o use_cache=/tmp -o allow_other -o uid={} -o gid={} ' \
-    #            '-o mp_umask=002 -o multireq_max=5 {}'.format(self.loader.ec2_conf.bucket_name,
-    #                                                          self.loader.ec2_conf.vm_uid,
-    #                                                          self.loader.ec2_conf.vm_gid,
-    #                                                          path)
-    #
-    #     logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
-    #     self.ssh.execute_command(cmd1, output=True)
-    #
-    #     logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd2))
-    #     self.ssh.execute_command(cmd2, output=True)
-    #
-    #     logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
-    #     self.ssh.execute_command(cmd3, output=True)
-    #
+    def __create_s3(self):
+
+        logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
+
+        # prepare S3FS
+        cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
+                                                        self.manager.credentials.secret_key)
+        cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
+
+        # Mount the bucket
+        cmd3 = 'sudo s3fs {} ' \
+               '-o use_cache=/tmp -o allow_other -o uid={} -o gid={} ' \
+               '-o mp_umask=002 -o multireq_max=5 {}'.format(self.manager.s3_conf.bucket_name,
+                                                             self.manager.s3_conf.vm_uid,
+                                                             self.manager.s3_conf.vm_gid,
+                                                             self.manager.s3_conf.path)
+
+        logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
+        self.ssh.execute_command(cmd1, output=True)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd2))
+        self.ssh.execute_command(cmd2, output=True)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
+        self.ssh.execute_command(cmd3, output=True)
+
     # def __create_efs(self):
     #     logging.info("<VirtualMachine {}>: - Mounting EFS".format(self.instance_id))
     #
