@@ -85,6 +85,6 @@ requests==2.24.0
 # watchdog==0.10.3
 # wstools==0.4.8
 # zc.lockfile==2.0
-# zope.event==4.4
+zope.event==4.4
 
 python-dateutil==2.8.1
