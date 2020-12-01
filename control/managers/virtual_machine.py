@@ -284,10 +284,26 @@ class VirtualMachine:
                 # # keep ssh live
                 # # self.ssh.execute_command("$HOME/.ssh/config")
                 #
-                # # Send daemon file
-                # self.ssh.put_file(source=self.loader.application_conf.daemon_path,
-                #                   target=self.loader.ec2_conf.home_path,
-                #                   item=self.loader.application_conf.daemon_file)
+
+                # TODO: create a AMI with the requirements already installed
+                # Send python requirements file
+                self.ssh.put_file(source='/home/ubuntu/control-gpu',
+                                  target=self.ec2_conf.home_path,
+                                  item='requirements.txt')
+
+                command = 'sudo apt install python3-pip -y; pip3 install -r requirements.txt'
+
+                cmd = 'mkdir {}_{}/; {}'.format(10,2,command)
+
+                logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+
+                stdout, stderr, retcode = self.ssh.execute_command(cmd, output=True)
+                print(stdout)
+
+                # Send daemon file
+                self.ssh.put_file(source=self.application_conf.daemon_path,
+                                  target=self.ec2_conf.home_path,
+                                  item=self.application_conf.daemon_file)
                 #
                 # # create execution folder
                 # self.root_folder = os.path.join(self.loader.filesys_conf.path, '{}_{}'.format(self.loader.job.job_id,

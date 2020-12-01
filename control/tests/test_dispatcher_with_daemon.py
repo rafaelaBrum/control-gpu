@@ -58,11 +58,14 @@ def __execution_loop(vm: VirtualMachine, task: Task):
 
     logging.info("<Executor {}-{}>: Instance-id {} - Status {}".format(task.task_id, vm.instance_id,
                                                                        vm.instance_id, status))
-
     if status:
-
         try:
             vm.prepare_vm()
+        except Exception as e:
+            logging.error(e)
+
+    else:
+        try:
             __prepare_daemon(vm)
         except Exception as e:
             logging.error(e)
@@ -81,19 +84,19 @@ def __execution_loop(vm: VirtualMachine, task: Task):
             # start the executor loop to execute the task
             executor.thread.start()
 
-        if vm.state == CloudManager.RUNNING:
+        # if vm.state == CloudManager.RUNNING:
 
             # while self.debug_wait_command:
             #     time.sleep(5)
 
-            status = vm.terminate()
+            # status = vm.terminate()
 
-            if status:
-                logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+            # if status:
+            #     logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
-    else:
+    # else:
         # Error to start VM
-        logging.error("<Dispatcher> Instance type: {} Was not started".format(vm.instance_type.type))
+        # logging.error("<Dispatcher> Instance type: {} Was not started".format(vm.instance_type.type))
 
 
 def main():
@@ -122,6 +125,8 @@ def main():
         instance_type=instance,
         market='on-demand'
     )
+
+    # vm.instance_id = 'i-03789817e6a065205'
 
     __prepare_logging()
 
