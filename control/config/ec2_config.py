@@ -51,3 +51,7 @@ class EC2Config(Config):
     @property
     def vcpu_limits(self):
         return int(self.get_property(self._key, 'vcpu_limits'))
+
+    @property
+    def vm_user(self):
+        return self.get_property(self._key, 'vm_user')

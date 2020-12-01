@@ -5,11 +5,15 @@ from control.managers.ec2_manager import EC2Manager
 
 from control.util.ssh_client import SSHClient
 # from control.util.loader import Loader
+from control.config.ec2_config import EC2Config
+from control.config.application_config import ApplicationConfig
 
 from datetime import datetime, timedelta
 
 import uuid
 import logging
+
+import os
 
 
 # Class to control the virtual machine in the cloud
@@ -25,6 +29,8 @@ class VirtualMachine:
     def __init__(self, instance_type: InstanceType, market, volume_id=None):
 
         # self.loader = loader
+        self.ec2_conf = EC2Config()
+        self.application_conf = ApplicationConfig()
 
         self.instance_type = instance_type
         self.market = market
@@ -291,26 +297,24 @@ class VirtualMachine:
                 # Start Daemon
                 logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-                cmd_daemon = "ls tests"
-                # cmd_daemon = "python3 {} " \
-                #              "--vm_user {} " \
-                #              "--root_path {} " \
-                #              "--work_path {} " \
-                #              "--container_image {} " \
-                #              "--job_id {} " \
-                #              "--execution_id {}  " \
-                #              "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                #                                                      self.loader.application_conf.daemon_file),
-                #                                         self.loader.ec2_conf.vm_user,
-                #                                         self.loader.filesys_conf.path,
-                #                                         self.loader.docker_conf.work_dir,
-                #                                         self.loader.docker_conf.docker_image,
-                #                                         self.loader.job.job_id,
-                #                                         self.loader.execution_id,
-                #                                         self.instance_id)
+                # cmd_daemon = "ls tests"
+                cmd_daemon = "python3 {} " \
+                             "--vm_user {} " \
+                             "--root_path {} " \
+                             "--work_path {} " \
+                             "--job_id {} " \
+                             "--execution_id {}  " \
+                             "--instance_id {} ".format(os.path.join(self.ec2_conf.home_path,
+                                                                     self.application_conf.daemon_file),
+                                                        self.ec2_conf.vm_user,
+                                                        '/home/ubuntu/',
+                                                        '/home/ubuntu/',
+                                                        10,
+                                                        2,
+                                                        self.instance_id)
 
-                # cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
-                cmd_screen = '{}'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+                # cmd_screen = '{}'.format(cmd_daemon)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
