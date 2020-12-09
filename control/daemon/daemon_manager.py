@@ -36,7 +36,7 @@ class Daemon:
         self.execution_id = execution_id
         self.instance_id = instance_id
 
-        self.root_path = os.path.join(root_path, "{}_{}/".format(self.job_id, self.execution_id))
+        self.root_path = os.path.join(root_path, "{}_{}".format(self.job_id, self.execution_id))
 
         self.__prepare_logging()
 
@@ -63,9 +63,13 @@ class Daemon:
 
         task_id = value['task_id']
         command = value['command']
+        session = ''
+
+        if command is not None:
+            session = command.split()[0]
 
         session_name = "Session_{}_{}_{}_{}".format(
-            value['command'].split()[0],
+            session,
             self.job_id,
             self.execution_id,
             task_id

@@ -110,21 +110,21 @@ class Executor:
             # self.update_status_table()
 
             # start task execution Loop
-            while (self.status == Task.EXECUTING or self.status == Task.RESTARTED) and not self.stop_signal:
-
-                try:
-                    command_status, current_stage = self.__get_task_status()
-                    logging.info()
-                    # usage = self.__get_task_usage()
-
-                    # if self.loader.checkpoint_conf.with_checkpoint \
-                    #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
-                    #     self.__checkpoint_task()
-
-                except Exception as e:
-                    logging.error(e)
-                    # self.__stopped(Task.ERROR)
-                    return
+            # while (self.status == Task.EXECUTING or self.status == Task.RESTARTED) and not self.stop_signal:
+            #
+            #     try:
+            #         command_status, current_stage = self.__get_task_status()
+            #         logging.info()
+            #         # usage = self.__get_task_usage()
+            #
+            #         # if self.loader.checkpoint_conf.with_checkpoint \
+            #         #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
+            #         #     self.__checkpoint_task()
+            #
+            #     except Exception as e:
+            #         logging.error(e)
+            #         # self.__stopped(Task.ERROR)
+            #         return
 
                 # update memory usage
                 # if usage is not None and 'memory' in usage:
@@ -182,21 +182,21 @@ class Executor:
                 # time.sleep(1)
 
         # if kill signal than checkpoint task (SIMULATION)
-        if self.stop_signal:
-            # check is task is running
-            try:
-                command_status, current_stage = self.__get_task_status()
-                if command_status is not None and command_status == 'running':
-                    self.__stop()  # Checkpoint and stop task
-                    # self.__stopped(Task.HIBERNATED)
-                # else:
-                    # self.__stopped(Task.FINISHED)
-
-            except Exception as e:
-                logging.error(e)
-                # self.__stopped(Task.STOP_SIGNAL)
-
-            return
+        # if self.stop_signal:
+        #     # check is task is running
+        #     try:
+        #         command_status, current_stage = self.__get_task_status()
+        #         if command_status is not None and command_status == 'running':
+        #             self.__stop()  # Checkpoint and stop task
+        #             # self.__stopped(Task.HIBERNATED)
+        #         # else:
+        #             # self.__stopped(Task.FINISHED)
+        #
+        #     except Exception as e:
+        #         logging.error(e)
+        #         # self.__stopped(Task.STOP_SIGNAL)
+        #
+        #     return
 
         # self.__stopped(Task.ERROR)
 

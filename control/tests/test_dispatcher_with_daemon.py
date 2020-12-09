@@ -40,6 +40,7 @@ def __prepare_daemon(vm: VirtualMachine):
     communication_conf = CommunicationConfig()
 
     try:
+        # print('host={} | port={} | action={}'.format(vm.instance_ip, communication_conf.socket_port, Daemon.TEST))
         communicator = Communicator(host=vm.instance_ip, port=communication_conf.socket_port)
         communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
 
@@ -64,35 +65,34 @@ def __execution_loop(vm: VirtualMachine, task: Task):
         except Exception as e:
             logging.error(e)
 
-    else:
-        try:
-            __prepare_daemon(vm)
-        except Exception as e:
-            logging.error(e)
+    try:
+        __prepare_daemon(vm)
+    except Exception as e:
+        logging.error(e)
 
-        # indicate that the VM is ready to execute
-        vm.ready = True
+    # indicate that the VM is ready to execute
+    vm.ready = True
 
-        # start Execution when instance is RUNNING
-        if vm.state == CloudManager.RUNNING:
+    # start Execution when instance is RUNNING
+    if vm.state == CloudManager.RUNNING:
 
-            # create a executor and start task
-            executor = Executor(
-                task=task,
-                vm=vm
-            )
-            # start the executor loop to execute the task
-            executor.thread.start()
+        # create a executor and start task
+        executor = Executor(
+            task=task,
+            vm=vm
+        )
+        # start the executor loop to execute the task
+        executor.thread.start()
 
-        # if vm.state == CloudManager.RUNNING:
+    # if vm.state == CloudManager.RUNNING:
 
-            # while self.debug_wait_command:
-            #     time.sleep(5)
+        # while self.debug_wait_command:
+        #     time.sleep(5)
 
-            # status = vm.terminate()
+        # status = vm.terminate()
 
-            # if status:
-            #     logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+        # if status:
+        #     logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
     # else:
         # Error to start VM
@@ -103,7 +103,7 @@ def main():
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0d1a4eacad59b7a5b',
+        image_id='ami-09685b54c80020d8c',
         memory=1,
         vcpu=1,
         restrictions={'on-demand': 1,
@@ -116,7 +116,7 @@ def main():
     task = Task(
         task_id=2,
         memory=0.2,
-        command="sh config.sh",
+        command="ls",
         io=0,
         runtime={'t2.micro': 100}
     )
@@ -126,7 +126,7 @@ def main():
         market='on-demand'
     )
 
-    # vm.instance_id = 'i-03789817e6a065205'
+    # vm.instance_id = 'i-07481b0f2dabdbe9f'
 
     __prepare_logging()
 

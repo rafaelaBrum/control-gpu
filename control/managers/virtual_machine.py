@@ -167,6 +167,8 @@ class VirtualMachine:
                 self.failed_to_created = True
 
                 return False
+        else:
+            self.instance_ip = self.manager.get_instance_ip(self.instance_id)
 
         # Instance was already started
         return False
