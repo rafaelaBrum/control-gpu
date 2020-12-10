@@ -7,6 +7,7 @@ from control.util.ssh_client import SSHClient
 # from control.util.loader import Loader
 from control.config.ec2_config import EC2Config
 from control.config.application_config import ApplicationConfig
+from control.config.file_system_config import FileSystemConfig
 
 from datetime import datetime, timedelta
 
@@ -31,6 +32,7 @@ class VirtualMachine:
         # self.loader = loader
         self.ec2_conf = EC2Config()
         self.application_conf = ApplicationConfig()
+        self.filesys_conf = FileSystemConfig()
 
         self.instance_type = instance_type
         self.market = market
@@ -137,27 +139,27 @@ class VirtualMachine:
 
                 self.instance_ip = self.manager.get_instance_ip(self.instance_id)
 
-                # if self.loader.filesys_conf.type == CloudManager.EBS:
-                #     # if there is not a volume create a new volume
-                #     if self.volume_id is None:
-                #         self.volume_id = self.manager.create_volume(
-                #             size=self.loader.filesys_conf.size,
-                #             zone=self.loader.ec2_conf.zone
-                #         )
-                #         self.create_file_system = True
-                #
-                #         if self.volume_id is None:
-                #             raise Exception("<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
-                #
-                #     logging.info("<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
-                #     # attached new volume
-                #     # waiting until volume available
-                #     self.manager.wait_volume(volume_id=self.volume_id)
-                #     self.manager.attach_volume(
-                #         instance_id=self.instance_id,
-                #         volume_id=self.volume_id,
-                #         device=self.loader.filesys_conf.device
-                #     )
+                if self.filesys_conf.type == CloudManager.EBS:
+                    # if there is not a volume create a new volume
+                    if self.volume_id is None:
+                        self.volume_id = self.manager.create_volume(
+                            size=self.filesys_conf.size,
+                            zone=self.ec2_conf.zone
+                        )
+                        self.create_file_system = True
+
+                        if self.volume_id is None:
+                            raise Exception("<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
+
+                    logging.info("<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
+                    # attached new volume
+                    # waiting until volume available
+                    self.manager.wait_volume(volume_id=self.volume_id)
+                    self.manager.attach_volume(
+                        instance_id=self.instance_id,
+                        volume_id=self.volume_id,
+                        device=self.instance_type.ebs_device_name
+                    )
 
                 return True
 
@@ -173,41 +175,34 @@ class VirtualMachine:
         # Instance was already started
         return False
 
-    # def __create_ebs(self, path):
-    #
-    #     internal_device_name = self.loader.filesys_conf.device
-    #     # if instance is from c5 family rename internal_device_name to nvme1n1
-    #     if self.instance_type.type.split(".")[0] in ['c5', 'm5']:
-    #         internal_device_name = '/dev/nvme1n1'
-    #         logging.info("<VirtualMachine {}>: - Instance {} "
-    #                      "rename internal device name to {}".format(self.instance_id,
-    #                                                                 self.instance_type.type,
-    #                                                                 internal_device_name))
-    #
-    #     logging.info("<VirtualMachine {}>: - Mounting EBS".format(self.instance_id))
-    #
-    #     if self.create_file_system:
-    #         cmd1 = 'sudo mkfs.ext4 {}'.format(internal_device_name)
-    #         logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd1))
-    #         self.ssh.execute_command(cmd1, output=True)
-    #
-    #     # Mount Directory
-    #     cmd2 = 'sudo mount {} {}'.format(internal_device_name, path)
-    #     logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd2))
-    #
-    #     self.ssh.execute_command(cmd2, output=True)  # mount directory
-    #
-    #     if self.create_file_system:
-    #         cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.loader.filesys_conf.path)
-    #         cmd4 = 'chmod 775 -R {}'.format(self.loader.filesys_conf.path)
-    #
-    #         logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd3))
-    #         self.ssh.execute_command(cmd3, output=True)
-    #
-    #         logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
-    #         self.ssh.execute_command(cmd4, output=True)
-    #
-    def __create_s3(self):
+    def __create_ebs(self, path):
+
+        internal_device_name = self.instance_type.ebs_device_name
+
+        logging.info("<VirtualMachine {}>: - Mounting EBS".format(self.instance_id))
+
+        if self.create_file_system:
+            cmd1 = 'sudo mkfs.ext4 {}'.format(internal_device_name)
+            logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd1))
+            self.ssh.execute_command(cmd1, output=True)
+
+        # Mount Directory
+        cmd2 = 'sudo mount {} {}'.format(internal_device_name, path)
+        logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd2))
+
+        self.ssh.execute_command(cmd2, output=True)  # mount directory
+
+        if self.create_file_system:
+            cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.filesys_conf.path)
+            cmd4 = 'chmod 775 -R {}'.format(self.filesys_conf.path)
+
+            logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd3))
+            self.ssh.execute_command(cmd3, output=True)
+
+            logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
+            self.ssh.execute_command(cmd4, output=True)
+
+    def __create_s3(self, path):
 
         logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
 
@@ -223,7 +218,7 @@ class VirtualMachine:
                '-o mp_umask=002 -o multireq_max=5 {}'.format(self.manager.s3_conf.bucket_name,
                                                              self.manager.s3_conf.vm_uid,
                                                              self.manager.s3_conf.vm_gid,
-                                                             self.manager.s3_conf.path)
+                                                             path)
 
         logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
         self.ssh.execute_command(cmd1, output=True)
@@ -233,21 +228,6 @@ class VirtualMachine:
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
-
-    # def __create_efs(self):
-    #     logging.info("<VirtualMachine {}>: - Mounting EFS".format(self.instance_id))
-    #
-    #     # Mount NFS
-    #     cmd1 = 'sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport' \
-    #            ' {}:/ {}'.format(self.loader.ec2_conf.fs_dns, self.loader.ec2_conf.path)
-    #
-    #     cmd2 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.loader.filesys_conf.path)
-    #
-    #     logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd1))
-    #     self.ssh.execute_command(cmd1, output=True)
-    #
-    #     logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd2))
-    #     self.ssh.execute_command(cmd2, output=True)
 
     def prepare_vm(self):
 
@@ -261,31 +241,24 @@ class VirtualMachine:
             # try to open the connection
             if self.ssh.open_connection():
 
-                # Assuming files are in S3
-                self.__create_s3()
+                logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
+                                                                                   self.filesys_conf.path))
+                # create directory
+                self.ssh.execute_command('mkdir -p {}'.format(self.filesys_conf.path), output=True)
 
-                # logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
-                #                                                                    self.loader.filesys_conf.path))
-                # # create directory
-                # self.ssh.execute_command('mkdir -p {}'.format(self.loader.filesys_conf.path), output=True)
-                #
-                # if self.loader.filesys_conf.type == CloudManager.EBS:
-                #     self.__create_ebs(self.loader.filesys_conf.path)
-                # elif self.loader.filesys_conf.type == CloudManager.S3:
-                #     self.__create_s3(self.loader.filesys_conf.path)
-                #
-                # elif self.loader.filesys_conf.type == CloudManager.EFS:
-                #     self.__create_efs()
-                #
-                # else:
-                #     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
-                #
-                #     raise Exception(
-                #         "VM {} Storage {} not supported".format(self.instance_id, self.loader.filesys_conf.type))
-                #
-                # # keep ssh live
-                # # self.ssh.execute_command("$HOME/.ssh/config")
-                #
+                if self.filesys_conf.type == CloudManager.EBS:
+                    self.__create_ebs(self.filesys_conf.path)
+                elif self.filesys_conf.type == CloudManager.S3:
+                    self.__create_s3(self.filesys_conf.path)
+                else:
+                    logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+
+                    raise Exception(
+                        "VM {} Storage {} not supported".format(self.instance_id, self.filesys_conf.type))
+
+                # keep ssh live
+                # self.ssh.execute_command("$HOME/.ssh/config")
+
 
                 # TODO: create a AMI with the requirements already installed
                 # Send python requirements file
@@ -306,11 +279,14 @@ class VirtualMachine:
                 self.ssh.put_file(source=self.application_conf.daemon_path,
                                   target=self.ec2_conf.home_path,
                                   item=self.application_conf.daemon_file)
-                #
-                # # create execution folder
-                # self.root_folder = os.path.join(self.loader.filesys_conf.path, '{}_{}'.format(self.loader.job.job_id,
+
+                # create execution folder
+                # self.root_folder = os.path.join(self.filesys_conf.path, '{}_{}'.format(self.loader.job.job_id,
                 #                                                                               self.loader.execution_id))
-                # self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
+                self.root_folder = os.path.join(self.filesys_conf.path, '{}_{}'.format(10,
+                                                                                       1))
+
+                self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
 
                 # Start Daemon
                 logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))

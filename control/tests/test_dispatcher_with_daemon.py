@@ -104,6 +104,7 @@ def main():
         provider=CloudManager.EC2,
         instance_type='t2.micro',
         image_id='ami-09685b54c80020d8c',
+        ebs_device_name='/dev/xvdf',
         memory=1,
         vcpu=1,
         restrictions={'on-demand': 1,

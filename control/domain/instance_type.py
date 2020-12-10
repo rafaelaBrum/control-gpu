@@ -3,7 +3,7 @@ from control.config.ec2_config import EC2Config
 
 class InstanceType:
 
-    def __init__(self, provider, instance_type, image_id, prices, memory, gflops, vcpu, restrictions):
+    def __init__(self, provider, instance_type, image_id, prices, memory, gflops, vcpu, restrictions, ebs_device_name):
         self.provider = provider
         self.type = instance_type
         self.memory = float(memory) * 1024.0  # GB to MB
@@ -13,6 +13,7 @@ class InstanceType:
         self.price_preemptible = prices['preemptible']
         self.restrictions = restrictions
         self.image_id = image_id
+        self.ebs_device_name = ebs_device_name
 
         self.cpu_credits = None
         self.id = None
@@ -41,6 +42,7 @@ class InstanceType:
                 provider=adict['instances'][key]['provider'],
                 instance_type=key,
                 image_id=adict['instances'][key]['image_id'],
+                ebs_device_name=adict['instances'][key]['ebs_device_name'],
                 prices=adict['instances'][key]['prices'],
                 memory=adict['instances'][key]['memory'],
                 gflops=adict['instances'][key]['gflops'],
