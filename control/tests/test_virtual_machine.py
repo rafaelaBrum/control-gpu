@@ -109,9 +109,51 @@ def test_preemptible_virtual_machine():
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
 
-if __name__ == "__main__":
-    print("Testing on demand VM")
-    test_on_demand_virtual_machine()
-    print("Testing spot VM")
-    test_preemptible_virtual_machine()
-    print("Test completed")
+def test_vm_with_EBS(volume_id=''):
+    instance = InstanceType(
+        provider=CloudManager.EC2,
+        instance_type='t2.micro',
+        image_id='ami-09685b54c80020d8c',
+        memory=1,
+        vcpu=1,
+        ebs_device_name='/dev/xvdf',
+        restrictions={'on-demand': 1,
+                      'preemptible': 1},
+        prices={'on-demand': 0.001,
+                'preemptible': 0.000031},
+        gflops=0.0
+    )
+
+    # task = Task(
+    #     task_id=2,
+    #     memory=0.2,
+    #     command="ls",
+    #     io=0,
+    #     runtime={'t2.nano': 100}
+    # )
+
+    vm = VirtualMachine(
+        instance_type=instance,
+        market='preemptible'
+    )
+
+    __prepare_logging()
+
+    if volume_id is not None:
+        vm.volume_id = volume_id
+
+    vm.deploy()
+
+    vm.prepare_vm()
+
+    status = vm.terminate(delete_volume=False)
+
+    if status:
+        logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+
+# if __name__ == "__main__":
+#     print("Testing on demand VM")
+#     test_on_demand_virtual_machine()
+#     print("Testing spot VM")
+#     test_preemptible_virtual_machine()
+#     print("Test completed")
