@@ -2,16 +2,17 @@ from control.config.checkpoint_config import CheckPointConfig
 
 from typing import Dict
 
+
 class Task:
     EXECUTING = 'executing'
     FINISHED = 'finished'
-    # WAITING = 'waiting'
+    WAITING = 'waiting'
     ERROR = 'error'
     # RUNTIME_ERROR = 'runtime_error'
     MIGRATED = 'migrated'
     # HIBERNATED = 'hibernated'
     # STOLEN = 'stolen'
-    STOP_SIGNAL = 'stop_signal'
+    # STOP_SIGNAL = 'stop_signal'
 
     INTERRUPTED = 'interrupted'
 

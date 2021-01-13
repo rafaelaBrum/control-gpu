@@ -29,17 +29,22 @@ def __prepare_logging():
 
 def test_cudalign_task_creation():
 
-    task = CUDAlignTask(
-        task_id=2,
-        command="ls",
-        runtime={'t2.nano': 100},
-        generic_ckpt=True,
-        mcups={'t2.nano': 10023.23},
-        disk_size='1G',
-        tam_seq0=3147090,
-        tam_seq1=3282708
-    )
-
     __prepare_logging()
 
-    logging.info("<Task {}>: Created task with success. Task info:{}".format(task.task_id, task))
+    try:
+        task = CUDAlignTask(
+            task_id=2,
+            command="ls",
+            runtime={'g4dn.xlarge': 64.25},
+            generic_ckpt=True,
+            mcups={'g4dn.xlarge': 160808.882},
+            disk_size='1G',
+            tam_seq0=3147090,
+            tam_seq1=3282708,
+            similar_seqs=False
+        )
+        logging.info("Created task with success. Task info: {}".format(task))
+        logging.info("Runtimes CUDAlign Task {}:\n{}".format(task.task_id, task.print_all_runtimes()))
+        logging.info("MCUPS CUDAlign Task {}:\n{}".format(task.task_id, task.print_all_mcups()))
+    except Exception as e:
+        logging.error(e)
