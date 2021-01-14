@@ -341,9 +341,6 @@ class Executor:
 
         quota = self.vm.cpu_quota
 
-        if self.task.burst_mode:
-            quota = -1
-
         info = {
             "task_id": self.task.task_id,
             "command": self.task.command,

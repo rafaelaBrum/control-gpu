@@ -229,7 +229,7 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
 
-    def prepare_vm(self):
+    def prepare_vm(self, task):
 
         if not self.failed_to_created:
 
@@ -296,14 +296,14 @@ class VirtualMachine:
                              "--vm_user {} " \
                              "--root_path {} " \
                              "--work_path {} " \
-                             "--job_id {} " \
+                             "--task_id {} " \
                              "--execution_id {}  " \
                              "--instance_id {} ".format(os.path.join(self.ec2_conf.home_path,
                                                                      self.application_conf.daemon_file),
                                                         self.ec2_conf.vm_user,
                                                         '/home/ubuntu/',
                                                         '/home/ubuntu/',
-                                                        10,
+                                                        ,
                                                         2,
                                                         self.instance_id)
 

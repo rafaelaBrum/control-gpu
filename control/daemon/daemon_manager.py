@@ -27,16 +27,16 @@ class Daemon:
     SUCCESS = 'success'
     ERROR = 'error'
 
-    def __init__(self, vm_user, root_path, work_path, job_id, execution_id, instance_id):
+    def __init__(self, vm_user, root_path, work_path, task_id, execution_id, instance_id):
         self.vm_user = vm_user
 
         self.work_path = work_path
 
-        self.job_id = job_id
+        self.task_id = task_id
         self.execution_id = execution_id
         self.instance_id = instance_id
 
-        self.root_path = os.path.join(root_path, "{}_{}".format(self.job_id, self.execution_id))
+        self.root_path = os.path.join(root_path, "{}_{}".format(self.task_id, self.execution_id))
 
         self.__prepare_logging()
 
@@ -49,7 +49,7 @@ class Daemon:
         root_logger.setLevel('INFO')
 
         file_name = os.path.join(self.root_path,
-                                 "{}_{}_{}.log".format(self.job_id, self.execution_id, self.instance_id))
+                                 "{}_{}_{}.log".format(self.task_id, self.execution_id, self.instance_id))
 
         file_handler = logging.FileHandler(file_name)
         file_handler.setFormatter(log_formatter)
@@ -70,13 +70,13 @@ class Daemon:
 
         session_name = "Session_{}_{}_{}_{}".format(
             session,
-            self.job_id,
+            self.task_id,
             self.execution_id,
             task_id
         )
 
         vm_name = "VM_{}_{}_{}".format(
-            self.job_id,
+            self.task_id,
             self.execution_id,
             task_id
         )
@@ -123,16 +123,6 @@ class Daemon:
                 value_return = "Error stop command {} in VM {} status".format(command, vm_name)
                 status_return = Daemon.ERROR
 
-        # elif action == Daemon.TASK_USAGE:
-        #     try:
-        #
-        #         value_return = self.__get_container_usage(container_name, data_path)
-        #         status_return = Daemon.SUCCESS
-        #     except Exception as e:
-        #         logging.error(e)
-        #         value_return = "Error to get container {} usage".format(container_name)
-        #         status_return = Daemon.ERROR
-        #
         # elif action == Daemon.INSTANCE_USAGE:
         #     try:
         #
@@ -155,41 +145,6 @@ class Daemon:
         logging.info(str({"status": status_return, "value": value_return, "duration": str(duration)}))
 
         return {"status": status_return, "value": value_return, "duration": str(duration)}
-
-    # def __get_container_usage(self, container_name, data_path):
-    #     # check container status
-    #     cmd = "docker container stats {} --no-stream".format(
-    #         container_name
-    #     )
-    #     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
-    #     out, err = process.communicate()
-    #
-    #     line = out.decode().splitlines()[-1]
-    #
-    #     cpu_usage = line.split()[1]
-    #     memory = line.split()[2]
-    #     memory_index = line.split()[3]
-    #
-    #     # get super-task pos
-    #     pos = 0
-    #
-    #     exec_bkp_file = Path(data_path, 'exec.bkp')
-    #
-    #     if exec_bkp_file.is_file():
-    #
-    #         try:
-    #             with open(exec_bkp_file) as bkp_fp:
-    #                 pos = int(bkp_fp.read())
-    #         except Exception as e:
-    #             pos = 0
-    #             logging.error("error to get pos from exec.bkp")
-    #             logging.error(e)
-    #
-    #     return {
-    #         "memory": memory + " " + memory_index,
-    #         "cpu": cpu_usage,
-    #         "pos": pos
-    #     }
 
     # def __get_instance_status(self, command):
     #     # check container status
@@ -278,7 +233,7 @@ class MyWebService(object):
             vm_user=args.vm_user,
             root_path=args.root_path,
             work_path=args.work_path,
-            job_id=args.job_id,
+            task_id=args.task_id,
             execution_id=args.execution_id,
             instance_id=args.instance_id
         )
@@ -298,7 +253,7 @@ def main():
     parser.add_argument('--root_path', type=str, required=True)
     parser.add_argument('--work_path', type=str, required=True)
 
-    parser.add_argument('--job_id', type=int, required=True)
+    parser.add_argument('--task_id', type=int, required=True)
     parser.add_argument('--execution_id', type=int, required=True)
     parser.add_argument('--instance_id', type=str, required=True)
 

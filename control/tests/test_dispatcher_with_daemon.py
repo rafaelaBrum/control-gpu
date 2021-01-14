@@ -40,8 +40,9 @@ def __prepare_daemon(vm: VirtualMachine):
     communication_conf = CommunicationConfig()
 
     try:
-        # print('host={} | port={} | action={}'.format(vm.instance_ip, communication_conf.socket_port, Daemon.TEST))
+        print('host={} | port={} | action={}'.format(vm.instance_ip, communication_conf.socket_port, Daemon.TEST))
         communicator = Communicator(host=vm.instance_ip, port=communication_conf.socket_port)
+        print("Created communicator")
         communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
 
         if communicator.response['status'] == 'success':
@@ -99,27 +100,23 @@ def __execution_loop(vm: VirtualMachine, task: Task):
         # logging.error("<Dispatcher> Instance type: {} Was not started".format(vm.instance_type.type))
 
 
-def main():
+def test_dispatcher_with_daemon():
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
         image_id='ami-09685b54c80020d8c',
         ebs_device_name='/dev/xvdf',
-        memory=1,
-        vcpu=1,
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031},
-        gflops=0.0
+                'preemptible': 0.000031}
     )
 
     task = Task(
         task_id=2,
-        memory=0.2,
         command="ls",
-        io=0,
-        runtime={'t2.micro': 100}
+        runtime={'t2.micro': 100},
+        generic_ckpt=False
     )
 
     vm = VirtualMachine(
@@ -127,11 +124,8 @@ def main():
         market='on-demand'
     )
 
-    # vm.instance_id = 'i-07481b0f2dabdbe9f'
+    vm.instance_id = 'i-0dd21b2167699e7dd'
 
     __prepare_logging()
 
     __execution_loop(vm=vm, task=task)
-
-if __name__ == '__main__':
-    main()
