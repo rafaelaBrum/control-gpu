@@ -9,6 +9,8 @@ class CUDAlignTask(Task):
 
     baseline_instance = "g4dn.xlarge"
 
+    finished = False
+
     baseline_runtimes_relation_similar_seqs = {
         "g2.2xlarge": 3.2,
         "g3s.xlarge": 1.7,
@@ -52,8 +54,20 @@ class CUDAlignTask(Task):
             self.disk_limit = disk_size_int * 1024 * 1024
 
         self.work_dir = work_dir
-        self.__calculate_flush_interval()
         self.__calculate_runtimes_and_mcups()
+        self.__calculate_worst_scenario_restart()
+
+        self.percentage_executed = 0.0
+        self.real_execution_time = 0
+        self.running_instance = ""
+
+    def update_percentage_done(self):
+        runtime_current_instance = self.real_execution_time - (self.percentage_executed *
+                                                               self.runtime[self.running_instance])
+        percentage_done_current_instance = runtime_current_instance / self.runtime[self.running_instance]
+        self.percentage_executed += percentage_done_current_instance
+        if not self.finished and self.percentage_executed >= 1:
+            self.percentage_executed = 0.9
 
     def __calculate_runtimes_and_mcups(self):
         if self.similar_seqs:
@@ -66,8 +80,35 @@ class CUDAlignTask(Task):
             if key not in self.mcups:
                 self.mcups[key] = self.mcups[self.baseline_instance]/value
 
-    def __calculate_flush_interval(self):
+    def __calculate_worst_scenario_restart(self):
         self.flush_interval = int((self.tam_seq0*self.tam_seq1*self.tam_cell)/self.disk_limit + 1)
+
+        # as the CUDAlign returns millions of cell updated per second, we need to calculate
+        # in function of million of cells
+        self.million_cells_worst_scenario_restart = (self.flush_interval * self.tam_seq1)/1000000
+
+    def update_execution_time(self, time_passed):
+        self.real_execution_time += time_passed
+
+    def start_execution(self, instance_type):
+        self.running_instance = instance_type
+
+    def finish_execution(self):
+        self.finisehd = True
+
+    def get_remaining_execution_time_with_restart(self, instance_type):
+        restart_overhead = self.million_cells_worst_scenario_restart/self.mcups[instance_type]
+        remaining_time_chosen_instance = self.runtime[instance_type] * (1 - self.percentage_executed)
+        return remaining_time_chosen_instance + restart_overhead
+
+    def get_execution_time(self):
+        return self.real_execution_time
+
+    def get_restart_overhead(self, instance_type):
+        return self.million_cells_worst_scenario_restart/self.mcups[instance_type]
+
+    def get_running_instance(self):
+        return self.running_instance
 
     @classmethod
     def from_dict(cls, adict):
