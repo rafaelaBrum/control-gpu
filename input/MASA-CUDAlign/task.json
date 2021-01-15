@@ -1,0 +1,15 @@
+{
+    "task_id": "0",
+    "command": "cudalign",
+    "runtime": {
+        "g4dn.xlarge": 65
+    },
+    "generic_ckpt": "True",
+    "mcups": {
+        "g4dn.xlarge": 160808.882
+    },
+    "disk_size": "1G",
+    "tam_seq0": 3147090,
+    "tam_seq1": 3282708,
+    "similar_seqs": "False"
+}

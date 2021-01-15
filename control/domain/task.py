@@ -8,7 +8,7 @@ class Task:
     FINISHED = 'finished'
     WAITING = 'waiting'
     ERROR = 'error'
-    # RUNTIME_ERROR = 'runtime_error'
+    RUNTIME_ERROR = 'runtime_error'
     MIGRATED = 'migrated'
     # HIBERNATED = 'hibernated'
     # STOLEN = 'stolen'

@@ -9,8 +9,7 @@ from control.domain.task import Task
 
 # from control.util.linked_list import LinkedList
 # from control.util.event import Event
-# from control.util.loader import Loader
-from control.config.communication_config import CommunicationConfig
+from control.util.loader import Loader
 
 from control.daemon.daemon_manager import Daemon
 from control.daemon.communicator import Communicator
@@ -36,11 +35,9 @@ import logging
 
 class Executor:
 
-    # def __init__(self, task: Task, vm: VirtualMachine, loader: Loader):
-    def __init__(self, task: Task, vm: VirtualMachine):
+    def __init__(self, task: Task, vm: VirtualMachine, loader: Loader):
 
-        # self.loader = loader substituido pelo communicationconfig a principio
-        self.communication_conf = CommunicationConfig()
+        self.loader = loader
 
         self.task = task
         self.vm = vm
@@ -51,7 +48,7 @@ class Executor:
 
         # socket.communicator
         # used to send commands to the ec2 instance
-        self.communicator = Communicator(host=self.vm.instance_ip, port=self.communication_conf.socket_port)
+        self.communicator = Communicator(host=self.vm.instance_ip, port=self.loader.communication_conf.socket_port)
 
         """Track INFO """
         # used to abort the execution loop
@@ -93,7 +90,7 @@ class Executor:
             self.communicator.send(action=action, value=self.dict_info)
         except Exception as e:
             logging.error(e)
-            # self.__stopped(Task.ERROR)
+            self.__stopped(Task.ERROR)
             return
 
         # if task was started with success
@@ -110,76 +107,34 @@ class Executor:
             # self.update_status_table()
 
             # start task execution Loop
-            # while (self.status == Task.EXECUTING or self.status == Task.RESTARTED) and not self.stop_signal:
-            #
-            #     try:
-            #         command_status, current_stage = self.__get_task_status()
-            #         logging.info()
-            #         # usage = self.__get_task_usage()
-            #
-            #         # if self.loader.checkpoint_conf.with_checkpoint \
-            #         #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
-            #         #     self.__checkpoint_task()
-            #
-            #     except Exception as e:
-            #         logging.error(e)
-            #         # self.__stopped(Task.ERROR)
-            #         return
+            while (self.status == Task.EXECUTING) and not self.stop_signal:
 
-                # update memory usage
-                # if usage is not None and 'memory' in usage:
-                #
-                #     current_mem = self.__to_megabyte(usage['memory'])
-                #     current_cpu_str = usage['cpu']
-                #
-                #     current_cpu = 0.0
-                #
-                #     if current_cpu_str.find("%") != -1:
-                #         current_cpu = float(current_cpu_str.replace('%', ''))
-                #
-                #     # repo = PostgresRepo()
-                #     self.repo.add_task_statistic(TaskStatisticRepo(
-                #         execution_id=self.loader.execution_id,
-                #         job_id=self.loader.job.job_id,
-                #         task_id=self.task.task_id,
-                #         timestamp=datetime.now(),
-                #         cpu_usage=current_cpu,
-                #         memory_usage=current_mem
-                #     ))
-                #     # repo.close_session()
+                try:
+                    command_status, current_stage = self.__get_task_status()
 
-                # TODO MASA - VERSION
-                # if usage is not None and 'pos' in usage:
-                #     self.task.super_task_pos = int(usage['pos'])
-                #     self.task.update_task_time()
+                    # if self.loader.checkpoint_conf.with_checkpoint \
+                    #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
+                    #     self.__checkpoint_task()
 
-                # check docker status
-                # if docker_status is not None and docker_status == 'exited':
-                #
-                #     status = Task.FINISHED
-                #
-                #     if exit_code != '0':
-                #         status = Task.RUNTIME_ERROR
-                #
-                #     self.__stopped(status)
-                #     return
-                #
-                # if docker_status is not None and docker_status == 'not found':
-                #     status = Task.RUNTIME_ERROR
-                #     self.__stopped(status)
-                #     return
-                #
-                # if docker_status is not None and docker_status != 'running':
-                #     status = Task.RUNTIME_ERROR
-                #     self.__stopped(status)
-                #     return
-                #
-                # if docker_status is not None and docker_status == 'error':
-                #     status = Task.RUNTIME_ERROR
-                #     self.__stopped(status)
-                #     return
+                except Exception as e:
+                    logging.error(e)
+                    self.__stopped(Task.ERROR)
+                    return
 
-                # time.sleep(1)
+                # check task status
+                if command_status is not None and command_status == 'not running':
+
+                    status = Task.FINISHED
+
+                    self.__stopped(status)
+                    return
+
+                if command_status is not None and command_status != 'running':
+                    status = Task.RUNTIME_ERROR
+                    self.__stopped(status)
+                    return
+
+                time.sleep(1)
 
         # if kill signal than checkpoint task (SIMULATION)
         # if self.stop_signal:
@@ -211,10 +166,11 @@ class Executor:
             self.communicator.send(action=action, value=self.dict_info)
         except Exception as e:
             logging.error(e)
-            # self.__stopped(Task.ERROR)
+            self.__stopped(Task.ERROR)
             return
 
-    # def __stopped(self, status):
+    def __stopped(self, status):
+        self.status = status
     #     # update execution time
     #
     #     # if task had Migrated, not to do

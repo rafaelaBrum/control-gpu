@@ -94,7 +94,7 @@ class CUDAlignTask(Task):
         self.running_instance = instance_type
 
     def finish_execution(self):
-        self.finisehd = True
+        self.finished = True
 
     def get_remaining_execution_time_with_restart(self, instance_type):
         restart_overhead = self.million_cells_worst_scenario_restart/self.mcups[instance_type]
@@ -114,22 +114,17 @@ class CUDAlignTask(Task):
     def from_dict(cls, adict):
         """return a list of tasks created from a dict"""
 
-        return [
-            cls(
-                task_id=int(task_id),
-                # memory=adict['cudalign_tasks'][task_id]['memory'],
-                # io=adict['cudalign_tasks'][task_id]['io'],
-                command=adict['cudalign_tasks'][task_id]['command'],
-                runtime=adict['cudalign_tasks'][task_id]['runtime'],
-                generic_ckpt=adict['cudalign_tasks'][task_id]['generic_ckpt'],
-                disk_size=adict['cudalign_tasks'][task_id]['disk_size'],
-                mcups=adict['cudalign_tasks'][task_id]['mcups'],
-                tam_seq0=adict['cudalign_tasks'][task_id]['tam_seq0'],
-                tam_seq1=adict['cudalign_tasks'][task_id]['tam_seq1'],
-                similar_seqs=adict['cudalign_tasks'][task_id]['similar_seqs']
+        return cls(
+                task_id=adict['task_id'],
+                command=adict['command'],
+                runtime=adict['runtime'],
+                generic_ckpt=adict['generic_ckpt'],
+                disk_size=adict['disk_size'],
+                mcups=adict['mcups'],
+                tam_seq0=adict['tam_seq0'],
+                tam_seq1=adict['tam_seq1'],
+                similar_seqs=['similar_seqs']
             )
-            for task_id in adict['tasks']
-        ]
 
     def __str__(self):
         return "CUDAlignTask_id: {}, command:{}, generic_checkpoint:{}, " \
