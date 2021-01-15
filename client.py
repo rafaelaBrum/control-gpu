@@ -7,9 +7,9 @@ from control.util.loader import Loader
 
 from distutils.util import strtobool
 
-# from control.util.recreate_database import RecreateDatabase
+from control.util.recreate_database import RecreateDatabase
 
-# import logging
+import logging
 import argparse
 # import datetime
 
@@ -33,19 +33,20 @@ import argparse
 #     #     logging.info("Backup finished...")
 
 
-# def __call_recreate_database(loader: Loader):
-#     logging.info("Are you sure that you want to recreate the database  {}? (yes or no):"
-#                  "".format(loader.database_conf.database_name))
-#     answer = input()
-#
-#     try:
-#         if strtobool(answer):
-#             RecreateDatabase.execute()
-#             logging.info("Database was recreated with success")
-#         else:
-#             logging.info("Database WAS NOT recreated.")
-#     except:
-#         logging.error("Answer should be: yes or no")
+def __call_recreate_database(loader: Loader):
+    logging.info("Are you sure that you want to recreate the database  {}? (yes or no):"
+                 "".format(loader.database_conf.database_name))
+    answer = input()
+
+    try:
+        if strtobool(answer):
+            RecreateDatabase.execute()
+            logging.info("Database was recreated with success")
+        else:
+            logging.error("Answer should be: yes or no")
+            logging.info("Database WAS NOT recreated.")
+    except Exception as e:
+        logging.error(e)
 
 
 def __print_execution_info(loader: Loader):
@@ -56,8 +57,6 @@ def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
 
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
-    parser.add_argument('--app_path', help="Path where there are all files to run the execution",
-                        type=str, default=None)
     parser.add_argument('--task_file', help="task file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
     # parser.add_argument('--map_file', help="map file name", type=str, default=None)
@@ -84,7 +83,7 @@ def main():
     options_map = {
         # 'control': __call_control,
         # 'map': __call_primary_scheduling,
-        # 'recreate_db': __call_recreate_database,
+        'recreate_db': __call_recreate_database,
         'info': __print_execution_info,
     }
     parser.add_argument('command', choices=options_map.keys())

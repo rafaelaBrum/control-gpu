@@ -6,7 +6,7 @@ from control.managers.ec2_manager import EC2Manager
 from control.config.application_config import ApplicationConfig
 from control.config.checkpoint_config import CheckPointConfig
 from control.config.communication_config import CommunicationConfig
-# from control.config.database_config import DataBaseConfig
+from control.config.database_config import DataBaseConfig
 from control.config.debug_config import DebugConfig
 from control.config.ec2_config import EC2Config
 from control.config.file_system_config import FileSystemConfig
@@ -19,7 +19,7 @@ from control.config.notify_config import NotifyConfig
 from control.domain.instance_type import InstanceType
 from control.domain.app_specific.cudalign_task import CUDAlignTask
 
-# from control.repository.postgres_repo import PostgresRepo
+from control.repository.postgres_repo import PostgresRepo
 
 from datetime import timedelta
 
@@ -45,8 +45,6 @@ class Loader:
         self.input_path = args.input_path
         self.task_file = args.task_file
         self.env_file = args.env_file
-
-        self.app_path = args.app_path
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -80,13 +78,13 @@ class Loader:
         self.application_conf = ApplicationConfig()
         self.checkpoint_conf = CheckPointConfig()
         self.communication_conf = CommunicationConfig()
-        # self.database_conf = DataBaseConfig()
+        self.database_conf = DataBaseConfig()
         self.debug_conf = DebugConfig()
         self.ec2_conf = EC2Config()
         self.file_system_conf = FileSystemConfig()
         self.input_conf = InputConfig()
         self.logging_conf = LoggingConfig()
-        # self.notify_conf = NotifyConfig()
+        self.notify_conf = NotifyConfig()
         # self.scheduler_conf = SchedulerConfig()
         # self.simulation_conf = SimulationConfig()
 
@@ -149,9 +147,6 @@ class Loader:
 
         if self.input_path is None:
             self.input_path = self.input_conf.path
-
-        if self.app_path is None:
-            self.app_path = self.application_conf.app_local_path
 
         if self.task_file is None:
             self.task_file = os.path.join(self.input_path, self.input_conf.task_file)
@@ -227,22 +222,23 @@ class Loader:
             self.instances_list.append(instance)
 
     def __get_execution_id(self):
-        """
-        Get next execution_id
-        :return: int
-        """
-        self.execution_id = 1
         # """
-        # Read the database to get the next execution_id
+        # Get next execution_id
+        # :return: int
         # """
-        #
-        # repo = PostgresRepo()
-        # row = repo.get_execution(filter={'job_id': self.job.job_id, 'limit': 1, 'order': 'desc'})
-        # if len(row) == 0:
-        #     self.execution_id = 0
-        # else:
-        #     # get least execution ID
-        #     self.execution_id = row[0].execution_id + 1
+        # self.execution_id = 1
+
+        """
+        Read the database to get the next execution_id
+        """
+
+        repo = PostgresRepo()
+        row = repo.get_execution(filter={'task_id': self.cudalign_task.task_id, 'limit': 1, 'order': 'desc'})
+        if len(row) == 0:
+            self.execution_id = 0
+        else:
+            # get least execution ID
+            self.execution_id = row[0].execution_id + 1
 
     def __update_prices(self):
         """
@@ -298,7 +294,6 @@ class Loader:
         logging.info("\tEnv: {}".format(self.env_file))
         # logging.info("\tMap: {}".format(self.map_file))
         logging.info("\tLog File: {}".format(self.log_file))
-        logging.info("\tAPP Local Path: {}".format(self.app_path))
         logging.info("\tDaemon: {}".format(self.daemon_file))
         logging.info("")
         logging.info("")

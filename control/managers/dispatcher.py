@@ -14,11 +14,11 @@ from control.util.loader import Loader
 from control.daemon.daemon_manager import Daemon
 from control.daemon.communicator import Communicator
 
-# from control.repository.postgres_repo import PostgresRepo
-# from control.repository.postgres_objects import Execution as ExecutionRepo
-# from control.repository.postgres_objects import Instance as InstanceRepo
+from control.repository.postgres_repo import PostgresRepo
+from control.repository.postgres_objects import Execution as ExecutionRepo
+from control.repository.postgres_objects import Instance as InstanceRepo
 # from control.repository.postgres_objects import InstanceStatus as InstanceStatusRepo
-# from control.repository.postgres_objects import InstanceStatistic as InstanceStatisticRepo
+from control.repository.postgres_objects import InstanceStatistic as InstanceStatisticRepo
 # from control.repository.postgres_objects import TaskStatistic as TaskStatisticRepo
 
 # from typing import List
@@ -28,7 +28,7 @@ import logging
 # import os
 # import math
 
-# from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 
 # from zope.event import notify
 
@@ -58,29 +58,28 @@ class Executor:
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
 
-    # def update_status_table(self):
-    #     """
-    #     Update Execution Table
-    #     Call if task status change
-    #     """
-    #     # Update Execution Status Table
-    #     self.repo.add_execution(
-    #         ExecutionRepo(
-    #             execution_id=self.loader.execution_id,
-    #             job_id=self.loader.job.job_id,
-    #             task_id=self.task.task_id,
-    #             instance_id=self.vm.instance_id,
-    #             timestamp=datetime.now(),
-    #             status=self.status
-    #         )
-    #     )
-    #
-    #     # repo.close_session()
+    def update_status_table(self):
+        """
+        Update Execution Table
+        Call if task status change
+        """
+        # Update Execution Status Table
+        self.repo.add_execution(
+            ExecutionRepo(
+                execution_id=self.loader.execution_id,
+                task_id=self.task.task_id,
+                instance_id=self.vm.instance_id,
+                timestamp=datetime.now(),
+                status=self.status
+            )
+        )
+
+        # repo.close_session()
 
     def __run(self):
         # START task execution
 
-        # self.repo = PostgresRepo()
+        self.repo = PostgresRepo()
 
         action = Daemon.START
 
@@ -158,7 +157,7 @@ class Executor:
     def __stop(self):
         # START task execution
 
-        # self.repo = PostgresRepo()
+        self.repo = PostgresRepo()
 
         action = Daemon.STOP
 
@@ -178,11 +177,11 @@ class Executor:
     #         self.repo.close_session()
     #         return
     #
-    #     self.status = status
-    #
-    #     self.update_status_table()
-    #     # close repo
-    #     self.repo.close_session()
+        self.status = status
+
+        self.update_status_table()
+        # close repo
+        self.repo.close_session()
 
         # Check if condition is true to checkpoint the task
 
@@ -683,36 +682,6 @@ class Executor:
 #         with tarfile.open(output_filename, "w:gz") as tar:
 #             tar.add(source_dir, arcname=os.path.basename(source_dir))
 #
-#     def __send_task_files(self, task):
-#         # Send files to VM
-#         if task is not None and not task.has_checkpoint:
-#
-#             if not self.vm.ssh.is_active:
-#                 self.vm.ssh.open_connection()
-#
-#             # first compress files
-#             path_to_compact = os.path.join(self.loader.app_path, str(task.task_id))
-#
-#             tar_file_name = "{}.tar.gz".format(str(task.task_id))
-#             tar_file = os.path.join(self.loader.app_path, tar_file_name)
-#
-#             logging.info("<Dispatcher {}>: Creating tar file {}".format(self.vm.instance_id, tar_file))
-#             self.__make_tarfile(output_filename=tar_file, source_dir=path_to_compact)
-#
-#             # send files
-#             logging.info("<Dispatcher {}>: Send Files of task: {}.".format(self.vm.instance_id, task.task_id))
-#             try:
-#                 # create target folder
-#                 # self.vm.ssh.execute_command('mkdir -p {}'.format(target))
-#                 self.vm.ssh.put_file(source=tar_file, target=os.path.join(self.vm.root_folder, tar_file_name))
-#
-#                 cmd = 'tar -xvf {} -C {}'.format(os.path.join(self.vm.root_folder, tar_file_name), self.vm.root_folder)
-#                 logging.info("<Dispatcher {}>:  {}".format(self.vm.instance_id, cmd))
-#                 self.vm.ssh.execute_command(cmd)
-#             except Exception as e:
-#                 logging.error("<Dispatcher {}>:  Error to send files of task {},".format(self.vm.instance_id,
-#                                                                                          task.task_id))
-#                 logging.error(e)
 #
 #     def __execution_loop(self):
 #
