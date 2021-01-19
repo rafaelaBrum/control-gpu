@@ -1,6 +1,8 @@
 from control.domain.app_specific.cudalign_task import CUDAlignTask
 from control.domain.instance_type import InstanceType
 
+from control.managers.cloud_manager import CloudManager
+
 from typing import Dict
 
 import logging
@@ -44,7 +46,7 @@ class SimpleScheduler:
             ordered_possible_vms = {k: v for k, v in sorted(possible_vms.items(), key=lambda item: item[1])}
             # logging.info("<Scheduler>: Spot instance chosen {}".format(list(ordered_possible_vms.keys())[0]))
             # return the type of selected VM
-            return list(ordered_possible_vms.keys())[0], "spot"
+            return list(ordered_possible_vms.keys())[0], CloudManager.PREEMPTIBLE
         else:
             logging.error("<Scheduler>: Could not chose an spot VM!")
             # logging.info("<Scheduler>: Choosing an on-demand VM with deadline {}!".format(deadline))
@@ -63,7 +65,7 @@ class SimpleScheduler:
                 ordered_possible_vms = {k: v for k, v in sorted(possible_vms.items(), key=lambda item: item[1])}
                 # logging.info("<Scheduler>: On-demand instance chosen {}".format(list(ordered_possible_vms.keys())[0]))
                 # return the type of selected VM
-                return list(ordered_possible_vms.keys())[0], "on-demand"
+                return list(ordered_possible_vms.keys())[0], CloudManager.ON_DEMAND
             else:
                 logging.error("<Scheduler>: No VM could be selected!")
                 return "", ""
@@ -103,7 +105,7 @@ class SimpleScheduler:
             ordered_possible_vms = {k: v for k, v in sorted(possible_vms.items(), key=lambda item: item[1])}
             # logging.info("<Scheduler>: Spot instance chosen {}".format(list(ordered_possible_vms.keys())[0]))
             # return the type of selected VM
-            return list(ordered_possible_vms.keys())[0], "spot"
+            return list(ordered_possible_vms.keys())[0], CloudManager.PREEMPTIBLE
         else:
             # logging.info("<Scheduler>: Could not chose an spot VM!")
             # logging.info("<Scheduler>: Choosing restart on-demand instance for CUDAlignTask {} "
@@ -125,7 +127,7 @@ class SimpleScheduler:
                 ordered_possible_vms = {k: v for k, v in sorted(possible_vms.items(), key=lambda item: item[1])}
                 # logging.info("<Scheduler>: On-demand instance chosen {}".format(list(ordered_possible_vms.keys())[0]))
                 # return the type of selected VM
-                return list(ordered_possible_vms.keys())[0], "on-demand"
+                return list(ordered_possible_vms.keys())[0], CloudManager.ON_DEMAND
             else:
                 logging.error("<Scheduler>: No VM could be selected!")
                 return "", ""

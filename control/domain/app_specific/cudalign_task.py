@@ -27,9 +27,9 @@ class CUDAlignTask(Task):
         "p2.xlarge": 4.0
     }
 
-    def __init__(self, task_id, command, generic_ckpt, runtime, mcups, tam_seq0, tam_seq1, similar_seqs,
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, mcups, tam_seq0, tam_seq1, similar_seqs,
                  disk_size, work_dir=""):
-        super().__init__(task_id, command, generic_ckpt, runtime)
+        super().__init__(task_id, task_name, command, generic_ckpt, runtime)
 
         if self.baseline_instance not in self.runtime:
             raise Exception("CUDAlignTask Error: CUDAlignTask '{}' don't have run time "
@@ -60,6 +60,10 @@ class CUDAlignTask(Task):
         self.percentage_executed = 0.0
         self.real_execution_time = 0
         self.running_instance = ""
+        self.running = False
+
+    def is_running(self):
+        return self.running
 
     def update_percentage_done(self):
         runtime_current_instance = self.real_execution_time - (self.percentage_executed *
@@ -92,9 +96,16 @@ class CUDAlignTask(Task):
 
     def start_execution(self, instance_type):
         self.running_instance = instance_type
+        self.running = True
+
+    def stop_execution(self):
+        self.running = False
 
     def finish_execution(self):
         self.finished = True
+
+    def has_task_finished(self):
+        return self.finished is True
 
     def get_remaining_execution_time_with_restart(self, instance_type):
         restart_overhead = self.million_cells_worst_scenario_restart/self.mcups[instance_type]
@@ -116,6 +127,7 @@ class CUDAlignTask(Task):
 
         return cls(
                 task_id=adict['task_id'],
+                task_name=adict['task_name'],
                 command=adict['command'],
                 runtime=adict['runtime'],
                 generic_ckpt=adict['generic_ckpt'],

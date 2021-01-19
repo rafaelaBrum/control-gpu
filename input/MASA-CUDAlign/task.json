@@ -1,5 +1,6 @@
 {
-    "task_id": "0",
+    "task_id": 0,
+    "task_name": "Task de teste",
     "command": "cudalign",
     "runtime": {
         "g4dn.xlarge": 65

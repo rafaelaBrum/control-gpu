@@ -18,8 +18,9 @@ class Task:
 
     # RESTARTED = 'restarted'
 
-    def __init__(self, task_id, command, generic_ckpt, runtime):
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime):
         self.task_id = task_id
+        self.task_name = task_name
         # self.memory = memory
         self.command = command
         # self.io = io
@@ -77,6 +78,7 @@ class Task:
         return [
             cls(
                 task_id=int(task_id),
+                task_name=adict['tasks'][task_id]['task_name'],
                 # memory=adict['tasks'][task_id]['memory'],
                 # io=adict['tasks'][task_id]['io'],
                 command=adict['tasks'][task_id]['command'],

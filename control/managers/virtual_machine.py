@@ -4,10 +4,7 @@ from control.managers.cloud_manager import CloudManager
 from control.managers.ec2_manager import EC2Manager
 
 from control.util.ssh_client import SSHClient
-# from control.util.loader import Loader
-from control.config.ec2_config import EC2Config
-from control.config.application_config import ApplicationConfig
-from control.config.file_system_config import FileSystemConfig
+from control.util.loader import Loader
 
 from datetime import datetime, timedelta
 
@@ -27,12 +24,9 @@ import os
 class VirtualMachine:
     CPU_BURST = -1
 
-    def __init__(self, instance_type: InstanceType, market, volume_id=None):
+    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None):
 
-        # self.loader = loader
-        self.ec2_conf = EC2Config()
-        self.application_conf = ApplicationConfig()
-        self.filesys_conf = FileSystemConfig()
+        self.loader = loader
 
         self.instance_type = instance_type
         self.market = market
@@ -76,16 +70,6 @@ class VirtualMachine:
 
         self.root_folder = None
 
-        # By default cpu_quota is burstable
-        self.cpu_quota = self.CPU_BURST
-        self.reserved_cpu_credits = 0
-
-        # # if its a VM burstable, by default it is setup to the baseline mode
-        # if self.burstable:
-        #     self.__set_baseline_mode()
-
-        # logging.info("Instance {} CPU_QUOTA: {}".format(self.instance_id, self.cpu_quota))
-
     '''
         Methods to Manager the virtual Machine
     '''
@@ -100,12 +84,7 @@ class VirtualMachine:
         if self.instance_id is None:
 
             logging.info("<VirtualMachine>: Deploying a new {} instance of type {} "
-                         "Burstable: {}".format(self.market,
-                                                self.instance_type.type, False))
-            # logging.info("<VirtualMachine>: Deploying a new {} instance of type {} "
-            #              "Burstable: {}".format(self.market,
-            #                                     self.instance_type.type,
-            #                                     self.burstable))
+                         .format(self.market, self.instance_type.type))
 
             try:
 
@@ -113,9 +92,10 @@ class VirtualMachine:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                               image_id=self.instance_type.image_id)
                 elif self.market == CloudManager.PREEMPTIBLE:
-                    self.instance_id = self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
-                                                                                image_id=self.instance_type.image_id,
-                                                                                max_price=self.instance_type.price_preemptible + 0.1)
+                    self.instance_id = \
+                        self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
+                                                                 image_id=self.instance_type.image_id,
+                                                                 max_price=self.instance_type.price_preemptible + 0.1)
                 else:
                     raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
 
@@ -139,12 +119,12 @@ class VirtualMachine:
 
                 self.instance_ip = self.manager.get_instance_ip(self.instance_id)
 
-                if self.filesys_conf.type == CloudManager.EBS:
+                if self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
                     if self.volume_id is None:
                         self.volume_id = self.manager.create_volume(
-                            size=self.filesys_conf.size,
-                            zone=self.ec2_conf.zone
+                            size=self.loader.file_system_conf.size,
+                            zone=self.loader.ec2_conf.zone
                         )
                         self.create_file_system = True
 
@@ -193,8 +173,8 @@ class VirtualMachine:
         self.ssh.execute_command(cmd2, output=True)  # mount directory
 
         if self.create_file_system:
-            cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.filesys_conf.path)
-            cmd4 = 'chmod 775 -R {}'.format(self.filesys_conf.path)
+            cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.loader.file_system_conf.path)
+            cmd4 = 'chmod 775 -R {}'.format(self.loader.file_system_conf.path)
 
             logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd3))
             self.ssh.execute_command(cmd3, output=True)
@@ -242,49 +222,47 @@ class VirtualMachine:
             if self.ssh.open_connection():
 
                 logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
-                                                                                   self.filesys_conf.path))
+                                                                                   self.loader.file_system_conf.path))
                 # create directory
-                self.ssh.execute_command('mkdir -p {}'.format(self.filesys_conf.path), output=True)
+                self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
-                if self.filesys_conf.type == CloudManager.EBS:
-                    self.__create_ebs(self.filesys_conf.path)
-                elif self.filesys_conf.type == CloudManager.S3:
-                    self.__create_s3(self.filesys_conf.path)
+                if self.loader.file_system_conf.type == CloudManager.EBS:
+                    self.__create_ebs(self.loader.file_system_conf.path)
+                elif self.loader.file_system_conf.type == CloudManager.S3:
+                    self.__create_s3(self.loader.file_system_conf.path)
                 else:
                     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
                     raise Exception(
-                        "VM {} Storage {} not supported".format(self.instance_id, self.filesys_conf.type))
+                        "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
 
-
                 # TODO: create a AMI with the requirements already installed
                 # Send python requirements file
                 self.ssh.put_file(source='/home/ubuntu/control-gpu',
-                                  target=self.ec2_conf.home_path,
+                                  target=self.loader.ec2_conf.home_path,
                                   item='requirements.txt')
 
                 command = 'sudo apt install python3-pip -y; pip3 install -r requirements.txt'
 
-                cmd = 'mkdir {}_{}/; {}'.format(10,2,command)
+                cmd = 'mkdir {}_{}/; {}'.format(self.loader.cudalign_task.task_id, self.loader.execution_id, command)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
 
-                stdout, stderr, retcode = self.ssh.execute_command(cmd, output=True)
+                stdout, stderr, code_return = self.ssh.execute_command(cmd, output=True)
                 print(stdout)
 
                 # Send daemon file
-                self.ssh.put_file(source=self.application_conf.daemon_path,
-                                  target=self.ec2_conf.home_path,
-                                  item=self.application_conf.daemon_file)
+                self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                  target=self.loader.ec2_conf.home_path,
+                                  item=self.loader.application_conf.daemon_file)
 
                 # create execution folder
-                # self.root_folder = os.path.join(self.filesys_conf.path, '{}_{}'.format(self.loader.job.job_id,
-                #                                                                               self.loader.execution_id))
-                self.root_folder = os.path.join(self.filesys_conf.path, '{}_{}'.format(10,
-                                                                                       1))
+                self.root_folder = os.path.join(self.loader.file_system_conf.path,
+                                                '{}_{}'.format(self.loader.cudalign_task.task_id,
+                                                               self.loader.execution_id))
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
 
@@ -298,9 +276,9 @@ class VirtualMachine:
                              "--work_path {} " \
                              "--task_id {} " \
                              "--execution_id {}  " \
-                             "--instance_id {} ".format(os.path.join(self.ec2_conf.home_path,
-                                                                     self.application_conf.daemon_file),
-                                                        self.ec2_conf.vm_user,
+                             "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                     self.loader.application_conf.daemon_file),
+                                                        self.loader.ec2_conf.vm_user,
                                                         '/home/ubuntu/',
                                                         '/home/ubuntu/',
                                                         self.loader,
@@ -312,7 +290,7 @@ class VirtualMachine:
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
-                stdout, stderr, retcode = self.ssh.execute_command(cmd_screen, output=True)
+                stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True)
                 print(stdout)
 
                 self.deploy_overhead = datetime.now() - self.start_deploy
@@ -327,7 +305,7 @@ class VirtualMachine:
     # Return True if success otherwise return False
     def terminate(self, delete_volume=True):
 
-        logging.info("<VirtualMachine>: Terminanting instance {} ".format(self.instance_id))
+        logging.info("<VirtualMachine>: Terminating instance {} ".format(self.instance_id))
 
         terminate_start = datetime.now()
 
@@ -347,48 +325,22 @@ class VirtualMachine:
     def update_ip(self):
         self.instance_ip = self.manager.get_instance_ip(self.instance_id)
 
-    def update_hibernation_start(self):
-        self.__hibernation_start_timestamp = datetime.now()
-
-    def update_hibernation_end(self):
-        self.__hibernation_end_timestamp = datetime.now()
-
-        duration = self.__hibernation_end_timestamp - self.__hibernation_start_timestamp
-
-        self.__hibernation_duration += duration
-
-        logging.info("<VirtualMachine {}>: - Hibernation duration: {}".format(self.instance_id, duration))
-
-    def __set_baseline_mode(self):
-        if self.burstable:
-            # self.cpu_quota = int(self.instance_type.baseline * 1000)
-            self.cpu_quota = 0
-        else:
-            logging.error("<VirtualMachine {}>:  Set baseline mode ERROR".format(self.instance_id))
-
-    def reserve_credits(self, value):
-        self.reserved_cpu_credits += value
-
-    def release_credits(self, value):
-        self.reserved_cpu_credits = min(self.reserved_cpu_credits - value, 0)
-
     # return the a IP's list of all running instance on the cloud provider
     def get_instances_ip(self):
 
-        filter = {
-            'status': [CloudManager.PENDING, CloudManager.RUNNING, CloudManager.HIBERNATED]
+        filter_instance = {
+            'status': [CloudManager.PENDING, CloudManager.RUNNING],
+            'tags': [{'Key': self.loader.ec2_conf.tag_key,
+                      'Value': self.loader.ec2_conf.tag_value
+                      }]
         }
 
-        instances_id = self.manager.list_instances_id(filter)
+        instances_id = self.manager.list_instances_id(filter_instance)
         ip_list = []
-        for id in instances_id:
-            ip_list.append(self.manager.get_instance_ip(id))
+        for id_instance in instances_id:
+            ip_list.append(self.manager.get_instance_ip(id_instance))
 
         return ip_list
-
-    # get cpu credits
-    def get_cpu_credits(self):
-        return self.manager.get_cpu_credits(self.instance_id) - self.reserved_cpu_credits
 
     # Return the current state of the virtual machine
     @property
@@ -449,15 +401,11 @@ class VirtualMachine:
     @property
     def price(self):
         if self.market == CloudManager.PREEMPTIBLE:
-            # return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
+            # return self.manager.get_preemptible_price(self.instance_type.type, self.loader.loader.ec2_conf.zone)[0][1]
             return 0
 
         else:
             return self.instance_type.price_ondemand
-
-    @property
-    def burstable(self):
-        return self.instance_type.burstable
 
     @property
     def type(self):

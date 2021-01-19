@@ -3,7 +3,7 @@
 from control.util.loader import Loader
 # from control.util.mail_me import MailMe
 
-# from control.managers.schedule_manager import ScheduleManager
+from control.scheduler.schedule_manager import ScheduleManager
 
 from distutils.util import strtobool
 
@@ -13,24 +13,25 @@ import logging
 import argparse
 # import datetime
 
-# def __call_control(loader: Loader):
-#     try:
-#         loader.print_execution_info()
-#
-#         manager = ScheduleManager(loader=loader)
-#
-#         manager.start_execution()
-#
-#         status = "SUCCESS"
-#
-#     except Exception as e:
-#         logging.error(e)
-#         status = "ERROR"
-#
-#     # if loader.dump:
-#     #     logging.info("Backup Database..")
-#     #     dump.dump_db()
-#     #     logging.info("Backup finished...")
+
+def __call_control(loader: Loader):
+    try:
+        loader.print_execution_info()
+
+        manager = ScheduleManager(loader=loader)
+
+        manager.start_execution()
+
+        # status = "SUCCESS"
+
+    except Exception as e:
+        logging.error(e)
+        # status = "ERROR"
+
+    # if loader.dump:
+    #     logging.info("Backup Database..")
+    #     dump.dump_db()
+    #     logging.info("Backup finished...")
 
 
 def __call_recreate_database(loader: Loader):
@@ -81,7 +82,7 @@ def main():
     #                     action='store_true', default=False)
 
     options_map = {
-        # 'control': __call_control,
+        'control': __call_control,
         # 'map': __call_primary_scheduling,
         'recreate_db': __call_recreate_database,
         'info': __print_execution_info,

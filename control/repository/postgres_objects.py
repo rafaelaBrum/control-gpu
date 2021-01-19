@@ -8,12 +8,13 @@ Base = declarative_base()
 class Task(Base):
     __tablename__ = 'task'
     task_id = Column(Integer, primary_key=True)
+    task_name = Column(String)
     command = Column(String)
 
     executions = relationship('Execution', backref='task', lazy='dynamic')
 
     def __repr__(self):
-        return "<Task(task_id='{}' command='{}'>".format(self.task_id, self.command)
+        return "<Task(task_id='{}' command='{}'>".format(self.task_id, self.task_name, self.command)
 
 
 class InstanceType(Base):

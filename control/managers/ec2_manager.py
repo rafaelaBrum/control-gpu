@@ -330,28 +330,13 @@ class EC2Manager(CloudManager):
                 )
             )
 
-        # if 'lifecycle' in filters:
-        #     _filters.append(
-        #         self._new_filter(
-        #             name="instance-lifecycle",
-        #             values=filters['lifecycle']
-        #         )
-        #     )
-        # if 'request_id' in filters:
-        #     _filters.append(
-        #         self._new_filter(
-        #             name="spot-instance-request-id",
-        #             values=filters['request_id']
-        #         )
-        #     )
-        #
-        # if 'tag' in filters:
-        #     _filters.append(
-        #         self._new_filter(
-        #             name='tag:{}'.format(filters['tag']['name']),
-        #             values=filters['tag']['values']
-        #         )
-        #     )
+        if 'tag' in search_filter:
+            _filters.append(
+                self._new_filter(
+                    name='tag:{}'.format(search_filter['tag']['name']),
+                    values=search_filter['tag']['values']
+                )
+            )
 
         return [i for i in self.resource.instances.filter(Filters=_filters)]
 

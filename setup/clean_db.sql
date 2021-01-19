@@ -276,6 +276,7 @@ ALTER TABLE public.instance_type OWNER TO postgres;
 
 CREATE TABLE public.task (
     task_id integer NOT NULL,
+    task_name character varying,
     command character varying
 );
 
@@ -327,15 +328,15 @@ COPY public.execution_status (execution_id, task_id, instance_id, "timestamp", s
 1   1   xyz	2019-03-30 15:01:38.20816	waiting
 1   2	xyz	2019-03-30 15:01:38.51292	waiting
 1   3	xyz	2019-03-30 15:01:38.553461	waiting
-1	4	xyz	2019-03-30 15:01:38.56174	waiting
+1   4	xyz	2019-03-30 15:01:38.56174	waiting
 1   5	xyz	2019-03-30 15:02:14.279995	executing
-1	6	xyz	2019-03-30 15:02:14.328468	executing
-1	7	xyz	2019-03-30 15:02:14.399822	executing
-1	8	xyz	2019-03-30 15:02:42.096192	executing
-1	9	xyz	2019-03-30 15:03:12.929855	finished
-1	10	xyz	2019-03-30 15:03:13.123799	finished
-1	11	xyz	2019-03-30 15:03:13.482473	finished
-1	12	xyz	2019-03-30 15:03:51.027635	finished
+1   6	xyz	2019-03-30 15:02:14.328468	executing
+1   7	xyz	2019-03-30 15:02:14.399822	executing
+1   8	xyz	2019-03-30 15:02:42.096192	executing
+1   9	xyz	2019-03-30 15:03:12.929855	finished
+1   10	xyz	2019-03-30 15:03:13.123799	finished
+1   11	xyz	2019-03-30 15:03:13.482473	finished
+1   12	xyz	2019-03-30 15:03:51.027635	finished
 \.
 
 
@@ -367,7 +368,7 @@ COPY public.instance_type (type, provider) FROM stdin;
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.task (task_id, command) FROM stdin;
+COPY public.task (task_id, task_name, command) FROM stdin;
 \.
 
 
@@ -2763,9 +2764,8 @@ ALTER TABLE public.instance_type OWNER TO postgres;
 
 CREATE TABLE public.task (
     task_id integer NOT NULL,
-    command character varying,
-    memory double precision,
-    io double precision
+    task_name character varying,
+    command character varying
 );
 
 
@@ -2825,9 +2825,9 @@ c3.xlarge
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.task (task_id, command) FROM stdin;
-0	Test
-1	Test
+COPY public.task (task_id, task_name, command) FROM stdin;
+1   "Task de Teste"	Test
+2 "Task2" Test
 \.
 
 
