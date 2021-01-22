@@ -174,7 +174,7 @@ class EC2Manager(CloudManager):
             self.client.attach_volume(
                 VolumeId=volume_id,
                 InstanceId=instance_id,
-                Device=device
+                Device="/dev/xvdf"
             )
             return True
         except Exception as e:

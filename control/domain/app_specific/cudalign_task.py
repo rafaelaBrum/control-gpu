@@ -27,8 +27,8 @@ class CUDAlignTask(Task):
         "p2.xlarge": 4.0
     }
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, mcups, tam_seq0, tam_seq1, similar_seqs,
-                 disk_size, work_dir=""):
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, mcups, seq0, seq1, tam_seq0,
+                 tam_seq1, similar_seqs, disk_size, work_dir=""):
         super().__init__(task_id, task_name, command, generic_ckpt, runtime)
 
         if self.baseline_instance not in self.runtime:
@@ -41,10 +41,16 @@ class CUDAlignTask(Task):
             raise Exception("CUDAlignTask Error: CUDAlignTask '{}' don't have MCUPS for "
                             "instance {}".format(task_id, self.baseline_instance))
 
+        self.seq0 = seq0
+        self.seq1 = seq1
+
+        self.simple_command = command
+
         self.tam_seq0 = tam_seq0
         self.tam_seq1 = tam_seq1
 
         self.similar_seqs = similar_seqs
+        self.disk_size = disk_size
 
         if disk_size.endswith('G'):
             disk_size_int = int((disk_size.split('G')[0]))
@@ -103,6 +109,7 @@ class CUDAlignTask(Task):
 
     def finish_execution(self):
         self.finished = True
+        self.running = False
 
     def has_task_finished(self):
         return self.finished is True
@@ -133,6 +140,8 @@ class CUDAlignTask(Task):
                 generic_ckpt=adict['generic_ckpt'],
                 disk_size=adict['disk_size'],
                 mcups=adict['mcups'],
+                seq0=adict['seq0'],
+                seq1=adict['seq1'],
                 tam_seq0=adict['tam_seq0'],
                 tam_seq1=adict['tam_seq1'],
                 similar_seqs=['similar_seqs']

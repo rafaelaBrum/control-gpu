@@ -239,15 +239,7 @@ class VirtualMachine:
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
 
-                # TODO: create a AMI with the requirements already installed
-                # Send python requirements file
-                self.ssh.put_file(source='/home/ubuntu/control-gpu',
-                                  target=self.loader.ec2_conf.home_path,
-                                  item='requirements.txt')
-
-                command = 'sudo apt install python3-pip -y; pip3 install -r requirements.txt'
-
-                cmd = 'mkdir {}_{}/; {}'.format(self.loader.cudalign_task.task_id, self.loader.execution_id, command)
+                cmd = 'mkdir {}_{}/'.format(self.loader.cudalign_task.task_id, self.loader.execution_id)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
 
@@ -273,16 +265,14 @@ class VirtualMachine:
                 cmd_daemon = "python3 {} " \
                              "--vm_user {} " \
                              "--root_path {} " \
-                             "--work_path {} " \
                              "--task_id {} " \
                              "--execution_id {}  " \
                              "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
                                                                      self.loader.application_conf.daemon_file),
                                                         self.loader.ec2_conf.vm_user,
-                                                        '/home/ubuntu/',
-                                                        '/home/ubuntu/',
-                                                        self.loader,
-                                                        2,
+                                                        self.loader.file_system_conf.path,
+                                                        self.loader.cudalign_task.task_id,
+                                                        self.loader.execution_id,
                                                         self.instance_id)
 
                 cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
@@ -401,8 +391,7 @@ class VirtualMachine:
     @property
     def price(self):
         if self.market == CloudManager.PREEMPTIBLE:
-            # return self.manager.get_preemptible_price(self.instance_type.type, self.loader.loader.ec2_conf.zone)[0][1]
-            return 0
+            return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
 
         else:
             return self.instance_type.price_ondemand

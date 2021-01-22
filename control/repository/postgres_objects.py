@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, ForeignKeyConstraint, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, ForeignKeyConstraint, TIMESTAMP,Interval
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -85,6 +85,6 @@ class Statistic(Base):
     task_id = Column(Integer, primary_key=True)
     start = Column(TIMESTAMP, primary_key=True)
     end = Column(TIMESTAMP)
-    deadline = Column(TIMESTAMP)
+    deadline = Column(Interval)
     cost = Column(Float)
     status = Column(String)

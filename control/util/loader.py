@@ -119,6 +119,8 @@ class Loader:
 
         self.__update_prices()
 
+        self.__update_command()
+
     def __prepare_logging(self):
         """
         Set up the log format, level and the file where it will be recorded.
@@ -278,6 +280,26 @@ class Loader:
         with open(self.env_file, "w") as jsonFile:
             json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
 
+    # update cudalign command
+    def __update_command(self):
+        self.cudalign_task.command = "{} --disk-size={} --work-dir={} {} {} > {} 2> {}"\
+            .format(self.cudalign_task.command,
+                    self.cudalign_task.disk_size,
+                    os.path.join(self.file_system_conf.path,
+                                 '{}_{}'.format(self.cudalign_task.task_id,
+                                                self.execution_id)),
+                    os.path.join(self.ec2_conf.input_path,
+                                 self.cudalign_task.seq0),
+                    os.path.join(self.ec2_conf.input_path,
+                                 self.cudalign_task.seq1),
+                    os.path.join(self.file_system_conf.path,
+                                 '{}_{}/output.txt'.format(self.cudalign_task.task_id,
+                                                           self.execution_id)),
+                    os.path.join(self.file_system_conf.path,
+                                 '{}_{}/error.txt'.format(self.cudalign_task.task_id,
+                                                          self.execution_id))
+                    )
+
     def print_execution_info(self):
         logging.info("\n")
 
@@ -299,6 +321,7 @@ class Loader:
         logging.info("")
         logging.info("\t" + 30 * "*")
         logging.info("\tTask id: {} Execution id: {}".format(self.cudalign_task.task_id, self.execution_id))
+        logging.info("\tCommand: {}".format(self.cudalign_task.command))
         logging.info("\tDeadline: {}".format(self.deadline_seconds))
         # logging.info("\tDeadline: {} AC: {}".format(self.deadline_seconds,
         #                                             self.ac_size_seconds))

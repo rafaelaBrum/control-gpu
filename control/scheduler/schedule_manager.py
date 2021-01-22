@@ -41,7 +41,7 @@ class ScheduleManager:
         self.loader = loader
 
         # load the Scheduler that will be used
-        self.scheduler = SimpleScheduler(instance_types=self.loader.instances_list)
+        self.scheduler = SimpleScheduler(instance_types=self.loader.env)
         # self.__load_scheduler()
 
         # read expected_makespan on build_dispatcher()
@@ -88,6 +88,12 @@ class ScheduleManager:
         self.task_dispatcher: Dispatcher
         self.task_status = Task.WAITING
 
+        '''
+                Build the initial dispatcher
+                The class Dispatcher is responsible to manager the execution steps
+                '''
+        self.__build_dispatcher()
+
         # Prepare the control database and the folders structure in S3
         try:
             self.__prepare_execution()
@@ -115,6 +121,32 @@ class ScheduleManager:
     #                                                           self.loader.execution_id,
     #                                                           self.loader.scheduler_name))
 
+    def __build_dispatcher(self):
+
+        instance_type, market = self.scheduler.choose_initial_best_instance_type(self.loader.cudalign_task,
+                                                                                 self.loader.deadline_seconds)
+
+        # Create the Vm that will be used by the dispatcher
+        vm = VirtualMachine(
+            instance_type=instance_type,
+            market=market,
+            loader=self.loader
+        )
+
+        # than a dispatcher, that will execute the tasks, is create
+
+        dispatcher = Dispatcher(vm=vm, loader=self.loader)
+
+        # check if the VM need to be register on the simulator
+        # if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
+        #     self.simulator.register_vm(vm)
+
+        self.semaphore.acquire()
+
+        self.task_dispatcher = dispatcher
+
+        self.semaphore.release()
+
     def __prepare_execution(self):
         """
            Prepare control database and all directories to start the execution process
@@ -139,10 +171,10 @@ class ScheduleManager:
 
             task_repo = tasks_repo[0]
 
-            assert task_repo.name == self.loader.cudalign_task.task_name, "Consistency error (task name): {} <> {}"\
-                .format(task_repo.name, self.loader.cudalign_task.task_name)
+            assert task_repo.task_name == self.loader.cudalign_task.task_name, "Consistency error (task name): {} <> {}"\
+                .format(task_repo.task_name, self.loader.cudalign_task.task_name)
 
-            assert task_repo.command == self.loader.cudalign_task.command, "Consistency error (task command): " \
+            assert task_repo.command == self.loader.cudalign_task.simple_command, "Consistency error (task command): " \
                                                                            "{} <> {} "\
                 .format(task_repo.command, self.loader.cudalign_task.command)
 
@@ -173,9 +205,9 @@ class ScheduleManager:
         """Record a Task to the controlgpu database"""
 
         task_repo = TaskRepo(
-            id=self.loader.cudalign_task.task_id,
-            name=self.loader.cudalign_task.task_name,
-            command=self.loader.cudalign_task.command
+            task_id=self.loader.cudalign_task.task_id,
+            task_name=self.loader.cudalign_task.task_name,
+            command=self.loader.cudalign_task.simple_command
         )
 
         self.repo.add_task(task_repo)
@@ -263,7 +295,13 @@ class ScheduleManager:
         self.loader.cudalign_task.update_execution_time(diff.total_seconds())
         self.last_event_timestamp = event_timestamp
 
-        if event.value == CloudManager.STOPPED:
+        if event.value == CloudManager.IDLE:
+            logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.cudalign_task.task_id,
+                                                                                   self.loader.execution_id))
+
+            self.loader.cudalign_task.finish_execution()
+            self.task_status = Task.FINISHED
+        elif event.value == CloudManager.STOPPED:
             self.semaphore_count.acquire()
             self.n_interruptions += 1
             self.semaphore_count.release()
@@ -279,9 +317,6 @@ class ScheduleManager:
 
         elif event.value in CloudManager.ABORT:
             self.abort = True
-
-        elif event.value in Task.FINISHED:
-            self.loader.cudalign_task.finish_execution()
 
     '''
     CHECKERS FUNCTIONS
@@ -306,7 +341,7 @@ class ScheduleManager:
 
         # Starting working dispatcher
         self.task_dispatcher.main_thread.start()
-        self.task_dispatcher.waiting_work.set()
+        # self.task_dispatcher.waiting_work.set()
 
         self.semaphore.release()
 
@@ -337,7 +372,7 @@ class ScheduleManager:
         self.task_dispatcher.debug_wait_command = False
 
         self.task_dispatcher.working = False
-        self.task_dispatcher.waiting_work.set()
+        # self.task_dispatcher.waiting_work.set()
 
         # Confirm Termination
         logging.info("<Scheduler Manager {}_{}>: - Waiting Termination process..."
@@ -421,7 +456,7 @@ class ScheduleManager:
 
         self.repo.add_statistic(
             StatisticRepo(execution_id=self.loader.execution_id,
-                          job_id=self.loader.cudalign_task.task_id,
+                          task_id=self.loader.cudalign_task.task_id,
                           status=status,
                           start=self.start_timestamp,
                           end=self.end_timestamp,

@@ -237,6 +237,7 @@ CREATE TABLE public.instance (
     type character varying,
     region character varying,
     zone character varying,
+    ebs_volume character varying,
     market character varying,
     price double precision
 );
@@ -269,6 +270,21 @@ CREATE TABLE public.instance_type (
 
 ALTER TABLE public.instance_type OWNER TO postgres;
 
+--
+-- Name: statistic; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.statistic (
+    execution_id integer NOT NULL,
+    job_id integer NOT NULL,
+    start timestamp without time zone,
+    "end" timestamp without time zone,
+    deadline timestamp without time zone,
+    cost double precision
+);
+
+
+ALTER TABLE public.statistic OWNER TO postgres;
 
 --
 -- Name: task; Type: TABLE; Schema: public; Owner: postgres
@@ -325,18 +341,18 @@ COPY public.execution (execution_id, task_id, instance_id, "timestamp", status) 
 --
 
 COPY public.execution_status (execution_id, task_id, instance_id, "timestamp", status) FROM stdin;
-1   1   xyz	2019-03-30 15:01:38.20816	waiting
-1   2	xyz	2019-03-30 15:01:38.51292	waiting
-1   3	xyz	2019-03-30 15:01:38.553461	waiting
-1   4	xyz	2019-03-30 15:01:38.56174	waiting
-1   5	xyz	2019-03-30 15:02:14.279995	executing
-1   6	xyz	2019-03-30 15:02:14.328468	executing
-1   7	xyz	2019-03-30 15:02:14.399822	executing
-1   8	xyz	2019-03-30 15:02:42.096192	executing
-1   9	xyz	2019-03-30 15:03:12.929855	finished
-1   10	xyz	2019-03-30 15:03:13.123799	finished
-1   11	xyz	2019-03-30 15:03:13.482473	finished
-1   12	xyz	2019-03-30 15:03:51.027635	finished
+1 1 xyz	2019-03-30 15:01:38.20816 waiting
+1 2	xyz	2019-03-30 15:01:38.51292	waiting
+1 3	xyz	2019-03-30 15:01:38.553461	waiting
+1 4	xyz	2019-03-30 15:01:38.56174	waiting
+1 5	xyz	2019-03-30 15:02:14.279995	executing
+1 6	xyz	2019-03-30 15:02:14.328468	executing
+1 7	xyz	2019-03-30 15:02:14.399822	executing
+1 8	xyz	2019-03-30 15:02:42.096192	executing
+1 9	xyz	2019-03-30 15:03:12.929855	finished
+1 10	xyz	2019-03-30 15:03:13.123799	finished
+1 11	xyz	2019-03-30 15:03:13.482473	finished
+1 12	xyz	2019-03-30 15:03:51.027635	finished
 \.
 
 
@@ -439,32 +455,32 @@ ALTER TABLE ONLY public.test
 -- Name: execution execution_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
+--ALTER TABLE ONLY public.execution
+--    ADD CONSTRAINT execution_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
 
 
 --
 -- Name: execution execution_task_id_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
+--ALTER TABLE ONLY public.execution
+--    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
 
 
 --
 -- Name: instance_status instance_status_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.instance_status
-    ADD CONSTRAINT instance_status_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
+--ALTER TABLE ONLY public.instance_status
+--    ADD CONSTRAINT instance_status_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
 
 
 --
 -- Name: instance instance_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.instance
-    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
+--ALTER TABLE ONLY public.instance
+--    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
 
 
 --
@@ -2726,6 +2742,7 @@ CREATE TABLE public.instance (
     type character varying,
     region character varying,
     zone character varying,
+    ebs_volume character varying,
     market character varying,
     price double precision
 );
@@ -2757,6 +2774,21 @@ CREATE TABLE public.instance_type (
 
 ALTER TABLE public.instance_type OWNER TO postgres;
 
+--
+-- Name: statistic; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.statistic (
+    execution_id integer NOT NULL,
+    job_id integer NOT NULL,
+    start timestamp without time zone,
+    "end" timestamp without time zone,
+    deadline timestamp without time zone,
+    cost double precision
+);
+
+
+ALTER TABLE public.statistic OWNER TO postgres;
 
 --
 -- Name: task; Type: TABLE; Schema: public; Owner: postgres
@@ -2797,8 +2829,8 @@ COPY public.execution_status (execution_id, task_id, instance_id, "timestamp", s
 -- Data for Name: instance; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.instance (id, type, region, zone, market, price) FROM stdin;
-xyz	c3.xlarge			spot	0.5
+COPY public.instance (type, region, zone, ebs_volume, market, price) FROM stdin;
+c3.xlarge us-east-1 us-east-1a id_01 spot 0.5
 \.
 
 
@@ -2826,7 +2858,7 @@ c3.xlarge
 --
 
 COPY public.task (task_id, task_name, command) FROM stdin;
-1   "Task de Teste"	Test
+1 "Task de Teste"	Test
 2 "Task2" Test
 \.
 
@@ -2883,40 +2915,40 @@ ALTER TABLE ONLY public.task
 -- Name: execution execution_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
+--ALTER TABLE ONLY public.execution
+--    ADD CONSTRAINT execution_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
 
 
 --
 -- Name: execution execution_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
+--ALTER TABLE ONLY public.execution
+--    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
 
 
 --
 -- Name: execution_status execution_status_execution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.execution_status
-    ADD CONSTRAINT execution_status_execution_id_fkey FOREIGN KEY (execution_id, task_id, instance_id) REFERENCES public.execution(id, task_id, instance_id);
+--ALTER TABLE ONLY public.execution_status
+--    ADD CONSTRAINT execution_status_execution_id_fkey FOREIGN KEY (execution_id, task_id, instance_id) REFERENCES public.execution(id, task_id, instance_id);
 
 
 --
 -- Name: instance_status instance_status_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.instance_status
-    ADD CONSTRAINT instance_status_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
+--ALTER TABLE ONLY public.instance_status
+--    ADD CONSTRAINT instance_status_instance_id_fkey FOREIGN KEY (instance_id) REFERENCES public.instance(id);
 
 
 --
 -- Name: instance instance_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.instance
-    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
+--ALTER TABLE ONLY public.instance
+--    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
 
 
 --

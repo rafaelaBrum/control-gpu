@@ -41,6 +41,10 @@ class EC2Config(Config):
         return self.get_property(self._key, 'home_path')
 
     @property
+    def input_path(self):
+        return self.get_property(self._key, 'input_path')
+
+    @property
     def boot_overhead(self):
         return float(self.get_property(self._key, 'boot_overhead'))
 

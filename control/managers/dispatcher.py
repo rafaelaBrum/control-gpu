@@ -57,6 +57,7 @@ class Executor:
         self.next_checkpoint_datetime = None
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
+        self.thread_executing = False
 
     def update_status_table(self):
         """
@@ -79,14 +80,18 @@ class Executor:
     def __run(self):
         # START task execution
 
-        self.repo = PostgresRepo()
+        logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
+        self.repo = PostgresRepo()
+        current_time = None
         action = Daemon.START
 
         # if self.task.has_checkpoint:
         #     action = Daemon.RESTART
         try:
             self.communicator.send(action=action, value=self.dict_info)
+            current_time = datetime.now()
+            logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
         except Exception as e:
             logging.error(e)
             self.__stopped(Task.ERROR)
@@ -94,10 +99,10 @@ class Executor:
 
         # if task was started with success
         # start execution loop
-        # print(self.communicator.response)
         if self.communicator.response['status'] == 'success':
 
             self.status = Task.EXECUTING
+
             # if action == Daemon.START:
             #     self.status = Task.EXECUTING
             # else:
@@ -105,11 +110,19 @@ class Executor:
 
             # self.update_status_table()
 
+            # self.stop_signal = True
+
+            logging.info("<Executor {}-{}>: Begin execution loop".format(self.task.task_id, self.vm.instance_id))
+
             # start task execution Loop
             while (self.status == Task.EXECUTING) and not self.stop_signal:
 
                 try:
+                    logging.info(
+                        "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
                     command_status, current_stage = self.__get_task_status()
+                    logging.info(
+                        "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id, command_status))
 
                     # if self.loader.checkpoint_conf.with_checkpoint \
                     #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
@@ -121,15 +134,23 @@ class Executor:
                     return
 
                 # check task status
-                if command_status is not None and command_status == 'not running':
+                if command_status is not None and command_status == 'finished':
 
-                    status = Task.FINISHED
+                    self.status = status = Task.FINISHED
 
+                    self.loader.cudalign_task.finish_execution()
                     self.__stopped(status)
                     return
 
+                if command_status is not None and command_status == 'running':
+                    elapsed_time = datetime.now() - current_time
+                    current_time = current_time + elapsed_time
+                    self.loader.cudalign_task.update_execution_time(elapsed_time.total_seconds())
+
                 if command_status is not None and command_status != 'running':
                     status = Task.RUNTIME_ERROR
+
+                    self.loader.cudalign_task.stop_execution()
                     self.__stopped(status)
                     return
 
@@ -330,7 +351,7 @@ class Dispatcher:
         '''
 
         # threading event to waiting for tasks to execute
-        self.waiting_work = threading.Event()
+        # self.waiting_work = threading.Event()
         self.semaphore = threading.Semaphore()
 
         self.main_thread = threading.Thread(target=self.__execution_loop, daemon=True)
@@ -478,69 +499,69 @@ class Dispatcher:
                 logging.error(e)
 
                 # stop working process
-                self.waiting_work.clear()
+                # self.waiting_work.clear()
                 # Notify abort!
                 self.__notify(CloudManager.ABORT)
 
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
+            cuda_task = self.loader.cudalign_task
 
-            while self.working:
+            if not cuda_task.has_task_finished() and self.working:
+                if self.vm.state == CloudManager.RUNNING:
+
+                    self.semaphore.acquire()
+                    # # check running tasks
+                    # self.__update_running_executors()
+
+                    if not cuda_task.is_running():
+                        self.executor = Executor(
+                            task=cuda_task,
+                            vm=self.vm,
+                            loader=self.loader
+                        )
+                        # start the executor loop to execute the task
+                        self.executor.thread.start()
+                        self.loader.cudalign_task.start_execution(self.vm.instance_type)
+
+                    self.semaphore.release()
+
+            while self.working and not self.loader.cudalign_task.has_task_finished():
                 # waiting for work
-                self.waiting_work.wait()
-
-                self.waiting_work.clear()
+                # self.waiting_work.wait()
+                #
+                # self.waiting_work.clear()
                 if not self.working:
                     break
 
-                # execution loop
-                self.semaphore.acquire()
-                cuda_task = self.loader.cudalign_task
-                self.semaphore.release()
+                # # execution loop
+                # self.semaphore.acquire()
+                # self.semaphore.release()
 
-                if not cuda_task.has_task_finished():
+                # Error: instance was not deployed or was terminated
+                if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN, CloudManager.TERMINATED):
+                    # VM was not created, raise a event
+                    self.__notify(CloudManager.TERMINATED)
 
-                    # self.__update_instance_status_table()
+                    break
 
-                    # start Execution when instance is RUNNING
-                    if self.vm.state == CloudManager.RUNNING:
+                elif self.vm.state == CloudManager.STOPPED:
+                    # STOP and CHECKPOINT all tasks
+                    self.executor.stop_signal = True
 
-                        self.semaphore.acquire()
-                        # # check running tasks
-                        # self.__update_running_executors()
+                    # waiting running tasks
+                    self.executor.thread.join()
 
-                        if not cuda_task.is_running():
-                            self.executor = Executor(
-                                task=cuda_task,
-                                vm=self.vm,
-                                loader=self.loader
-                            )
-                            # start the executor loop to execute the task
-                            self.executor.thread.start()
+                    self.resume = False
 
-                        self.semaphore.release()
+                    self.__notify(CloudManager.STOPPED)
 
-                    # Error: instance was not deployed or was terminated
-                    elif self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN, CloudManager.TERMINATED):
-                        # VM was not created, raise a event
-                        self.__notify(CloudManager.TERMINATED)
-
-                        break
-
-                    elif self.vm.state == CloudManager.STOPPED:
-                        # STOP and CHECKPOINT all tasks
-                        self.executor.stop_signal = True
-
-                        # waiting running tasks
-                        self.executor.thread.join()
-
-                        self.resume = False
-
-                        self.__notify(CloudManager.STOPPED)
-
-                        break
+                    break
 
             if self.vm.state == CloudManager.RUNNING:
+
+                # self.__update_instance_status_table(state=CloudManager.IDLE)
+                self.__notify(CloudManager.IDLE)
 
                 while self.debug_wait_command:
                     time.sleep(5)
