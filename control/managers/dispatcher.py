@@ -122,7 +122,18 @@ class Executor:
                         "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
                     command_status, current_stage = self.__get_task_status()
                     logging.info(
-                        "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id, command_status))
+                        "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
+                                                                     command_status))
+
+                    instance_action = None
+                    if self.vm.market == CloudManager.PREEMPTIBLE:
+                        logging.info(
+                            "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
+                                                                                     self.vm.instance_id))
+                        instance_action = self.__get_instance_action()
+                        logging.info(
+                            "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
+                                                                          instance_action))
 
                     # if self.loader.checkpoint_conf.with_checkpoint \
                     #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
@@ -147,14 +158,20 @@ class Executor:
                     current_time = current_time + elapsed_time
                     self.loader.cudalign_task.update_execution_time(elapsed_time.total_seconds())
 
-                if command_status is not None and command_status != 'running':
-                    status = Task.RUNTIME_ERROR
+                if instance_action is not None and instance_action != 'none':
+                    self.vm.interrupt()
+                    self.__stopped(Task.INTERRUPTED)
+                    return
 
+                if command_status is not None and command_status != 'running':
                     self.loader.cudalign_task.stop_execution()
-                    self.__stopped(status)
+                    self.__stopped(Task.RUNTIME_ERROR)
                     return
 
                 time.sleep(1)
+
+            if self.stop_signal:
+                self.loader.cudalign_task.stop_execution()
 
         # if kill signal than checkpoint task (SIMULATION)
         # if self.stop_signal:
@@ -267,6 +284,28 @@ class Executor:
                 time.sleep(1)
 
         raise Exception("<Executor {}-{}>: Get task status error".format(self.task.task_id, self.vm.instance_id))
+
+    def __get_instance_action(self):
+
+        for i in range(3):
+
+            try:
+
+                self.communicator.send(action=Daemon.INSTANCE_ACTION,
+                                       value=self.dict_info)
+
+                result = self.communicator.response
+
+                instance_action = result['value']
+
+                return instance_action
+            except:
+                logging.error("<Executor {}-{}>: Get instance action {}/3".format(self.task.task_id,
+                                                                                  self.vm.instance_id,
+                                                                                  i + 1))
+                time.sleep(1)
+
+        raise Exception("<Executor {}-{}>: Get instance action error".format(self.task.task_id, self.vm.instance_id))
 
     # def __get_task_usage(self):
     #     for i in range(3):
@@ -544,6 +583,14 @@ class Dispatcher:
                     self.__notify(CloudManager.TERMINATED)
 
                     break
+
+                elif self.vm.state == CloudManager.STOPPING:
+                    # waiting running tasks
+                    self.executor.thread.join()
+
+                    self.resume = False
+
+                    self.__notify(CloudManager.STOPPING)
 
                 elif self.vm.state == CloudManager.STOPPED:
                     # STOP and CHECKPOINT all tasks

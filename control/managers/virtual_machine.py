@@ -40,6 +40,7 @@ class VirtualMachine:
         self.instance_id = None
         self.instance_ip = None
         self.current_state = CloudManager.PENDING
+        self.marked_to_interrupt = False
 
         self.ready = False
 
@@ -332,10 +333,15 @@ class VirtualMachine:
 
         return ip_list
 
+    def interrupt(self):
+        self.marked_to_interrupt = True
+
     # Return the current state of the virtual machine
     @property
     def state(self):
-        if not self.in_simulation:
+        if self.marked_to_interrupt:
+            self.current_state = CloudManager.STOPPING
+        elif not self.in_simulation:
             if not self.failed_to_created:
                 self.current_state = self.manager.get_instance_status(self.instance_id)
             else:

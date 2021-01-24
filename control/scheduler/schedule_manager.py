@@ -79,6 +79,7 @@ class ScheduleManager:
 
         # TRACKERS VALUES
         self.n_interruptions = 0
+        self.n_sim_interruptions = 0
 
         self.timeout = False
 
@@ -301,9 +302,17 @@ class ScheduleManager:
 
             self.loader.cudalign_task.finish_execution()
             self.task_status = Task.FINISHED
-        elif event.value == CloudManager.STOPPED:
+        elif event.value == CloudManager.STOPPING:
             self.semaphore_count.acquire()
             self.n_interruptions += 1
+            self.semaphore_count.release()
+
+            logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
+                         .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
+            self.__interruption_handle()
+        elif event.value == CloudManager.STOPPED:
+            self.semaphore_count.acquire()
+            self.n_sim_interruptions += 1
             self.semaphore_count.release()
 
             logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
@@ -416,20 +425,25 @@ class ScheduleManager:
         logging.info("")
 
         if not self.abort:
-            execution_info = "\tTask: {} Execution: {} Scheduler: SimpleScheduler\t"\
+            execution_info = "    Task: {} Execution: {} Scheduler: SimpleScheduler    "\
                 .format(self.loader.cudalign_task.task_id, self.loader.execution_id)
         else:
-            execution_info = "\tJob: {} Execution: {} Scheduler: SimpleScheduler" \
-                             " - EXECUTION ABORTED\t".format(self.loader.cudalign_task.task_id,
+            execution_info = "    Job: {} Execution: {} Scheduler: SimpleScheduler" \
+                             " - EXECUTION ABORTED    ".format(self.loader.cudalign_task.task_id,
                                                              self.loader.execution_id)
 
-        logging.info(50 * "#" + execution_info + 50 * "#")
+        execution_info = 20 * "#" + execution_info + 20 * "#"
+
+        logging.info(execution_info)
         logging.info("")
-        logging.info("\t Interruption: {}".format(self.n_interruptions))
+        total = self.n_sim_interruptions + self.n_interruptions
+
+        logging.info("\t AWS interruption: {} Simulation interruption: {} Total interruption: {}".format(
+            self.n_interruptions, self.n_sim_interruptions, total))
 
         total = on_demand_count + preemptible_count
         logging.info(
-            "\t On-demand (not burstable): {} Preemptible: {} Total: {}".format(on_demand_count,
+            "\t On-demand: {} Preemptible: {} Total: {}".format(on_demand_count,
                                                                                 preemptible_count,
                                                                                 total))
         logging.info("")
@@ -447,7 +461,7 @@ class ScheduleManager:
             logging.warning("\t-> {}".format(self.ebs_volume_id))
 
         logging.info("")
-        logging.info(144 * "#")
+        logging.info(len(execution_info) * "#")
 
         status = 'success'
 

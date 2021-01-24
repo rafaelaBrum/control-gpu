@@ -14,6 +14,8 @@ import subprocess
 import os
 import logging
 
+from ec2_metadata import ec2_metadata
+
 
 class Daemon:
     # CHECKPOINT_LIMIT = 3
@@ -26,6 +28,7 @@ class Daemon:
     TEST = 'test'
     SUCCESS = 'success'
     ERROR = 'error'
+    INSTANCE_ACTION = 'instance_action'
 
     def __init__(self, vm_user, root_path, task_id, execution_id, instance_id):
         self.vm_user = vm_user
@@ -105,6 +108,16 @@ class Daemon:
             try:
 
                 value_return = self.__get_command_status(session_name)
+                status_return = Daemon.SUCCESS
+            except Exception as e:
+                logging.error(e)
+                value_return = "Error to get VM {} status".format(vm_name)
+                status_return = Daemon.ERROR
+
+        elif action == Daemon.INSTANCE_ACTION:
+            try:
+
+                value_return = ec2_metadata.instance_action
                 status_return = Daemon.SUCCESS
             except Exception as e:
                 logging.error(e)

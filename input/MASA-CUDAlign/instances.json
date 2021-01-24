@@ -16,7 +16,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-04edd35eb375ca3ba",
+            "image_id": "ami-0f37c64a867d7a967",
             "ebs_device_name": "/dev/xvdf"
         },
         "g3s.xlarge": {
@@ -35,7 +35,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-07708a5ef23d9fa27",
+            "image_id": "ami-0d06239227191470a",
             "ebs_device_name": "/dev/xvdf"
         },
         "g4dn.xlarge": {
@@ -54,7 +54,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-02007fe660a61ca3e",
+            "image_id": "ami-0072ab402faa38d64",
             "ebs_device_name": "/dev/nvme2n1"
         },
         "g4dn.2xlarge": {
@@ -73,7 +73,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-02007fe660a61ca3e",
+            "image_id": "ami-0072ab402faa38d64",
             "ebs_device_name": "/dev/nvme2n1"
         },
         "p2.xlarge": {
@@ -92,7 +92,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-0b7f8386e2cdaf2d7",
+            "image_id": "ami-0ed1a0853586c4028",
             "ebs_device_name": "/dev/xvdf"
         }
     }
