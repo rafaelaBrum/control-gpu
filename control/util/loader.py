@@ -303,7 +303,7 @@ class Loader:
     def print_execution_info(self):
         logging.info("\n")
 
-        header_msg = 50 * "#" + "\tControl-GPU {}\t".format(Loader.VERSION) + 50 * "#"
+        header_msg = 25 * "#" + "    Control-GPU {}    ".format(Loader.VERSION) + 25 * "#"
         logging.info(header_msg)
         logging.info("")
 
@@ -336,5 +336,5 @@ class Loader:
         logging.info("\tDEBUG MODE: {}".format(self.debug_conf.debug_mode))
         logging.info("")
 
-        logging.info(120 * "#")
+        logging.info(len(header_msg) * "#")
         logging.info("\n\n")
