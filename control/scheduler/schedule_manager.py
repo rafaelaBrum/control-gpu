@@ -80,6 +80,7 @@ class ScheduleManager:
         # TRACKERS VALUES
         self.n_interruptions = 0
         self.n_sim_interruptions = 0
+        self.n_terminated = 0
 
         self.timeout = False
 
@@ -87,6 +88,7 @@ class ScheduleManager:
         self.abort = False
 
         self.task_dispatcher: Dispatcher
+        self.terminated_dispatchers = []
         self.task_status = Task.WAITING
 
         '''
@@ -172,11 +174,12 @@ class ScheduleManager:
 
             task_repo = tasks_repo[0]
 
-            assert task_repo.task_name == self.loader.cudalign_task.task_name, "Consistency error (task name): {} <> {}"\
+            assert task_repo.task_name == self.loader.cudalign_task.task_name, "Consistency error (task name): " \
+                                                                               "{} <> {}"\
                 .format(task_repo.task_name, self.loader.cudalign_task.task_name)
 
             assert task_repo.command == self.loader.cudalign_task.simple_command, "Consistency error (task command): " \
-                                                                           "{} <> {} "\
+                                                                                  "{} <> {} "\
                 .format(task_repo.command, self.loader.cudalign_task.command)
 
         # Check Instances Type
@@ -254,17 +257,26 @@ class ScheduleManager:
 
     def __terminated_handle(self):
         # Move task to others VM
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
+
+        if not self.loader.cudalign_task.has_task_finished():
+            self.loader.cudalign_task.stop_execution()
+
+        logging.info("Entrou no terminated_handle")
 
         # getting volume-id
         if self.loader.file_system_conf.type == EC2Manager.EBS:
             self.ebs_volume_id = self.task_dispatcher.vm.volume_id
+
+        logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
 
         # See in which VM will restart
         instance_type, market = self.scheduler.choose_restart_best_instance_type(
             cudalign_task=self.loader.cudalign_task,
             deadline=self.loader.deadline_seconds
         )
+
+        logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
 
         if not self.loader.cudalign_task.has_task_finished():
             new_vm = VirtualMachine(
@@ -274,11 +286,24 @@ class ScheduleManager:
                 volume_id=self.ebs_volume_id
             )
 
-            self.loader.cudalign_task.start_execution(instance_type.type)
+            logging.info("Criou a nova vm!")
 
-            # TODO: ATUALIZAR A VM NO DISPATCHER!!!
+            dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
 
-        self.semaphore.release()
+            # check if the VM need to be register on the simulator
+            # if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
+            #     self.simulator.register_vm(vm)
+
+            self.semaphore.acquire()
+
+            self.terminated_dispatchers.append(self.task_dispatcher)
+            self.task_dispatcher = dispatcher
+
+            self.semaphore.release()
+
+            self.__start_dispatcher()
+
+        # self.semaphore.release()
 
     def __event_handle(self, event):
         event_timestamp: datetime = datetime.now()
@@ -322,6 +347,7 @@ class ScheduleManager:
         elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR]:
             logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
+            self.n_terminated += 1
             self.__terminated_handle()
 
         elif event.value in CloudManager.ABORT:
@@ -396,6 +422,8 @@ class ScheduleManager:
         if self.loader.file_system_conf.type == EC2Manager.EBS:
             self.ebs_volume_id = self.task_dispatcher.vm.volume_id
 
+        self.terminated_dispatchers.append(self.task_dispatcher)
+
         self.semaphore.release()
 
     # TODO: pegar todos os dispatchers que pararam!!!
@@ -412,15 +440,16 @@ class ScheduleManager:
         on_demand_count = 0
         preemptible_count = 0
 
-        if not self.task_dispatcher.vm.failed_to_created:
+        for dispatcher in self.terminated_dispatchers:
+            if not dispatcher.vm.failed_to_created:
 
-            if self.task_dispatcher.vm.market == CloudManager.ON_DEMAND:
-                on_demand_count += 1
-            else:
-                preemptible_count += 1
+                if dispatcher.vm.market == CloudManager.ON_DEMAND:
+                    on_demand_count += 1
+                else:
+                    preemptible_count += 1
 
-            cost += self.task_dispatcher.vm.uptime.seconds * \
-                (self.task_dispatcher.vm.price / 3600.0)  # price in seconds'
+                cost += dispatcher.vm.uptime.seconds * \
+                    (dispatcher.vm.price / 3600.0)  # price in seconds'
 
         logging.info("")
 
@@ -430,22 +459,23 @@ class ScheduleManager:
         else:
             execution_info = "    Job: {} Execution: {} Scheduler: SimpleScheduler" \
                              " - EXECUTION ABORTED    ".format(self.loader.cudalign_task.task_id,
-                                                             self.loader.execution_id)
+                                                               self.loader.execution_id)
 
         execution_info = 20 * "#" + execution_info + 20 * "#"
 
         logging.info(execution_info)
         logging.info("")
-        total = self.n_sim_interruptions + self.n_interruptions
+        total = self.n_sim_interruptions + self.n_interruptions + self.n_terminated
 
-        logging.info("\t AWS interruption: {} Simulation interruption: {} Total interruption: {}".format(
-            self.n_interruptions, self.n_sim_interruptions, total))
+        logging.info("\t AWS interruption: {} Simulation interruption: {} Terminated: {} "
+                     "Total interruption: {}".format(self.n_interruptions, self.n_sim_interruptions,
+                                                     self.n_terminated, total))
 
         total = on_demand_count + preemptible_count
         logging.info(
             "\t On-demand: {} Preemptible: {} Total: {}".format(on_demand_count,
-                                                                                preemptible_count,
-                                                                                total))
+                                                                preemptible_count,
+                                                                total))
         logging.info("")
         logging.info("")
         logging.info("\t Start Time: {}  End Time: {}".format(self.start_timestamp, self.end_timestamp))
