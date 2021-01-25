@@ -115,7 +115,7 @@ class Executor:
             logging.info("<Executor {}-{}>: Begin execution loop".format(self.task.task_id, self.vm.instance_id))
 
             # start task execution Loop
-            while (self.status == Task.EXECUTING) and not self.stop_signal:
+            while (self.status == Task.EXECUTING) and not self.stop_signal and self.vm.state == CloudManager.RUNNING:
 
                 try:
                     logging.info(
@@ -170,7 +170,7 @@ class Executor:
 
                 time.sleep(1)
 
-            if self.stop_signal:
+            if self.status != Task.FINISHED:
                 self.loader.cudalign_task.stop_execution()
 
         # if kill signal than checkpoint task (SIMULATION)
@@ -561,7 +561,7 @@ class Dispatcher:
                         )
                         # start the executor loop to execute the task
                         self.executor.thread.start()
-                        self.loader.cudalign_task.start_execution(self.vm.instance_type)
+                        self.loader.cudalign_task.start_execution(self.vm.instance_type.type)
 
                     self.semaphore.release()
 
@@ -579,6 +579,8 @@ class Dispatcher:
 
                 # Error: instance was not deployed or was terminated
                 if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN, CloudManager.TERMINATED):
+                    # waiting running tasks
+                    self.executor.thread.join()
                     # VM was not created, raise a event
                     self.__notify(CloudManager.TERMINATED)
 
