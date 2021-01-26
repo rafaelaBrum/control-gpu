@@ -14,7 +14,7 @@ from control.config.input_config import InputConfig
 from control.config.logging_config import LoggingConfig
 from control.config.notify_config import NotifyConfig
 # from control.config.scheduler_config import SchedulerConfig
-# from control.config.simulation_config import SimulationConfig
+from control.config.simulation_config import SimulationConfig
 
 from control.domain.instance_type import InstanceType
 from control.domain.app_specific.cudalign_task import CUDAlignTask
@@ -54,7 +54,7 @@ class Loader:
         self.log_file = args.log_file
         # # simulation parameters
         # self.resume_rate = args.resume_rate
-        # self.revocation_rate = args.revocation_rate
+        self.revocation_rate = args.revocation_rate
         # # name of the scheduler
         # self.scheduler_name = args.scheduler_name
         # # notify end of execution by email
@@ -86,7 +86,7 @@ class Loader:
         self.logging_conf = LoggingConfig()
         self.notify_conf = NotifyConfig()
         # self.scheduler_conf = SchedulerConfig()
-        # self.simulation_conf = SimulationConfig()
+        self.simulation_conf = SimulationConfig()
 
         # local path where the daemon file is
         self.daemon_file = None
@@ -178,10 +178,8 @@ class Loader:
         # if self.ac_size_seconds is None:
         #     self.ac_size_seconds = self.input_conf.ac_size_seconds
 
-        # if self.revocation_rate is None:
-        #     self.revocation_rate = self.simulation_conf.revocation_rate
-        # if self.resume_rate is None:
-        #     self.resume_rate = self.simulation_conf.resume_rate
+        if self.revocation_rate is None:
+            self.revocation_rate = self.simulation_conf.revocation_rate
 
     def __load_task(self):
         """
@@ -328,10 +326,9 @@ class Loader:
         logging.info("\t" + 30 * "*")
 
         logging.info("")
-        # logging.info("\tWITH SIMULATION: {}".format(self.simulation_conf.with_simulation))
-        # if self.simulation_conf.with_simulation:
-        #     logging.info("\tRevocation Rate: {]  Resume Rate: {}".format(self.simulation_conf.revocation_rate,
-        #                                                                  self.simulation_conf.resume_rate))
+        logging.info("\tWITH SIMULATION: {}".format(self.simulation_conf.with_simulation))
+        if self.simulation_conf.with_simulation:
+            logging.info("\tRevocation Rate: {}".format(self.simulation_conf.revocation_rate))
         logging.info("\tWITH CHECKPOINT: {}".format(self.checkpoint_conf.with_checkpoint))
         logging.info("\tDEBUG MODE: {}".format(self.debug_conf.debug_mode))
         logging.info("")

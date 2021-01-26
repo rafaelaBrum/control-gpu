@@ -69,9 +69,9 @@ def main():
 
     # parser.add_argument('--resume_rate', help="Resume rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)",
     #                     type=float, default=None)
-    # parser.add_argument('--revocation_rate',
-    #                     help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
-    #                     default=None)
+    parser.add_argument('--revocation_rate',
+                        help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
+                        default=None)
 
     # parser.add_argument('--scheduler_name',
     #                     help="Scheduler name - Currently supported Schedulers are: " + ", ".join(

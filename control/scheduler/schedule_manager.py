@@ -16,9 +16,7 @@ from control.managers.dispatcher import Dispatcher
 from control.managers.cloud_manager import CloudManager
 from control.managers.ec2_manager import EC2Manager
 
-# from control.simulators.status_simulator import RevocationSim
-# from control.simulators.status_simulator import HibernationSim
-# from control.simulators.status_simulator import Sim
+from control.simulators.status_simulator import RevocationSim
 
 from control.repository.postgres_repo import PostgresRepo
 from control.repository.postgres_objects import Task as TaskRepo
@@ -52,15 +50,9 @@ class ScheduleManager:
            If the execution has simulation
            Prepare the simulation environment
         '''
-        # if self.loader.simulation_conf.with_simulation:
-        #     # start simulator
-        #     if self.loader.simulation_conf.sim_type == Sim.REVOCATION_SIM:
-        #         self.simulator = RevocationSim(self.loader.revocation_rate)
-        #     elif self.loader.simulation_conf.sim_type == Sim.HIBERNATION_SIM:
-        #         self.simulator = HibernationSim(self.loader.revocation_rate, self.loader.resume_rate)
-        #     else:
-        #         raise Exception(
-        #             "Simulator {} Not Found. Check HADS setup file".format(self.loader.simulation_conf.sim_type))
+        if self.loader.simulation_conf.with_simulation:
+            # start simulator
+            self.simulator = RevocationSim(self.loader.revocation_rate)
 
         # Keep Used EBS Volume
         self.ebs_volume_id = None
@@ -141,8 +133,8 @@ class ScheduleManager:
         dispatcher = Dispatcher(vm=vm, loader=self.loader)
 
         # check if the VM need to be register on the simulator
-        # if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
-        #     self.simulator.register_vm(vm)
+        if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
+            self.simulator.register_vm(vm)
 
         self.semaphore.acquire()
 
@@ -291,8 +283,8 @@ class ScheduleManager:
             dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
 
             # check if the VM need to be register on the simulator
-            # if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
-            #     self.simulator.register_vm(vm)
+            if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
+                self.simulator.register_vm(new_vm)
 
             self.semaphore.acquire()
 
@@ -394,8 +386,8 @@ class ScheduleManager:
                      .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
 
         # terminate simulation
-        # if self.loader.simulation_conf.with_simulation:
-        #     self.simulator.stop_simulation()
+        if self.loader.simulation_conf.with_simulation:
+            self.simulator.stop_simulation()
 
         self.semaphore.acquire()
 
