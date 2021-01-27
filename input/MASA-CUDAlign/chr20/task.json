@@ -1,5 +1,5 @@
 {
-    "task_id": 1,
+    "task_id": 2,
     "task_name": "Chromossome 20",
     "command": "cudalign --blocks=512",
     "runtime": {
@@ -7,7 +7,7 @@
     },
     "generic_ckpt": "False",
     "mcups": {
-        "g4dn.xlarge":200026.841
+        "g4dn.xlarge":20002841
     },
     "disk_size": "24G",
     "seq0": "chr20/NC_000020.11.fasta",

@@ -2,7 +2,7 @@
 echo " ----------------------------
   Starting docker
  ----------------------------"
-docker start pg-docker
+docker start pg-gpu-docker
 echo " ----------------------------
   Exporting variables
  ----------------------------"
@@ -22,7 +22,7 @@ done
 echo " ----------------------------
   Stopping docker
  ----------------------------"
-docker stop pg-docker
+docker stop pg-gpu-docker
 echo " ----------------------------
   Finished
  ----------------------------"
