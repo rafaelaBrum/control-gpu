@@ -23,7 +23,8 @@ class SimpleScheduler:
     def calculate_max_restart_time(self, cudalign_task: CUDAlignTask):
         max_restart_time = 0.0
         for name_instance_type, instance in self.instance_types_on_demand.items():
-            max_restart_time = max(max_restart_time, cudalign_task.get_restart_overhead(name_instance_type))
+            max_restart_time = max(max_restart_time, (cudalign_task.get_restart_overhead(name_instance_type) +
+                                   instance.boot_overhead_seconds))
         return max_restart_time
 
     def choose_initial_best_instance_type(self, cudalign_task: CUDAlignTask, deadline):
@@ -72,13 +73,13 @@ class SimpleScheduler:
                 logging.error("<Scheduler>: No VM could be selected!")
                 return "", ""
 
-    def choose_restart_best_instance_type(self, cudalign_task: CUDAlignTask, deadline):
+    def choose_restart_best_instance_type(self, cudalign_task: CUDAlignTask, deadline, current_time):
         # logging.info("<Scheduler>: Choosing restart instance for CUDAlignTask {}".format(cudalign_task.task_id))
         cudalign_task.update_percentage_done()
         # logging.info("<Scheduler>: Task {} already executed {}%".format(cudalign_task.task_id,
         #                                                                 cudalign_task.percentage_executed))
 
-        remaining_deadline = deadline - cudalign_task.get_execution_time()
+        remaining_deadline = deadline - current_time
         self.remove_instance_type_spot(cudalign_task.get_running_instance())
 
         # logging.info("<Scheduler>: Remaining deadline for task {} is {}".format(cudalign_task.task_id,

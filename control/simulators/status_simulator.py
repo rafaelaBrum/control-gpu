@@ -9,10 +9,6 @@ import logging
 import threading
 
 
-class Sim:
-    REVOCATION_SIM = 'revocation'
-
-
 class RevocationSim:
 
     def __init__(self, termination_rate):

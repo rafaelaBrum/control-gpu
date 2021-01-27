@@ -27,7 +27,7 @@ from control.scheduler.simple_scheduler import SimpleScheduler
 
 from control.util.loader import Loader
 
-import threading
+# import threading
 
 
 class ScheduleManager:
@@ -59,20 +59,18 @@ class ScheduleManager:
 
         # Vars Datetime to keep track of global execution time
         self.start_timestamp = None
-        self.last_event_timestamp = None
         self.end_timestamp = None
         self.elapsed_time = None
 
         self.repo = PostgresRepo()
 
         # Semaphore
-        self.semaphore = threading.Semaphore()
-        self.semaphore_count = threading.Semaphore()
+        # self.semaphore = threading.Semaphore()
+        # self.semaphore_count = threading.Semaphore()
 
         # TRACKERS VALUES
         self.n_interruptions = 0
         self.n_sim_interruptions = 0
-        self.n_terminated = 0
 
         self.timeout = False
 
@@ -136,11 +134,11 @@ class ScheduleManager:
         if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
             self.simulator.register_vm(vm)
 
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
 
         self.task_dispatcher = dispatcher
 
-        self.semaphore.release()
+        # self.semaphore.release()
 
     def __prepare_execution(self):
         """
@@ -223,17 +221,29 @@ class ScheduleManager:
     def __interruption_handle(self):
 
         # Move task to other VM
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
+
+        if not self.loader.cudalign_task.has_task_finished():
+            self.loader.cudalign_task.stop_execution()
+
+        logging.info("Entrou no interruption_handle")
 
         # getting volume-id
         if self.loader.file_system_conf.type == EC2Manager.EBS:
             self.ebs_volume_id = self.task_dispatcher.vm.volume_id
 
+        logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
+
         # See in which VM we wiil restart
+        current_time = self.start_timestamp - datetime.now()
+
         instance_type, market = self.scheduler.choose_restart_best_instance_type(
             cudalign_task=self.loader.cudalign_task,
-            deadline=self.loader.deadline_seconds
+            deadline=self.loader.deadline_seconds,
+            current_time=current_time.total_seconds()
         )
+
+        logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
 
         if self.loader.cudalign_task.has_task_finished():
             new_vm = VirtualMachine(
@@ -242,10 +252,25 @@ class ScheduleManager:
                 loader=self.loader,
                 volume_id=self.ebs_volume_id
             )
-            self.loader.cudalign_task.start_execution(instance_type.type)
-            # TODO: ATUALIZAR A VM NO DISPATCHER!!!
 
-        self.semaphore.release()
+            logging.info("Criou a nova vm!")
+
+            dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
+
+            # check if the VM need to be register on the simulator
+            if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
+                self.simulator.register_vm(new_vm)
+
+            # self.semaphore.acquire()
+
+            self.terminated_dispatchers.append(self.task_dispatcher)
+            self.task_dispatcher = dispatcher
+
+            # self.semaphore.release()
+
+            self.__start_dispatcher()
+
+        # self.semaphore.release()
 
     def __terminated_handle(self):
         # Move task to others VM
@@ -263,9 +288,12 @@ class ScheduleManager:
         logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
 
         # See in which VM will restart
+        current_time = self.start_timestamp - datetime.now()
+
         instance_type, market = self.scheduler.choose_restart_best_instance_type(
             cudalign_task=self.loader.cudalign_task,
-            deadline=self.loader.deadline_seconds
+            deadline=self.loader.deadline_seconds,
+            current_time=current_time.total_seconds()
         )
 
         logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
@@ -286,19 +314,18 @@ class ScheduleManager:
             if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
                 self.simulator.register_vm(new_vm)
 
-            self.semaphore.acquire()
+            # self.semaphore.acquire()
 
             self.terminated_dispatchers.append(self.task_dispatcher)
             self.task_dispatcher = dispatcher
 
-            self.semaphore.release()
+            # self.semaphore.release()
 
             self.__start_dispatcher()
 
         # self.semaphore.release()
 
     def __event_handle(self, event):
-        event_timestamp: datetime = datetime.now()
 
         logging.info("<Scheduler Manager {}_{}>: - EVENT_HANDLE "
                      "Instance: '{}', Type: '{}', Market: '{}',"
@@ -309,10 +336,6 @@ class ScheduleManager:
                                           self.task_dispatcher.vm.market,
                                           event.value))
 
-        diff = self.last_event_timestamp - event_timestamp
-        self.loader.cudalign_task.update_execution_time(diff.total_seconds())
-        self.last_event_timestamp = event_timestamp
-
         if event.value == CloudManager.IDLE:
             logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.cudalign_task.task_id,
                                                                                    self.loader.execution_id))
@@ -320,17 +343,17 @@ class ScheduleManager:
             self.loader.cudalign_task.finish_execution()
             self.task_status = Task.FINISHED
         elif event.value == CloudManager.STOPPING:
-            self.semaphore_count.acquire()
+            # self.semaphore_count.acquire()
             self.n_interruptions += 1
-            self.semaphore_count.release()
+            # self.semaphore_count.release()
 
             logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
             self.__interruption_handle()
         elif event.value == CloudManager.STOPPED:
-            self.semaphore_count.acquire()
+            # self.semaphore_count.acquire()
             self.n_sim_interruptions += 1
-            self.semaphore_count.release()
+            # self.semaphore_count.release()
 
             logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
@@ -339,7 +362,7 @@ class ScheduleManager:
         elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR]:
             logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-            self.n_terminated += 1
+            self.n_sim_interruptions += 1
             self.__terminated_handle()
 
         elif event.value in CloudManager.ABORT:
@@ -364,13 +387,13 @@ class ScheduleManager:
     '''
 
     def __start_dispatcher(self):
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
 
         # Starting working dispatcher
         self.task_dispatcher.main_thread.start()
         # self.task_dispatcher.waiting_work.set()
 
-        self.semaphore.release()
+        # self.semaphore.release()
 
     def __terminate_dispatcher(self):
 
@@ -389,7 +412,7 @@ class ScheduleManager:
         if self.loader.simulation_conf.with_simulation:
             self.simulator.stop_simulation()
 
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
 
         # Terminate DISPATCHER
         logging.info("<Scheduler Manager {}_{}>: - "
@@ -416,9 +439,8 @@ class ScheduleManager:
 
         self.terminated_dispatchers.append(self.task_dispatcher)
 
-        self.semaphore.release()
+        # self.semaphore.release()
 
-    # TODO: pegar todos os dispatchers que pararam!!!
     def __end_of_execution(self):
 
         # end of execution
@@ -457,11 +479,10 @@ class ScheduleManager:
 
         logging.info(execution_info)
         logging.info("")
-        total = self.n_sim_interruptions + self.n_interruptions + self.n_terminated
+        total = self.n_sim_interruptions + self.n_interruptions
 
-        logging.info("\t AWS interruption: {} Simulation interruption: {} Terminated: {} "
-                     "Total interruption: {}".format(self.n_interruptions, self.n_sim_interruptions,
-                                                     self.n_terminated, total))
+        logging.info("\t AWS interruption: {} Simulation interruption: {} "
+                     "Total interruption: {}".format(self.n_interruptions, self.n_sim_interruptions, total))
 
         total = on_demand_count + preemptible_count
         logging.info(
@@ -514,7 +535,6 @@ class ScheduleManager:
         subscribers.append(self.__event_handle)
 
         self.start_timestamp = datetime.now()
-        self.last_event_timestamp = self.start_timestamp
         # UPDATE DATETIME DEADLINE
 
         logging.info("<Scheduler Manager {}_{}>: - Starting Execution.".format(self.loader.cudalign_task.task_id,

@@ -13,6 +13,5 @@
     "seq0": "1-3M/BA000035.2.fasta",
     "seq1": "1-3M/BX927147.1.fasta",
     "tam_seq0": 3147090,
-    "tam_seq1": 3282708,
-    "similar_seqs": "False"
+    "tam_seq1": 3282708
 }

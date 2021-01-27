@@ -11,24 +11,16 @@ class CUDAlignTask(Task):
 
     finished = False
 
-    baseline_runtimes_relation_similar_seqs = {
-        "g2.2xlarge": 3.2,
-        "g3s.xlarge": 1.7,
+    baseline_runtimes = {
+        "g2.2xlarge": 4.16,
+        "g3s.xlarge": 1.95,
         "g4dn.xlarge": 1.0,
-        "g4dn.2xlarge": 0.9,
-        "p2.xlarge": 2.8
-    }
-
-    baseline_runtimes_relation_different_seqs = {
-        "g2.2xlarge": 5.0,
-        "g3s.xlarge": 2.1,
-        "g4dn.xlarge": 1.0,
-        "g4dn.2xlarge": 1.1,
-        "p2.xlarge": 4.0
+        "g4dn.2xlarge": 1.02,
+        "p2.xlarge": 3.33
     }
 
     def __init__(self, task_id, task_name, command, generic_ckpt, runtime, mcups, seq0, seq1, tam_seq0,
-                 tam_seq1, similar_seqs, disk_size, work_dir=""):
+                 tam_seq1, disk_size, work_dir=""):
         super().__init__(task_id, task_name, command, generic_ckpt, runtime)
 
         if self.baseline_instance not in self.runtime:
@@ -49,7 +41,6 @@ class CUDAlignTask(Task):
         self.tam_seq0 = tam_seq0
         self.tam_seq1 = tam_seq1
 
-        self.similar_seqs = similar_seqs
         self.disk_size = disk_size
 
         if disk_size.endswith('G'):
@@ -80,11 +71,7 @@ class CUDAlignTask(Task):
             self.percentage_executed = 0.9
 
     def __calculate_runtimes_and_mcups(self):
-        if self.similar_seqs:
-            iter_baselines = self.baseline_runtimes_relation_similar_seqs
-        else:
-            iter_baselines = self.baseline_runtimes_relation_different_seqs
-        for key, value in iter_baselines.items():
+        for key, value in self.baseline_runtimes.items():
             if key not in self.runtime:
                 self.runtime[key] = self.runtime[self.baseline_instance]*value
             if key not in self.mcups:
@@ -143,8 +130,7 @@ class CUDAlignTask(Task):
                 seq0=adict['seq0'],
                 seq1=adict['seq1'],
                 tam_seq0=adict['tam_seq0'],
-                tam_seq1=adict['tam_seq1'],
-                similar_seqs=['similar_seqs']
+                tam_seq1=adict['tam_seq1']
             )
 
     def __str__(self):
