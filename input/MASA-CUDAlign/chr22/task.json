@@ -1,0 +1,17 @@
+{
+    "task_id": 4,
+    "task_name": "Chromossome 22",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 10208.593
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 188283.977
+    },
+    "disk_size": "10G",
+    "seq0": "chr22/NC_000022.11.fasta",
+    "seq1": "chr22/NC_006489.4.fasta",
+    "tam_seq0": 50818468,
+    "tam_seq1": 37823149
+}
