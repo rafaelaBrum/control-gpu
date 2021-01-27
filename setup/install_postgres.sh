@@ -8,7 +8,7 @@ MSG='''
 '''
 
 # this is needed to install the communication between Python and postgres
-#sudo apt install -y libpq-dev
+sudo apt install -y libpq-dev
 
 # installing docker first
 
