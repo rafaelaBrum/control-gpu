@@ -80,7 +80,7 @@ class Executor:
     def __run(self):
         # START task execution
 
-        logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
+        # logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
         self.repo = PostgresRepo()
         current_time = None
@@ -91,7 +91,7 @@ class Executor:
         try:
             self.communicator.send(action=action, value=self.dict_info)
             current_time = datetime.now()
-            logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
+            # logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
         except Exception as e:
             logging.error(e)
             self.__stopped(Task.ERROR)
@@ -118,22 +118,22 @@ class Executor:
             while (self.status == Task.EXECUTING) and not self.stop_signal and self.vm.state == CloudManager.RUNNING:
 
                 try:
-                    logging.info(
-                        "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
+                    # logging.info(
+                        # "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
                     command_status, current_stage = self.__get_task_status()
-                    logging.info(
-                        "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
-                                                                     command_status))
+                    # logging.info(
+                    #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
+                    #                                                  command_status))
 
                     instance_action = None
                     if self.vm.market == CloudManager.PREEMPTIBLE:
-                        logging.info(
-                            "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
-                                                                                     self.vm.instance_id))
+                        # logging.info(
+                            # "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
+                            #                                                          self.vm.instance_id))
                         instance_action = self.__get_instance_action()
-                        logging.info(
-                            "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
-                                                                          instance_action))
+                        # logging.info(
+                        #     "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
+                        #                                                   instance_action))
 
                     # if self.loader.checkpoint_conf.with_checkpoint \
                     #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:

@@ -226,13 +226,13 @@ class ScheduleManager:
         if not self.loader.cudalign_task.has_task_finished():
             self.loader.cudalign_task.stop_execution()
 
-        logging.info("Entrou no interruption_handle")
+        # logging.info("Entrou no interruption_handle")
 
         # getting volume-id
         if self.loader.file_system_conf.type == EC2Manager.EBS:
             self.ebs_volume_id = self.task_dispatcher.vm.volume_id
 
-        logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
+        # logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
 
         # See in which VM we wiil restart
         current_time = self.start_timestamp - datetime.now()
@@ -243,7 +243,7 @@ class ScheduleManager:
             current_time=current_time.total_seconds()
         )
 
-        logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
+        # logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
 
         if self.loader.cudalign_task.has_task_finished():
             new_vm = VirtualMachine(
@@ -253,7 +253,7 @@ class ScheduleManager:
                 volume_id=self.ebs_volume_id
             )
 
-            logging.info("Criou a nova vm!")
+            # logging.info("Criou a nova vm!")
 
             dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
 
@@ -279,13 +279,13 @@ class ScheduleManager:
         if not self.loader.cudalign_task.has_task_finished():
             self.loader.cudalign_task.stop_execution()
 
-        logging.info("Entrou no terminated_handle")
+        # logging.info("Entrou no terminated_handle")
 
         # getting volume-id
         if self.loader.file_system_conf.type == EC2Manager.EBS:
             self.ebs_volume_id = self.task_dispatcher.vm.volume_id
 
-        logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
+        # logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
 
         # See in which VM will restart
         current_time = self.start_timestamp - datetime.now()
@@ -296,7 +296,7 @@ class ScheduleManager:
             current_time=current_time.total_seconds()
         )
 
-        logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
+        # logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
 
         if not self.loader.cudalign_task.has_task_finished():
             new_vm = VirtualMachine(
@@ -306,7 +306,7 @@ class ScheduleManager:
                 volume_id=self.ebs_volume_id
             )
 
-            logging.info("Criou a nova vm!")
+            # logging.info("Criou a nova vm!")
 
             dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
 
