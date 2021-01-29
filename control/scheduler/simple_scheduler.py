@@ -13,6 +13,7 @@ class SimpleScheduler:
     def __init__(self, instance_types: Dict[str, InstanceType]):
         self.instance_types_spot = instance_types
         self.instance_types_on_demand = instance_types.copy()
+        self.deadline_spot = 0
 
     # def add_instance_type(self, name_type, instance):
     #     self.instance_types[name_type] = instance
@@ -28,7 +29,7 @@ class SimpleScheduler:
         return max_restart_time
 
     def choose_initial_best_instance_type(self, cudalign_task: CUDAlignTask, deadline):
-        deadline_spot = deadline - self.calculate_max_restart_time(cudalign_task)
+        self.deadline_spot = deadline - self.calculate_max_restart_time(cudalign_task)
         # logging.info("<Scheduler>: Choosing initial instance for CUDAlignTask {} "
         #              "with deadline {} (considering future restart)".format(cudalign_task.task_id,
         #                                                                     deadline_spot))
@@ -37,7 +38,7 @@ class SimpleScheduler:
             # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
             runtime = cudalign_task.get_runtime(name_instance_type)
             # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
-            if runtime < deadline_spot:
+            if runtime < self.deadline_spot:
                 possible_vms[name_instance_type] = runtime*(instance.price_preemptible/3600)
                 # logging.info("<Scheduler>: Spot instance {} can be chosen "
                 #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
@@ -85,7 +86,7 @@ class SimpleScheduler:
         # logging.info("<Scheduler>: Remaining deadline for task {} is {}".format(cudalign_task.task_id,
         #                                                                         remaining_deadline))
 
-        remaining_deadline_spot = remaining_deadline - self.calculate_max_restart_time(cudalign_task)
+        remaining_deadline_spot = self.deadline_spot - current_time
         # logging.info("<Scheduler>: Choosing restart spot instance for CUDAlignTask {} with remaining "
         #              "deadline {} (considering future restart)".format(cudalign_task.task_id,
         #                                                                remaining_deadline_spot))
@@ -93,7 +94,8 @@ class SimpleScheduler:
         possible_vms: Dict[str:float] = dict()
         for name_instance_type, instance in self.instance_types_spot.items():
             # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
-            runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type)
+            runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type) + \
+                      instance.boot_overhead_seconds
             # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
             if runtime < remaining_deadline_spot:
                 possible_vms[name_instance_type] = runtime*instance.price_preemptible
@@ -121,7 +123,7 @@ class SimpleScheduler:
                 # logging.info("<Scheduler>: Testing on-demand instance {}".format(name_instance_type))
                 runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type)
                 # logging.info("<Scheduler>: Runtime in on-demand instance {}: {}".format(name_instance_type, runtime))
-                if runtime < deadline:
+                if runtime < remaining_deadline:
                     possible_vms[name_instance_type] = runtime * (instance.price_ondemand / 3600)
                     # logging.info("<Scheduler>: On-demand instance {} can be chosen "
                     #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
