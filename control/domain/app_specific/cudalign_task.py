@@ -55,6 +55,7 @@ class CUDAlignTask(Task):
         self.__calculate_worst_scenario_restart()
 
         self.percentage_executed = 0.0
+        self.last_interruption_time = 0
         self.real_execution_time = 0
         self.running_instance = ""
         self.running = False
@@ -63,8 +64,8 @@ class CUDAlignTask(Task):
         return self.running
 
     def update_percentage_done(self):
-        runtime_current_instance = self.real_execution_time - (self.percentage_executed *
-                                                               self.runtime[self.running_instance])
+        runtime_current_instance = self.real_execution_time - self.last_interruption_time
+        self.last_interruption_time = self.real_execution_time
         percentage_done_current_instance = runtime_current_instance / self.runtime[self.running_instance]
         self.percentage_executed += percentage_done_current_instance
         if not self.finished and self.percentage_executed >= 1:
