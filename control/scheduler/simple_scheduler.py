@@ -81,7 +81,10 @@ class SimpleScheduler:
         #                                                                 cudalign_task.percentage_executed))
 
         remaining_deadline = deadline - current_time
-        self.remove_instance_type_spot(cudalign_task.get_running_instance())
+        try:
+            self.remove_instance_type_spot(cudalign_task.get_running_instance())
+        except Exception as e:
+            logging.error(e)
 
         # logging.info("<Scheduler>: Remaining deadline for task {} is {}".format(cudalign_task.task_id,
         #                                                                         remaining_deadline))
