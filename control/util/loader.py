@@ -328,7 +328,7 @@ class Loader:
         logging.info("")
         logging.info("\tWITH SIMULATION: {}".format(self.simulation_conf.with_simulation))
         if self.simulation_conf.with_simulation:
-            logging.info("\tRevocation Rate: {}".format(self.simulation_conf.revocation_rate))
+            logging.info("\tRevocation Rate: {}".format(self.revocation_rate))
         logging.info("\tWITH CHECKPOINT: {}".format(self.checkpoint_conf.with_checkpoint))
         logging.info("\tDEBUG MODE: {}".format(self.debug_conf.debug_mode))
         logging.info("")
