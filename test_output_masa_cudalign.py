@@ -32,6 +32,7 @@ def __prepare_logging():
     console_handler.setFormatter(log_formatter)
     root_logger.addHandler(console_handler)
 
+
 def main():
     parser = argparse.ArgumentParser(description='Creating a t2.micro instance to check EBS content')
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
@@ -41,6 +42,10 @@ def main():
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",
     #                     type=int, default=None)
+
+    parser.add_argument('--revocation_rate',
+                        help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
+                        default=None)
 
     parser.add_argument('--log_file', help="log file name", type=str, default=None)
     parser.add_argument('--command', help='command para o client', type=str, default='')
@@ -67,7 +72,6 @@ def main():
         loader=loader
     )
 
-
     __prepare_logging()
 
     if volume_id is not None:
@@ -76,6 +80,7 @@ def main():
     vm.deploy()
 
     vm.prepare_vm()
+
 
 if __name__ == "__main__":
     main()

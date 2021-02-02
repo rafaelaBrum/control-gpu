@@ -342,27 +342,30 @@ class ScheduleManager:
 
             self.loader.cudalign_task.finish_execution()
             self.task_status = Task.FINISHED
-        elif event.value == CloudManager.STOPPING:
+        # elif event.value == CloudManager.STOPPING:
+        #     # self.semaphore_count.acquire()
+        #     self.n_interruptions += 1
+        #     # self.semaphore_count.release()
+        #
+        #     logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
+        #                  .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
+        #     self.__interruption_handle()
+        elif event.value == CloudManager.STOPPED:
             # self.semaphore_count.acquire()
             self.n_interruptions += 1
             # self.semaphore_count.release()
 
-            logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
-                         .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-            self.__interruption_handle()
-        elif event.value == CloudManager.STOPPED:
-            # self.semaphore_count.acquire()
-            self.n_sim_interruptions += 1
-            # self.semaphore_count.release()
+            self.task_dispatcher.vm.terminate()
 
             logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-            self.__interruption_handle()
+            # self.__interruption_handle()
 
         elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR]:
             logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-            self.n_sim_interruptions += 1
+            if not self.task_dispatcher.vm.marked_to_interrupt:
+                self.n_sim_interruptions += 1
             self.__terminated_handle()
 
         elif event.value in CloudManager.ABORT:
