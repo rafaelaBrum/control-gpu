@@ -1,0 +1,17 @@
+{
+    "task_id": 6,
+    "task_name": "Chromosome 19",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 18115.438
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 198382.6723935481
+    },
+    "disk_size": "24G",
+    "seq0": "chr19/NC_000019.10.fasta",
+    "seq1": "chr19/NC_006486.4.fasta",
+    "tam_seq0": 58617616,
+    "tam_seq1": 61309027
+}
