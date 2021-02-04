@@ -586,13 +586,13 @@ class Dispatcher:
 
                     break
 
-                elif self.vm.state == CloudManager.STOPPING:
-                    # waiting running tasks
-                    self.executor.thread.join()
-
-                    self.resume = False
-
-                    self.__notify(CloudManager.STOPPING)
+                # elif self.vm.state == CloudManager.STOPPING:
+                #     # waiting running tasks
+                #     self.executor.thread.join()
+                #
+                #     self.resume = False
+                #
+                #     self.__notify(CloudManager.STOPPING)
 
                 elif self.vm.state == CloudManager.STOPPED:
                     # STOP and CHECKPOINT all tasks
@@ -605,7 +605,7 @@ class Dispatcher:
 
                     self.__notify(CloudManager.STOPPED)
 
-                    break
+                    # break
 
             if self.vm.state == CloudManager.RUNNING:
 
