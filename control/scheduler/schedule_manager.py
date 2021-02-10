@@ -355,7 +355,7 @@ class ScheduleManager:
             self.n_interruptions += 1
             # self.semaphore_count.release()
 
-            self.task_dispatcher.vm.terminate()
+            self.task_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
 
             logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
                          .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
