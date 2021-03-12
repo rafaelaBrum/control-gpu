@@ -1,0 +1,17 @@
+{
+    "task_id": 5,
+    "task_name": "Chromossome Y",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 9952.450
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 151517.652
+    },
+    "disk_size": "10G",
+    "seq0": "chrY/NC_000024.10.fasta",
+    "seq1": "chrY/NC_006492.4.fasta",
+    "tam_seq0": 57227415,
+    "tam_seq1": 26350515
+}

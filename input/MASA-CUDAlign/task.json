@@ -1,0 +1,17 @@
+{
+    "task_id": 1,
+    "task_name": "Task de teste (3M)",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 65
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 160808.882
+    },
+    "disk_size": "1G",
+    "seq0": "1-3M/BA000035.2.fasta",
+    "seq1": "1-3M/BX927147.1.fasta",
+    "tam_seq0": 3147090,
+    "tam_seq1": 3282708
+}

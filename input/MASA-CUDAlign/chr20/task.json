@@ -1,0 +1,17 @@
+{
+    "task_id": 2,
+    "task_name": "Chromossome 20",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 21435.484
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge":20002.841
+    },
+    "disk_size": "24G",
+    "seq0": "chr20/NC_000020.11.fasta",
+    "seq1": "chr20/NC_006487.4.fasta",
+    "tam_seq0": 64444167,
+    "tam_seq1": 66533130
+}

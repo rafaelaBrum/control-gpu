@@ -1,0 +1,17 @@
+{
+    "task_id": 3,
+    "task_name": "Chromossome 21",
+    "command": "cudalign --blocks=512",
+    "runtime": {
+        "g4dn.xlarge": 9099.163
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 171688.176
+    },
+    "disk_size": "10G",
+    "seq0": "chr21/NC_000021.9.fasta",
+    "seq1": "chr21/NC_006488.4.fasta",
+    "tam_seq0": 46709983,
+    "tam_seq1": 33445071
+}
