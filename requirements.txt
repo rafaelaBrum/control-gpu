@@ -45,7 +45,7 @@ paramiko==2.7.1
 # plac==1.2.0
 # pluggy==0.13.1
 # portend==2.6
-psycopg2==2.8.5
+# psycopg2==2.8.5
 psycopg2-binary==2.8.5
 # punch.py==2.0.0
 # py==1.9.0
@@ -88,3 +88,7 @@ SQLAlchemy-Utils==0.36.8
 zope.event==4.4
 
 python-dateutil==2.8.1
+
+flwr==0.15.0
+torch==1.7.1
+torchvision==0.8.2
