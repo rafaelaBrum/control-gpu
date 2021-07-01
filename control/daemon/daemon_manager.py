@@ -198,7 +198,6 @@ class Daemon:
             else:
                 status = 'not running'
 
-        # TODO: Pegar qual dos estagios do MASA-CUDAlign ele ta executando
         current_stage = 0
 
         return {"status": status, "current_stage": current_stage}

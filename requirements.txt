@@ -18,6 +18,7 @@ CherryPy==18.6.0
 # defusedxml==0.6.0
 # distlib==0.3.1
 # docutils==0.15.2
+ec2_metadata==2.4.0
 # filelock==3.0.12
 # flake8==3.8.3
 # idna==2.10
@@ -90,5 +91,5 @@ zope.event==4.4
 python-dateutil==2.8.1
 
 flwr==0.15.0
-torch==1.7.1
-torchvision==0.8.2
+torch==1.8.0
+torchvision==0.9.0

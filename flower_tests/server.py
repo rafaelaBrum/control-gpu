@@ -5,6 +5,7 @@ import argparse
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
+
 def main():
     """Start server and train five rounds."""
     parser = argparse.ArgumentParser(description="Testando criar o servidor para CIFAR-10 automaticamente")
@@ -41,9 +42,12 @@ def main():
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=args.sample_fraction,
+        fraction_eval=args.sample_fraction,
         min_fit_clients=args.min_sample_size,
+        min_eval_clients=args.min_sample_size,
         min_available_clients=args.min_num_clients,
         on_fit_config_fn=fit_config,
+        on_evaluate_config_fn=evaluate_config,
     )
 
     # Configure logger and start server
@@ -64,6 +68,17 @@ def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
         "batch_size": str(128),
     }
     return config
+
+
+def evaluate_config(rnd: int):
+    """Return evaluation configuration dict for each round.
+    Perform five local evaluation steps on each client (i.e., use five
+    batches) during rounds one to three, then increase to ten Local
+    evaluation steps.
+    """
+    val_steps = 5 if rnd < 4 else 10
+    return {"val_steps": val_steps}
+
 
 if __name__ == "__main__":
     main()
