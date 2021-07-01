@@ -76,7 +76,10 @@ class SimpleScheduler:
 
     def choose_restart_best_instance_type(self, cudalign_task: CUDAlignTask, deadline, current_time):
         # logging.info("<Scheduler>: Choosing restart instance for CUDAlignTask {}".format(cudalign_task.task_id))
-        cudalign_task.update_percentage_done()
+        try:
+            cudalign_task.update_percentage_done()
+        except Exception as e:
+            logging.error(e)
         # logging.info("<Scheduler>: Task {} already executed {}%".format(cudalign_task.task_id,
         #                                                                 cudalign_task.percentage_executed))
 
