@@ -19,8 +19,8 @@ while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"
-        python3 client.py control
-        sleep 5m
+#        python3 client.py control
+#        sleep 5m
         COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------
@@ -31,19 +31,19 @@ while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"
-        python3 client.py --revocation_rate 0.0001388888888888889 control
-        sleep 5m
+#        python3 client.py --revocation_rate 0.0001388888888888889 control
+#        sleep 5m
         COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------
   Failure rate of 1/(4 hours)
  ---------------------------- "
-COUNTER=1
+COUNTER=3
 while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"
-	python3 client.py control 6.944444444444444e-05
+	python3 client.py --revocation_rate 6.944444444444444e-05 control
 	sleep 5m
 	COUNTER=$((COUNTER+1))
 done
@@ -55,8 +55,8 @@ while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"
-	python3 client.py --revocation_rate 4.6296296296296294e-05 control
-	sleep 5m
+#	python3 client.py --revocation_rate 4.6296296296296294e-05 control
+#	sleep 5m
 	COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------
