@@ -22,6 +22,8 @@ def main():
     )
     args = parser.parse_args()
 
+    print(args.server_address)
+
     # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
     class Net(nn.Module):
         def __init__(self) -> None:
@@ -68,7 +70,7 @@ def main():
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client("200.20.15.118:8889", client=CifarClient())
+    fl.client.start_numpy_client(args.server_address, client=CifarClient())
 
 
 def train(net, trainloader, epochs):
