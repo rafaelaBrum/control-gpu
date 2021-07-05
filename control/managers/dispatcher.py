@@ -48,7 +48,7 @@ class Executor:
 
         # socket.communicator
         # used to send commands to the ec2 instance
-        self.communicator = Communicator(host=self.vm.instance_ip, port=self.loader.communication_conf.socket_port)
+        self.communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
 
         """Track INFO """
         # used to abort the execution loop
@@ -405,7 +405,7 @@ class Dispatcher:
     #     memory = 0
     #     cpu = 0
     #
-    #     communicator = Communicator(self.vm.instance_ip,
+    #     communicator = Communicator(self.vm.instance_public_ip,
     #                                 self.loader.communication_conf.socket_port)
     #
     #     info = {
@@ -487,7 +487,7 @@ class Dispatcher:
             time.sleep(self.loader.communication_conf.retry_interval)
 
             try:
-                communicator = Communicator(host=self.vm.instance_ip, port=self.loader.communication_conf.socket_port)
+                communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
                 communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
 
                 if communicator.response['status'] == 'success':

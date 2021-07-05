@@ -43,7 +43,7 @@ def __create_ebs(vm, path):
         vm.ssh.execute_command(cmd4, output=True)
 
 
-def __prepare_vm_server(vm: VirtualMachine):
+def __prepare_vm_client(vm: VirtualMachine, server_ip):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -74,7 +74,7 @@ def __prepare_vm_server(vm: VirtualMachine):
             # Send daemon file
             vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
                             target=vm.loader.ec2_conf.home_path,
-                            item=vm.loader.application_conf.server_flower_file)
+                            item=vm.loader.application_conf.client_flower_file)
 
             # create execution folder
             # vm.root_folder = os.path.join(vm.loader.file_system_conf.path,
@@ -84,19 +84,13 @@ def __prepare_vm_server(vm: VirtualMachine):
             # vm.ssh.execute_command('mkdir -p {}'.format(vm.root_folder), output=True)
 
             # Start Daemon
-            logging.info("<VirtualMachine {}>: - Starting Server".format(vm.instance_id))
+            logging.info("<VirtualMachine {}>: - Starting Client".format(vm.instance_id))
 
             # cmd_daemon = "ls tests"
             cmd_daemon = "python3 {} " \
-                         "--rounds {} " \
-                         "--sample_fraction {} " \
-                         "--min_sample_size {} " \
-                         "--min_num_clients {}".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                                    vm.loader.application_conf.server_flower_file),
-                                                       5,
-                                                       1,
-                                                       1,
-                                                       1)
+                         "--server_address {}".format(os.path.join(vm.loader.ec2_conf.home_path,
+                                                                   vm.loader.application_conf.client_flower_file),
+                                                      server_ip)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -134,12 +128,12 @@ def __prepare_logging():
     root_logger.addHandler(console_handler)
 
 
-def test_server_on_demand(loader: Loader):
+def test_client_on_demand(loader: Loader, server_ip):
     instance = InstanceType(
         provider=CloudManager.EC2,
-        instance_type='t2.micro',
-        image_id='ami-0c164c2660a258c81',
-        ebs_device_name='/dev/xvdf',
+        instance_type='g4dn.xlarge',
+        image_id='ami-036d12a8852daec8a',
+        ebs_device_name='/dev/nvme2n1',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
@@ -156,9 +150,9 @@ def test_server_on_demand(loader: Loader):
 
     vm.deploy()
 
-    __prepare_vm_server(vm)
+    __prepare_vm_client(vm, server_ip)
 
-    print(vm.instance_private_ip)
+    print(vm.instance_public_ip)
 
     var = 'n'
 
@@ -169,7 +163,6 @@ def test_server_on_demand(loader: Loader):
 
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
-
 
 def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
@@ -208,7 +201,9 @@ def main():
 
     loader = Loader(args=parser.parse_args())
 
-    test_server_on_demand(loader)
+    server_ip = input("Enter server ip and port:")
+
+    test_client_on_demand(loader, server_ip)
 
 
 def __call_control():

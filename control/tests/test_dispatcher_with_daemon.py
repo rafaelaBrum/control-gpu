@@ -40,8 +40,8 @@ def __prepare_daemon(vm: VirtualMachine):
     communication_conf = CommunicationConfig()
 
     try:
-        print('host={} | port={} | action={}'.format(vm.instance_ip, communication_conf.socket_port, Daemon.TEST))
-        communicator = Communicator(host=vm.instance_ip, port=communication_conf.socket_port)
+        print('host={} | port={} | action={}'.format(vm.instance_public_ip, communication_conf.socket_port, Daemon.TEST))
+        communicator = Communicator(host=vm.instance_public_ip, port=communication_conf.socket_port)
         print("Created communicator")
         communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
 
