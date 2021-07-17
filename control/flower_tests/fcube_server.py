@@ -5,6 +5,7 @@ import argparse
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
+
 def get_args():
     parser = argparse.ArgumentParser(description="Testando criar o servidor para FCUBE automaticamente")
     parser.add_argument(
@@ -37,6 +38,7 @@ def get_args():
     )
     args = parser.parse_args()
     return args
+
 
 def main():
     """Start server and train five rounds."""

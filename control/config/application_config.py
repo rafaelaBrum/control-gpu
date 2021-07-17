@@ -27,3 +27,11 @@ class ApplicationConfig(Config):
     @property
     def client_flower_file(self):
         return self.get_property(self._key, 'client_flower_file')
+
+    @property
+    def data_path(self):
+        return self.get_property(self._key, 'data_path')
+
+    @property
+    def dataset(self):
+        return self.get_property(self._key, 'dataset')

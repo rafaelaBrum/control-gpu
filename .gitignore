@@ -69,3 +69,6 @@ logs/
 
 # python virtualenv
 venv/
+
+#dataset folder
+data/
