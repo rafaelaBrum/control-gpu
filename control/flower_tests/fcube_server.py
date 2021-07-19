@@ -70,9 +70,9 @@ def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
     config: Dict[str, fl.common.Scalar] = {
         "epoch_global": str(rnd),
         "epochs": str(5),
-        "learning_rate": str(),
-        "momentum": str(),
-        "weight_decay": str(),
+        "learning_rate": str(0.01),
+        "momentum": str(0),
+        "weight_decay": str(1e-5),
         "batch_size": str(128),
     }
     return config

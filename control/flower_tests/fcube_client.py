@@ -26,8 +26,8 @@ class Generated(MNIST):
         self.dataidxs = dataidxs
 
         if self.train:
-            self.data = pd.read_csv(Path(args.path, "X_train.csv")).to_numpy()
-            self.targets = pd.read_csv(Path(args.path, "y_train.csv")).to_numpy()
+            self.data = pd.read_csv(Path(args.path_dataset, "X_train.csv")).to_numpy()
+            self.targets = pd.read_csv(Path(args.path_dataset, "y_train.csv")).to_numpy()
         # else:
         #     self.data = np.load("data/generated/X_test.npy")
         #     self.targets = np.load("data/generated/y_test.npy")
@@ -51,7 +51,7 @@ def get_args():
         help=f"Path to dataset",
     )
     parser.add_argument(
-        "--batch-size", type=str, required=True,
+        "--batch-size", type=int, required=True,
         help=f"Path to dataset",
     )
     args = parser.parse_args()
@@ -93,10 +93,10 @@ def main():
             self.set_parameters(parameters)
 
             # Get hyperparameters for this round
-            epochs: int = config["local_epochs"]
-            lr = config["learning_rate"]
-            rho = config["momentum"]
-            reg = config["weight_decay"]
+            epochs = int(config["epochs"])
+            lr = float(config["learning_rate"])
+            rho = float(config["momentum"])
+            reg = float(config["weight_decay"])
 
             train(net, trainloader, epochs=epochs, lr=lr, rho=rho, reg=reg)
             return self.get_parameters(), len(trainloader), {}
@@ -117,17 +117,18 @@ def train(net, trainloader, epochs, lr, rho, reg):
                                 weight_decay=reg)
     net.train()
     for _ in range(epochs):
-        for tmp in trainloader:
-            for batch_idx, (x, target) in enumerate(tmp):
-                x, target = x.to(DEVICE), target.to(DEVICE)
-                optimizer.zero_grad()
-                x.requires_grad = True
-                target.requires_grad = False
-                target = target.long()
-                out = net(x)
-                loss = criterion(out, target)
-                loss.backward()
-                optimizer.step()
+        # for tmp in trainloader:
+        for x, target in trainloader:
+            # for batch_idx, (x, target) in enumerate(tmp):
+            x, target = x.to(DEVICE), target.to(DEVICE)
+            optimizer.zero_grad()
+            x.requires_grad = True
+            target.requires_grad = False
+            target = target.long()
+            out = net(x.float())
+            loss = criterion(out, target)
+            loss.backward()
+            optimizer.step()
 
 
 def test(net, testloader):
@@ -158,7 +159,7 @@ def load_data(args):
     """Load FCUBE (training and test set)."""
     dl_obj = Generated
 
-    train_ds = dl_obj(args.path, train=True, args=args)
+    train_ds = dl_obj(args.path_dataset, train=True, args=args)
     # TODO: divide test_ds into all parties for FCUBE
 
     train_dl = data.DataLoader(dataset=train_ds, batch_size=args.batch_size,

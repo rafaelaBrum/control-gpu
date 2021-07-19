@@ -184,6 +184,18 @@ class SSHClient:
 
         return outdata.decode('utf-8'), errdata.decode('utf-8'), retcode
 
+    def get_file(self, source, target, item=None):
+
+        ftp_client = self.client.open_sftp()
+
+        if item is not None:
+            source = os.path.join(source, item)
+            target = os.path.join(target, item)
+
+        ftp_client.get(source, target)
+
+        ftp_client.close()
+
     @property
     def app_is_running(self):
 

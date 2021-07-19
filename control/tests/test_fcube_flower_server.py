@@ -98,7 +98,7 @@ def __prepare_vm_server(vm: VirtualMachine):
                                                        1,
                                                        1)
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
@@ -160,10 +160,22 @@ def test_server_on_demand(loader: Loader):
 
     print(vm.instance_private_ip)
 
-    var = 'n'
+    # var = 'n'
+    #
+    # while var.lower() != 'y':
+    #     var = input("OK to finish instance? [y/n]")
 
-    while var.lower() != 'y':
-        var = input("OK to finish instance? [y/n]")
+    cmd = "screen -list | grep test"
+
+    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+
+    while 'test' in stdout:
+        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    print("Server has finished!")
+
+    vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
+                    target=Path(vm.loader.communication_conf.key_path, 'control-gpu', 'logs', 'server'),
+                    item='screen_log')
 
     status = vm.terminate()
 

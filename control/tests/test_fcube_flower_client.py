@@ -76,19 +76,20 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
                             target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.client_flower_file)
 
+
             # Send dataset files
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset),
-                            target=vm.loader.ec2_conf.home_path,
-                            item=Path('0', 'X_train.csv'))
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset),
-                            target=vm.loader.ec2_conf.home_path,
-                            item=Path('0', 'X_test.csv'))
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset),
-                            target=vm.loader.ec2_conf.home_path,
-                            item=Path('0', 'y_train.csv'))
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset),
-                            target=vm.loader.ec2_conf.home_path,
-                            item=Path('0', 'y_test.csv'))
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='X_train.csv')
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='X_test.csv')
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='y_train.csv')
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='y_test.csv')
 
             # create execution folder
             # vm.root_folder = os.path.join(vm.loader.file_system_conf.path,
@@ -102,15 +103,15 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
 
             # cmd_daemon = "ls tests"
             cmd_daemon = "python3 {} " \
-                         "--server_address {}" \
-                         "--path_dataset {}" \
-                         "--bath-size {}".format(os.path.join(vm.loader.ec2_conf.home_path,
+                         "--server_address {} " \
+                         "--path_dataset {} " \
+                         "--batch-size {} ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                               vm.loader.application_conf.client_flower_file),
                                                  server_ip,
-                                                 vm.loader.ec2_conf.home_path,
+                                                 vm.loader.ec2_conf.input_path,
                                                  32)
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
@@ -149,9 +150,9 @@ def __prepare_logging():
 def test_client_on_demand(loader: Loader, server_ip):
     instance = InstanceType(
         provider=CloudManager.EC2,
-        instance_type='g4dn.xlarge',
-        image_id='ami-036d12a8852daec8a',
-        ebs_device_name='/dev/nvme2n1',
+        instance_type='t2.micro',
+        image_id='ami-0419c40eab85fd7e9',
+        ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
@@ -161,7 +162,7 @@ def test_client_on_demand(loader: Loader, server_ip):
     vm = VirtualMachine(
         instance_type=instance,
         market='on-demand',
-        loader=loader
+        loader=loader,
     )
 
     __prepare_logging()
@@ -172,10 +173,22 @@ def test_client_on_demand(loader: Loader, server_ip):
 
     print(vm.instance_public_ip)
 
-    var = 'n'
+    # var = 'n'
+    #
+    # while var.lower() != 'y':
+    #     var = input("OK to finish instance? [y/n]")
 
-    while var.lower() != 'y':
-        var = input("OK to finish instance? [y/n]")
+    cmd = "screen -list | grep test"
+
+    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+
+    while 'test' in stdout:
+        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    print("Client has finished!")
+
+    vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
+                    target=Path(vm.loader.communication_conf.key_path, 'control-gpu', 'logs', 'client'),
+                    item='screen_log')
 
     status = vm.terminate()
 
@@ -220,7 +233,8 @@ def main():
 
     loader = Loader(args=parser.parse_args())
 
-    server_ip = input("Enter server ip and port:")
+    # server_ip = input("Enter server ip and port:")
+    server_ip = "172.31.47.85:8080"
 
     test_client_on_demand(loader, server_ip)
 

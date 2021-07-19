@@ -179,9 +179,7 @@ class Daemon:
     def __get_command_status(self, session_name):
 
         # check if our screen session is still running
-        cmd = "screen -list | grep '{}'".format(
-            session_name
-        )
+        cmd = "screen -list | grep '{}'"
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         out, err = process.communicate()
