@@ -109,7 +109,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
                                                               vm.loader.application_conf.client_flower_file),
                                                  server_ip,
                                                  vm.loader.ec2_conf.input_path,
-                                                 32)
+                                                 64)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)

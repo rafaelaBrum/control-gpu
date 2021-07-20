@@ -69,7 +69,7 @@ def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config: Dict[str, fl.common.Scalar] = {
         "epoch_global": str(rnd),
-        "epochs": str(5),
+        "epochs": str(10),
         "learning_rate": str(0.01),
         "momentum": str(0),
         "weight_decay": str(1e-5),
