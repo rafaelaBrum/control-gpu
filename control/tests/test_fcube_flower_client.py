@@ -43,7 +43,7 @@ def __create_ebs(vm, path):
         vm.ssh.execute_command(cmd4, output=True)
 
 
-def __prepare_vm_client(vm: VirtualMachine, server_ip):
+def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -78,18 +78,18 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
 
 
             # Send dataset files
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, str(client_id)),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='X_train.npy')
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, str(client_id)),
+                            target=vm.loader.ec2_conf.input_path,
+                            item='X_test.npy')
             vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
                             target=vm.loader.ec2_conf.input_path,
-                            item='X_train.csv')
+                            item='y_train.npy')
             vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
                             target=vm.loader.ec2_conf.input_path,
-                            item='X_test.csv')
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
-                            target=vm.loader.ec2_conf.input_path,
-                            item='y_train.csv')
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
-                            target=vm.loader.ec2_conf.input_path,
-                            item='y_test.csv')
+                            item='y_test.npy')
 
             # create execution folder
             # vm.root_folder = os.path.join(vm.loader.file_system_conf.path,
@@ -111,7 +111,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
                                                  vm.loader.ec2_conf.input_path,
                                                  64)
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
@@ -147,7 +147,7 @@ def __prepare_logging():
     root_logger.addHandler(console_handler)
 
 
-def test_client_on_demand(loader: Loader, server_ip):
+def test_client_on_demand(loader: Loader, server_ip, n_parties):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
@@ -159,19 +159,24 @@ def test_client_on_demand(loader: Loader, server_ip):
                 'preemptible': 0.000031}
     )
 
-    vm = VirtualMachine(
-        instance_type=instance,
-        market='on-demand',
-        loader=loader,
-    )
+    vms=[]
 
     __prepare_logging()
 
-    vm.deploy()
+    for i in range(n_parties):
+        vm = VirtualMachine(
+            instance_type=instance,
+            market='on-demand',
+            loader=loader,
+        )
 
-    __prepare_vm_client(vm, server_ip)
+        vm.deploy()
 
-    print(vm.instance_public_ip)
+        __prepare_vm_client(vm, server_ip, i)
+
+        print(vm.instance_public_ip)
+
+        vms.append(vm)
 
     # var = 'n'
     #
@@ -180,20 +185,21 @@ def test_client_on_demand(loader: Loader, server_ip):
 
     cmd = "screen -list | grep test"
 
-    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    for i in range(n_parties):
+        stdout, stderr, code_return = vms[i].ssh.execute_command(cmd, output=True)
 
-    while 'test' in stdout:
-        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
-    print("Client has finished!")
+        while 'test' in stdout:
+            stdout, stderr, code_return = vms[i].ssh.execute_command(cmd, output=True)
+        print(f"Client {i} has finished!")
 
-    vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
-                    target=Path(vm.loader.communication_conf.key_path, 'control-gpu', 'logs', 'client'),
-                    item='screen_log')
+        vms[i].ssh.get_file(source=vms[i].loader.ec2_conf.home_path,
+                            target=Path(vms[i].loader.communication_conf.key_path, 'control-gpu', 'logs', 'client'),
+                            item=f'screen_log_{i}')
 
-    status = vm.terminate()
+        status = vms[i].terminate()
 
-    if status:
-        logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+        if status:
+            logging.info("<VirtualMachine {}>: Terminated with Success".format(vms[i].instance_id, status))
 
 
 def main():
@@ -234,9 +240,11 @@ def main():
     loader = Loader(args=parser.parse_args())
 
     # server_ip = input("Enter server ip and port:")
-    server_ip = "172.31.47.85:8080"
+    server_ip = "172.31.33.66:8080"
 
-    test_client_on_demand(loader, server_ip)
+    n_parties = 4
+
+    test_client_on_demand(loader, server_ip, n_parties)
 
 
 def __call_control():

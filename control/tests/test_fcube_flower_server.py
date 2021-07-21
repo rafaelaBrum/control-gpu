@@ -95,8 +95,8 @@ def __prepare_vm_server(vm: VirtualMachine):
                                                                     vm.loader.application_conf.server_flower_file),
                                                        10,
                                                        1,
-                                                       1,
-                                                       1)
+                                                       4,
+                                                       4)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
