@@ -3,6 +3,8 @@ from typing import Dict
 import flwr as fl
 import argparse
 
+from fedavg_strategy import FedAvg
+
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 
@@ -45,7 +47,8 @@ def main():
     args = get_args()
 
     # Create strategy
-    strategy = fl.server.strategy.FedAvg(
+    # strategy = fl.server.server.FedAvg(
+    strategy = FedAvg(
         fraction_fit=args.sample_fraction,
         fraction_eval=args.sample_fraction,
         min_fit_clients=args.min_sample_size,

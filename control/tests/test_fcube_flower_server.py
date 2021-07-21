@@ -74,6 +74,10 @@ def __prepare_vm_server(vm: VirtualMachine):
             # Send daemon file
             vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
                             target=vm.loader.ec2_conf.home_path,
+                            item="fedavg_strategy.py")
+
+            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+                            target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.server_flower_file)
 
             # create execution folder
@@ -138,7 +142,7 @@ def test_server_on_demand(loader: Loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0c164c2660a258c81',
+        image_id='ami-03e15d31e4fab2356',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},

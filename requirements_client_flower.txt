@@ -9,6 +9,7 @@ ec2_metadata==2.3.0
 
 python-dateutil==2.8.1
 
-flwr==0.15.0
+#flwr==0.15.0
+git+https://github.com/rafaelaBrum/flower.git
 torch==1.7.1
 torchvision==0.8.2

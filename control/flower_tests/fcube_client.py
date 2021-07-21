@@ -4,7 +4,6 @@ from collections import OrderedDict
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 
 import flwr as fl
 import torch
@@ -180,13 +179,14 @@ def train(net, trainloader, epochs, lr, rho, reg):
         epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
         print('Epoch: %d Loss: %f' % (e, epoch_loss))
 
-        train_loss, train_acc = test(net, trainloader)
+    train_loss, train_acc = test(net, trainloader)
 
-        return train_loss, train_acc
+    return train_loss, train_acc
 
 
 def test(net, testloader):
     """Validate the network on the entire test set."""
+    criterion = torch.nn.CrossEntropyLoss()
     net.eval()
 
     true_labels_list, pred_labels_list = np.array([]), np.array([])
@@ -195,23 +195,18 @@ def test(net, testloader):
     else:
         testloader = [testloader]
 
-    correct, total, loss = 0, 1, 0.0
+    correct, total, loss = 0, 0, 0.0
     with torch.no_grad():
         for tmp in testloader:
             for batch_idx, (x, target) in enumerate(tmp):
                 x, target = x.to(DEVICE), target.to(DEVICE, dtype=torch.int64)
                 out = net(x)
+                loss += criterion(out, target).item()
                 _, pred_label = torch.max(out.data, 1)
 
                 total += x.data.size()[0]
                 correct += (pred_label == target.data).sum().item()
 
-                if DEVICE == "cpu":
-                    pred_labels_list = np.append(pred_labels_list, pred_label.numpy())
-                    true_labels_list = np.append(true_labels_list, target.data.numpy())
-                else:
-                    pred_labels_list = np.append(pred_labels_list, pred_label.cpu().numpy())
-                    true_labels_list = np.append(true_labels_list, target.data.cpu().numpy())
     accuracy = correct / total
     return loss, accuracy
 

@@ -151,7 +151,7 @@ def test_client_on_demand(loader: Loader, server_ip, n_parties):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0419c40eab85fd7e9',
+        image_id='ami-096d4801a3da106fa',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
@@ -240,7 +240,7 @@ def main():
     loader = Loader(args=parser.parse_args())
 
     # server_ip = input("Enter server ip and port:")
-    server_ip = "172.31.33.66:8080"
+    server_ip = "172.31.39.67:8080"
 
     n_parties = 4
 

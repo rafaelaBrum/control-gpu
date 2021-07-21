@@ -72,3 +72,6 @@ venv/
 
 #dataset folder
 data/
+
+# output files
+*.txt
