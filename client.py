@@ -81,8 +81,6 @@ def main():
     # parser.add_argument('--notify', help='Send an email to notify the end of the execution (control mode)',
     #                     action='store_true', default=False)
 
-    parser.add_argument('--with_spot', help="Let the scheduler choose an Spot VM", type=bool, default=None)
-
     options_map = {
         'control': __call_control,
         # 'map': __call_primary_scheduling,

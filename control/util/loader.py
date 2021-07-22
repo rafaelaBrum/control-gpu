@@ -336,6 +336,7 @@ class Loader:
             logging.info("\tRevocation Rate: {}".format(self.revocation_rate))
         logging.info("\tWITH CHECKPOINT: {}".format(self.checkpoint_conf.with_checkpoint))
         logging.info("\tDEBUG MODE: {}".format(self.debug_conf.debug_mode))
+        logging.info("\tWITH SPOT: {}".format(self.with_spot))
         logging.info("")
 
         logging.info(len(header_msg) * "#")
