@@ -15,7 +15,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def main():
     """Create model, load data, define Flower client, start Flower client."""
 
-    parser = argparse.ArgumentParser(description="Testando criar o servidor para CIFAR-10 automaticamente")
+    parser = argparse.ArgumentParser(description="Creating CIFAR-10 client automatically")
     parser.add_argument(
         "--server_address", type=str, required=True,
         help=f"gRPC server address",
