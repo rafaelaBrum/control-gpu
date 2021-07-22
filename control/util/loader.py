@@ -74,6 +74,8 @@ class Loader:
         self.max_on_demand = None
         # used to attend the cloud limits
 
+        self.with_spot = args.with_spot
+
         # Load config Classes
         self.application_conf = ApplicationConfig()
         self.checkpoint_conf = CheckPointConfig()
@@ -180,6 +182,9 @@ class Loader:
 
         if self.revocation_rate is None:
             self.revocation_rate = self.simulation_conf.revocation_rate
+
+        if self.with_spot is None:
+            self.with_spot = self.input_conf.with_spot
 
     def __load_task(self):
         """
