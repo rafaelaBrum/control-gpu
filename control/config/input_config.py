@@ -31,3 +31,7 @@ class InputConfig(Config):
     # @property
     # def idle_slack_time(self):
     #     return float(self.get_property(self._key, 'idle_slack_time'))
+
+    @property
+    def with_spot(self):
+        return self.get_boolean(self._key, 'with_spot')

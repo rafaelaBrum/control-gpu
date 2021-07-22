@@ -117,7 +117,8 @@ class ScheduleManager:
     def __build_dispatcher(self):
 
         instance_type, market = self.scheduler.choose_initial_best_instance_type(self.loader.cudalign_task,
-                                                                                 self.loader.deadline_seconds)
+                                                                                 self.loader.deadline_seconds,
+                                                                                 self.loader.input_conf.with_spot)
 
         # Create the Vm that will be used by the dispatcher
         vm = VirtualMachine(
@@ -240,7 +241,8 @@ class ScheduleManager:
         instance_type, market = self.scheduler.choose_restart_best_instance_type(
             cudalign_task=self.loader.cudalign_task,
             deadline=self.loader.deadline_seconds,
-            current_time=current_time.total_seconds()
+            current_time=current_time.total_seconds(),
+            with_spot=self.loader.input_conf.with_spot
         )
 
         # logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))

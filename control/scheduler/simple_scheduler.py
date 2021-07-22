@@ -28,20 +28,21 @@ class SimpleScheduler:
                                    instance.boot_overhead_seconds))
         return max_restart_time
 
-    def choose_initial_best_instance_type(self, cudalign_task: CUDAlignTask, deadline):
+    def choose_initial_best_instance_type(self, cudalign_task: CUDAlignTask, deadline, with_spot: bool = True):
         self.deadline_spot = deadline - self.calculate_max_restart_time(cudalign_task)
         # logging.info("<Scheduler>: Choosing initial instance for CUDAlignTask {} "
         #              "with deadline {} (considering future restart)".format(cudalign_task.task_id,
         #                                                                     deadline_spot))
         possible_vms: Dict[str:float] = dict()
-        for name_instance_type, instance in self.instance_types_spot.items():
-            # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
-            runtime = cudalign_task.get_runtime(name_instance_type)
-            # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
-            if runtime < self.deadline_spot:
-                possible_vms[name_instance_type] = runtime*(instance.price_preemptible/3600)
-                # logging.info("<Scheduler>: Spot instance {} can be chosen "
-                #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
+        if with_spot:
+            for name_instance_type, instance in self.instance_types_spot.items():
+                # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
+                runtime = cudalign_task.get_runtime(name_instance_type)
+                # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
+                if runtime < self.deadline_spot:
+                    possible_vms[name_instance_type] = runtime*(instance.price_preemptible/3600)
+                    # logging.info("<Scheduler>: Spot instance {} can be chosen "
+                    #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
 
         if len(possible_vms) > 0:
             # order by expected cost
@@ -74,7 +75,7 @@ class SimpleScheduler:
                 logging.error("<Scheduler>: No VM could be selected!")
                 return "", ""
 
-    def choose_restart_best_instance_type(self, cudalign_task: CUDAlignTask, deadline, current_time):
+    def choose_restart_best_instance_type(self, cudalign_task: CUDAlignTask, deadline, current_time, with_spot = True):
         # logging.info("<Scheduler>: Choosing restart instance for CUDAlignTask {}".format(cudalign_task.task_id))
         try:
             cudalign_task.update_percentage_done()
@@ -98,15 +99,16 @@ class SimpleScheduler:
         #                                                                remaining_deadline_spot))
 
         possible_vms: Dict[str:float] = dict()
-        for name_instance_type, instance in self.instance_types_spot.items():
-            # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
-            runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type) + \
-                      instance.boot_overhead_seconds
-            # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
-            if runtime < remaining_deadline_spot:
-                possible_vms[name_instance_type] = runtime*instance.price_preemptible
-                # logging.info("<Scheduler>: Spot instance {} can be chosen "
-                #              "and will cost US${}".format(instance.type, possible_vms[name_instance_type]))
+        if with_spot:
+            for name_instance_type, instance in self.instance_types_spot.items():
+                # logging.info("<Scheduler>: Testing spot instance {}".format(name_instance_type))
+                runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type) + \
+                          instance.boot_overhead_seconds
+                # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
+                if runtime < remaining_deadline_spot:
+                    possible_vms[name_instance_type] = runtime*instance.price_preemptible
+                    # logging.info("<Scheduler>: Spot instance {} can be chosen "
+                    #              "and will cost US${}".format(instance.type, possible_vms[name_instance_type]))
 
         # # add again the running instance in the types of scheduler
         # self.add_instance_type(cudalign_task.get_running_instance(), instance_removed)
