@@ -8,7 +8,7 @@ DEFAULT_SERVER_ADDRESS = "[::]:8080"
 
 def main():
     """Start server and train five rounds."""
-    parser = argparse.ArgumentParser(description="Testando criar o servidor para CIFAR-10 automaticamente")
+    parser = argparse.ArgumentParser(description="Creating CIFAR-10 server automatically")
     parser.add_argument(
         "--server_address", type=str,
         default=DEFAULT_SERVER_ADDRESS,

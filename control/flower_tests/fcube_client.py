@@ -1,7 +1,6 @@
 import argparse
+import os.path
 from collections import OrderedDict
-
-from pathlib import Path
 
 import numpy as np
 
@@ -18,31 +17,21 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Generated(MNIST):
 
-    def __init__(self, root, dataidxs=None, train=True, transform=None, target_transform=None, args=None):
+    def __init__(self, root, train=True, transform=None, target_transform=None, args=None):
         super(MNIST, self).__init__(root, transform=transform,
                                     target_transform=target_transform)
         self.train = train
-        self.dataidxs = dataidxs
 
         if self.train:
-            # self.data = pd.read_csv(Path(args.path_dataset, "X_train.csv"), header=None, index_col=None).to_numpy()
-            # self.targets = pd.read_csv(Path(args.path_dataset, "y_train.csv"), header=None, index_col=None).to_numpy()
-            # self.targets = self.targets.flatten()
-            self.data = np.load(Path(args.path_dataset, "X_train.npy"))
-            self.targets = np.load(Path(args.path_dataset, "y_train.npy"))
+            self.data = np.load(os.path.join(args.path_dataset, "X_train.npy"))
+            self.targets = np.load(os.path.join(args.path_dataset, "y_train.npy"))
             # print("y_train", self.targets)
             # print("y_train[0]", self.targets[1])
             # print("type of y_train", type(self.targets))
             # print("y_train.shape()", self.targets.shape())
         else:
-            # self.data = pd.read_csv(Path(args.path_dataset, "y_test.csv"), header=None, index_col=None).to_numpy()
-            # self.targets = pd.read_csv(Path(args.path_dataset, "y_test.csv"), header=None, index_col=None).to_numpy()
-            self.data = np.load(Path(args.path_dataset, "X_test.npy"))
-            self.targets = np.load(Path(args.path_dataset, "y_test.npy"))
-
-        if self.dataidxs is not None:
-            self.data = self.data[self.dataidxs]
-            self.targets = self.targets[self.dataidxs]
+            self.data = np.load(os.path.join(args.path_dataset, "X_test.npy"))
+            self.targets = np.load(os.path.join(args.path_dataset, "y_test.npy"))
 
     def __getitem__(self, index):
         data, target = self.data[index], self.targets[index]
@@ -53,7 +42,7 @@ class Generated(MNIST):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Testando criar o servidor para FCUBE automaticamente")
+    parser = argparse.ArgumentParser(description="Creating FCUBE client automatically")
     parser.add_argument(
         "--server_address", type=str, required=True,
         help=f"gRPC server address",
@@ -189,7 +178,6 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     net.eval()
 
-    true_labels_list, pred_labels_list = np.array([]), np.array([])
     if type(testloader) == type([1]):
         pass
     else:
@@ -216,7 +204,6 @@ def load_data(args):
     dl_obj = Generated
 
     train_ds = dl_obj(args.path_dataset, train=True, args=args)
-    # TODO: divide test_ds into all parties for FCUBE
     test_ds = dl_obj(args.path_dataset, train=False, args=args)
 
     # print("train_ds", train_ds)
