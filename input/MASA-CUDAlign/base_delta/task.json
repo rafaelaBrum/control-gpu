@@ -1,0 +1,17 @@
+{
+    "task_id": 12,
+    "task_name": "COVID Alpha vs. Beta",
+    "command": "cudalign --blocks=512 --alignment-edges=++",
+    "runtime": {
+        "g4dn.xlarge": 18115.438
+    },
+    "generic_ckpt": "False",
+    "mcups": {
+        "g4dn.xlarge": 198382.6723935481
+    },
+    "disk_size": "100M",
+    "seq0": "base_delta/MZ571863.1.fasta",
+    "seq1": "base_delta/NC_045512.2.fasta",
+    "tam_seq0": 58617616,
+    "tam_seq1": 61309027
+}

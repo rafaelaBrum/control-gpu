@@ -1,24 +1,5 @@
 {
     "instances": {
-        "g2.2xlarge": {
-            "provider": "ec2",
-            "prices": {
-                "on-demand": 0.65,
-                "preemptible": 0.195
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "ami-0f37c64a867d7a967",
-            "ebs_device_name": "/dev/xvdf"
-        },
         "g3s.xlarge": {
             "provider": "ec2",
             "prices": {
@@ -35,7 +16,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-0d06239227191470a",
+            "image_id": "ami-07f255dd34ac3b7bf",
             "ebs_device_name": "/dev/xvdf"
         },
         "g4dn.xlarge": {
@@ -54,7 +35,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-0072ab402faa38d64",
+            "image_id": "ami-037a65a1cbf0a30de",
             "ebs_device_name": "/dev/nvme2n1"
         },
         "g4dn.2xlarge": {
@@ -73,7 +54,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-0072ab402faa38d64",
+            "image_id": "ami-037a65a1cbf0a30de",
             "ebs_device_name": "/dev/nvme2n1"
         },
         "p2.xlarge": {
@@ -92,7 +73,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-0ed1a0853586c4028",
+            "image_id": "ami-07d0bd0ed8aff6d48",
             "ebs_device_name": "/dev/xvdf"
         }
     }
