@@ -10,8 +10,8 @@
         "g4dn.xlarge": 198382.6723935481
     },
     "disk_size": "100M",
-    "seq0": "gama_delta/MZ571863.1.fasta",
-    "seq1": "gama_delta/MZ572240.1.fasta",
-    "tam_seq0": 58617616,
-    "tam_seq1": 61309027
+    "seq0": "gama_delta/MZ572240.1.fasta",
+    "seq1": "gama_delta/MZ571863.1.fasta",
+    "tam_seq0": 29839,
+    "tam_seq1": 29793
 }

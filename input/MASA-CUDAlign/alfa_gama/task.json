@@ -12,6 +12,6 @@
     "disk_size": "100M",
     "seq0": "alfa_gama/MZ571855.1.fasta",
     "seq1": "alfa_gama/MZ572240.1.fasta",
-    "tam_seq0": 58617616,
-    "tam_seq1": 61309027
+    "tam_seq0": 29880,
+    "tam_seq1": 29839
 }

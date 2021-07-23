@@ -12,6 +12,6 @@
     "disk_size": "100M",
     "seq0": "beta_delta/MZ520096.1.fasta",
     "seq1": "beta_delta/MZ571863.1.fasta",
-    "tam_seq0": 58617616,
-    "tam_seq1": 61309027
+    "tam_seq0": 29764,
+    "tam_seq1": 29793
 }
