@@ -285,7 +285,7 @@ class Loader:
 
     # update cudalign command
     def __update_command(self):
-        self.cudalign_task.command = "{} --disk-size={} --work-dir={} {} {} > {} 2> {}"\
+        self.cudalign_task.command = "{} --ram-size={} --work-dir={} {} {} > {} 2> {}"\
             .format(self.cudalign_task.command,
                     self.cudalign_task.disk_size,
                     os.path.join(self.file_system_conf.path,
