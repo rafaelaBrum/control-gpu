@@ -42,7 +42,6 @@ pandas==1.1.4
 paramiko==2.7.1
 # pathtools==0.1.2
 # pbr==5.5.1
-# Pillow==7.2.0
 # plac==1.2.0
 # pluggy==0.13.1
 # portend==2.6
@@ -94,3 +93,5 @@ python-dateutil==2.8.1
 git+https://github.com/rafaelaBrum/flower.git
 torch==1.8.0
 torchvision==0.9.0
+
+Pillow==8.3.0

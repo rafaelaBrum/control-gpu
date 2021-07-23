@@ -36,7 +36,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from flwr.server.strategy.aggregate import aggregate
 from flwr.server.strategy.strategy import Strategy
 
 DEPRECATION_WARNING = """
@@ -67,6 +67,20 @@ instead. Use
 
 to easily transform `Weights` to `Parameters`.
 """
+
+
+def weighted_loss_avg(results: List[Tuple[int, float, Optional[float]]]) -> float:
+    """Aggregate evaluation results obtained from multiple clients."""
+    num_total_evaluation_examples = sum(
+        [num_examples for num_examples, _, _ in results]
+    )
+    # print("num_total_evaluation", num_total_evaluation_examples)
+    # for num_examples, loss, _ in results:
+    #     print("num_examples", num_examples, "loss", loss)
+    weighted_losses = [num_examples * loss for num_examples, loss, _ in results]
+    # print("weighted_losses", weighted_losses)
+    return sum(weighted_losses) / num_total_evaluation_examples
+
 
 def weighted_metrics_avg(results: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
     """Aggregate evaluation results obtained from multiple clients."""
@@ -257,7 +271,8 @@ class FedAvg(Strategy):
             (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
-        return weights_to_parameters(aggregate(weights_results)), {}
+        # print("results", results)
+        return weights_to_parameters(aggregate(weights_results)), {'accuracy': 13.0}
 
     def aggregate_evaluate(
         self,
