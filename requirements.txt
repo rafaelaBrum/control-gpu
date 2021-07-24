@@ -88,3 +88,5 @@ SQLAlchemy-Utils==0.36.8
 zope.event==4.4
 
 python-dateutil==2.8.1
+
+ec2_metadata

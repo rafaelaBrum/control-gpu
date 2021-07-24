@@ -505,7 +505,7 @@ class ScheduleManager:
         logging.info("")
 
         if self.loader.file_system_conf.type == CloudManager.EBS and not self.loader.file_system_conf.ebs_delete:
-            logging.warning("The following EBS VOLUMES will note be deleted by HADS: ")
+            logging.warning("The following EBS VOLUMES will not be deleted by HADS: ")
             logging.warning("\t-> {}".format(self.ebs_volume_id))
 
         logging.info("")
