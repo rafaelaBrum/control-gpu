@@ -74,7 +74,7 @@ class Loader:
         self.max_on_demand = None
         # used to attend the cloud limits
 
-        self.with_spot = args.with_spot
+        self.with_spot = None
 
         # Load config Classes
         self.application_conf = ApplicationConfig()
