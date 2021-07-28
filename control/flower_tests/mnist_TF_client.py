@@ -45,7 +45,7 @@ class MNISTClient(fl.client.NumPyClient):
         self.x_test, self.y_test = x_test, y_test
 
     def get_parameters(self):
-        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        return self.model.get_weights()
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
