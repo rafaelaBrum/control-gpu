@@ -1,6 +1,6 @@
 boto3==1.14.40
 CherryPy==18.6.0
-pandas==1.1.4
+pandas==1.1.5
 paramiko==2.7.1
 ratelimit==2.2.1
 requests==2.24.0
@@ -11,7 +11,21 @@ python-dateutil==2.8.1
 
 #flwr==0.15.0
 git+https://github.com/rafaelaBrum/flower.git
-torch==1.7.1
-torchvision==0.8.2
 
-tensorflow==2.5.0
+h5py == 2.9.0
+imageio == 2.9.0
+imagesize == 1.2.0
+imgaug >= 0.4.0
+Keras == 2.2.4
+Keras-Applications == 1.0.8
+git+https://www.github.com/keras-team/keras-contrib.git
+Keras-Preprocessing == 1.1.2
+matplotlib == 3.3.4
+numpy == 1.18.5
+opencv-python == 4.5.1.48
+pandas >= 1.1.5
+sklearn >= 0.0
+scikit-image >= 0.17.2
+scikit-learn >= 0.24.1
+tensorflow == 1.15.5
+tqdm >= 4.56.2
