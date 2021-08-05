@@ -71,7 +71,13 @@ logs/
 venv/
 
 #dataset folder
+data_torch/
 data/
 
 # output files
 *.txt
+
+# app files
+*.h5
+*.npz
+*.pik

@@ -4,6 +4,7 @@
 import os
 
 # Keras MNIST
+import numpy as np
 from keras.datasets import mnist
 import keras.backend as K
 
@@ -40,7 +41,8 @@ class MNIST(gd.GenericDS):
         t_x, t_y = ([], [])
 
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
-        
+        # (x_train, y_train), (x_test, y_test) = self._load_data()
+
         # input image dimensions
         img_rows, img_cols = 28, 28
         
@@ -86,3 +88,10 @@ class MNIST(gd.GenericDS):
         relative_path = os.path.join(*components)
 
         return os.path.join(d, relative_path)
+
+    def _load_data(self):
+        f = np.load('dataset.npz')
+        x_train, y_train = f['x_train'], f['y_train']
+        x_test, y_test = f['x_test'], f['y_test']
+        f.close()
+        return (x_train, y_train), (x_test, y_test)

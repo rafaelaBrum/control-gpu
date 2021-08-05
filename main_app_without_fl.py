@@ -11,8 +11,8 @@ warnings.filterwarnings('ignore')
 # Project imports
 # from Preprocessing import Preprocess
 # from Testing import TrainTest, DatasourcesTest,PredictionTest,ActiveLearningTest
-from control.fl_app.CacheManager import CacheManager
-from control.fl_app import GenericTrainer
+from control.cnn_app.CacheManager import CacheManager
+from control.cnn_app import GenericTrainer
 
 
 # Supported image types
