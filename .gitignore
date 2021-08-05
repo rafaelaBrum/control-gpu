@@ -71,6 +71,7 @@ logs/
 venv/
 
 #dataset folder
+data_torch/
 data/
 
 # output files

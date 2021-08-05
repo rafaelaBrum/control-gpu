@@ -87,12 +87,12 @@ class Trainer(object):
             return Exitcodes.RUNTIME_ERROR
 
         if self._config.data:
-            dsm = importlib.import_module('control.fl_app', self._config.data)
+            dsm = importlib.import_module('control.cnn_app', self._config.data)
             self._ds = getattr(dsm, self._config.data)(self._config.predst, self._config.keepimg, self._config)
         else:
             self._ds = CellRep(self._config.predst, self._config.keepimg, self._config)
 
-        net_module = importlib.import_module('control.fl_app', net_name)
+        net_module = importlib.import_module('control.cnn_app', net_name)
         net_model = getattr(net_module, net_name)(self._config, self._ds)
 
         return net_model
@@ -326,6 +326,20 @@ class Trainer(object):
         elif self._config.verbose > 1:
             print("Model parameters: {}".format(single.count_params()))
             print("Model layers: {}".format(len(single.layers)))
+
+        # for i in range(self._config.epochs):
+        #     hist = training_model.fit_generator(
+        #         generator=train_generator,
+        #         steps_per_epoch=len(train_generator),  # self._config.batch_size,
+        #         epochs=1,
+        #         validation_data=val_generator,
+        #         validation_steps=len(val_generator),  # self._config.batch_size,
+        #         verbose=self._verbose,
+        #         use_multiprocessing=False,
+        #         workers=self._config.cpu_count*2,
+        #         max_queue_size=self._config.batch_size*3,
+        #         callbacks=callbacks,
+        #         )
 
         hist = training_model.fit_generator(
             generator=train_generator,
