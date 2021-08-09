@@ -273,6 +273,6 @@ class FedAvg(Strategy):
                 for _, evaluate_res in results
             ]
         )
-        # print("loss_aggregated", loss_aggregated)
-        # print("metrics_aggregated", metrics_aggregated)
+        print("loss_aggregated", loss_aggregated)
+        print("metrics_aggregated", metrics_aggregated)
         return loss_aggregated, metrics_aggregated

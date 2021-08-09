@@ -31,7 +31,7 @@ def partition_data(dataset, n_parties):
         print("No available dataset to partition.")
         return
 
-    root_foldername = "data/{}".format(dataset)
+    root_foldername = "data/{}/{}_clients".format(dataset, n_parties)
     mkdirs(root_foldername)
     dataset_file = f"{dataset}.npz"
 
@@ -52,5 +52,5 @@ def partition_data(dataset, n_parties):
 
 if __name__ == "__main__":
     dataset = 'MNIST'
-    n_parties = 2
+    n_parties = 4
     partition_data(dataset, n_parties)
