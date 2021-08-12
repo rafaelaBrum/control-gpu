@@ -3,6 +3,7 @@
 
 import os
 import skimage
+import skimage.transform
 from skimage import io
 
 from .SegImage import SegImage
