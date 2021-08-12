@@ -401,9 +401,9 @@ class Inception(GenericEnsemble):
         self._mgpu_weightsCache = "{0}-mgpu-weights.h5".format(self.name)
  
         self.cache_m = CacheManager()
-        self.cache_m.registerFile(os.path.join(config.model_path, self._modelCache), self._modelCache)
-        self.cache_m.registerFile(os.path.join(config.weights_path, self._weightsCache), self._weightsCache)
-        self.cache_m.registerFile(os.path.join(config.weights_path, self._mgpu_weightsCache), self._mgpu_weightsCache)
+        self.cache_m.register_file(os.path.join(config.model_path, self._modelCache), self._modelCache)
+        self.cache_m.register_file(os.path.join(config.weights_path, self._weightsCache), self._weightsCache)
+        self.cache_m.register_file(os.path.join(config.weights_path, self._mgpu_weightsCache), self._mgpu_weightsCache)
 
         self.single = None
         self.parallel = None
@@ -412,19 +412,19 @@ class Inception(GenericEnsemble):
         """
         Returns path to model cache
         """
-        return self.cache_m.fileLocation(self._modelCache)
+        return self.cache_m.file_location(self._modelCache)
     
     def get_weights_cache(self):
         """
         Returns path to model cache
         """
-        return self.cache_m.fileLocation(self._weightsCache)
+        return self.cache_m.file_location(self._weightsCache)
 
     def get_mgpu_weights_cache(self):
         """
         Returns path to model cache
         """
-        return self.cache_m.fileLocation(self._mgpu_weightsCache)
+        return self.cache_m.file_location(self._mgpu_weightsCache)
     
     def _build(self, width, height, channels, **kwargs):
         """
@@ -453,9 +453,9 @@ class Inception(GenericEnsemble):
         """
         # Check if previous training and LR is saved, if so, use it
         lr_cache = "{0}_learning_rate.txt".format(self.name)
-        self.cache_m.registerFile(os.path.join(self._config.cache, lr_cache), lr_cache)
+        self.cache_m.register_file(os.path.join(self._config.cache, lr_cache), lr_cache)
         l_rate = self._config.learn_r
-        if os.path.isfile(self.cache_m.fileLocation(lr_cache)) and not self._config.new_net:
+        if os.path.isfile(self.cache_m.file_location(lr_cache)) and not self._config.new_net:
             l_rate = float(self.cache_m.read(lr_cache))
             if self._config.info:
                 print("Found previous learning rate: {0}".format(l_rate))
