@@ -27,8 +27,8 @@ from keras import models
 from keras_contrib.layers import GroupNormalization
 
 # Locals
-from CacheManager import CacheManager
-from GenericEnsemble import GenericEnsemble
+from .CacheManager import CacheManager
+from .GenericEnsemble import GenericEnsemble
 
 
 BASE_WEIGHT_URL = ('https://github.com/fchollet/deep-learning-models/'
