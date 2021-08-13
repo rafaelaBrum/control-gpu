@@ -129,6 +129,8 @@ def get_args():
                         help='Keep logs of current execution instance in dir.')
     parser.add_argument('-k', action='store_true', dest='keepimg', default=False,
                         help='Keep loaded images in memory.')
+    parser.add_argument('-d', action='store_true', dest='delay_load', default=False,
+                        help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)
@@ -248,17 +250,39 @@ class Trainer(object):
             val_prep = ImageDataGenerator(
                 samplewise_center=self._args.batch_norm,
                 samplewise_std_normalization=self._args.batch_norm)
+        if self._args.delay_load:
+            from BatchGenerator_daemon import ThreadedGenerator
 
-        # Loads training images and validation images
-        x_train, y_train = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=train_data)
+            train_generator = ThreadedGenerator(dps=train_data,
+                                                classes=self._ds.nclasses,
+                                                dim=fix_dim,
+                                                batch_size=self._args.batch_size,
+                                                image_generator=train_prep,
+                                                extra_aug=self._args.augment,
+                                                shuffle=True,
+                                                verbose=self._verbose,
+                                                keep=self._args.keepimg)
 
-        x_val, y_val = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=val_data)
+            val_generator = ThreadedGenerator(dps=val_data,
+                                              classes=self._ds.nclasses,
+                                              dim=fix_dim,
+                                              batch_size=self._args.batch_size,
+                                              image_generator=val_prep,
+                                              extra_aug=self._args.augment,
+                                              shuffle=True,
+                                              verbose=self._verbose,
+                                              keep=self._args.keepimg)
+        else:
+            # Loads training images and validation images
+            x_train, y_train = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=train_data)
 
-        # Labels should be converted to categorical representation
-        y_train = to_categorical(y_train, self._ds.nclasses)
-        y_val = to_categorical(y_val, self._ds.nclasses)
-        train_generator = train_prep.flow(x_train, y_train, batch_size=self._args.batch_size, shuffle=True)
-        val_generator = val_prep.flow(x_val, y_val, batch_size=1)
+            x_val, y_val = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=val_data)
+
+            # Labels should be converted to categorical representation
+            y_train = to_categorical(y_train, self._ds.nclasses)
+            y_val = to_categorical(y_val, self._ds.nclasses)
+            train_generator = train_prep.flow(x_train, y_train, batch_size=self._args.batch_size, shuffle=True)
+            val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
         return train_generator, val_generator
 
