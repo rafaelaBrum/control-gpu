@@ -881,7 +881,7 @@ class Inception(GenericEnsemble):
     Implements abstract methods from GenericModel.
     Model is the same as in: 
     https://github.com/keras-team/keras-applications/blob/master/keras_applications/inception_resnet_v2.py
-    Addapted to provide a Bayesian model
+    Adapted to provide a Bayesian model
     """
     def __init__(self, config, ds, name=None):
         super().__init__(config, ds, name=name)

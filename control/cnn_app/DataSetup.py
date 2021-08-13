@@ -77,8 +77,10 @@ def split_test(config, ds):
     t_idx = 0
     if tsp > 1.0:
         t_idx = int(tsp)
-    else:
+    elif tsp > 0.0:
         t_idx = int(tsp * len(fX))
+    else:
+        t_idx = np.inf
 
     # Configuration option that limits test set size
     t_idx = min(config.pred_size, t_idx) if config.pred_size > 0 else t_idx

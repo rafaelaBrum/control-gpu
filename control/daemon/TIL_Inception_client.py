@@ -59,11 +59,11 @@ def get_args():
 
     train_args.add_argument('--train', action='store_true', dest='train', default=False,
                             help='Train model')
-    train_args.add_argument('-net', dest='network', type=str, default='BayesKNet',
+    train_args.add_argument('-net', dest='network', type=str, default='Inception',
                             help='Network name which should be trained.\n Check documentation for available models.')
     train_args.add_argument('-data', dest='data', type=str, help='Dataset name to train model.\n '
                                                                  'Check documentation for available datasets.',
-                            default='MNIST')
+                            default='CellRep')
     train_args.add_argument('-b', dest='batch_size', type=int,
                             help='Batch size (Default: 8).', default=8)
     train_args.add_argument('-lr', dest='learn_r', type=float,
@@ -198,6 +198,7 @@ class Trainer(object):
         """
 
         net_model = self.load_modules()
+
 
         # Test set splitting done in the same code now, outside GenericDatasource
         self.x_test, self.y_test, X, Y = split_test(self._args, self._ds)
@@ -361,7 +362,7 @@ class Trainer(object):
     def train(self, epochs):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('BayesKNet', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
 
         # Define special behaviour CALLBACKS
         callbacks = []
@@ -396,7 +397,7 @@ class Trainer(object):
     def evaluate(self):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('BayesKNet', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
 
         hist = self.training_model.evaluate_generator(
             generator=self.val_generator,

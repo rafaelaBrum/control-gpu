@@ -190,6 +190,10 @@ class GenericDS(ABC):
         X, Y = (None, None)
         reload_data = False
         reshuffle = False
+
+        if sum(self._config.split) > 1.0:
+            raise RuntimeError("Splitting error, you should define a data split that sums 1.0")
+
         
         if self._cache.check_file_existence('split_ratio.pik'):
             split = self._cache.load('split_ratio.pik')
