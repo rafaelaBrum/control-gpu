@@ -186,6 +186,8 @@ if __name__ == "__main__":
                         help='Keep logs of current execution instance in dir.')
     parser.add_argument('-k', action='store_true', dest='keepimg', default=False,
                         help='Keep loaded images in memory.')
+    parser.add_argument('-d', action='store_true', dest='delay_load', default=False,
+                        help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)

@@ -158,16 +158,39 @@ class Trainer(object):
                 samplewise_center=self._config.batch_norm,
                 samplewise_std_normalization=self._config.batch_norm)
 
-        # Loads training images and validation images
-        x_train, y_train = self._ds.load_data(split=None, keep_img=self._config.keepimg, data=train_data)
+        if self._config.delay_load:
+            from .BatchGenerator import ThreadedGenerator
 
-        x_val, y_val = self._ds.load_data(split=None, keep_img=self._config.keepimg, data=val_data)
+            train_generator = ThreadedGenerator(dps=train_data,
+                                                classes=self._ds.nclasses,
+                                                dim=fix_dim,
+                                                batch_size=self._config.batch_size,
+                                                image_generator=train_prep,
+                                                extra_aug=self._config.augment,
+                                                shuffle=True,
+                                                verbose=self._verbose,
+                                                keep=self._config.keepimg)
 
-        # Labels should be converted to categorical representation
-        y_train = to_categorical(y_train, self._ds.nclasses)
-        y_val = to_categorical(y_val, self._ds.nclasses)
-        train_generator = train_prep.flow(x_train, y_train, batch_size=self._config.batch_size, shuffle=True)
-        val_generator = val_prep.flow(x_val, y_val, batch_size=1)
+            val_generator = ThreadedGenerator(dps=val_data,
+                                              classes=self._ds.nclasses,
+                                              dim=fix_dim,
+                                              batch_size=self._config.batch_size,
+                                              image_generator=val_prep,
+                                              extra_aug=self._config.augment,
+                                              shuffle=True,
+                                              verbose=self._verbose,
+                                              keep=self._config.keepimg)
+        else:
+            # Loads training images and validation images
+            x_train, y_train = self._ds.load_data(split=None, keep_img=self._config.keepimg, data=train_data)
+
+            x_val, y_val = self._ds.load_data(split=None, keep_img=self._config.keepimg, data=val_data)
+
+            # Labels should be converted to categorical representation
+            y_train = to_categorical(y_train, self._ds.nclasses)
+            y_val = to_categorical(y_val, self._ds.nclasses)
+            train_generator = train_prep.flow(x_train, y_train, batch_size=self._config.batch_size, shuffle=True)
+            val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
         return train_generator, val_generator
     
