@@ -250,6 +250,10 @@ class Trainer(object):
             val_prep = ImageDataGenerator(
                 samplewise_center=self._args.batch_norm,
                 samplewise_std_normalization=self._args.batch_norm)
+
+        test_prep = ImageDataGenerator(samplewise_center=self._args.batch_norm,
+                                             samplewise_std_normalization=self._args.batch_norm)
+
         if self._args.delay_load:
             from BatchGenerator_daemon import ThreadedGenerator
 
@@ -272,6 +276,17 @@ class Trainer(object):
                                               shuffle=True,
                                               verbose=self._verbose,
                                               keep=self._args.keepimg)
+
+            test_generator = ThreadedGenerator(dps=(self.x_test, self.y_test),
+                                               classes=self._ds.nclasses,
+                                               dim=fix_dim,
+                                               batch_size=2*self._args.batch_size,
+                                               image_generator=test_prep,
+                                               extra_aug=self._args.augment,
+                                               shuffle=False,
+                                               verbose=self._verbose,
+                                               input_n=1,
+                                               keep=self._args.keepimg)
         else:
             # Loads training images and validation images
             x_train, y_train = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=train_data)
@@ -284,7 +299,11 @@ class Trainer(object):
             train_generator = train_prep.flow(x_train, y_train, batch_size=self._args.batch_size, shuffle=True)
             val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
-        return train_generator, val_generator
+            Y = to_categorical(self.y_test, self._ds.nclasses)
+            test_generator = test_prep.flow(x=self.x_test, y=Y, batch_size=2*self._args.batch_size, shuffle=False)
+        del Y
+
+        return train_generator, val_generator, test_generator
 
     def build_model(self, model, **kwargs):
         """
@@ -367,7 +386,8 @@ class Trainer(object):
             print("Train set: {0} items".format(len(train_data[0])))
             print("Validate set: {0} items".format(len(val_data[0])))
 
-        self.train_generator, self.val_generator = self._choose_generator(train_data, val_data, model.check_input_shape())
+        self.train_generator, self.val_generator, self.test_generator = self._choose_generator(
+            train_data, val_data, model.check_input_shape())
 
         single, parallel = model.build(data_size=len(train_data[0]),
                                        allocated_gpus=allocated_gpus,
@@ -405,6 +425,8 @@ class Trainer(object):
         hist = self.training_model.fit_generator(
             generator=self.train_generator,
             steps_per_epoch=len(self.train_generator),  # self._args.batch_size,
+            validation_data=self.val_generator,
+            validation_steps=len(self.val_generator),  # self._config.batch_size,
             epochs=epochs,
             verbose=self._verbose,
             use_multiprocessing=False,
@@ -424,8 +446,8 @@ class Trainer(object):
         wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
 
         hist = self.training_model.evaluate_generator(
-            generator=self.val_generator,
-            steps=len(self.val_generator),  # self._args.batch_size,
+            generator=self.test_generator,
+            steps=len(self.test_generator),  # self._args.batch_size,
             # epochs=epochs,
             verbose=self._verbose,
             use_multiprocessing=False,
