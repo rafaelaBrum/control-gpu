@@ -70,7 +70,7 @@ logs/
 # python virtualenv
 venv/
 
-#dataset folder
+# dataset folder
 data_torch/
 data/
 
@@ -81,3 +81,6 @@ data/
 *.h5
 *.npz
 *.pik
+
+# folders of TIL app
+results/

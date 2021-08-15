@@ -13,6 +13,7 @@ warnings.filterwarnings('ignore')
 # from Testing import TrainTest, DatasourcesTest,PredictionTest,ActiveLearningTest
 from control.cnn_app.CacheManager import CacheManager
 from control.cnn_app import GenericTrainer
+from control.cnn_app import Predictions
 
 
 # Supported image types
@@ -53,6 +54,9 @@ def main_exec(config):
             
         GenericTrainer.run_training(config, None)
 
+    if config.pred:
+        Predictions.run_prediction(config,None)
+
     # if config.postproc:
     #     pass
 
@@ -70,7 +74,7 @@ def main_exec(config):
     #         ActiveLearningTest.run(config)
 
     # if not (config.preprocess or config.train or config.postproc or config.runtest):
-    if not config.train:
+    if not (config.train or config.pred):
         print("The problem begins with choice: preprocess, train, postprocess or predict")
 
 
@@ -189,15 +193,21 @@ if __name__ == "__main__":
     parser.add_argument('-d', action='store_true', dest='delay_load', default=False,
                         help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
+    # #Run prediction options
+    parser.add_argument('--pred', action='store_true', dest='pred', default=False,
+                        help='Runs prediction with a given model (use -net parameter).')
+    parser.add_argument('-print', action='store_true', dest='print_pred', default=False,
+                        help='Prints stored prediction results.')
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)
     parser.add_argument('-test_dir', dest='testdir', type=str, default=None,
                         help='Runs prediction on a different set of images stored in dir.')
     parser.add_argument('-wsi_split', dest='wsi_split', type=int,
                         help='Randomly select this number of WSIs to choose test patches from '
-                             '(Default 0, means use all).',
-                        default=0)
+                             '(Default 0, means use all).', default=0)
     parser.add_argument('-wsilist', dest='wsilist', type=str, nargs='+', default=None)
+    parser.add_argument('-pb', action='store_true', dest='progressbar', default=False,
+                        help='Print progress bars of processing execution.')
 
     # #System tests
     test_args = parser.add_argument_group('Tests')
