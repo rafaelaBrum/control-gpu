@@ -452,16 +452,16 @@ class Trainer(object):
         old_e_offset = 0
         wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
 
-        # hist = self.pred_model.evaluate_generator(
-        #     generator=self.test_generator,
-        #     steps=len(self.test_generator),  # self._args.batch_size,
-        #     # epochs=epochs,
-        #     verbose=self._verbose,
-        #     use_multiprocessing=False,
-        #     workers=self._args.cpu_count*2,
-        #     max_queue_size=self._args.batch_size*3,
-        #     )
-        hist = self.training_model.evaluate(self.x_test, self.y_test)
+        hist = self.training_model.evaluate_generator(
+            generator=self.test_generator,
+            steps=len(self.test_generator),  # self._args.batch_size,
+            # epochs=epochs,
+            verbose=self._verbose,
+            use_multiprocessing=False,
+            workers=self._args.cpu_count*2,
+            max_queue_size=self._args.batch_size*3,
+            )
+        # hist = self.training_model.evaluate(self.x_test, self.y_test)
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
@@ -472,7 +472,7 @@ class Trainer(object):
         return self.training_model.get_weights()
 
     def set_model_weights(self, parameters):
-        self.pred_model.set_weights(parameters)
+        # self.pred_model.set_weights(parameters)
         return self.training_model.set_weights(parameters)
 
     def get_train_data_length(self):
