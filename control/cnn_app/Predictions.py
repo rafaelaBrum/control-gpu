@@ -195,7 +195,7 @@ class Predictor(object):
         if self._ensemble or self._config.delay_load:
             X, Y = x_test, y_test
         else:
-            X, Y = self._ds.load_data(data=(x_test, y_test), keepImg=self._keep)
+            X, Y = self._ds.load_data(data=(x_test, y_test), keep_img=self._keep)
                         
         if self._config.verbose > 1:
             print("Y original ({1}):\n{0}".format(Y, Y.shape))        
@@ -203,21 +203,7 @@ class Predictor(object):
         # session setup
         sess = K.get_session()
         
-        if self._ensemble:
-            # Weights should be loaded during ensemble build
-            if hasattr(model, 'build_ensemble'):
-                single, parallel = model.build_ensemble(training=False, npfile=True, new=False, load_weights=load_full)
-                if parallel:
-                    if self._config.info:
-                        print("Using multigpu model for predictions.")
-                    pred_model = parallel
-                else:
-                    pred_model = single
-            else:
-                if self._config.info:
-                    print('[Predictor] Model not prepared to build ensembles, implement or choose another model')
-                return None
-        elif load_full and os.path.isfile(model.get_model_cache()):
+        if load_full and os.path.isfile(model.get_model_cache()):
             try:
                 pred_model = load_model(model.get_model_cache())
                 if self._config.info:

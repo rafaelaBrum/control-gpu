@@ -224,7 +224,12 @@ class Trainer(object):
         Returns a tuple with two batch generators: (train_generator, val_generator)
         The type of generator depends on the config.delay_load option
         """
-        train_generator, val_generator = (None, None)
+        train_generator, val_generator, test_generator = (None, None, None)
+
+        # if self._args.delay_load:
+        #     X, Y = self.x_test, self.y_test
+        # else:
+        #     X, Y = self._ds.load_data(data=(self.x_test, self.y_test), keep_img=self._args.keepimg)
 
         if self._args.augment:
             train_prep = ImageDataGenerator(
@@ -252,7 +257,7 @@ class Trainer(object):
                 samplewise_std_normalization=self._args.batch_norm)
 
         test_prep = ImageDataGenerator(samplewise_center=self._args.batch_norm,
-                                             samplewise_std_normalization=self._args.batch_norm)
+                                       samplewise_std_normalization=self._args.batch_norm)
 
         if self._args.delay_load:
             from BatchGenerator_daemon import ThreadedGenerator
@@ -277,16 +282,16 @@ class Trainer(object):
                                               verbose=self._verbose,
                                               keep=self._args.keepimg)
 
-            test_generator = ThreadedGenerator(dps=(self.x_test, self.y_test),
-                                               classes=self._ds.nclasses,
-                                               dim=fix_dim,
-                                               batch_size=2*self._args.batch_size,
-                                               image_generator=test_prep,
-                                               extra_aug=self._args.augment,
-                                               shuffle=False,
-                                               verbose=self._verbose,
-                                               input_n=1,
-                                               keep=self._args.keepimg)
+            # test_generator = ThreadedGenerator(dps=(X, Y),
+            #                                    classes=self._ds.nclasses,
+            #                                    dim=fix_dim,
+            #                                    batch_size=2*self._args.batch_size,
+            #                                    image_generator=test_prep,
+            #                                    extra_aug=self._args.augment,
+            #                                    shuffle=False,
+            #                                    verbose=self._verbose,
+            #                                    input_n=1,
+            #                                    keep=self._args.keepimg)
         else:
             # Loads training images and validation images
             x_train, y_train = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=train_data)
@@ -299,9 +304,9 @@ class Trainer(object):
             train_generator = train_prep.flow(x_train, y_train, batch_size=self._args.batch_size, shuffle=True)
             val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
-            Y = to_categorical(self.y_test, self._ds.nclasses)
-            test_generator = test_prep.flow(x=self.x_test, y=Y, batch_size=2*self._args.batch_size, shuffle=False)
-        del Y
+        #     Y = to_categorical(self.y_test, self._ds.nclasses)
+        #     test_generator = test_prep.flow(x=X, y=Y, batch_size=2*self._args.batch_size, shuffle=False)
+        # del Y
 
         return train_generator, val_generator, test_generator
 
@@ -403,6 +408,8 @@ class Trainer(object):
             print("Model parameters: {}".format(single.count_params()))
             print("Model layers: {}".format(len(single.layers)))
 
+        # self.pred_model, _ = model.build(training=False, pre_load_w=False)
+
     def train(self, epochs):
 
         old_e_offset = 0
@@ -445,15 +452,16 @@ class Trainer(object):
         old_e_offset = 0
         wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
 
-        hist = self.training_model.evaluate_generator(
-            generator=self.test_generator,
-            steps=len(self.test_generator),  # self._args.batch_size,
-            # epochs=epochs,
-            verbose=self._verbose,
-            use_multiprocessing=False,
-            workers=self._args.cpu_count*2,
-            max_queue_size=self._args.batch_size*3,
-            )
+        # hist = self.pred_model.evaluate_generator(
+        #     generator=self.test_generator,
+        #     steps=len(self.test_generator),  # self._args.batch_size,
+        #     # epochs=epochs,
+        #     verbose=self._verbose,
+        #     use_multiprocessing=False,
+        #     workers=self._args.cpu_count*2,
+        #     max_queue_size=self._args.batch_size*3,
+        #     )
+        hist = self.training_model.evaluate(self.x_test, self.y_test)
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
@@ -464,6 +472,7 @@ class Trainer(object):
         return self.training_model.get_weights()
 
     def set_model_weights(self, parameters):
+        self.pred_model.set_weights(parameters)
         return self.training_model.set_weights(parameters)
 
     def get_train_data_length(self):
@@ -471,6 +480,9 @@ class Trainer(object):
 
     def get_val_data_length(self):
         return len(self.val_data[0])
+
+    def get_test_data_length(self):
+        return len(self.x_test)
 
 
 def main_exec(args):
@@ -577,8 +589,10 @@ def split_test(args, ds):
     t_idx = 0
     if tsp > 1.0:
         t_idx = int(tsp)
-    else:
+    elif tsp > 0.0:
         t_idx = int(tsp * len(fX))
+    else:
+        t_idx = np.inf
 
     # Configuration option that limits test set size
     t_idx = min(args.pred_size, t_idx) if args.pred_size > 0 else t_idx
@@ -642,7 +656,7 @@ class InceptionClient(fl.client.NumPyClient):
 
         # Evaluate global model parameters on the local test data and return results
         history = self.model.evaluate()
-        num_examples_test = self.model.get_val_data_length()
+        num_examples_test = self.model.get_test_data_length()
         loss = history[0]
         accuracy = history[1]
         print("num_examples fit:", num_examples_test)
