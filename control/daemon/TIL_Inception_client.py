@@ -181,10 +181,13 @@ class Trainer(object):
         self._args = args
         self._verbose = args.verbose
         self._ds = None
+        self._ds_test = None
         self._rex = r'{0}-t(?P<try>[0-9]+)e(?P<epoch>[0-9]+).h5'
 
     def load_modules(self):
         self._ds = CellRep(self._args.predst, self._args.keepimg, self._args)
+
+        self._ds_test = CellRep(self._args.testdir, self._args.keepimg, self._args)
 
         net_model = Inception(self._args, self._ds)
 
@@ -203,7 +206,8 @@ class Trainer(object):
 
 
         # Test set splitting done in the same code now, outside GenericDatasource
-        self.x_test, self.y_test, X, Y = split_test(self._args, self._ds)
+        _, _, X, Y = split_test(self._args, self._ds)
+        self.x_test, self.y_test, _, _ = split_test(self._args, self._ds_test, test=True)
 
         self._rex = self._rex.format(net_model.name)
 
@@ -579,46 +583,53 @@ def _split_origins(args, x_data, t_idx):
     return full_id, samples
 
 
-def split_test(args, ds):
+def split_test(args, ds, test=False):
     # Test set is extracted from the last items of the full DS or from a test dir and is not changed for the whole run
     fX, fY = ds.load_metadata()
     test_x = None
     test_y = None
 
-    tsp = args.split[-1:][0]
-    t_idx = 0
-    if tsp > 1.0:
-        t_idx = int(tsp)
-    elif tsp > 0.0:
-        t_idx = int(tsp * len(fX))
+    X = None
+    Y = None
+
+    if test:
+        test_x = fX
+        test_y = fY
     else:
-        t_idx = np.inf
-
-    # Configuration option that limits test set size
-    t_idx = min(args.pred_size, t_idx) if args.pred_size > 0 else t_idx
-
-    if args.testdir is None or not os.path.isdir(args.testdir):
-        if args.wsi_split > 0 or args.wsilist is not None:
-            full_id, samples = _split_origins(args, fX, t_idx)
-            test_x = fX[samples]
-            test_y = fY[samples]
-            X = np.delete(fX, full_id)
-            Y = np.delete(fY, full_id)
+        tsp = args.split[-1:][0]
+        t_idx = 0
+        if tsp > 1.0:
+            t_idx = int(tsp)
+        elif tsp > 0.0:
+            t_idx = int(tsp * len(fX))
         else:
-            test_x = fX[- t_idx:]
-            test_y = fY[- t_idx:]
-            X, Y = fX[:-t_idx], fY[:-t_idx]
-        ds.check_paths(test_x, args.predst)
-    else:
-        x_test, y_test = ds.run_dir(args.testdir)
-        t_idx = min(len(x_test), t_idx)
-        samples = np.random.choice(len(x_test), t_idx, replace=False)
-        test_x = [x_test[s] for s in samples]
-        test_y = [y_test[s] for s in samples]
-        del x_test
-        del y_test
-        del samples
-        X, Y = fX, fY
+            t_idx = np.inf
+
+        # Configuration option that limits test set size
+        t_idx = min(args.pred_size, t_idx) if args.pred_size > 0 else t_idx
+
+        if args.testdir is None or not os.path.isdir(args.testdir):
+            if args.wsi_split > 0 or args.wsilist is not None:
+                full_id, samples = _split_origins(args, fX, t_idx)
+                test_x = fX[samples]
+                test_y = fY[samples]
+                X = np.delete(fX, full_id)
+                Y = np.delete(fY, full_id)
+            else:
+                test_x = fX[- t_idx:]
+                test_y = fY[- t_idx:]
+                X, Y = fX[:-t_idx], fY[:-t_idx]
+            ds.check_paths(test_x, args.predst)
+        else:
+            x_test, y_test = ds.run_dir(args.testdir)
+            t_idx = min(len(x_test), t_idx)
+            samples = np.random.choice(len(x_test), t_idx, replace=False)
+            test_x = [x_test[s] for s in samples]
+            test_y = [y_test[s] for s in samples]
+            del x_test
+            del y_test
+            del samples
+            X, Y = fX, fY
 
     return test_x, test_y, X, Y
 
