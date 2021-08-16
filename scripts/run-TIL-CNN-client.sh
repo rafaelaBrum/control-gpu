@@ -2,7 +2,7 @@
 SERVER_ADDRESS=localhost:8080
 CLIENT_FILE=$HOME/control-gpu/control/daemon/TIL_Inception_client.py
 PATH_TRAIN_DATASET=$HOME/IMGs-EN-194/1/
-PATH_TEST_DATASET=$HOME/IMGs-EN-194/testset/
+PATH_TEST_DATASET=$HOME/IMGs-EN-194/2/
 RESULTS_PATH=$HOME/control-gpu/results/TIL-flower/
 LOG_PATH=$HOME/control-gpu/logs/TIL-flower/
 

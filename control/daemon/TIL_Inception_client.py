@@ -286,16 +286,16 @@ class Trainer(object):
                                               verbose=self._verbose,
                                               keep=self._args.keepimg)
 
-            # test_generator = ThreadedGenerator(dps=(X, Y),
-            #                                    classes=self._ds.nclasses,
-            #                                    dim=fix_dim,
-            #                                    batch_size=2*self._args.batch_size,
-            #                                    image_generator=test_prep,
-            #                                    extra_aug=self._args.augment,
-            #                                    shuffle=False,
-            #                                    verbose=self._verbose,
-            #                                    input_n=1,
-            #                                    keep=self._args.keepimg)
+            test_generator = ThreadedGenerator(dps=(self.x_test, self.y_test),
+                                               classes=self._ds.nclasses,
+                                               dim=fix_dim,
+                                               batch_size=2*self._args.batch_size,
+                                               image_generator=test_prep,
+                                               extra_aug=self._args.augment,
+                                               shuffle=False,
+                                               verbose=self._verbose,
+                                               input_n=1,
+                                               keep=self._args.keepimg)
         else:
             # Loads training images and validation images
             x_train, y_train = self._ds.load_data(split=None, keep_img=self._args.keepimg, data=train_data)
@@ -308,9 +308,11 @@ class Trainer(object):
             train_generator = train_prep.flow(x_train, y_train, batch_size=self._args.batch_size, shuffle=True)
             val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
-        #     Y = to_categorical(self.y_test, self._ds.nclasses)
-        #     test_generator = test_prep.flow(x=X, y=Y, batch_size=2*self._args.batch_size, shuffle=False)
-        # del Y
+            X, Y = self._ds.load_data(data=(self.x_test, self.y_test), keep_img=self._args.keepimg)
+
+            Y = to_categorical(Y, self._ds.nclasses)
+            test_generator = test_prep.flow(x=X, y=Y, batch_size=2*self._args.batch_size, shuffle=False)
+            del Y
 
         return train_generator, val_generator, test_generator
 
