@@ -404,7 +404,8 @@ class VirtualMachine:
             return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
 
         else:
-            return self.instance_type.price_ondemand
+            return self.manager.get_ondemand_price(self.instance_type.type, self.loader.ec2_conf.region)
+            # return self.instance_type.price_ondemand
 
     @property
     def type(self):
