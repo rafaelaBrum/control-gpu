@@ -15,6 +15,11 @@ class FileSystemConfig(Config):
     @property
     def path(self):
         return self.get_property(self._key, 'path')
+
+    @property
+    def path_ebs(self):
+        return self.get_property(self._key, 'path_ebs')
+
     @property
     def ebs_delete(self):
         return self.get_boolean(self._key, 'ebs_delete')

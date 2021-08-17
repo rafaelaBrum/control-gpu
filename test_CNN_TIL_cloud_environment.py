@@ -40,6 +40,10 @@ def main():
 
     parser.add_argument('--command', default='control')
 
+    parser.add_argument('--instance_type', required=True)
+
+    parser.add_argument('--rounds', default=10)
+
     args = parser.parse_args()
 
     loader = Loader(args=args)
@@ -48,18 +52,21 @@ def main():
 
     n_parties = args.n_parties
 
-    vm_server = create_server_on_demand(loader, n_parties)
+    vm_server = create_server_on_demand(loader, n_parties, args.rounds)
+
+    instance_type = args.instance_type
 
     logging.info("Server created!")
 
-    time.sleep(60)
+    # time.sleep(10)
 
     threads: List[threading.Thread] = []
 
     for i in range(n_parties):
         x = threading.Thread(target=controlling_client_flower, args=(loader,
                                                                      vm_server.instance_private_ip,
-                                                                     i, os.path.join(args.folder, 'client'), ))
+                                                                     i, os.path.join(args.folder, 'client'),
+                                                                     instance_type, n_parties))
         threads.append(x)
         x.start()
         time.sleep(5)
@@ -70,6 +77,10 @@ def main():
             logging.info('Server has finished execution!')
             finish_vm(vm_server, os.path.join(args.folder, 'server'), 'screen_log')
         time.sleep(5)
+
+    cost = vm_server.uptime.seconds * (vm_server.price / 3600.0)  # price in seconds'
+
+    logging.info("Server cost {}".format(cost))
 
     for i in range(n_parties):
         threads[i].join()
@@ -93,8 +104,8 @@ def __create_ebs(vm, path):
     vm.ssh.execute_command(cmd2, output=True)  # mount directory
 
     if vm.create_file_system:
-        cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(vm.loader.file_system_conf.path)
-        cmd4 = 'chmod 775 -R {}'.format(vm.loader.file_system_conf.path)
+        cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(path)
+        cmd4 = 'chmod 775 -R {}'.format(path)
 
         logging.info("<VirtualMachine {}>: - {} ".format(vm.instance_id, cmd3))
         vm.ssh.execute_command(cmd3, output=True)
@@ -108,7 +119,7 @@ def __create_s3(vm: VirtualMachine, path):
     logging.info("<VirtualMachine {}>: - Mounting S3FS".format(vm.instance_id))
 
     # prepare S3FS
-    cmd0 = 'sudo apt install s3fs'
+    cmd0 = 'sudo apt install s3fs -y'
 
     cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(vm.manager.credentials.access_key,
                                                     vm.manager.credentials.secret_key)
@@ -138,6 +149,20 @@ def __create_s3(vm: VirtualMachine, path):
 
 def __call_control():
     print("aqui")
+
+
+def __send_zip_file(vm: VirtualMachine, file):
+    vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+                    target=vm.loader.ec2_conf.home_path,
+                    item=file)
+
+    cmd0 = f'sudo apt install unzip -y'
+    cmd1 = f'unzip {file} -d .'
+
+    stdout, stderr, code_return = vm.ssh.execute_command(cmd0, output=True)
+    print(stdout)
+    stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
+    print(stdout)
 
 
 def __prepare_logging():
@@ -191,7 +216,7 @@ def has_command_finished(vm: VirtualMachine):
 
 
 # Server functions
-def __prepare_vm_server(vm: VirtualMachine, n_parties):
+def __prepare_vm_server(vm: VirtualMachine, n_parties, rounds):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -220,35 +245,27 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties):
             # print(stdout)
 
             # Send daemon file
+            #
+            # __send_zip_file(vm, vm.loader.application_conf.server_flower_file)
             vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
                             target=vm.loader.ec2_conf.home_path,
                             item="fedavg_strategy.py")
 
             vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
                             target=vm.loader.ec2_conf.home_path,
-                            item=vm.loader.application_conf.server_flower_file)
-
-            # create execution folder
-            # vm.root_folder = os.path.join(vm.loader.file_system_conf.path,
-            #                                 '{}_{}'.format(vm.loader.cudalign_task.task_id,
-            #                                                vm.loader.execution_id))
-            #
-            # vm.ssh.execute_command('mkdir -p {}'.format(vm.root_folder), output=True)
+                            item=vm.loader.application_conf.server_flower_file.replace('.zip', '.py'))
 
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Server".format(vm.instance_id))
 
             # cmd_daemon = "ls tests"
-            cmd_daemon = "python3 {} " \
-                         "--rounds {} " \
-                         "--sample_fraction {} " \
-                         "--min_sample_size {} " \
-                         "--min_num_clients {}".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                                    vm.loader.application_conf.server_flower_file),
-                                                       1,
-                                                       1,
-                                                       n_parties,
-                                                       n_parties)
+            cmd_daemon = "python3 {0} --rounds {1} --sample_fraction 1 --min_sample_size {2} " \
+                         "--min_num_clients {2}".format(os.path.join(vm.loader.ec2_conf.home_path,
+                                                                     vm.loader.application_conf.
+                                                                     server_flower_file.
+                                                                     replace('.zip', '.py')),
+                                                        rounds,
+                                                        n_parties)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -266,7 +283,7 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties):
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_server_on_demand(loader: Loader, n_parties):
+def create_server_on_demand(loader: Loader, n_parties, n_rounds):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
@@ -286,13 +303,13 @@ def create_server_on_demand(loader: Loader, n_parties):
 
     vm.deploy()
 
-    __prepare_vm_server(vm, n_parties)
+    __prepare_vm_server(vm, n_parties, n_rounds)
 
     return vm
 
 
 # Client functions
-def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
+def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, test_folder):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -305,10 +322,14 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
 
             logging.info("<VirtualMachine {}>: - Creating directory {}".format(vm.instance_id,
                                                                                vm.loader.file_system_conf.path))
+
             # create directory
             vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path), output=True)
+            vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path_ebs), output=True)
 
             __create_s3(vm, vm.loader.file_system_conf.path)
+
+            __create_ebs(vm, vm.loader.file_system_conf.path_ebs)
 
             # keep ssh live
             # vm.ssh.execute_command("$HOME/.ssh/config")
@@ -321,41 +342,33 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
             # print(stdout)
 
             # Send daemon file
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
-                            target=vm.loader.ec2_conf.home_path,
-                            item=vm.loader.application_conf.client_flower_file)
 
-            # Send dataset files
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path,
-                                        vm.loader.application_conf.dataset,
-                                        str(client_id)),
-                            target=vm.loader.ec2_conf.input_path,
-                            item='training.pt')
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path,
-                                        vm.loader.application_conf.dataset,
-                                        str(client_id)),
-                            target=vm.loader.ec2_conf.input_path,
-                            item='test.pt')
-
-            # create execution folder
-            # vm.root_folder = os.path.join(vm.loader.file_system_conf.path,
-            #                                 '{}_{}'.format(vm.loader.cudalign_task.task_id,
-            #                                                vm.loader.execution_id))
-            #
-            # vm.ssh.execute_command('mkdir -p {}'.format(vm.root_folder), output=True)
+            __send_zip_file(vm, vm.loader.application_conf.client_flower_file)
 
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Client".format(vm.instance_id))
 
+            cmd0 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'))
+            cmd1 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_ebs, 'results'))
+
+            stdout, stderr, code_return = vm.ssh.execute_command(cmd0, output=True)
+            print(stdout)
+            stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
+            print(stdout)
+
             # cmd_daemon = "ls tests"
-            cmd_daemon = "python3 {} " \
-                         "--server_address {} " \
-                         "--path_dataset {} " \
-                         "--batch-size {} ".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                                vm.loader.application_conf.client_flower_file),
-                                                   server_ip,
-                                                   vm.loader.ec2_conf.input_path,
-                                                   64)
+            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -tn " \
+                         "-out {2} -cpu 4 -gpu 0 -wpath {3} -model_dir {3} -logdir {3} " \
+                         "-server_address {4} -tdim 240 240 -f1 10 " \
+                         "-cache {3} -test_dir {5} ".format(os.path.join(vm.loader.ec2_conf.home_path,
+                                                                         vm.loader.application_conf.client_flower_file.
+                                                                         replace('.zip', '.py')),
+                                                            os.path.join(vm.loader.ec2_conf.input_path, train_folder),
+                                                            os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'),
+                                                            os.path.join(vm.loader.file_system_conf.path_ebs,
+                                                                         'results'),
+                                                            server_ip,
+                                                            os.path.join(vm.loader.ec2_conf.input_path, test_folder))
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -373,30 +386,54 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_client_on_demand(loader: Loader, server_ip, client_id):
-    if client_id < 3:
-        instance = InstanceType(
-            provider=CloudManager.EC2,
-            # instance_type='t2.large',
-            instance_type='r5dn.xlarge',
-            image_id='ami-0edb301da47f42152',
-            ebs_device_name='/dev/xvdf',
-            restrictions={'on-demand': 1,
-                          'preemptible': 1},
-            prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
-        )
-    else:
+def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type, n_parties):
+    if instance_type == 'g4dn.xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='g4dn.xlarge',
-            image_id='ami-0e30a08c4a240e88b',
+            image_id='ami-03cbeb6d7c1f4528f',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
             prices={'on-demand': 0.001,
                     'preemptible': 0.000031}
         )
+    elif instance_type == 'c5d.2xlarge':
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='c5d.2xlarge',
+            image_id='ami-03cbeb6d7c1f4528f',
+            ebs_device_name='/dev/nvme2n1',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.001,
+                    'preemptible': 0.000031}
+        )
+    elif instance_type == 'r5dn.xlarge':
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='r5dn.xlarge',
+            image_id='ami-03cbeb6d7c1f4528f',
+            ebs_device_name='/dev/nvme2n1',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.001,
+                    'preemptible': 0.000031}
+        )
+    elif instance_type == 'd3.xlarge':
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='d3.xlarge',
+            image_id='ami-03cbeb6d7c1f4528f',
+            ebs_device_name='/dev/nvme4n1',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.001,
+                    'preemptible': 0.000031}
+        )
+    else:
+        return
+
     vm = VirtualMachine(
         instance_type=instance,
         market='on-demand',
@@ -405,13 +442,17 @@ def create_client_on_demand(loader: Loader, server_ip, client_id):
 
     vm.deploy()
 
-    __prepare_vm_client(vm, server_ip, client_id)
+    train_folder = f'data/CellRep/{n_parties}_clients/{client_id}/trainset'
+    test_folder = f'data/CellRep/{n_parties}_clients/{client_id}/testset'
+
+    __prepare_vm_client(vm, server_ip, client_id, train_folder, test_folder)
 
     return vm
 
 
-def controlling_client_flower(loader: Loader, server_ip: str, client_id: int, folder_log: str):
-    vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id)
+def controlling_client_flower(loader: Loader, server_ip: str,
+                              client_id: int, folder_log: str, instance_type: str, n_parties: int):
+    vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id, instance_type, n_parties)
     logging.info(f"Client_{client_id} created!")
 
     while vm.state not in (CloudManager.TERMINATED, None):
@@ -420,6 +461,10 @@ def controlling_client_flower(loader: Loader, server_ip: str, client_id: int, fo
             logging.info(f'Client {client_id} has finished execution!')
             finish_vm(vm, folder_log, f'screen_log_{client_id}')
         time.sleep(5)
+
+    cost = vm.uptime.seconds * (vm.price / 3600.0)  # price in seconds'
+
+    logging.info("Client {} cost {}".format(client_id, cost))
 
 
 if __name__ == "__main__":
