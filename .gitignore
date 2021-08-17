@@ -73,6 +73,8 @@ venv/
 # dataset folder
 data_torch/
 data/
+data_old/
+data_old_old/
 
 # output files
 *.txt

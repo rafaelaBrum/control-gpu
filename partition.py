@@ -137,13 +137,50 @@ def partition_CellRep_data(dataset, n_parties):
     n_train = len(y_train)
     n_test = len(y_test)
 
-    # random partition
-    idxs = np.random.permutation(n_train)
-    batch_idxs = np.array_split(idxs, n_parties)
-    net_dataidx_map = {i: batch_idxs[i] for i in range(n_parties)}
-    idxs_test = np.random.permutation(n_test)
-    batch_test_idxs = np.array_split(idxs_test, n_parties)
-    net_test_dataidx_map = {i: batch_test_idxs[i] for i in range(n_parties)}
+    # Dirichlet label partition
+    min_size = 0
+    min_size_test = 0
+    min_require_size = (n_train/n_parties)*0.1
+    min_test_require_size = (n_test/n_parties)*0.1
+    K = 2
+
+    N = n_train
+    N_test = n_test
+    np.random.seed(2020)
+    net_dataidx_map = {}
+    net_test_dataidx_map = {}
+
+    while (min_size < min_require_size) and (min_size_test < min_test_require_size):
+        idx_batch = [[] for _ in range(n_parties)]
+        idx_test_batch = [[] for _ in range(n_parties)]
+        for k in range(K):
+            idx_k = np.where(y_train == k)[0]
+            idx_test_k = np.where(y_test == k)[0]
+            np.random.shuffle(idx_k)
+            np.random.shuffle(idx_test_k)
+            proportions = np.repeat(1/n_parties, n_parties)
+            print("proportions1: ", proportions)
+            print("sum pro1:", np.sum(proportions))
+            ## Balance
+            proportions = np.array([p * (len(idx_j) < N / n_parties) for p, idx_j in zip(proportions, idx_batch)])
+            proportions_test = np.array([p * (len(idx_j) < N_test / n_parties) for p, idx_j in zip(proportions, idx_test_batch)])
+            # logger.info("proportions2: ", proportions)
+            proportions = proportions / proportions.sum()
+            proportions_test = proportions_test / proportions_test.sum()
+            # logger.info("proportions3: ", proportions)
+            proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
+            proportions_test = (np.cumsum(proportions_test) * len(idx_test_k)).astype(int)[:-1]
+            # logger.info("proportions4: ", proportions)
+            idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
+            idx_test_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_test_batch, np.split(idx_test_k, proportions_test))]
+            min_size = min([len(idx_j) for idx_j in idx_batch])
+            min_size_test = min([len(idx_j) for idx_j in idx_test_batch])
+
+        for j in range(n_parties):
+            np.random.shuffle(idx_batch[j])
+            net_dataidx_map[j] = idx_batch[j]
+            np.random.shuffle(idx_test_batch[j])
+            net_test_dataidx_map[j] = idx_test_batch[j]
 
     root_foldername = "data/{}/{}_clients".format(dataset, n_parties)
     mkdirs(root_foldername)
@@ -189,5 +226,5 @@ def partition_data(dataset, n_parties):
 
 if __name__ == "__main__":
     dataset = 'CellRep'
-    n_parties = 4
+    n_parties = 2
     partition_data(dataset, n_parties)
