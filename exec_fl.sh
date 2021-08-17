@@ -12,9 +12,9 @@ export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 echo " ----------------------------
- 4 clients
+ 2 clients
  ---------------------------- "
-for instance_type in r5dn.xlarge d3.xlarge g4dn.xlarge
+for instance_type in g4dn.xlarge r5dn.xlarge
 #for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 do
   COUNTER=1
@@ -22,9 +22,9 @@ do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER="4_clients_$((COUNTER))_folder_${instance_type}"
-    echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type
-    python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type
+   FOLDER="2_clients_$((COUNTER))_folder_${instance_type}"
+    echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type
+    python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type
     # sleep 5m
     COUNTER=$((COUNTER+1))
   done
@@ -33,7 +33,7 @@ echo " ----------------------------
   3 clients
  ---------------------------- "
 # for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
-for instance_type in r5dn.xlarge d3.xlarge g4dn.xlarge
+for instance_type in g4dn.xlarge r5dn.xlarge
 do
   COUNTER=1
   while [  $COUNTER -lt 2 ]; do
@@ -48,19 +48,19 @@ do
   done
 done
 echo " ----------------------------
-  2 clients
+  4 clients
  ---------------------------- "
 # for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
-for instance_type in r5dn.xlarge d3.xlarge g4dn.xlarge
+for instance_type in g4dn.xlarge r5dn.xlarge
 do
   COUNTER=1
   while [  $COUNTER -lt 2 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER=2_clients_$((COUNTER))_folder_${instance_type}
-    echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type
-    python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type
+   FOLDER=4_clients_$((COUNTER))_folder_${instance_type}
+    echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type
+    python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type
     # sleep 5m
     COUNTER=$((COUNTER+1))
   done
