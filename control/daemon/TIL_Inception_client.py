@@ -206,8 +206,8 @@ class Trainer(object):
 
 
         # Test set splitting done in the same code now, outside GenericDatasource
-        _, _, X, Y = split_test(self._args, self._ds)
-        self.x_test, self.y_test, _, _ = split_test(self._args, self._ds_test, test=True)
+        self.x_test, self.y_test, X, Y = split_test(self._args, self._ds)
+        # self.x_test, self.y_test, _, _ = split_test(self._args, self._ds_test, test=True)
 
         self._rex = self._rex.format(net_model.name)
 

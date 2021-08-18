@@ -159,6 +159,12 @@ def __send_zip_file(vm: VirtualMachine, file):
     cmd0 = f'sudo apt install unzip -y'
     cmd1 = f'unzip {file} -d .'
 
+    cmd = "sudo lsof /var/lib/dpkg/lock"
+
+    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    while stdout != '':
+        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+
     stdout, stderr, code_return = vm.ssh.execute_command(cmd0, output=True)
     print(stdout)
     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
@@ -390,7 +396,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
     if instance_type == 'g4dn.xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
-            instance_type='g4dn.xlarge',
+            instance_type='g4dn.2xlarge',
             image_id='ami-03cbeb6d7c1f4528f',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
@@ -454,6 +460,8 @@ def controlling_client_flower(loader: Loader, server_ip: str,
                               client_id: int, folder_log: str, instance_type: str, n_parties: int):
     vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id, instance_type, n_parties)
     logging.info(f"Client_{client_id} created!")
+
+    # input("waiting...")
 
     while vm.state not in (CloudManager.TERMINATED, None):
         print(f"Testing client_{client_id}")
