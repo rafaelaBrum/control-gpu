@@ -72,7 +72,7 @@ def main():
         time.sleep(5)
 
     while vm_server.state not in (CloudManager.TERMINATED, None):
-        print("Testing the server")
+        # print("Testing the server")
         if has_command_finished(vm_server):
             logging.info('Server has finished execution!')
             finish_vm(vm_server, os.path.join(args.folder, 'server'), 'screen_log')
@@ -119,8 +119,6 @@ def __create_s3(vm: VirtualMachine, path):
     logging.info("<VirtualMachine {}>: - Mounting S3FS".format(vm.instance_id))
 
     # prepare S3FS
-    cmd0 = 'sudo apt install s3fs -y'
-
     cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(vm.manager.credentials.access_key,
                                                     vm.manager.credentials.secret_key)
 
@@ -133,9 +131,6 @@ def __create_s3(vm: VirtualMachine, path):
                                                          vm.manager.s3_conf.vm_uid,
                                                          vm.manager.s3_conf.vm_gid,
                                                          path)
-
-    logging.info("<VirtualMachine {}>: - Installing s3fs".format(vm.instance_id))
-    vm.ssh.execute_command(cmd0, output=True)
 
     logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(vm.instance_id))
     vm.ssh.execute_command(cmd1, output=True)
@@ -156,19 +151,11 @@ def __send_zip_file(vm: VirtualMachine, file):
                     target=vm.loader.ec2_conf.home_path,
                     item=file)
 
-    cmd0 = f'sudo apt install unzip -y'
     cmd1 = f'unzip {file} -d .'
 
-    cmd = "sudo lsof /var/lib/dpkg/lock"
-
-    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
-    while stdout != '':
-        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
-
-    stdout, stderr, code_return = vm.ssh.execute_command(cmd0, output=True)
-    print(stdout)
     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
-    print(stdout)
+    logging.info("<VirtualMachine {}>: output of '{}' is '{}'".format(vm.instance_id, cmd1, stdout))
+    logging.info("<VirtualMachine {}>: error output of '{}' is '{}'".format(vm.instance_id, cmd1, stderr))
 
 
 def __prepare_logging():
@@ -397,7 +384,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='g4dn.2xlarge',
-            image_id='ami-03cbeb6d7c1f4528f',
+            image_id='ami-0240576b6e843f428',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
@@ -408,7 +395,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='c5d.2xlarge',
-            image_id='ami-03cbeb6d7c1f4528f',
+            image_id='ami-0240576b6e843f428',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
@@ -419,7 +406,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='r5dn.xlarge',
-            image_id='ami-03cbeb6d7c1f4528f',
+            image_id='ami-0240576b6e843f428',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
@@ -430,7 +417,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='d3.xlarge',
-            image_id='ami-03cbeb6d7c1f4528f',
+            image_id='ami-0240576b6e843f428',
             ebs_device_name='/dev/nvme4n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
@@ -464,7 +451,7 @@ def controlling_client_flower(loader: Loader, server_ip: str,
     # input("waiting...")
 
     while vm.state not in (CloudManager.TERMINATED, None):
-        print(f"Testing client_{client_id}")
+        # print(f"Testing client_{client_id}")
         if has_command_finished(vm):
             logging.info(f'Client {client_id} has finished execution!')
             finish_vm(vm, folder_log, f'screen_log_{client_id}')
