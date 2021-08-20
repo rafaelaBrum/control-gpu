@@ -17,15 +17,15 @@ echo " ----------------------------
 for instance_type in g4dn.xlarge
 #for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 do
-  COUNTER=3
+  COUNTER=1
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
    FOLDER="2_clients_$((COUNTER))_folder_${instance_type}_4xlarge"
     echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 5
-    #python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 5
-    #sleep 30m
+    python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 5
+    sleep 30m
     COUNTER=$((COUNTER+1))
   done
 done
