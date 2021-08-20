@@ -17,12 +17,12 @@ echo " ----------------------------
 for instance_type in g4dn.xlarge
 #for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 do
-  COUNTER=1
+  COUNTER=3
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER="2_clients_$((COUNTER))_folder_${instance_type}_4xlarge"
+   FOLDER="2_clients_$((COUNTER))_folder_${instance_type}_spot"
     echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 5
     python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 5
     sleep 30m
@@ -35,12 +35,12 @@ echo " ----------------------------
 # for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 for instance_type in g4dn.xlarge
 do
-  COUNTER=2
+  COUNTER=3
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER=3_clients_$((COUNTER))_folder_${instance_type}
+    FOLDER="3_clients_$((COUNTER))_folder_${instance_type}_spot"
     echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 3 --instance_type $instance_type --rounds 5
     python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 3 --instance_type $instance_type --rounds 5
     sleep 30m
@@ -53,12 +53,12 @@ echo " ----------------------------
 # for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 for instance_type in g4dn.xlarge
 do
-  COUNTER=1
+  COUNTER=3
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER=4_clients_$((COUNTER))_folder_${instance_type}
+   FOLDER="4_clients_$((COUNTER))_folder_${instance_type}_spot"
     echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --roudns 5
     python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds 5
     if [ $COUNTER -ne 3 ]; then
