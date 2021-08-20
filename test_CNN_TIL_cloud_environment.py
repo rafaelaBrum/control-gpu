@@ -290,7 +290,7 @@ def create_server_on_demand(loader: Loader, n_parties, n_rounds):
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand',
+        market='spot',
         loader=loader
     )
 
@@ -429,7 +429,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand',
+        market='spot',
         loader=loader,
     )
 
