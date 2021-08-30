@@ -115,3 +115,56 @@ class GenericModel(ABC):
     # def getName(self):
     def get_name(self):
         return self.name
+
+    def rescale(self, dim, full_size):
+        """
+        Rescales down a network according to inversed EfficientNet strategy.
+        - [Efficientnet: Rethinking model scaling for convolutional neural networks ] (https://arxiv.org/pdf/1905.11946)
+
+        Params:
+        - dim <string>: 'depth', 'width', 'resolution' or 'lr';
+        - phi <int>: rescaling factor (should be compatible with network architecture). Equivalent to reducing resources
+        by 1/phi;
+        - full_size <int,list,tuple>: original size which will be scaled down.
+
+        Return: returns rescaled dimension of tuple if full_size is a list
+        """
+        alpha = 1.2
+        beta = 1.1
+        gama = 1.15
+        phi = 1
+
+        if phi <= 1:
+            return full_size
+
+        if not dim in ['depth', 'width', 'resolution', 'lr']:
+            print("[GenericModel] Dim should be one of 'depth', 'width', 'resolution' or 'lr'")
+            return full_size
+
+        if dim == 'depth':
+            rd = 1 / math.pow(alpha, phi)
+        elif dim == 'width':
+            rd = 1 / math.pow(beta, phi)
+        elif dim == 'resolution':
+            rd = 1 / math.pow(gama, phi)
+        else:
+            if phi > 2:
+                rd = 2.5 * (1 + math.log(phi))
+            else:
+                rd = 2.5 * phi
+
+        if isinstance(full_size, list) or isinstance(full_size, tuple):
+            full_size = np.asarray(full_size, dtype=np.float32)
+            full_size *= rd
+            full_size.round(out=full_size)
+            full_size = full_size.astype(np.int32)
+            np.clip(full_size, a_min=1, a_max=full_size.max(), out=full_size)
+            full_size = tuple(full_size)
+        elif isinstance(full_size, int):
+            full_size *= rd
+            full_size = int(round(full_size))
+            full_size = 1 if full_size < 1 else full_size
+        else:
+            full_size *= rd
+
+        return full_size
