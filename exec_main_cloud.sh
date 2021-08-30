@@ -17,14 +17,14 @@ echo " ----------------------------
 for instance_type in g4dn.xlarge
 #for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 do
-  COUNTER=1
+  COUNTER=3
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER="centralized_50_epochs_$((COUNTER))_folder_${instance_type}_4xlarge"
+   FOLDER="centralized_50_epochs_$((COUNTER))_folder_${instance_type}_spot"
     echo python3 test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --rounds 50
-    python3  test_CNN_TIL_without_fl_cloud --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 50
+    python3  test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --rounds 50
     #sleep 30m
     COUNTER=$((COUNTER+1))
   done
@@ -36,14 +36,14 @@ echo " ----------------------------
 for instance_type in g4dn.xlarge
 #for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
 do
-  COUNTER=1
+  COUNTER=3
   while [  $COUNTER -lt 4 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
-   FOLDER="centralized_50_epochs_$((COUNTER))_folder_${instance_type}_4xlarge"
+   FOLDER="centralized_25_epochs_$((COUNTER))_folder_${instance_type}_spot"
     echo python3 test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --rounds 25
-    python3  test_CNN_TIL_without_fl_cloud --folder $FOLDER --n_parties 2 --instance_type $instance_type --rounds 25
+    python3  test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --rounds 25
     #sleep 30m
     COUNTER=$((COUNTER+1))
   done

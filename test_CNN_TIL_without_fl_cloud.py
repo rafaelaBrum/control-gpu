@@ -240,7 +240,7 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net Inception -tn " \
                          "-data CellRep -out {2} -e {5} -cpu 7 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-tdim 240 240 -f1 10 " \
-                         "-cache {3} -test_dir {4} ".format(os.path.join(vm.loader.ec2_conf.home_path,
+                         "-cache {3} -test_dir {4} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.
                                                                          centralized_app_file),
                                                             os.path.join(vm.loader.ec2_conf.input_path, train_folder),
@@ -274,13 +274,13 @@ def create_vm_on_demand(loader: Loader, n_epochs):
         ebs_device_name='/dev/nvme2n1',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
-        prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+        prices={'on-demand': 0.752,
+                'preemptible': 0.2256}
     )
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand',
+        market='preemptible',
         loader=loader,
     )
 

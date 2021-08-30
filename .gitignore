@@ -69,6 +69,8 @@ logs/
 
 # python virtualenv
 venv/
+venv_hads/
+venv_novo/
 
 # dataset folder
 data_torch/
@@ -86,3 +88,6 @@ data_old_old/
 
 # folders of TIL app
 results/
+
+# screen log files
+screen*
