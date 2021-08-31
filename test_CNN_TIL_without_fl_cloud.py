@@ -53,13 +53,13 @@ def main():
     while vm.state not in (CloudManager.TERMINATED, None):
         # print("Testing the server")
         if has_command_finished(vm):
-            logging.info('Server has finished execution!')
+            logging.info('VM has finished execution!')
             finish_vm(vm, os.path.join(args.folder, 'server'), 'screen_log')
         time.sleep(5)
 
     cost = vm.uptime.seconds * (vm.price / 3600.0)  # price in seconds'
 
-    logging.info("Server cost {}".format(cost))
+    logging.info("VM cost {}".format(cost))
 
 
 # Global functions
@@ -237,7 +237,7 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             print(stdout)
 
             # cmd_daemon = "ls tests"
-            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net Inception -tn " \
+            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net VGG16 -tn " \
                          "-data CellRep -out {2} -e {5} -cpu 7 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-tdim 240 240 -f1 10 " \
                          "-cache {3} -test_dir {4} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
@@ -280,7 +280,7 @@ def create_vm_on_demand(loader: Loader, n_epochs):
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible',
+        market='on-demand',
         loader=loader,
     )
 
