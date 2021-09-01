@@ -7,6 +7,9 @@ import numpy as np
 import random
 import flwr as fl
 
+# Scikit learn
+from sklearn import metrics
+
 # Filter warnings
 import warnings
 
@@ -34,6 +37,52 @@ from vgg_daemon import VGG16
 
 # Supported image types
 img_types = ['svs', 'dicom', 'nii', 'tif', 'tiff', 'png']
+
+
+def print_confusion_matrix(y_pred, expected, classes, label):
+    stp = len(expected)
+    # x is expected, y is actual
+    m_conf = np.zeros((classes + 3, classes + 1))
+    for i in range(stp):
+        m_conf[expected[i]][y_pred[i]] = m_conf[expected[i]][y_pred[i]] + 1
+    m_conf_2 = m_conf.tolist()
+    # Total predictions and expectations for each class
+    for i in range(classes):
+        m_conf_2[classes][i] = "{0:.0f}".format(
+            sum(m_conf.transpose()[i]))
+        m_conf_2[i][classes] = "{0:.0f}".format(sum(m_conf[i]))
+    # Correct rate
+    for i in range(classes):
+        m_conf_2[classes + 1][i] = "{0:.0f}/{1:.0f}".format(
+            m_conf[i][i], sum(m_conf.transpose()[i]))
+    # Accuracy
+    for i in range(classes):
+        m_conf_2[classes + 2][i] = "{0:.2f}".format(
+            m_conf[i][i] / sum(m_conf.transpose()[i]))
+
+    # Total samples
+    m_conf_2[classes][classes] = "{0:.0f}".format(m_conf.sum())
+    m_conf_2[classes + 1][classes] = ''
+    m_conf_2[classes + 2][classes] = '{0:.2f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
+    # Store accuracy in m_conf also
+    m_conf[classes + 2][classes] = m_conf_2[classes + 2][classes]
+
+    # col = [i for i in range(classes)] + ['Expected Total']
+    # ind = [i for i in range(classes)] + \
+    #       ['Predicted Total', 'Correct Rate', 'Accuracy']
+
+    # df = DataFrame(m_conf_2, columns=col, index=ind)
+    print("Confusion matrix ({0}):".format(label))
+    print(m_conf_2)
+    print('\n')
+
+    # fd = open(
+    #     os.path.join(os.path.abspath(args.logdir), 'confusion_matrix_{0}-nn{1}.csv'.format(label, args.network)),
+    #     'w')
+    # df.to_csv(fd, columns=col, index=ind, header=True)
+    # fd.close()
+
+    return m_conf
 
 
 def get_args():
@@ -465,10 +514,44 @@ class Trainer(object):
             # epochs=epochs,
             verbose=self._verbose,
             use_multiprocessing=False,
+            workers=self._args.cpu_count * 2,
+            max_queue_size=self._args.batch_size * 3,
+        )
+
+        Y_pred = self.training_model.predict_evaluator(
+            generator=self.test_generator,
+            steps=len(self.test_generator),  # self._args.batch_size,
+            # epochs=epochs,
+            verbose=self._verbose,
+            use_multiprocessing=False,
             workers=self._args.cpu_count*2,
             max_queue_size=self._args.batch_size*3,
             )
-        # hist = self.training_model.evaluate(self.x_test, self.y_test)
+
+        y_pred = np.argmax(Y_pred, axis=1)
+        expected = np.array(self.y_test)
+        nclasses = self._ds.nclasses
+
+        print("expected ({1}):\n{0}".format(expected, expected.shape))
+        print("Predicted ({1}):\n{0}".format(y_pred, y_pred.shape))
+
+        f1 = metrics.f1_score(expected, y_pred, pos_label=1)
+        print("F1 score: {0:.2f}".format(f1))
+
+        m_conf = print_confusion_matrix(y_pred, expected, nclasses, "TILs")
+
+        # ROC AUC
+        # Get positive scores (binary only)
+        if nclasses == 2:
+            scores = Y_pred.transpose()[1]
+            fpr, tpr, thresholds = metrics.roc_curve(expected, scores, pos_label=1)
+            print("AUC: {0:f}".format(metrics.roc_auc_score(expected, scores)))
+
+            print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
+
+            print("False positive rates: {0}".format(fpr))
+            print("True positive rates: {0}".format(tpr))
+            print("Thresholds: {0}".format(thresholds))
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
