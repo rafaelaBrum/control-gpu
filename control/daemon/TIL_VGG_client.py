@@ -197,7 +197,7 @@ def get_args():
 
     flwr_args.add_argument("-server_address", dest='server_address', type=str, required=True,
                            help=f"gRPC server address", default='localhost:8080')
-    flwr_args.add_argument("--epochs", type=int, required=True, default=10,
+    flwr_args.add_argument("-epochs", type=int, required=True, default=10,
                         help="Number of epochs per round of federated learning",
     )
 
@@ -518,7 +518,7 @@ class Trainer(object):
             max_queue_size=self._args.batch_size * 3,
         )
 
-        Y_pred = self.training_model.predict_evaluator(
+        Y_pred = self.training_model.predict_generator(
             generator=self.test_generator,
             steps=len(self.test_generator),  # self._args.batch_size,
             # epochs=epochs,
