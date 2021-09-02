@@ -59,13 +59,14 @@ def print_confusion_matrix(y_pred, expected, classes, label):
             m_conf[i][i], sum(m_conf.transpose()[i]))
     # Accuracy
     for i in range(classes):
-        m_conf_2[classes + 2][i] = "{0:.2f}".format(
+        m_conf_2[classes + 2][i] = "{0:.4f}".format(
             m_conf[i][i] / sum(m_conf.transpose()[i]))
+        m_conf[classes + 2][i] = m_conf_2[classes + 2][i]
 
     # Total samples
     m_conf_2[classes][classes] = "{0:.0f}".format(m_conf.sum())
     m_conf_2[classes + 1][classes] = ''
-    m_conf_2[classes + 2][classes] = '{0:.2f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
+    m_conf_2[classes + 2][classes] = '{0:.4f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
     # Store accuracy in m_conf also
     m_conf[classes + 2][classes] = m_conf_2[classes + 2][classes]
 
@@ -551,14 +552,16 @@ class Trainer(object):
 
             print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
 
-            print("False positive rates: {0}".format(fpr))
-            print("True positive rates: {0}".format(tpr))
-            print("Thresholds: {0}".format(thresholds))
+            print("m_conf", m_conf)
+
+            # print("False positive rates: {0}".format(fpr))
+            # print("True positive rates: {0}".format(tpr))
+            # print("Thresholds: {0}".format(thresholds))
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
 
-        return hist
+        return hist, m_conf[nclasses+2][0], m_conf[nclasses+2][1]
 
     def get_model_weights(self):
         return self.training_model.get_weights()
@@ -757,14 +760,14 @@ class InceptionClient(fl.client.NumPyClient):
         self.model.set_model_weights(parameters)
 
         # Evaluate global model parameters on the local test data and return results
-        history = self.model.evaluate()
+        history, neg_acc, pos_acc = self.model.evaluate()
         num_examples_test = self.model.get_test_data_length()
         loss = history[0]
         accuracy = history[1]
         print("num_examples fit:", num_examples_test)
         print("evaluate loss: ", loss)
         print("evaluate accuracy: ", accuracy)
-        return loss, num_examples_test, {"accuracy": accuracy}
+        return loss, num_examples_test, {"accuracy": accuracy, "neg_accuracy": neg_acc, "pos_accuracy": pos_acc}
 
 
 if __name__ == "__main__":
