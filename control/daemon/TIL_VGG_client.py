@@ -59,13 +59,14 @@ def print_confusion_matrix(y_pred, expected, classes, label):
             m_conf[i][i], sum(m_conf.transpose()[i]))
     # Accuracy
     for i in range(classes):
-        m_conf_2[classes + 2][i] = "{0:.2f}".format(
+        m_conf_2[classes + 2][i] = "{0:.4f}".format(
             m_conf[i][i] / sum(m_conf.transpose()[i]))
+        m_conf[classes + 2][i] = m_conf_2[classes + 2][i]
 
     # Total samples
     m_conf_2[classes][classes] = "{0:.0f}".format(m_conf.sum())
     m_conf_2[classes + 1][classes] = ''
-    m_conf_2[classes + 2][classes] = '{0:.2f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
+    m_conf_2[classes + 2][classes] = '{0:.4f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
     # Store accuracy in m_conf also
     m_conf[classes + 2][classes] = m_conf_2[classes + 2][classes]
 
@@ -551,9 +552,11 @@ class Trainer(object):
 
             print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
 
-            print("False positive rates: {0}".format(fpr))
-            print("True positive rates: {0}".format(tpr))
-            print("Thresholds: {0}".format(thresholds))
+            print("m_conf", m_conf)
+
+            # print("False positive rates: {0}".format(fpr))
+            # print("True positive rates: {0}".format(tpr))
+            # print("Thresholds: {0}".format(thresholds))
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
