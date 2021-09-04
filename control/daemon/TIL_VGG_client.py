@@ -7,6 +7,11 @@ import numpy as np
 import random
 import flwr as fl
 
+# Scikit learn
+from sklearn import metrics
+
+from pandas import DataFrame
+
 # Filter warnings
 import warnings
 
@@ -34,6 +39,53 @@ from vgg_daemon import VGG16
 
 # Supported image types
 img_types = ['svs', 'dicom', 'nii', 'tif', 'tiff', 'png']
+
+
+def print_confusion_matrix(y_pred, expected, classes, label):
+    stp = len(expected)
+    # x is expected, y is actual
+    m_conf = np.zeros((classes + 3, classes + 1))
+    for i in range(stp):
+        m_conf[expected[i]][y_pred[i]] = m_conf[expected[i]][y_pred[i]] + 1
+    m_conf_2 = m_conf.tolist()
+    # Total predictions and expectations for each class
+    for i in range(classes):
+        m_conf_2[classes][i] = "{0:.0f}".format(
+            sum(m_conf.transpose()[i]))
+        m_conf_2[i][classes] = "{0:.0f}".format(sum(m_conf[i]))
+    # Correct rate
+    for i in range(classes):
+        m_conf_2[classes + 1][i] = "{0:.0f}/{1:.0f}".format(
+            m_conf[i][i], sum(m_conf.transpose()[i]))
+    # Accuracy
+    for i in range(classes):
+        m_conf_2[classes + 2][i] = "{0:.4f}".format(
+            m_conf[i][i] / sum(m_conf.transpose()[i]))
+        m_conf[classes + 2][i] = m_conf_2[classes + 2][i]
+
+    # Total samples
+    m_conf_2[classes][classes] = "{0:.0f}".format(m_conf.sum())
+    m_conf_2[classes + 1][classes] = ''
+    m_conf_2[classes + 2][classes] = '{0:.4f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
+    # Store accuracy in m_conf also
+    m_conf[classes + 2][classes] = m_conf_2[classes + 2][classes]
+
+    col = [i for i in range(classes)] + ['Expected Total']
+    ind = [i for i in range(classes)] + \
+          ['Predicted Total', 'Correct Rate', 'Accuracy']
+
+    df = DataFrame(m_conf_2, columns=col, index=ind)
+    print("Confusion matrix ({0}):".format(label))
+    print(df)
+    print('\n')
+
+    # fd = open(
+    #     os.path.join(os.path.abspath(args.logdir), 'confusion_matrix_{0}-nn{1}.csv'.format(label, args.network)),
+    #     'w')
+    # df.to_csv(fd, columns=col, index=ind, header=True)
+    # fd.close()
+
+    return m_conf
 
 
 def get_args():
@@ -148,7 +200,7 @@ def get_args():
 
     flwr_args.add_argument("-server_address", dest='server_address', type=str, required=True,
                            help=f"gRPC server address", default='localhost:8080')
-    flwr_args.add_argument("--epochs", type=int, required=True, default=10,
+    flwr_args.add_argument("-epochs", type=int, required=True, default=10,
                         help="Number of epochs per round of federated learning",
     )
 
@@ -465,15 +517,51 @@ class Trainer(object):
             # epochs=epochs,
             verbose=self._verbose,
             use_multiprocessing=False,
+            workers=self._args.cpu_count * 2,
+            max_queue_size=self._args.batch_size * 3,
+        )
+
+        Y_pred = self.training_model.predict_generator(
+            generator=self.test_generator,
+            steps=len(self.test_generator),  # self._args.batch_size,
+            # epochs=epochs,
+            verbose=self._verbose,
+            use_multiprocessing=False,
             workers=self._args.cpu_count*2,
             max_queue_size=self._args.batch_size*3,
             )
-        # hist = self.training_model.evaluate(self.x_test, self.y_test)
+
+        y_pred = np.argmax(Y_pred, axis=1)
+        expected = np.array(self.y_test)
+        nclasses = self._ds.nclasses
+
+        print("expected ({1}):\n{0}".format(expected, expected.shape))
+        print("Predicted ({1}):\n{0}".format(y_pred, y_pred.shape))
+
+        f1 = metrics.f1_score(expected, y_pred, pos_label=1)
+        print("F1 score: {0:.2f}".format(f1))
+
+        m_conf = print_confusion_matrix(y_pred, expected, nclasses, "TILs")
+
+        # ROC AUC
+        # Get positive scores (binary only)
+        if nclasses == 2:
+            scores = Y_pred.transpose()[1]
+            fpr, tpr, thresholds = metrics.roc_curve(expected, scores, pos_label=1)
+            print("AUC: {0:f}".format(metrics.roc_auc_score(expected, scores)))
+
+            print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
+
+            print("m_conf", m_conf)
+
+            # print("False positive rates: {0}".format(fpr))
+            # print("True positive rates: {0}".format(tpr))
+            # print("Thresholds: {0}".format(thresholds))
 
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
 
-        return hist
+        return hist, m_conf[nclasses+2][0], m_conf[nclasses+2][1]
 
     def get_model_weights(self):
         return self.training_model.get_weights()
@@ -672,14 +760,14 @@ class InceptionClient(fl.client.NumPyClient):
         self.model.set_model_weights(parameters)
 
         # Evaluate global model parameters on the local test data and return results
-        history = self.model.evaluate()
+        history, neg_acc, pos_acc = self.model.evaluate()
         num_examples_test = self.model.get_test_data_length()
         loss = history[0]
         accuracy = history[1]
         print("num_examples fit:", num_examples_test)
         print("evaluate loss: ", loss)
         print("evaluate accuracy: ", accuracy)
-        return loss, num_examples_test, {"accuracy": accuracy}
+        return loss, num_examples_test, {"accuracy": accuracy, "neg_accuracy": neg_acc, "pos_accuracy": pos_acc}
 
 
 if __name__ == "__main__":
