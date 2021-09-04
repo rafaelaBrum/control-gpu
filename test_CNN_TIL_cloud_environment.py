@@ -351,7 +351,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
 
             # cmd_daemon = "ls tests"
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -tn " \
-                         "-out {2} -cpu 4 -gpu 0 -wpath {3} -model_dir {3} -logdir {3} " \
+                         "-out {2} -cpu 4 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-server_address {4} -tdim 240 240 -f1 10 " \
                          "-cache {3} -test_dir {5} ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.client_flower_file.
@@ -391,45 +391,23 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
             prices={'on-demand': 0.001,
                     'preemptible': 0.000031}
         )
-    elif instance_type == 'c5d.2xlarge':
+    elif instance_type == 'p2.xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
-            instance_type='c5d.2xlarge',
+            instance_type='p2.xlarge',
             image_id='ami-080af420cdfb56e39',
-            ebs_device_name='/dev/nvme2n1',
+            ebs_device_name='/dev/xvdf',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
-            prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
-        )
-    elif instance_type == 'r5dn.xlarge':
-        instance = InstanceType(
-            provider=CloudManager.EC2,
-            instance_type='r5dn.xlarge',
-            image_id='ami-080af420cdfb56e39',
-            ebs_device_name='/dev/nvme2n1',
-            restrictions={'on-demand': 1,
-                          'preemptible': 1},
-            prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
-        )
-    elif instance_type == 'd3.xlarge':
-        instance = InstanceType(
-            provider=CloudManager.EC2,
-            instance_type='d3.xlarge',
-            image_id='ami-080af420cdfb56e39',
-            ebs_device_name='/dev/nvme4n1',
-            restrictions={'on-demand': 1,
-                          'preemptible': 1},
-            prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
+            prices={'on-demand': 0.9,
+                    'preemptible': 0.27}
         )
     else:
         return
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible',
+        market='on-demand',
         loader=loader,
     )
 
