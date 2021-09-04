@@ -238,7 +238,7 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
 
             # cmd_daemon = "ls tests"
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net VGG16 -tn " \
-                         "-data CellRep -out {2} -e {5} -cpu 7 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
+                         "-data CellRep -out {2} -e {5} -cpu 2 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-tdim 240 240 -f1 10 " \
                          "-cache {3} -test_dir {4} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.
@@ -269,18 +269,18 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
 def create_vm_on_demand(loader: Loader, n_epochs):
     instance = InstanceType(
         provider=CloudManager.EC2,
-        instance_type='g4dn.2xlarge',
+        instance_type='p2.xlarge',
         image_id='ami-080af420cdfb56e39',
         ebs_device_name='/dev/nvme2n1',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.752,
-                'preemptible': 0.2256}
+                'preemptible': 0.27}
     )
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand',
+        market='preemptible',
         loader=loader,
     )
 
