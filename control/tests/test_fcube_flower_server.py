@@ -142,7 +142,7 @@ def test_server_on_demand(loader: Loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-03e15d31e4fab2356',
+        image_id='ami-06da94d6543aa67a8',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
