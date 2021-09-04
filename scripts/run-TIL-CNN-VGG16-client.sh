@@ -5,7 +5,7 @@ PATH_TRAIN_DATASET=$HOME/IMGs-EN-194/trainset/
 PATH_TEST_DATASET=$HOME/IMGs-EN-194/testset/
 RESULTS_PATH=$HOME/control-gpu/results/TIL-flower-VGG/
 LOG_PATH=$HOME/control-gpu/logs/TIL-flower-VGG/
-EPOCHS=1
+EPOCHS=10
 
 rm results/* -r
 
