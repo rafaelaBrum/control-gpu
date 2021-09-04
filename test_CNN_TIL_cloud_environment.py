@@ -290,7 +290,7 @@ def create_server_on_demand(loader: Loader, n_parties, n_rounds):
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible',
+        market='on-demand',
         loader=loader
     )
 
