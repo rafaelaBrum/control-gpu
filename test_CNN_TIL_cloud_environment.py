@@ -44,6 +44,8 @@ def main():
 
     parser.add_argument('--rounds', default=10)
 
+    parser.add_argument('--epochs', default=5)
+
     args = parser.parse_args()
 
     loader = Loader(args=args)
@@ -66,7 +68,7 @@ def main():
         x = threading.Thread(target=controlling_client_flower, args=(loader,
                                                                      vm_server.instance_private_ip,
                                                                      i, os.path.join(args.folder, 'client'),
-                                                                     instance_type, n_parties))
+                                                                     instance_type, n_parties, args.epochs))
         threads.append(x)
         x.start()
         time.sleep(5)
@@ -302,7 +304,7 @@ def create_server_on_demand(loader: Loader, n_parties, n_rounds):
 
 
 # Client functions
-def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, test_folder):
+def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, test_folder, epochs):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -353,7 +355,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -tn " \
                          "-out {2} -cpu 4 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-server_address {4} -tdim 240 240 -f1 10 " \
-                         "-cache {3} -test_dir {5} ".format(os.path.join(vm.loader.ec2_conf.home_path,
+                         "-cache {3} -test_dir {5}  -epochs {6}".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.client_flower_file.
                                                                          replace('.zip', '.py')),
                                                             os.path.join(vm.loader.ec2_conf.input_path, train_folder),
@@ -361,7 +363,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
                                                             os.path.join(vm.loader.file_system_conf.path_ebs,
                                                                          'results'),
                                                             server_ip,
-                                                            os.path.join(vm.loader.ec2_conf.input_path, test_folder))
+                                                            os.path.join(vm.loader.ec2_conf.input_path, test_folder),
+                                                            epochs)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -379,7 +382,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type, n_parties):
+def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type, n_parties, epochs):
     if instance_type == 'g4dn.xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
@@ -416,14 +419,14 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
     train_folder = f'data/CellRep/{n_parties}_clients/{client_id}/trainset'
     test_folder = f'data/CellRep/{n_parties}_clients/{client_id}/testset'
 
-    __prepare_vm_client(vm, server_ip, client_id, train_folder, test_folder)
+    __prepare_vm_client(vm, server_ip, client_id, train_folder, test_folder, epochs)
 
     return vm
 
 
 def controlling_client_flower(loader: Loader, server_ip: str,
-                              client_id: int, folder_log: str, instance_type: str, n_parties: int):
-    vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id, instance_type, n_parties)
+                              client_id: int, folder_log: str, instance_type: str, n_parties: int, epochs: int):
+    vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id, instance_type, n_parties, epochs)
     logging.info(f"Client_{client_id} created!")
 
     # input("waiting...")
