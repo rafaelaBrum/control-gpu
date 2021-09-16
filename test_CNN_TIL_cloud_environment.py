@@ -387,6 +387,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='g4dn.2xlarge',
+<<<<<<< Updated upstream
             image_id='ami-080af420cdfb56e39',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
