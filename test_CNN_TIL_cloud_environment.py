@@ -46,6 +46,8 @@ def main():
 
     parser.add_argument('--epochs', default=5)
 
+    parser.add_argument('--data_folder', required=True)
+
     args = parser.parse_args()
 
     loader = Loader(args=args)
@@ -68,7 +70,8 @@ def main():
         x = threading.Thread(target=controlling_client_flower, args=(loader,
                                                                      vm_server.instance_private_ip,
                                                                      i, os.path.join(args.folder, 'client'),
-                                                                     instance_type, n_parties, args.epochs))
+                                                                     instance_type, n_parties, args.epochs,
+                                                                     args.data_folder))
         threads.append(x)
         x.start()
         time.sleep(5)
@@ -382,30 +385,57 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type, n_parties, epochs):
-    if instance_type == 'g4dn.xlarge':
-        instance = InstanceType(
-            provider=CloudManager.EC2,
-            instance_type='g4dn.2xlarge',
-<<<<<<< Updated upstream
-            image_id='ami-080af420cdfb56e39',
-            ebs_device_name='/dev/nvme2n1',
-            restrictions={'on-demand': 1,
-                          'preemptible': 1},
-            prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
-        )
-    elif instance_type == 'p2.xlarge':
-        instance = InstanceType(
-            provider=CloudManager.EC2,
-            instance_type='p2.xlarge',
-            image_id='ami-080af420cdfb56e39',
-            ebs_device_name='/dev/xvdf',
-            restrictions={'on-demand': 1,
-                          'preemptible': 1},
-            prices={'on-demand': 0.9,
-                    'preemptible': 0.27}
-        )
+def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties, epochs, data_folder):
+    if data_folder == 'data':
+        if instance_type == 'g4dn.xlarge':
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='g4dn.2xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/nvme2n1',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.001,
+                        'preemptible': 0.000031}
+            )
+        elif instance_type == 'p2.xlarge':
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='p2.xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/xvdf',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.9,
+                        'preemptible': 0.27}
+            )
+        else:
+            return
+    if data_folder == 'data_heterogeneous':
+        if instance_type == 'g4dn.xlarge':
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='g4dn.2xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/nvme2n1',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.001,
+                        'preemptible': 0.000031}
+            )
+        elif instance_type == 'p2.xlarge':
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='p2.xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/xvdf',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.9,
+                        'preemptible': 0.27}
+            )
+        else:
+            return
     else:
         return
 
@@ -417,8 +447,8 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
 
     vm.deploy()
 
-    train_folder = f'data/CellRep/{n_parties}_clients/{client_id}/trainset'
-    test_folder = f'data/CellRep/{n_parties}_clients/{client_id}/testset'
+    train_folder = f'{data_folder}/CellRep/{n_parties}_clients/{client_id}/trainset'
+    test_folder = f'{data_folder}/CellRep/{n_parties}_clients/{client_id}/testset'
 
     __prepare_vm_client(vm, server_ip, client_id, train_folder, test_folder, epochs)
 
@@ -426,8 +456,10 @@ def create_client_on_demand(loader: Loader, server_ip, client_id, instance_type,
 
 
 def controlling_client_flower(loader: Loader, server_ip: str,
-                              client_id: int, folder_log: str, instance_type: str, n_parties: int, epochs: int):
-    vm = create_client_on_demand(loader, f"{server_ip}:8080", client_id, instance_type, n_parties, epochs)
+                              client_id: int, folder_log: str,
+                              instance_type: str, n_parties: int,
+                              epochs: int, folder: str):
+    vm = create_client(loader, f"{server_ip}:8080", client_id, instance_type, n_parties, epochs, folder)
     logging.info(f"Client_{client_id} created!")
 
     # input("waiting...")
