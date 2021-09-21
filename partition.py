@@ -140,8 +140,8 @@ def partition_CellRep_data(dataset, n_parties):
     # Dirichlet label partition
     min_size = 0
     min_size_test = 0
-    min_require_size = n_train*0.1
-    min_test_require_size = n_test*0.1
+    min_require_size = 5
+    min_test_require_size = 5
     K = 2
     beta = 0.9
 
