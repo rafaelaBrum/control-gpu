@@ -75,6 +75,8 @@ venv_novo/
 # dataset folder
 data_torch/
 data/
+data_homogeneous/
+data_less_heterogeneous/
 data_old/
 data_old_old/
 

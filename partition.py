@@ -140,9 +140,10 @@ def partition_CellRep_data(dataset, n_parties):
     # Dirichlet label partition
     min_size = 0
     min_size_test = 0
-    min_require_size = (n_train/n_parties)*0.1
-    min_test_require_size = (n_test/n_parties)*0.1
+    min_require_size = n_train*0.1
+    min_test_require_size = n_test*0.1
     K = 2
+    beta = 10
 
     N = n_train
     N_test = n_test
@@ -158,19 +159,24 @@ def partition_CellRep_data(dataset, n_parties):
             idx_test_k = np.where(y_test == k)[0]
             np.random.shuffle(idx_k)
             np.random.shuffle(idx_test_k)
-            proportions = np.repeat(1/n_parties, n_parties)
+            # proportions = np.repeat(1/n_parties, n_parties)
+            proportions = np.random.dirichlet(np.repeat(beta, n_parties))
+            # proportions_test = np.random.dirichlet(np.repeat(beta, n_parties))
+            proportions_test = proportions
             print("proportions1: ", proportions)
             print("sum pro1:", np.sum(proportions))
+            print("proportions1_test: ", proportions_test)
+            print("sum pro1_test:", np.sum(proportions_test))
             ## Balance
             proportions = np.array([p * (len(idx_j) < N / n_parties) for p, idx_j in zip(proportions, idx_batch)])
-            proportions_test = np.array([p * (len(idx_j) < N_test / n_parties) for p, idx_j in zip(proportions, idx_test_batch)])
-            # logger.info("proportions2: ", proportions)
+            proportions_test = np.array([p * (len(idx_j) < N_test / n_parties) for p, idx_j in zip(proportions_test, idx_test_batch)])
+            # print("proportions2: ", proportions)
             proportions = proportions / proportions.sum()
             proportions_test = proportions_test / proportions_test.sum()
-            # logger.info("proportions3: ", proportions)
+            # print("proportions3: ", proportions)
             proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
             proportions_test = (np.cumsum(proportions_test) * len(idx_test_k)).astype(int)[:-1]
-            # logger.info("proportions4: ", proportions)
+            # print("proportions4: ", proportions)
             idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
             idx_test_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_test_batch, np.split(idx_test_k, proportions_test))]
             min_size = min([len(idx_j) for idx_j in idx_batch])
