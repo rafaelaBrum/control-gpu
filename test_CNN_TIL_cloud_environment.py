@@ -395,8 +395,8 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 ebs_device_name='/dev/nvme2n1',
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
-                prices={'on-demand': 0.001,
-                        'preemptible': 0.000031}
+                prices={'on-demand': 0.752,
+                        'preemptible': 0.2256}
             )
         elif instance_type == 'p2.xlarge':
             instance = InstanceType(
@@ -411,7 +411,7 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
             )
         else:
             return
-    if data_folder == 'data_heterogeneous':
+    elif data_folder == 'data_heterogeneous':
         if instance_type == 'g4dn.xlarge':
             instance = InstanceType(
                 provider=CloudManager.EC2,
@@ -420,8 +420,8 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 ebs_device_name='/dev/nvme2n1',
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
-                prices={'on-demand': 0.001,
-                        'preemptible': 0.000031}
+                prices={'on-demand': 0.752,
+                        'preemptible': 0.2256}
             )
         elif instance_type == 'p2.xlarge':
             instance = InstanceType(
@@ -436,6 +436,29 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
             )
         else:
             return
+    elif data_folder == 'data_more_heterogeneous':
+        if client_id == 0 or client_id == 3:
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='p2.xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/xvdf',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.9,
+                        'preemptible': 0.27}
+            )
+        else:
+            instance = InstanceType(
+                provider=CloudManager.EC2,
+                instance_type='g4dn.2xlarge',
+                image_id='ami-080af420cdfb56e39',
+                ebs_device_name='/dev/nvme2n1',
+                restrictions={'on-demand': 1,
+                              'preemptible': 1},
+                prices={'on-demand': 0.752,
+                        'preemptible': 0.2256}
+            )
     else:
         return
 

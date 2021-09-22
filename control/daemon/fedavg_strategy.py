@@ -239,7 +239,7 @@ class FedAvg(Strategy):
             for client, fit_res in results
         ]
         # print("results", results)
-        return weights_to_parameters(aggregate(weights_results)), {'accuracy': 13.0}
+        return weights_to_parameters(aggregate(weights_results)), {}
 
     def aggregate_evaluate(
         self,
