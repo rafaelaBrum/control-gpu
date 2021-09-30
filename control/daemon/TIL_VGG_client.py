@@ -59,7 +59,6 @@ def print_confusion_matrix(y_pred, expected, classes, label):
     for i in range(classes):
         m_conf_2[classes + 1][i] = "{0:.0f}/{1:.0f}".format(
             m_conf[i][i], sum(m_conf.transpose()[i]))
-        m_conf[classes + 1][i] = m_conf_2[classes + 1][i]
     # Accuracy
     for i in range(classes):
         m_conf_2[classes + 2][i] = "{0:.4f}".format(
