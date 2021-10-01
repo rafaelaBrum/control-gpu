@@ -52,9 +52,7 @@ def print_confusion_matrix(y_pred, expected, classes, label):
     for i in range(classes):
         m_conf_2[classes][i] = "{0:.0f}".format(
             sum(m_conf.transpose()[i]))
-        m_conf[classes][i] = m_conf_2[classes][i]
         m_conf_2[i][classes] = "{0:.0f}".format(sum(m_conf[i]))
-        m_conf[i][classes] = m_conf_2[i][classes]
     # Correct rate
     for i in range(classes):
         m_conf_2[classes + 1][i] = "{0:.0f}/{1:.0f}".format(
@@ -63,6 +61,11 @@ def print_confusion_matrix(y_pred, expected, classes, label):
     for i in range(classes):
         m_conf_2[classes + 2][i] = "{0:.4f}".format(
             m_conf[i][i] / sum(m_conf.transpose()[i]))
+
+    # Copying m_conf2 to m_conf
+    for i in range(classes):
+        m_conf[classes][i] = m_conf_2[classes][i]
+        m_conf[i][classes] = m_conf_2[i][classes]
         m_conf[classes + 2][i] = m_conf_2[classes + 2][i]
 
     # Total samples
