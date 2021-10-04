@@ -53,7 +53,10 @@ def weighted_loss_avg(results: List[Tuple[int, float, Optional[float]]]) -> floa
 
 def weighted_metrics_avg(results: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
     """Aggregate evaluation results obtained from multiple clients."""
-    num_total_clients = len(results)
+    # num_total_clients = len(results)
+    num_total_evaluation_examples = sum(
+        [num_examples for num_examples, _ in results]
+    )
     weighted_results_list = {}
     weighted_results = {}
     # print("results[0][1]", results[0][1])
@@ -65,7 +68,7 @@ def weighted_metrics_avg(results: List[Tuple[int, Dict[str, float]]]) -> Dict[st
         # print("type(key)", type(key))
         # print("value", results[0][1].get(key))
         weighted_results_list[key] = [metrics.get(key) for num_examples, metrics in results]
-        weighted_results[key] = sum(weighted_results_list.get(key)) / num_total_clients
+        weighted_results[key] = sum(weighted_results_list.get(key)) / num_total_evaluation_examples
     return weighted_results
 
 

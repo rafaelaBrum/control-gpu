@@ -548,6 +548,13 @@ class Trainer(object):
 
         m_conf = print_confusion_matrix(y_pred, expected, nclasses, "TILs")
 
+        precision = 0.0
+        recall = 0.0
+        f1_score = 0.0
+        neg_accuracy = 0.0
+        pos_accuracy = 0.0
+
+
         # ROC AUC
         # Get positive scores (binary only)
         if nclasses == 2:
@@ -559,6 +566,12 @@ class Trainer(object):
 
             print("m_conf", m_conf)
 
+            neg_accuracy = m_conf[4][0]
+            pos_accuracy = m_conf[4][1]
+            precision = m_conf[1][1] / m_conf[2][1]
+            recall = m_conf[1][1] / m_conf[1][2]
+            f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
+
             # print("False positive rates: {0}".format(fpr))
             # print("True positive rates: {0}".format(tpr))
             # print("Thresholds: {0}".format(thresholds))
@@ -566,7 +579,7 @@ class Trainer(object):
         # if self._verbose > 1:
         print("Done evaluate model: {0}".format(hex(id(self.training_model))))
 
-        return hist, m_conf[nclasses+2][0], m_conf[nclasses+2][1]
+        return hist, neg_accuracy, pos_accuracy, precision, recall, f1_score
 
     def get_model_weights(self):
         return self.training_model.get_weights()
@@ -765,14 +778,15 @@ class InceptionClient(fl.client.NumPyClient):
         self.model.set_model_weights(parameters)
 
         # Evaluate global model parameters on the local test data and return results
-        history, neg_acc, pos_acc = self.model.evaluate()
+        history, neg_acc, pos_acc, precision, recall, f1_score  = self.model.evaluate()
         num_examples_test = self.model.get_test_data_length()
         loss = history[0]
         accuracy = history[1]
         print("num_examples fit:", num_examples_test)
         print("evaluate loss: ", loss)
         print("evaluate accuracy: ", accuracy)
-        return loss, num_examples_test, {"accuracy": accuracy, "neg_accuracy": neg_acc, "pos_accuracy": pos_acc}
+        return loss, num_examples_test, {"accuracy": accuracy, "neg_accuracy": neg_acc, "pos_accuracy": pos_acc,
+                                         "precision": precision, "recall": recall, "f1_score": f1_score}
 
 
 if __name__ == "__main__":

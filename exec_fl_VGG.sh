@@ -14,19 +14,19 @@ export POSTGRES_PASS=rafaela123
 echo " ----------------------------
   4 clients
  ---------------------------- "
-# for instance_type in g4dn.xlarge c5d.2xlarge r5dn.xlarge d3.xlarge
-for instance_type in g4dn.xlarge p2.xlarge
+# for instance_type in g4dn.xlarge p2.xlarge
+for instance_type in g4dn.xlarge
 do
-  for epochs in 2 5 10
+  for rounds in 5 10
   do
     COUNTER=1
     while [  $COUNTER -lt 3 ]; do
       echo " ----------------------------
        Running test - Counter=$COUNTER
       ----------------------------"
-      FOLDER="4_clients_${epochs}_epochs_$((COUNTER))_folder_${instance_type}"
-      echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds 5 --epochs $epochs
-      python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds 5 --epochs $epochs
+      FOLDER="4_clients_${rounds}_rounds_30_epochs_$((COUNTER))_folder_${instance_type}"
+      echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds $rounds --epochs 30
+      python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds $rounds --epochs 30
       # if [ $COUNTER -ne 3 ]; then
       #   sleep 30m
       # fi
