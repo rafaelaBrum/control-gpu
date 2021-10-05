@@ -17,16 +17,18 @@ echo " ----------------------------
 # for instance_type in g4dn.xlarge p2.xlarge
 for instance_type in g4dn.xlarge
 do
-  for rounds in 5 10
+#  for epochs in 2 5 10
+#  for epochs in 20 30
+  for epochs in 30
   do
-    COUNTER=1
+    COUNTER=2
     while [  $COUNTER -lt 3 ]; do
       echo " ----------------------------
        Running test - Counter=$COUNTER
       ----------------------------"
-      FOLDER="4_clients_${rounds}_rounds_30_epochs_$((COUNTER))_folder_${instance_type}"
-      echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds $rounds --epochs 30
-      python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds $rounds --epochs 30
+      FOLDER="4_clients_${epochs}_epochs_$((COUNTER))_folder_${instance_type}"
+      echo python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds 5 --epochs $epochs --data_folder data
+      python3 test_CNN_TIL_cloud_environment.py --folder $FOLDER --n_parties 4 --instance_type $instance_type --rounds 5 --epochs $epochs --data_folder data
       # if [ $COUNTER -ne 3 ]; then
       #   sleep 30m
       # fi
