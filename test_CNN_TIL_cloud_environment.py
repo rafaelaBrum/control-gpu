@@ -119,7 +119,9 @@ def __create_ebs(vm, path):
         vm.ssh.execute_command(cmd4, output=True)
 
 
-def __create_s3(vm: VirtualMachine, path):
+def __create_s3(vm: VirtualMachine, path, client_id):
+
+    bucket_name = vm.manager.s3_conf.bucket_name + "-client-" + client_id
 
     logging.info("<VirtualMachine {}>: - Mounting S3FS".format(vm.instance_id))
 
@@ -132,7 +134,7 @@ def __create_s3(vm: VirtualMachine, path):
     # Mount the bucket
     cmd3 = 'sudo s3fs {} ' \
            '-o use_cache=/tmp -o allow_other -o uid={} -o gid={} ' \
-           '-o mp_umask=002 -o multireq_max=5 {}'.format(vm.manager.s3_conf.bucket_name,
+           '-o mp_umask=002 -o multireq_max=5 {}'.format(bucket_name,
                                                          vm.manager.s3_conf.vm_uid,
                                                          vm.manager.s3_conf.vm_gid,
                                                          path)
@@ -325,7 +327,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path), output=True)
             vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path_ebs), output=True)
 
-            __create_s3(vm, vm.loader.file_system_conf.path)
+            __create_s3(vm, vm.loader.file_system_conf.path, client_id)
 
             __create_ebs(vm, vm.loader.file_system_conf.path_ebs)
 
