@@ -67,7 +67,7 @@ def weighted_metrics_avg(results: List[Tuple[int, Dict[str, float]]]) -> Dict[st
         # print("key", key)
         # print("type(key)", type(key))
         # print("value", results[0][1].get(key))
-        weighted_results_list[key] = [metrics.get(key) for num_examples, metrics in results]
+        weighted_results_list[key] = [num_examples * metrics.get(key) for num_examples, metrics in results]
         weighted_results[key] = sum(weighted_results_list.get(key)) / num_total_evaluation_examples
     return weighted_results
 
