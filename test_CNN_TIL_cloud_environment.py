@@ -121,7 +121,7 @@ def __create_ebs(vm, path):
 
 def __create_s3(vm: VirtualMachine, path, client_id):
 
-    bucket_name = vm.manager.s3_conf.bucket_name + "-client-" + client_id
+    bucket_name = vm.manager.s3_conf.bucket_name + "-client-" + str(client_id)
 
     logging.info("<VirtualMachine {}>: - Mounting S3FS".format(vm.instance_id))
 

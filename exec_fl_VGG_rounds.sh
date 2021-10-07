@@ -18,8 +18,8 @@ for instance_type in g4dn.xlarge
 do
   for rounds in 5 10
   do
-    COUNTER=2
-    while [  $COUNTER -lt 3 ]; do
+    COUNTER=1
+    while [  $COUNTER -lt 2 ]; do
       echo " ----------------------------
        Running test - Counter=$COUNTER
       ----------------------------"
