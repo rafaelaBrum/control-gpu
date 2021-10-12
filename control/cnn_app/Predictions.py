@@ -86,15 +86,32 @@ def print_prediction(config, target=True):
         else:
             print("FN AUC: {0:f}".format(metrics.roc_auc_score(expected, scores)))
 
+        print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
+
+        print("m_conf", m_conf)
+
+        neg_accuracy = m_conf[4][0]
+        pos_accuracy = m_conf[4][1]
+        precision = m_conf[1][1] / m_conf[2][1]
+        recall = m_conf[1][1] / m_conf[1][2]
+        f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
+
+        print("False positive rates: {0}".format(fpr))
+        print("True positive rates: {0}".format(tpr))
+        print("Thresholds: {0}".format(thresholds))
+        print(f"Accuracy: {m_conf[nclasses + 2][nclasses]}")
+        print(f"Negative Accuracy: {neg_accuracy}")
+        print(f"Positive Accuracy: {pos_accuracy}")
+        print(f"Precision: {precision}")
+        print(f"Recall: {recall}")
+        print(f"F1 Score: {f1_score}")
+
     if target:
         print("Accuracy: {0:.3f}".format(m_conf[nclasses+2][nclasses]))
     else:
         print("FN Accuracy: {0:.3f}".format(m_conf[nclasses+2][nclasses]))
         
-    if config.verbose > 1:
-        print("False positive rates: {0}".format(fpr))
-        print("True positive rates: {0}".format(tpr))
-        print("Thresholds: {0}".format(thresholds))
+    #if config.verbose > 1:
 
 
 class Predictor(object):
