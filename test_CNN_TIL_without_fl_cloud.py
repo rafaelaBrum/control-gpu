@@ -38,7 +38,7 @@ def main():
 
     parser.add_argument('--instance_type', required=True)
 
-    parser.add_argument('--rounds', dest='epochs', default=100)
+    parser.add_argument('--epochs', dest='epochs', default=100)
 
     args = parser.parse_args()
 
@@ -46,7 +46,7 @@ def main():
 
     __prepare_logging()
 
-    vm = create_vm_on_demand(loader, args.epochs)
+    vm = create_vm_on_demand(loader, args.epochs, args.instance_type)
 
     logging.info("VM created!")
 
@@ -266,21 +266,35 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_vm_on_demand(loader: Loader, n_epochs):
-    instance = InstanceType(
-        provider=CloudManager.EC2,
-        instance_type='p2.xlarge',
-        image_id='ami-080af420cdfb56e39',
-        ebs_device_name='/dev/nvme2n1',
-        restrictions={'on-demand': 1,
-                      'preemptible': 1},
-        prices={'on-demand': 0.752,
-                'preemptible': 0.27}
-    )
+def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
+    if instance_type == 'g4dn.xlarge':
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='g4dn.2xlarge',
+            image_id='ami-080af420cdfb56e39',
+            ebs_device_name='/dev/nvme2n1',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.752,
+                    'preemptible': 0.2256}
+        )
+    elif instance_type == 'p2.xlarge':
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='p2.xlarge',
+            image_id='ami-080af420cdfb56e39',
+            ebs_device_name='/dev/xvdf',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.9,
+                    'preemptible': 0.27}
+        )
+    else:
+        return
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible',
+        market='on-demand',
         loader=loader,
     )
 

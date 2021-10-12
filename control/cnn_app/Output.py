@@ -24,8 +24,14 @@ def PrintConfusionMatrix(y_pred, expected, classes, args, label):
             m_conf[i][i], sum(m_conf.transpose()[i]))
     # Accuracy
     for i in range(classes):
-        m_conf_2[classes + 2][i] = "{0:.2f}".format(
+        m_conf_2[classes + 2][i] = "{0:.4f}".format(
             m_conf[i][i] / sum(m_conf.transpose()[i]))
+
+    # Copying m_conf2 to m_conf
+    for i in range(classes):
+        m_conf[classes][i] = m_conf_2[classes][i]
+        m_conf[i][classes] = m_conf_2[i][classes]
+        m_conf[classes + 2][i] = m_conf_2[classes + 2][i]
 
     # Total samples
     m_conf_2[classes][classes] = "{0:.0f}".format(m_conf.sum())
@@ -38,16 +44,15 @@ def PrintConfusionMatrix(y_pred, expected, classes, args, label):
     ind = [i for i in range(classes)] + \
           ['Predicted Total', 'Correct Rate', 'Accuracy']
 
-    if args.info:
-        df = DataFrame(m_conf_2, columns=col, index=ind)
-        print("Confusion matrix ({0}):".format(label))
-        print(df)
-        print('\n')
+    df = DataFrame(m_conf_2, columns=col, index=ind)
+    print("Confusion matrix ({0}):".format(label))
+    print(df)
+    print('\n')
 
-        fd = open(
-            os.path.join(os.path.abspath(args.logdir), 'confusion_matrix_{0}-nn{1}.csv'.format(label, args.network)),
-            'w')
-        df.to_csv(fd, columns=col, index=ind, header=True)
-        fd.close()
+    fd = open(
+        os.path.join(os.path.abspath(args.logdir), 'confusion_matrix_{0}-nn{1}.csv'.format(label, args.network)),
+        'w')
+    df.to_csv(fd, columns=col, index=ind, header=True)
+    fd.close()
 
     return m_conf
