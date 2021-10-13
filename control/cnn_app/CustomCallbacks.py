@@ -84,7 +84,7 @@ class CalculateTestMetrics(Callback):
     https://stackoverflow.com/questions/43547402/how-to-calculate-f1-macro-in-keras
     """
 
-    def __init__(self, test_data, period=30, batch_size=32, info=True):
+    def __init__(self, test_data, period=30, batch_size=64, info=True):
         """
         Use the data generator that was provided as test
 
