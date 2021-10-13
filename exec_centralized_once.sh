@@ -14,7 +14,7 @@ export POSTGRES_PASS=rafaela123
 echo " ----------------------------
  150 epochs
  ---------------------------- "
-for instance_type in p2.xlarge
+for instance_type in g4dn.2xlarge
 do
   COUNTER=2
   while [  $COUNTER -lt 3 ]; do

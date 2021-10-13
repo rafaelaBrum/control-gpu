@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
 
     parser.add_argument('--folder', type=str, required=True)
-    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--epochs', type=int, default=100)
 
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
     parser.add_argument('--task_file', help="task file name", type=str, default=None)
@@ -38,7 +38,7 @@ def main():
 
     parser.add_argument('--instance_type', required=True)
 
-    parser.add_argument('--epochs', dest='epochs', default=100)
+    # parser.add_argument('--epochs', dest='epochs', default=100)
 
     args = parser.parse_args()
 
@@ -267,7 +267,7 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
 
 
 def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
-    if instance_type == 'g4dn.xlarge':
+    if instance_type == 'g4dn.2xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='g4dn.2xlarge',
