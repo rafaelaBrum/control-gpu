@@ -87,12 +87,12 @@ class Trainer(object):
             return Exitcodes.RUNTIME_ERROR
 
         if self._config.data:
-            dsm = importlib.import_module('control.cnn_app', self._config.data)
+            dsm = importlib.import_module('cnn_app', self._config.data)
             self._ds = getattr(dsm, self._config.data)(self._config.predst, self._config.keepimg, self._config)
         else:
             self._ds = CellRep(self._config.predst, self._config.keepimg, self._config)
 
-        net_module = importlib.import_module('control.cnn_app', net_name)
+        net_module = importlib.import_module('cnn_app', net_name)
         net_model = getattr(net_module, net_name)(self._config, self._ds)
 
         return net_model

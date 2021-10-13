@@ -160,7 +160,7 @@ class Predictor(object):
         if net_model is not None:
             self._ds = net_model.get_ds()
         elif self._config.data:
-            dsm = importlib.import_module('control.cnn_app', self._config.data)
+            dsm = importlib.import_module('cnn_app', self._config.data)
             if self._config.testdir:
                 self._ds = getattr(dsm, self._config.data)(self._config.testdir, self._config.keepimg, self._config)
             else:
@@ -169,7 +169,7 @@ class Predictor(object):
             self._ds = CellRep(self._config.predst, self._config.keepimg, self._config)
             
         if net_model is None:
-            net_module = importlib.import_module('control.cnn_app', net_name)
+            net_module = importlib.import_module('cnn_app', net_name)
             net_model = getattr(net_module, net_name)(self._config, self._ds)
 
         if x_test is None or y_test is None:
