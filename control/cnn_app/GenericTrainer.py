@@ -367,7 +367,7 @@ class Trainer(object):
         if self._config.metricsperiod > 0:
             callbacks.append(CalculateTestMetrics(test_generator,
                                               self._config.metricsperiod,
-                                              self._config.batch_size,
+                                              2*self._config.batch_size,
                                               self._config.info))
 
         if self._config.info and summary:

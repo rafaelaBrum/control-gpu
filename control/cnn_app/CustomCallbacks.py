@@ -84,7 +84,7 @@ class CalculateTestMetrics(Callback):
     https://stackoverflow.com/questions/43547402/how-to-calculate-f1-macro-in-keras
     """
 
-    def __init__(self, test_data, period=30, batch_size=32, info=True):
+    def __init__(self, test_data, period=30, batch_size=64, info=True):
         """
         Use the data generator that was provided as test
 
@@ -187,7 +187,7 @@ class CalculateTestMetrics(Callback):
         print("False positive rates: {0}".format(fpr))
         print("True positive rates: {0}".format(tpr))
         print("Thresholds: {0}".format(thresholds))
-        print(f"Accuracy: {m_conf[nclasses + 2][nclasses]}")
+        print(f"Accuracy: {m_conf[classes + 2][classes]}")
         print(f"Negative Accuracy: {neg_accuracy}")
         print(f"Positive Accuracy: {pos_accuracy}")
         print(f"Precision: {precision}")
