@@ -109,7 +109,7 @@ class Trainer(object):
         net_model = self.load_modules()
 
         # Test set splitting done in the same code now, outside GenericDatasource
-        _, _, X, Y = split_test(self._config, self._ds)
+        self.x_test, self.y_test, X, Y = split_test(self._config, self._ds)
 
         self._rex = self._rex.format(net_model.name)
 
