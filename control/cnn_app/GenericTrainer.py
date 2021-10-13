@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from .CellRep import CellRep
-from .CustomCallbacks import CalculateF1Score
+from .CustomCallbacks import CalculateF1Score, CalculateTestMetrics
 from . import Exitcodes
 from .CacheManager import CacheManager
 from .DataSetup import split_test
@@ -128,7 +128,7 @@ class Trainer(object):
 
     def _choose_generator(self, train_data, val_data, fix_dim):
         """B
-        Returns a tuple with two batch generators: (train_generator, val_generator)
+        Returns a tuple with three batch generators: (train_generator, val_generator, test_generator)
         The type of generator depends on the config.delay_load option
         """
         train_generator, val_generator = (None, None)
@@ -158,6 +158,9 @@ class Trainer(object):
                 samplewise_center=self._config.batch_norm,
                 samplewise_std_normalization=self._config.batch_norm)
 
+        test_prep = ImageDataGenerator(samplewise_center=self._config.batch_norm,
+                                       samplewise_std_normalization=self._config.batch_norm)
+
         if self._config.delay_load:
             from .BatchGenerator import ThreadedGenerator
 
@@ -180,6 +183,17 @@ class Trainer(object):
                                               shuffle=True,
                                               verbose=self._verbose,
                                               keep=self._config.keepimg)
+
+            test_generator = ThreadedGenerator(dps=(self.x_test, self.y_test),
+                                               classes=self._ds.nclasses,
+                                               dim=fix_dim,
+                                               batch_size=2 * self._config.batch_size,
+                                               image_generator=test_prep,
+                                               extra_aug=self._config.augment,
+                                               shuffle=False,
+                                               verbose=self._verbose,
+                                               input_n=1,
+                                               keep=self._config.keepimg)
         else:
             # Loads training images and validation images
             x_train, y_train = self._ds.load_data(split=None, keep_img=self._config.keepimg, data=train_data)
@@ -192,7 +206,13 @@ class Trainer(object):
             train_generator = train_prep.flow(x_train, y_train, batch_size=self._config.batch_size, shuffle=True)
             val_generator = val_prep.flow(x_val, y_val, batch_size=1)
 
-        return train_generator, val_generator
+            X, Y = self._ds.load_data(data=(self.x_test, self.y_test), keep_img=self._config.keepimg)
+
+            Y = to_categorical(Y, self._ds.nclasses)
+            test_generator = test_prep.flow(x=X, y=Y, batch_size=2 * self._config.batch_size, shuffle=False)
+            del Y
+
+        return train_generator, val_generator, test_generator
     
     def train_model(self, model, train_data, val_data=None, **kwargs):
         """
@@ -283,7 +303,7 @@ class Trainer(object):
             print("Train set: {0} items".format(len(train_data[0])))
             print("Validate set: {0} items".format(len(val_data[0])))
 
-        train_generator, val_generator = self._choose_generator(train_data, val_data, model.check_input_shape())
+        train_generator, val_generator, test_generator = self._choose_generator(train_data, val_data, model.check_input_shape())
         
         single, parallel = model.build(data_size=len(train_data[0]),
                                        allocated_gpus=allocated_gpus,
@@ -341,6 +361,12 @@ class Trainer(object):
         if self._config.f1period > 0:
             callbacks.append(CalculateF1Score(val_generator,
                                               self._config.f1period,
+                                              self._config.batch_size,
+                                              self._config.info))
+
+        if self._config.metricsperiod > 0:
+            callbacks.append(CalculateTestMetrics(test_generator,
+                                              self._config.metricsperiod,
                                               self._config.batch_size,
                                               self._config.info))
 

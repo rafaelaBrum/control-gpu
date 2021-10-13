@@ -151,6 +151,8 @@ if __name__ == "__main__":
                             default=(0.8, 0.1, 0.1), metavar=('Train', 'Validation', 'Test'))
     train_args.add_argument('-f1', dest='f1period', type=int,
                             help='Execute F1 and ROC AUC calculations every X epochs (Default: 0).', default=0)
+    train_args.add_argument('-met', dest='metricsperiod', type=int,
+                            help='Calculate metrics in test dataset every X epochs (Default: 0).', default=0)
     train_args.add_argument('-sample', dest='sample', type=float,
                             help='Use a sample of the whole data for training '
                                  '(Default: 100.0%% - use floats [0.0-1.0]).',
