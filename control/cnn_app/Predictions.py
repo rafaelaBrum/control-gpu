@@ -96,9 +96,9 @@ def print_prediction(config, target=True):
         recall = m_conf[1][1] / m_conf[1][2]
         f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
 
-        print("False positive rates: {0}".format(fpr))
-        print("True positive rates: {0}".format(tpr))
-        print("Thresholds: {0}".format(thresholds))
+        # print("False positive rates: {0}".format(fpr))
+        # print("True positive rates: {0}".format(tpr))
+        # print("Thresholds: {0}".format(thresholds))
         print(f"Accuracy: {m_conf[nclasses + 2][nclasses]}")
         print(f"Negative Accuracy: {neg_accuracy}")
         print(f"Positive Accuracy: {pos_accuracy}")

@@ -121,7 +121,7 @@ class CalculateTestMetrics(Callback):
         else:
             stp = data_size // self.bsize
         if self.info:
-            print('[F1CB] Making batch predictions: ', end='')
+            print('[METRICS] Making batch predictions: ', end='')
 
         for i in range(stp):
             start_idx = i * self.bsize
@@ -168,6 +168,14 @@ class CalculateTestMetrics(Callback):
         m_conf_2[classes + 2][classes] = '{0:.2f}'.format(sum(np.diag(m_conf)) / m_conf.sum())
         # Store accuracy in m_conf also
         m_conf[classes + 2][classes] = m_conf_2[classes + 2][classes]
+        
+        col = [i for i in range(classes)] + ['Expected Total']
+        ind = [i for i in range(classes)] + ['Predicted Total', 'Correct Rate', 'Accuracy']
+
+        df = DataFrame(m_conf_2, columns=col, index=ind)
+        print("Confusion matrix ({0}):".format(label))
+        print(df)
+        print('\n')
 
         scores = Y_pred.transpose()[1]
         fpr, tpr, thresholds = metrics.roc_curve(expected, scores, pos_label=1)
@@ -184,9 +192,9 @@ class CalculateTestMetrics(Callback):
         recall = m_conf[1][1] / m_conf[1][2]
         f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
 
-        print("False positive rates: {0}".format(fpr))
-        print("True positive rates: {0}".format(tpr))
-        print("Thresholds: {0}".format(thresholds))
+        # print("False positive rates: {0}".format(fpr))
+        # print("True positive rates: {0}".format(tpr))
+        # print("Thresholds: {0}".format(thresholds))
         print(f"Accuracy: {m_conf[classes + 2][classes]}")
         print(f"Negative Accuracy: {neg_accuracy}")
         print(f"Positive Accuracy: {pos_accuracy}")
