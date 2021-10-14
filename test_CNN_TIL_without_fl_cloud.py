@@ -239,7 +239,7 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             # cmd_daemon = "ls tests"
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net VGG16 -tn " \
                          "-data CellRep -out {2} -e {5} -cpu 2 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
-                         "-tdim 240 240 -f1 10 -met 30" \
+                         "-tdim 240 240 -f1 10 -met 30 " \
                          "-cache {3} -test_dir {4} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.
                                                                          centralized_app_file),

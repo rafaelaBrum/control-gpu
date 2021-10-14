@@ -21,7 +21,7 @@ do
     echo " ----------------------------
      Running test - Counter=$COUNTER
     ----------------------------"
-    FOLDER="centralized_once_150_epochs_${instance_type}_on_demand"
+    FOLDER="centralized_once_150_epochs_${instance_type}_on_demand_metrics"
     echo python3 test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --epochs 150
     python3  test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --epochs 150
     #sleep 30m
