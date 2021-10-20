@@ -6,6 +6,7 @@ from keras.callbacks import Callback
 
 import numpy as np
 
+from pandas import DataFrame
 
 class CalculateF1Score(Callback):
     """
@@ -173,7 +174,7 @@ class CalculateTestMetrics(Callback):
         ind = [i for i in range(classes)] + ['Predicted Total', 'Correct Rate', 'Accuracy']
 
         df = DataFrame(m_conf_2, columns=col, index=ind)
-        print("Confusion matrix ({0}):".format(label))
+        print("Confusion matrix (TILs):")
         print(df)
         print('\n')
 
