@@ -65,12 +65,6 @@ def main():
     # time.sleep(10)
 
     threads: List[threading.Thread] = []
-    x = threading.Thread(target=controlling_client_flower_from_server, args=(vm_server, 0, os.path.join(args.folder,
-                                                                                                        'client'),
-                                                                             n_parties, args.epochs, args.data_folder))
-    threads.append(x)
-    x.start()
-    time.sleep(5)
 
     for i in range(1, n_parties):
         x = threading.Thread(target=controlling_client_flower, args=(loader,
@@ -82,11 +76,29 @@ def main():
         x.start()
         time.sleep(5)
 
+    x = threading.Thread(target=controlling_client_flower_from_server, args=(vm_server, 0,
+                                                                             n_parties, args.epochs, args.data_folder))
+    threads.append(x)
+    x.start()
+    time.sleep(5)
+
+    server_finished = False
+    client_finished = False
+
     while vm_server.state not in (CloudManager.TERMINATED, None):
         # print("Testing the server")
-        if has_command_finished(vm_server):
+        if not server_finished and has_command_finished(vm_server, 'test_server'):
             logging.info('Server has finished execution!')
-            finish_vm(vm_server, os.path.join(args.folder, 'server'), 'screen_log')
+            finish_vm(vm_server, os.path.join(args.folder, 'server'), 'screen_log', 0)
+            server_finished = True
+        if not client_finished and has_command_finished(vm_server, 'test_client'):
+            logging.info(f'Client 0 has finished execution!')
+            finish_vm(vm_server, os.path.join(args.folder, 'client'), 'screen_log_0', 0)
+            client_finished = True
+        if server_finished and client_finished:
+            status = vm_server.terminate()
+            if status:
+                logging.info("<VirtualMachine {}>: Terminated with Success".format(vm_server.instance_id, status))
         time.sleep(5)
 
     cost = vm_server.uptime.seconds * (vm_server.price / 3600.0)  # price in seconds'
@@ -191,7 +203,7 @@ def __prepare_logging():
     root_logger.addHandler(console_handler)
 
 
-def finish_vm(vm: VirtualMachine, folder, item_name):
+def finish_vm(vm: VirtualMachine, folder, item_name, id):
     try:
         os.makedirs(os.path.join(vm.loader.communication_conf.key_path, 'control-gpu', 'logs', folder))
     except Exception as _:
@@ -203,18 +215,19 @@ def finish_vm(vm: VirtualMachine, folder, item_name):
     except Exception as e:
         logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR - {}".format(vm.instance_id, e))
 
-    status = vm.terminate()
+    if id != 0:
+        status = vm.terminate()
 
-    if status:
-        logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+        if status:
+            logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
 
-def has_command_finished(vm: VirtualMachine):
-    cmd = "screen -list | grep test"
+def has_command_finished(vm: VirtualMachine, name_screen: str):
+    cmd = "screen -list | grep " + name_screen
 
     stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
 
-    if 'test' in stdout:
+    if name_screen in stdout:
         finished = False
     else:
         finished = True
@@ -273,7 +286,7 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties, rounds):
                                                         rounds,
                                                         n_parties)
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test_server -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
@@ -383,7 +396,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
                                                                         os.path.join(vm.loader.ec2_conf.input_path,
                                                                                      test_folder),
                                                                         epochs)
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test_client -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
@@ -503,9 +516,9 @@ def controlling_client_flower(loader: Loader, server_ip: str,
 
     while vm.state not in (CloudManager.TERMINATED, None):
         # print(f"Testing client_{client_id}")
-        if has_command_finished(vm):
+        if has_command_finished(vm, 'test_client'):
             logging.info(f'Client {client_id} has finished execution!')
-            finish_vm(vm, folder_log, f'screen_log_{client_id}')
+            finish_vm(vm, folder_log, f'screen_log_{client_id}', client_id)
         time.sleep(5)
 
     cost = vm.uptime.seconds * (vm.price / 3600.0)  # price in seconds'
@@ -514,7 +527,7 @@ def controlling_client_flower(loader: Loader, server_ip: str,
 
 
 def controlling_client_flower_from_server(vm: VirtualMachine,
-                                          client_id: int, folder_log: str,
+                                          client_id: int,
                                           n_parties: int,
                                           epochs: int, folder: str):
     train_folder = f'{folder}/CellRep/{n_parties}_clients/{client_id}/trainset'
@@ -525,16 +538,16 @@ def controlling_client_flower_from_server(vm: VirtualMachine,
 
     # input("waiting...")
 
-    while vm.state not in (CloudManager.TERMINATED, None):
-        # print(f"Testing client_{client_id}")
-        if has_command_finished(vm):
-            logging.info(f'Client {client_id} has finished execution!')
-            finish_vm(vm, folder_log, f'screen_log_{client_id}')
-        time.sleep(5)
-
-    cost = vm.uptime.seconds * (vm.price / 3600.0)  # price in seconds'
-
-    logging.info("Client {} cost {}".format(client_id, cost))
+    # while vm.state not in (CloudManager.TERMINATED, None):
+    #     # print(f"Testing client_{client_id}")
+    #     if has_command_finished(vm, 'test_client'):
+    #         logging.info(f'Client {client_id} has finished execution!')
+    #         finish_vm(vm, folder_log, f'screen_log_{client_id}', client_id)
+    #     time.sleep(5)
+    #
+    # cost = vm.uptime.seconds * (vm.price / 3600.0)  # price in seconds'
+    #
+    # logging.info("Client {} cost {}".format(client_id, cost))
 
 
 if __name__ == "__main__":
