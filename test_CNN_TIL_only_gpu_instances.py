@@ -203,7 +203,7 @@ def __prepare_logging():
     root_logger.addHandler(console_handler)
 
 
-def finish_vm(vm: VirtualMachine, folder, item_name, id):
+def finish_vm(vm: VirtualMachine, folder, item_name, id_cli):
     try:
         os.makedirs(os.path.join(vm.loader.communication_conf.key_path, 'control-gpu', 'logs', folder))
     except Exception as _:
@@ -215,7 +215,7 @@ def finish_vm(vm: VirtualMachine, folder, item_name, id):
     except Exception as e:
         logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR - {}".format(vm.instance_id, e))
 
-    if id != 0:
+    if id_cli != 0:
         status = vm.terminate()
 
         if status:
@@ -396,7 +396,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
                                                                         os.path.join(vm.loader.ec2_conf.input_path,
                                                                                      test_folder),
                                                                         epochs)
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test_client -dm bash -c "{}"'.format(client_id, cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test_client -dm bash -c "{}"'.format(client_id,
+                                                                                                         cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(vm.instance_id, cmd_screen))
