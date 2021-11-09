@@ -66,3 +66,30 @@ target/
 
 # logging folder
 logs/
+
+# python virtualenv
+venv/
+venv_hads/
+venv_novo/
+
+# dataset folder
+data_torch/
+data/
+data_homogeneous/
+data_less_heterogeneous/
+data_old/
+data_old_old/
+
+# output files
+*.txt
+
+# app files
+*.h5
+*.npz
+*.pik
+
+# folders of TIL app
+results/
+
+# screen log files
+screen*

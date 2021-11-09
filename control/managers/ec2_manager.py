@@ -357,13 +357,21 @@ class EC2Manager(CloudManager):
 
         return [i.id for i in instances]
 
-    def get_instance_ip(self, instance_id):
+    def get_public_instance_ip(self, instance_id):
         instance = self.__get_instance(instance_id)
 
         if instance is None:
             return None
         else:
             return instance.public_ip_address
+
+    def get_private_instance_ip(self, instance_id):
+        instance = self.__get_instance(instance_id)
+
+        if instance is None:
+            return None
+        else:
+            return instance.private_ip_address
 
     @staticmethod
     def get_preemptible_price(instance_type, zone=None):

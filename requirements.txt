@@ -18,6 +18,7 @@ CherryPy==18.6.0
 # defusedxml==0.6.0
 # distlib==0.3.1
 # docutils==0.15.2
+ec2_metadata==2.4.0
 # filelock==3.0.12
 # flake8==3.8.3
 # idna==2.10
@@ -35,17 +36,16 @@ CherryPy==18.6.0
 # matplotlib==3.3.0
 # mccabe==0.6.1
 # more-itertools==8.4.0
-# numpy==1.19.1
+numpy==1.19.5
 # packaging==20.4
-# pandas==1.1.4
+pandas==1.1.4
 paramiko==2.7.1
 # pathtools==0.1.2
 # pbr==5.5.1
-# Pillow==7.2.0
 # plac==1.2.0
 # pluggy==0.13.1
 # portend==2.6
-psycopg2==2.8.5
+# psycopg2==2.8.5
 psycopg2-binary==2.8.5
 # punch.py==2.0.0
 # py==1.9.0
@@ -88,3 +88,11 @@ SQLAlchemy-Utils==0.36.8
 zope.event==4.4
 
 python-dateutil==2.8.1
+
+#flwr==0.15.0
+#git+https://github.com/rafaelaBrum/flower.git
+#torch==1.8.0
+#torchvision==0.9.0
+
+Pillow==8.3.0
+#flwr==0.17.0

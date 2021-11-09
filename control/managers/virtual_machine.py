@@ -38,7 +38,8 @@ class VirtualMachine:
         self.manager = EC2Manager()
 
         self.instance_id = None
-        self.instance_ip = None
+        self.instance_public_ip = None
+        self.instance_private_ip = None
         self.current_state = CloudManager.PENDING
         self.marked_to_interrupt = False
 
@@ -118,7 +119,8 @@ class VirtualMachine:
                 self.__start_time = datetime.now()
                 self.__start_time_utc = datetime.utcnow()
 
-                self.instance_ip = self.manager.get_instance_ip(self.instance_id)
+                self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
+                self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
 
                 if self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
@@ -151,7 +153,8 @@ class VirtualMachine:
 
                 return False
         else:
-            self.instance_ip = self.manager.get_instance_ip(self.instance_id)
+            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
+            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
 
         # Instance was already started
         return False
@@ -217,7 +220,7 @@ class VirtualMachine:
             # update instance IP
             self.update_ip()
             # Start a new SSH Client
-            self.ssh = SSHClient(self.instance_ip)
+            self.ssh = SSHClient(self.instance_public_ip)
 
             # try to open the connection
             if self.ssh.open_connection():
@@ -314,7 +317,8 @@ class VirtualMachine:
         return status
 
     def update_ip(self):
-        self.instance_ip = self.manager.get_instance_ip(self.instance_id)
+        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
+        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
 
     # return the a IP's list of all running instance on the cloud provider
     def get_instances_ip(self):
@@ -329,7 +333,7 @@ class VirtualMachine:
         instances_id = self.manager.list_instances_id(filter_instance)
         ip_list = []
         for id_instance in instances_id:
-            ip_list.append(self.manager.get_instance_ip(id_instance))
+            ip_list.append(self.manager.get_public_instance_ip(id_instance))
 
         return ip_list
 
@@ -400,7 +404,8 @@ class VirtualMachine:
             return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
 
         else:
-            return self.instance_type.price_ondemand
+            return self.manager.get_ondemand_price(self.instance_type.type, self.loader.ec2_conf.region)
+            # return self.instance_type.price_ondemand
 
     @property
     def type(self):
