@@ -271,7 +271,7 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='g4dn.2xlarge',
-            image_id='ami-080af420cdfb56e39',
+            image_id='ami-05967bab0d693d334',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
@@ -282,7 +282,7 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
         instance = InstanceType(
             provider=CloudManager.EC2,
             instance_type='p2.xlarge',
-            image_id='ami-080af420cdfb56e39',
+            image_id='ami-05967bab0d693d334',
             ebs_device_name='/dev/xvdf',
             restrictions={'on-demand': 1,
                           'preemptible': 1},
