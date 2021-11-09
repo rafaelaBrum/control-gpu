@@ -38,7 +38,8 @@ echo "cuDNN 7 installed"
 sudo apt install git -y
 git clone https://www.github.com/rafaelaBrum/Segframe.git
 cd Segframe
-pip3 -r requirements.txt
+pip3 install -U pip
+pip3 install -r requirements.txt
 echo "Segframe cloned and requirements installed"
 
 echo "Reboot machine to test the nvidia-smi command and then creates a image of it"
