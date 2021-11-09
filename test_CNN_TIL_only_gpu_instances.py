@@ -80,7 +80,7 @@ def main():
                                                                              n_parties, args.epochs, args.data_folder))
     threads.append(x)
     x.start()
-    time.sleep(5)
+    time.sleep(50)
 
     server_finished = False
     client_finished = False
@@ -225,7 +225,13 @@ def finish_vm(vm: VirtualMachine, folder, item_name, id_cli):
 def has_command_finished(vm: VirtualMachine, name_screen: str):
     cmd = "screen -list | grep " + name_screen
 
+    # print("cmd = ", cmd)
+
     stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+
+    # print("stdout", stdout)
+    # print("stderr", stderr)
+    # print("code_return", code_return)
 
     if name_screen in stdout:
         finished = False
