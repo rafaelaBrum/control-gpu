@@ -121,7 +121,10 @@ class Trainer(object):
             self._ds.check_paths(X, self._config.predst)
 
         # After test set is separated, after data sampling is done, now split train and val
-        train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y))
+        if self._config.split[-1:][0] > 0:
+            train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y), test_size=len(self.test_x))
+        else:
+            train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y))
 
         training_model, sw_thread, epad = self.train_model(net_model, train_data, val_data)
         return sw_thread.join()
