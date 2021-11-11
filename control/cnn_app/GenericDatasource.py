@@ -106,7 +106,7 @@ class GenericDS(ABC):
 
         return X, Y
 
-    def _split_data(self, split, X, Y):
+    def _split_data(self, split, X, Y, test_size):
         """
         Split data in at most N sets. Returns a tuple (set1,set2,set3,setN) with the divided
         data
@@ -115,7 +115,7 @@ class GenericDS(ABC):
             it_count = 0
             split_data = []
             start_idx = 0
-            samples = len(X)
+            samples = len(X) + test_size
             for frac in split:
                 it_count = int(frac * samples)
                 split_data.append((X[start_idx:start_idx+it_count], Y[start_idx:start_idx+it_count]))
@@ -159,12 +159,12 @@ class GenericDS(ABC):
     def _shuffle(self, X, Y):
         # Shuffle samples and labels maintaining relative order
         combined = list(zip(X, Y))
-        random.shuffle(combined)
+        # random.shuffle(combined)
         X[:], Y[:] = zip(*combined)
 
         return X, Y
         
-    def split_metadata(self, split, data=None):
+    def split_metadata(self, split, data=None, test_size=0):
         """
         Returns all metadata split into N sets, defined by the spliting tuples
         
@@ -173,9 +173,9 @@ class GenericDS(ABC):
         """
         # @param data <tuple>: (X,Y) if provided, split this sequence. Else, split full metadata
         if data is None:
-            return self._split_data(split, self.X, self.Y)
+            return self._split_data(split, self.X, self.Y, test_size)
         elif len(data) >= 2:
-            return self._split_data(split, data[0], data[1])
+            return self._split_data(split, data[0], data[1], test_size)
         else:
             return None
     
