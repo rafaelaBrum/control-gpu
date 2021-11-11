@@ -251,7 +251,7 @@ def __prepare_vm(vm: VirtualMachine, dataset_folder, n_epochs, split, neural_net
                                                                          vm.loader.application_conf.
                                                                          centralized_app_file),
                                                      os.path.join(vm.loader.ec2_conf.input_path, dataset_folder),
-                                                     split,
+                                                     f'{split[0]} {split[1]} {split[2]}',
                                                      neural_network,
                                                      os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'),
                                                      n_epochs,
