@@ -20,15 +20,14 @@ do
   neural_network="Inception"
   split="0.98 0.01 0.01"
   underscore_split=$(echo $split | sed 's/ /_/g')
-  STR1=`echo $STR1 | sed 's/ /,/g'`
   dataset_folder='brca'
   while [  $COUNTER -lt 2 ]; do
     echo " ----------------------------
     Running test - Counter=$COUNTER
    ----------------------------"
    FOLDER="patches_${dataset_folder}_50_epochs_${neural_network}_split_${underscore_split}_$((COUNTER))_folder_${instance_type}"
-    echo python3 test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --dataset_folder $dataset_folder --neural_network $neural_network --split $split --rounds 50
-    python3 test_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --dataset_folder $dataset_folder --neural_network $neural_network --split $split --rounds 50
+    echo python3 test_patches_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --dataset_folder $dataset_folder --neural_network $neural_network --split $split --epochs 50
+    python3 test_patches_CNN_TIL_without_fl_cloud.py --folder $FOLDER --instance_type $instance_type --dataset_folder $dataset_folder --neural_network $neural_network --split $split --epochs 50
     #sleep 30m
     COUNTER=$((COUNTER+1))
   done
