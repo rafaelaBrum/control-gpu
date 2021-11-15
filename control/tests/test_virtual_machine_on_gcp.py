@@ -34,12 +34,19 @@ def __prepare_logging():
 def test_on_demand_virtual_machine():
     instance = InstanceType(
         provider=CloudManager.GCLOUD,
-        instance_type='n1-standard-1'
+        instance_type='n2-standard-2',
+        image_id='ubuntu-flower-server',
+        restrictions={'on-demand': 1,
+                      'preemptible': 1},
+        prices={'on-demand': 0.001,
+                'preemptible': 0.000031},
+        ebs_device_name=''
     )
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand'
+        market='on-demand',
+        loader=None
     )
 
     __prepare_logging()

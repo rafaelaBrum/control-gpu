@@ -17,6 +17,7 @@ class InstanceType:
 
         self.id = None
 
+        #TODO change this to reflect GCP as well
         config = EC2Config()
 
         self.boot_overhead_seconds = config.boot_overhead
@@ -59,10 +60,6 @@ class InstanceType:
     @property
     def market_ondemand(self):
         return self.restrictions['markets']['on-demand'].lower() in ['yes']
-
-    @property
-    def provider(self):
-        return self.provider
 
     @property
     def market_preemptible(self):
