@@ -2,6 +2,7 @@ from control.domain.instance_type import InstanceType
 
 from control.managers.cloud_manager import CloudManager
 from control.managers.ec2_manager import EC2Manager
+from control.managers.gcp_manager import GCPManager
 
 from control.util.ssh_client import SSHClient
 from control.util.loader import Loader
@@ -35,7 +36,10 @@ class VirtualMachine:
         self.create_file_system = False
 
         # Start cloud manager
-        self.manager = EC2Manager()
+        if instance_type.provider == CloudManager.EC2:
+            self.manager = EC2Manager()
+        elif instance_type.provider == CloudManager.GCLOUD:
+            self.manager = GCPManager()
 
         self.instance_id = None
         self.instance_public_ip = None
@@ -122,7 +126,8 @@ class VirtualMachine:
                 self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
                 self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
 
-                if self.loader.file_system_conf.type == CloudManager.EBS:
+                if self.instance_type.provider == CloudManager.EC2 and \
+                        self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
                     if self.volume_id is None:
                         self.volume_id = self.manager.create_volume(

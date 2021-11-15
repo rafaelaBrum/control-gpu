@@ -61,6 +61,10 @@ class InstanceType:
         return self.restrictions['markets']['on-demand'].lower() in ['yes']
 
     @property
+    def provider(self):
+        return self.provider
+
+    @property
     def market_preemptible(self):
         return self.restrictions['markets']['preemptible'].lower() in ['yes']
 
@@ -74,7 +78,7 @@ class InstanceType:
 
     def __str__(self):
         return "'{}' on-demand price: '{}' preemptible price: '{}' " \
-               "region: '{}' zone: '{}'".format(
+               "region: '{}' zone: '{}' provider: {}".format(
                 self.type,
                 # self.memory,
                 # self.vcpu,
@@ -82,5 +86,6 @@ class InstanceType:
                 self.price_preemptible,
                 self.region,
                 self.zone,
+                self.provider
                 # self.cpu_credits,
                 )

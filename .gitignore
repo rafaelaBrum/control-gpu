@@ -93,3 +93,7 @@ results/
 
 # screen log files
 screen*
+
+
+#PyCharm WSL folder
+%SystemDrive%/
