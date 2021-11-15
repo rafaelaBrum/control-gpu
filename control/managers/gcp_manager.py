@@ -66,7 +66,7 @@ class GCPManager(CloudManager):
         try:
             instances = self.compute_engine.instances().insert(
                 project=self.gcp_conf.project,
-                zone=self.gcp_conf.zone,
+                zone=self.gcp_conf.region,
                 # sourceInstanceTemplate=
                 body=info).execute()
 
@@ -138,8 +138,11 @@ class GCPManager(CloudManager):
 
     def create_on_demand_instance(self, instance_type, image_id):
 
+        machine_type = f'zones/{self.gcp_conf.zone}/machineTypes/n2-standard-2'
+
         config = {
-            'machineType': instance_type,
+            'name': 'teste',
+            'machineType': machine_type,
 
             # # Specify the boot disk and the image to use as a source.
             # 'disks': [

@@ -60,9 +60,9 @@ class InstanceType:
     def market_ondemand(self):
         return self.restrictions['markets']['on-demand'].lower() in ['yes']
 
-    @property
-    def provider(self):
-        return self.provider
+    # @property
+    # def provider(self):
+    #     return self.provider
 
     @property
     def market_preemptible(self):

@@ -11,3 +11,7 @@ class GCPConfig(Config):
     @property
     def zone(self):
         return self.get_property(self._key, 'zone')
+
+    @property
+    def region(self):
+        return self.get_property(self._key, 'region')
