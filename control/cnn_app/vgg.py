@@ -89,7 +89,7 @@ class VGG16(GenericEnsemble):
                 print("Found previous learning rate: {0}".format(l_rate))
 
         l_rate = self.rescale('lr',l_rate)
-        sgd = optimizers.SGD(lr=l_rate, decay=1.5e-4, momentum=0.9, nesterov=True)
+        sgd = optimizers.SGD(lr=l_rate, decay=1.0e-4, momentum=0.9, nesterov=True)
         #adam = optimizers.Adam(lr = l_rate)
         
         #Return parallel model if multiple GPUs are available
