@@ -60,6 +60,10 @@ def test_on_demand_virtual_machine():
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
+
+def main():
+    print("Testing on demand VM")
+    test_on_demand_virtual_machine()
 # if __name__ == "__main__":
 #     print("Testing on demand VM")
 #     test_on_demand_virtual_machine()

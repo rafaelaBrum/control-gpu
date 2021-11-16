@@ -66,7 +66,7 @@ class GCPManager(CloudManager):
         try:
             instances = self.compute_engine.instances().insert(
                 project=self.gcp_conf.project,
-                zone=self.gcp_conf.region,
+                zone=self.gcp_conf.zone,
                 # sourceInstanceTemplate=
                 body=info).execute()
 
