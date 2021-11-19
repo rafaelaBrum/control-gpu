@@ -5,18 +5,6 @@ class CommunicationConfig(Config):
     _key = 'communication'
 
     @property
-    def key_path(self):
-        return self.get_property(self._key, 'key_path')
-
-    @property
-    def key_file(self):
-        return self.get_property(self._key, 'key_file')
-
-    @property
-    def user(self):
-        return self.get_property(self._key, 'user')
-
-    @property
     def ssh_port(self):
         return int(self.get_property(self._key, 'ssh_port'))
 

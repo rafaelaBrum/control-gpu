@@ -59,3 +59,12 @@ class EC2Config(Config):
     @property
     def vm_user(self):
         return self.get_property(self._key, 'vm_user')
+
+    @property
+    def key_path(self):
+        return self.get_property(self._key, 'key_path')
+
+    @property
+    def key_file(self):
+        return self.get_property(self._key, 'key_file')
+

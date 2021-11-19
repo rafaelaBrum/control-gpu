@@ -9,6 +9,7 @@ from control.config.communication_config import CommunicationConfig
 from control.config.database_config import DataBaseConfig
 from control.config.debug_config import DebugConfig
 from control.config.ec2_config import EC2Config
+from control.config.gcp_config import GCPConfig
 from control.config.file_system_config import FileSystemConfig
 from control.config.input_config import InputConfig
 from control.config.logging_config import LoggingConfig
@@ -81,6 +82,7 @@ class Loader:
         self.database_conf = DataBaseConfig()
         self.debug_conf = DebugConfig()
         self.ec2_conf = EC2Config()
+        self.gcp_conf = GCPConfig()
         self.file_system_conf = FileSystemConfig()
         self.input_conf = InputConfig()
         self.logging_conf = LoggingConfig()

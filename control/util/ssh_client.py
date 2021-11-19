@@ -12,13 +12,13 @@ import os
 
 class SSHClient:
 
-    def __init__(self, ip_address):
+    def __init__(self, ip_address, key_path, key_file, user):
         ssh_conf = CommunicationConfig()
 
         self.ip_address = ip_address
 
-        self.key = ssh_conf.key_path + ssh_conf.key_file
-        self.user = ssh_conf.user
+        self.key = key_path + key_file
+        self.user = user
         self.port = ssh_conf.ssh_port
         self.repeat = ssh_conf.repeat
         self.connection_timeout = ssh_conf.connection_timeout
@@ -58,19 +58,33 @@ class SSHClient:
         if not self.is_active:
 
             self.client = paramiko.SSHClient()
-            self.client.load_system_host_keys()
+            # self.client.load_system_host_keys()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            if '.pem' not in self.key:
+                key = paramiko.RSAKey.from_private_key_file(self.key)
+                print("key")
+                print(key)
 
             for x in range(self.repeat):
 
                 try:
-                    self.client.connect(
-                        hostname=self.ip_address,
-                        port=self.port,
-                        username=self.user,
-                        key_filename=self.key,
-                        timeout=self.connection_timeout
-                    )
+                    if '.pem' not in self.key:
+                        self.client.connect(
+                            hostname=self.ip_address,
+                            port=self.port,
+                            username=self.user,
+                            pkey=key,
+                            timeout=self.connection_timeout
+                        )
+                    else:
+                        self.client.connect(
+                            hostname=self.ip_address,
+                            port=self.port,
+                            username=self.user,
+                            key_filename=self.key,
+                            timeout=self.connection_timeout
+                        )
 
                     tr = self.client.get_transport()
                     tr.default_max_packet_size = 100000000
@@ -80,7 +94,7 @@ class SSHClient:
                 except (paramiko.BadHostKeyException, paramiko.AuthenticationException,
                         paramiko.SSHException, socket.error) as e:
 
-                    # logging.info("<SSH Client>:" + str(x) + "> " + str(e))
+                    logging.info("<SSH Client>:" + str(x) + "> " + str(e))
 
                     sleep(self.retry_interval)
         else:

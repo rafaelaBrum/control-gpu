@@ -15,3 +15,23 @@ class GCPConfig(Config):
     @property
     def region(self):
         return self.get_property(self._key, 'region')
+
+    @property
+    def home_path(self):
+        return self.get_property(self._key, 'home_path')
+
+    @property
+    def input_path(self):
+        return self.get_property(self._key, 'input_path')
+
+    @property
+    def key_path(self):
+        return self.get_property(self._key, 'key_path')
+
+    @property
+    def key_file(self):
+        return self.get_property(self._key, 'key_file')
+
+    @property
+    def vm_user(self):
+        return self.get_property(self._key, 'user')

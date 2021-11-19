@@ -3,7 +3,7 @@ from control.config.ec2_config import EC2Config
 
 class InstanceType:
 
-    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name):
+    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='', vm_name=''):
         self.provider = provider
         self.type = instance_type
         # self.memory = float(memory) * 1024.0  # GB to MB
@@ -14,6 +14,7 @@ class InstanceType:
         self.restrictions = restrictions
         self.image_id = image_id
         self.ebs_device_name = ebs_device_name
+        self.vm_name = vm_name
 
         self.id = None
 

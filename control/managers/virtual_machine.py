@@ -14,7 +14,6 @@ import logging
 
 import os
 
-
 # Class to control the virtual machine in the cloud
 # Parameters: Instance_type (InstanceType), market (str), primary (boolean)
 
@@ -94,16 +93,23 @@ class VirtualMachine:
 
             try:
 
-                if self.market == CloudManager.ON_DEMAND:
+                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
+                    raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
+                elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                               image_id=self.instance_type.image_id)
-                elif self.market == CloudManager.PREEMPTIBLE:
+                elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
+                    self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
+                                                                              image_id=self.instance_type.image_id,
+                                                                              vm_name=self.instance_type.vm_name)
+                elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = \
                         self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
                                                                  image_id=self.instance_type.image_id,
                                                                  max_price=self.instance_type.price_preemptible + 0.1)
                 else:
-                    raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
+                    raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
+                                    f"{self.instance_type.provider} cloud provider yet")
 
             except Exception as e:
                 logging.error("<VirtualMachine>: "
@@ -225,7 +231,12 @@ class VirtualMachine:
             # update instance IP
             self.update_ip()
             # Start a new SSH Client
-            self.ssh = SSHClient(self.instance_public_ip)
+            if self.instance_type.provider == CloudManager.EC2:
+                self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
+                                     self.loader.ec2_conf.key_file, self.loader.ec2_conf.vm_user)
+            elif self.instance_type.provider == CloudManager.GCLOUD:
+                self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
+                                     self.loader.gcp_conf.key_file, self.loader.gcp_conf.vm_user)
 
             # try to open the connection
             if self.ssh.open_connection():
@@ -233,17 +244,19 @@ class VirtualMachine:
                 logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
                                                                                    self.loader.file_system_conf.path))
                 # create directory
-                self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
+                #TODO: add storage options to GCP
+                if self.instance_type.provider == CloudManager.EC2:
+                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
-                if self.loader.file_system_conf.type == CloudManager.EBS:
-                    self.__create_ebs(self.loader.file_system_conf.path)
-                elif self.loader.file_system_conf.type == CloudManager.S3:
-                    self.__create_s3(self.loader.file_system_conf.path)
-                else:
-                    logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+                    if self.loader.file_system_conf.type == CloudManager.EBS:
+                        self.__create_ebs(self.loader.file_system_conf.path)
+                    elif self.loader.file_system_conf.type == CloudManager.S3:
+                        self.__create_s3(self.loader.file_system_conf.path)
+                    else:
+                        logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
-                    raise Exception(
-                        "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
+                        raise Exception(
+                            "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
@@ -256,33 +269,56 @@ class VirtualMachine:
                 print(stdout)
 
                 # Send daemon file
-                self.ssh.put_file(source=self.loader.application_conf.daemon_path,
-                                  target=self.loader.ec2_conf.home_path,
-                                  item=self.loader.application_conf.daemon_file)
+                if self.instance_type.provider == CloudManager.EC2:
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                      target=self.loader.ec2_conf.home_path,
+                                      item=self.loader.application_conf.daemon_file)
 
-                # create execution folder
-                self.root_folder = os.path.join(self.loader.file_system_conf.path,
-                                                '{}_{}'.format(self.loader.cudalign_task.task_id,
-                                                               self.loader.execution_id))
+                    # create execution folder
+                    self.root_folder = os.path.join(self.loader.file_system_conf.path,
+                                                    '{}_{}'.format(self.loader.cudalign_task.task_id,
+                                                                   self.loader.execution_id))
+
+                    cmd_daemon = "python3 {} " \
+                                 "--vm_user {} " \
+                                 "--root_path {} " \
+                                 "--task_id {} " \
+                                 "--execution_id {}  " \
+                                 "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                         self.loader.application_conf.daemon_file),
+                                                            self.loader.ec2_conf.vm_user,
+                                                            self.loader.file_system_conf.path,
+                                                            self.loader.cudalign_task.task_id,
+                                                            self.loader.execution_id,
+                                                            self.instance_id)
+
+                elif self.instance_type.provider == CloudManager.GCLOUD:
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                      target=self.loader.gcp_conf.home_path,
+                                      item=self.loader.application_conf.daemon_file)
+
+                    # create execution folder
+                    self.root_folder = os.path.join(self.loader.gcp_conf.home_path,
+                                                    '{}_{}'.format(self.loader.cudalign_task.task_id,
+                                                                   self.loader.execution_id))
+
+                    cmd_daemon = "python3 {} " \
+                                 "--vm_user {} " \
+                                 "--root_path {} " \
+                                 "--task_id {} " \
+                                 "--execution_id {}  " \
+                                 "--instance_id {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                         self.loader.application_conf.daemon_file),
+                                                            self.loader.gcp_conf.vm_user,
+                                                            self.loader.file_system_conf.path,
+                                                            self.loader.cudalign_task.task_id,
+                                                            self.loader.execution_id,
+                                                            self.instance_id)
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
 
                 # Start Daemon
                 logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
-
-                # cmd_daemon = "ls tests"
-                cmd_daemon = "python3 {} " \
-                             "--vm_user {} " \
-                             "--root_path {} " \
-                             "--task_id {} " \
-                             "--execution_id {}  " \
-                             "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                     self.loader.application_conf.daemon_file),
-                                                        self.loader.ec2_conf.vm_user,
-                                                        self.loader.file_system_conf.path,
-                                                        self.loader.cudalign_task.task_id,
-                                                        self.loader.execution_id,
-                                                        self.instance_id)
 
                 cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
                 # cmd_screen = '{}'.format(cmd_daemon)

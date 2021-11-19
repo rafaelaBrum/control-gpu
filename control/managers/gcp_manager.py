@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from control.managers.cloud_manager import CloudManager
 
 from control.config.gcp_config import GCPConfig
@@ -12,6 +14,7 @@ import logging
 import json
 
 import math
+import time
 
 from pkg_resources import resource_filename
 
@@ -38,42 +41,55 @@ class GCPManager(CloudManager):
     #         'Values': [v for v in values]
     #     }
 
-    # def _update_history(self, instances, status):
-    #     for i in instances:
-    #
-    #         if status == 'start':
-    #             try:
-    #                 i.load()
-    #             except:
-    #                 pass
-    #
-    #             self.instances_history = {
-    #                 i.id: {
-    #                     'StartTime': i.launch_time,
-    #                     'EndTime': None,
-    #                     'Instance': i,
-    #                     'Zone': i.placement['AvailabilityZone']
-    #                 }
-    #             }
-    #
-    #         if status == 'terminate':
-    #             if i.id in self.instances_history:
-    #                 self.instances_history[i.id]['EndTime'] = \
-    #                     datetime.now(tz=tzutc())
+    def _update_history(self, instances, status):
+
+        for instance in instances:
+
+            if status == 'start':
+                self.instances_history = {
+                    instance['id']: {
+                        'StartTime': instance['creationTimestamp'],
+                        'EndTime': None,
+                        'Instance': instance,
+                        'Zone': instance['zone']
+                    }
+                }
+
+            if status == 'terminate':
+                if instance['id'] in self.instances_history:
+                    self.instances_history[instance['id']]['EndTime'] = \
+                        datetime.now(tz=tzutc())
+
+    def _wait_for_operation(self, operation):
+        # print('Waiting for operation to finish...')
+
+        while True:
+            result = self.compute_engine.zoneOperations().get(
+                project=self.gcp_conf.project,
+                zone=self.gcp_conf.zone,
+                operation=operation).execute()
+
+            if result['status'] == 'DONE':
+                # print("done.")
+                if 'error' in result:
+                    raise Exception(result['error'])
+                return result
+
+            time.sleep(1)
 
     def _create_instance(self, info):
 
         try:
-            instances = self.compute_engine.instances().insert(
+            operation = self.compute_engine.instances().insert(
                 project=self.gcp_conf.project,
                 zone=self.gcp_conf.zone,
-                # sourceInstanceTemplate=
                 body=info).execute()
 
-            # self._update_history(instances, 'start')
+            self._wait_for_operation(operation['name'])
 
-            # for i in instances:
-            #     i.wait_until_running()
+            instances = self.__get_instances(filter=f'(name = {info["name"]})')
+
+            self._update_history(instances, 'start')
 
             return instances
 
@@ -136,21 +152,52 @@ class GCPManager(CloudManager):
     #         logging.error(e)
     #         return False
 
-    def create_on_demand_instance(self, instance_type, image_id):
+    def create_on_demand_instance(self, instance_type, image_id, vm_name=''):
 
         machine_type = f'zones/{self.gcp_conf.zone}/machineTypes/n2-standard-2'
 
+        image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
+                                                          image=f'{image_id}').execute()
+        source_disk_image = image_response['selfLink']
+
         config = {
-            'name': 'teste',
+            'name': vm_name,
             'machineType': machine_type,
 
-            # # Specify the boot disk and the image to use as a source.
-            # 'disks': [
-            #     {
-            #         'boot': True,
-            #         'autoDelete': True
-            #     }
-            # ],
+            # Not working. Still in Beta on GCP API!
+            # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+            # 'soourceMachineImage': source_machine_image,
+
+            # Specify the boot disk and the image to use as a source.
+            'disks': [
+                {
+                    'boot': True,
+                    'autoDelete': True,
+                    'initializeParams': {
+                        'sourceImage': source_disk_image,
+                    }
+
+                }
+            ],
+
+            # Allowing SSH connection from third-parties
+            "metadata": {
+                "items": [
+                    {
+                        "key": 'enable-oslogin',
+                        "value": 'TRUE'
+                    }
+                ]
+            },
+
+            # Specify a network interface with NAT to access the public
+            # internet.
+            'networkInterfaces': [{
+                'network': 'global/networks/default',
+                'accessConfigs': [
+                    {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                ]
+            }],
         }
 
         instances = self._create_instance(config)
@@ -158,7 +205,7 @@ class GCPManager(CloudManager):
         if instances is not None:
             created_instances = [i for i in instances]
             instance = created_instances[0]
-            return instance.id
+            return instance['id']
         else:
             return None
 
@@ -174,74 +221,82 @@ class GCPManager(CloudManager):
     #     return status
 
     def create_preemptible_instance(self, instance_type, image_id, max_price, burstable=False):
+        pass
 
         # user_data = '''#!/bin/bash
         # /usr/bin/enable-ec2-spot-hibernation
         # echo "user-data" > $HOME/control-applications/test_user_data.txt
         # '''
 
-        zone = self.ec2_conf.zone
-        interruption_behaviour = 'stop'
+        # zone = self.ec2_conf.zone
+        # interruption_behaviour = 'stop'
+        #
+        # parameters = {
+        #     'ImageId': image_id,
+        #     'InstanceType': instance_type,
+        #     'KeyName': self.ec2_conf.key_name,
+        #     'MaxCount': 1,
+        #     'MinCount': 1,
+        #     'SecurityGroups': [
+        #         self.ec2_conf.security_group,
+        #         self.ec2_conf.security_vpc_group
+        #     ],
+        #     'InstanceMarketOptions':
+        #         {
+        #             'MarketType': 'spot',
+        #             'SpotOptions': {
+        #                 'MaxPrice': str(max_price),
+        #                 'SpotInstanceType': 'persistent',
+        #                 'InstanceInterruptionBehavior': interruption_behaviour
+        #             }
+        #         },
+        #     'Placement': {}
+        #     # 'UserData': user_data
+        # }
+        #
+        # if zone:
+        #     parameters['Placement'] = {'AvailabilityZone': zone}
+        #
+        # instances = self._create_instance(parameters, burstable)
+        #
+        # if instances is not None:
+        #     created_instances = [i for i in instances]
+        #     instance = created_instances[0]
+        #     return instance.id
+        # else:
+        #     return None
 
-        parameters = {
-            'ImageId': image_id,
-            'InstanceType': instance_type,
-            'KeyName': self.ec2_conf.key_name,
-            'MaxCount': 1,
-            'MinCount': 1,
-            'SecurityGroups': [
-                self.ec2_conf.security_group,
-                self.ec2_conf.security_vpc_group
-            ],
-            'InstanceMarketOptions':
-                {
-                    'MarketType': 'spot',
-                    'SpotOptions': {
-                        'MaxPrice': str(max_price),
-                        'SpotInstanceType': 'persistent',
-                        'InstanceInterruptionBehavior': interruption_behaviour
-                    }
-                },
-            'Placement': {}
-            # 'UserData': user_data
-        }
-
-        if zone:
-            parameters['Placement'] = {'AvailabilityZone': zone}
-
-        instances = self._create_instance(parameters, burstable)
-
-        if instances is not None:
-            created_instances = [i for i in instances]
-            instance = created_instances[0]
-            return instance.id
-        else:
-            return None
-
-    def _terminate_instance(self, instance):
-
+    def _terminate_instance(self, instance, instance_name):
         # if instance is spot, we have to remove its request
-        if instance.instance_lifecycle == 'spot':
-            self.client.cancel_spot_instance_requests(
-                SpotInstanceRequestIds=[
-                    instance.spot_instance_request_id
-                ]
-            )
+        # if instance.instance_lifecycle == 'spot':
+        #     self.client.cancel_spot_instance_requests(
+        #         SpotInstanceRequestIds=[
+        #             instance.spot_instance_request_id
+        #         ]
+        #     )
 
         self._update_history([instance], status='terminate')
 
-        instance.terminate()
+        operation = self.compute_engine.instances().delete(project=self.gcp_conf.project,
+                                                           zone=self.gcp_conf.zone,
+                                                           instance=instance['name']).execute()
+
+        return operation
 
     def terminate_instance(self, instance_id, wait=True):
-
         try:
 
             instance = self.__get_instance(instance_id)
 
-            self._terminate_instance(instance)
+            # print("instance")
+            # print(instance['name'])
+
+            # return True
+
+            operation = self._terminate_instance(instance, instance['id'])
 
             if wait:
-                instance.wait_until_terminated()
+                self._wait_for_operation(operation['name'])
 
             status = True
 
@@ -256,131 +311,150 @@ class GCPManager(CloudManager):
     @sleep_and_retry
     @limits(calls=10, period=1)
     def __get_instance(self, instance_id):
-
         try:
 
-            instance = self.resource.Instance(instance_id)
+            instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
 
-            instance.reload()
         except Exception as e:
             logging.info(e)
             return None
 
         return instance
 
-    def __get_instances(self, search_filter=None):
+    def __get_instances(self, filter=None):
 
-        if search_filter is None:
-            return self.resource.instances.filter()
+        if filter is None:
+            result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                                                          zone=self.gcp_conf.zone).execute()
+        else:
+            result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                                                          zone=self.gcp_conf.zone,
+                                                          filter=filter).execute()
+        return result['items'] if 'items' in result else None
 
-        _filters = []
-
-        if 'status' in search_filter:
-            _filters.append(
-                self._new_filter(
-                    name="instance-state-name",
-                    values=search_filter['status']
-                )
-            )
-
-        if 'tag' in search_filter:
-            _filters.append(
-                self._new_filter(
-                    name='tag:{}'.format(search_filter['tag']['name']),
-                    values=search_filter['tag']['values']
-                )
-            )
-
-        return [i for i in self.resource.instances.filter(Filters=_filters)]
+        # if search_filter is None:
+        #     return self.resource.instances.filter()
+        #
+        # _filters = []
+        #
+        # if 'status' in search_filter:
+        #     _filters.append(
+        #         self._new_filter(
+        #             name="instance-state-name",
+        #             values=search_filter['status']
+        #         )
+        #     )
+        #
+        # if 'tag' in search_filter:
+        #     _filters.append(
+        #         self._new_filter(
+        #             name='tag:{}'.format(search_filter['tag']['name']),
+        #             values=search_filter['tag']['values']
+        #         )
+        #     )
+        #
+        # return [i for i in self.resource.instances.filter(Filters=_filters)]
 
     def get_instance_status(self, instance_id):
-
         if instance_id is None:
             return None
 
-        instance = self.__get_instance(instance_id)
+        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
 
         if instance is None:
             return None
         else:
-            return instance.state["Name"].lower()
+            # print("instance status", instance['status'])
+
+            return instance['status']
+
+        # if instance_id is None:
+        #     return None
+        #
+        # instance = self.__get_instance(instance_id)
+        #
+        # if instance is None:
+        #     return None
+        # else:
+        #     return instance.state["Name"].lower()
 
     def list_instances_id(self, search_filter=None):
-        instances = self.__get_instances(search_filter)
-
-        return [i.id for i in instances]
+        pass
+        # instances = self.__get_instances(search_filter)
+        #
+        # return [i.id for i in instances]
 
     def get_public_instance_ip(self, instance_id):
-        instance = self.__get_instance(instance_id)
-
+        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
         if instance is None:
             return None
         else:
-            return instance.public_ip_address
+            return instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
     def get_private_instance_ip(self, instance_id):
-        instance = self.__get_instance(instance_id)
-
+        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
         if instance is None:
             return None
         else:
-            return instance.private_ip_address
+            return instance['networkInterfaces'][0]['networkIP']
 
     @staticmethod
     def get_preemptible_price(instance_type, zone=None):
+        pass
 
-        _filters = [
-            {
-                'Name': 'product-description',
-                'Values': ['Linux/UNIX']
-            }
-        ]
-
-        if zone is not None:
-            _filters.append(
-                {
-                    'Name': 'availability-zone',
-                    'Values': [zone]
-                }
-            )
-
-        client = boto3.client('ec2')
-
-        history = client.describe_spot_price_history(
-            InstanceTypes=[instance_type],
-            Filters=_filters,
-            StartTime=datetime.now()
-        )
-
-        return [(h['AvailabilityZone'], float(h['SpotPrice'])) for h in history['SpotPriceHistory']]
+        # _filters = [
+        #     {
+        #         'Name': 'product-description',
+        #         'Values': ['Linux/UNIX']
+        #     }
+        # ]
+        #
+        # if zone is not None:
+        #     _filters.append(
+        #         {
+        #             'Name': 'availability-zone',
+        #             'Values': [zone]
+        #         }
+        #     )
+        #
+        # client = boto3.client('ec2')
+        #
+        # history = client.describe_spot_price_history(
+        #     InstanceTypes=[instance_type],
+        #     Filters=_filters,
+        #     StartTime=datetime.now()
+        # )
+        #
+        # return [(h['AvailabilityZone'], float(h['SpotPrice'])) for h in history['SpotPriceHistory']]
 
     # Get current AWS price for an on-demand instance
     @staticmethod
     def get_ondemand_price(instance_type, region):
+        pass
         # Search product search_filter
-        FLT = '[{{"Field": "tenancy", "Value": "shared", "Type": "TERM_MATCH"}},' \
-              '{{"Field": "operatingSystem", "Value": "Linux", "Type": "TERM_MATCH"}},' \
-              '{{"Field": "preInstalledSw", "Value": "NA", "Type": "TERM_MATCH"}},' \
-              '{{"Field": "instanceType", "Value": "{t}", "Type": "TERM_MATCH"}},' \
-              '{{"Field": "location", "Value": "{r}", "Type": "TERM_MATCH"}},' \
-              '{{"Field": "capacitystatus", "Value": "Used", "Type": "TERM_MATCH"}}]'
-
-        # translate region code to region name
-        endpoint_file = resource_filename('botocore', 'data/endpoints.json')
-
-        with open(endpoint_file, 'r') as f:
-            data = json.load(f)
-        region = data['partitions'][0]['regions'][region]['description']
-
-        f = FLT.format(r=region, t=instance_type)
-        # Get price info
-        pricing = boto3.client('pricing')
-        data = pricing.get_products(ServiceCode='AmazonEC2', Filters=json.loads(f))
-        od = json.loads(data['PriceList'][0])['terms']['OnDemand']
-        id1 = list(od)[0]
-        id2 = list(od[id1]['priceDimensions'])[0]
-
-        return float(od[id1]['priceDimensions'][id2]['pricePerUnit']['USD'])
+        # FLT = '[{{"Field": "tenancy", "Value": "shared", "Type": "TERM_MATCH"}},' \
+        #       '{{"Field": "operatingSystem", "Value": "Linux", "Type": "TERM_MATCH"}},' \
+        #       '{{"Field": "preInstalledSw", "Value": "NA", "Type": "TERM_MATCH"}},' \
+        #       '{{"Field": "instanceType", "Value": "{t}", "Type": "TERM_MATCH"}},' \
+        #       '{{"Field": "location", "Value": "{r}", "Type": "TERM_MATCH"}},' \
+        #       '{{"Field": "capacitystatus", "Value": "Used", "Type": "TERM_MATCH"}}]'
+        #
+        # # translate region code to region name
+        # endpoint_file = resource_filename('botocore', 'data/endpoints.json')
+        #
+        # with open(endpoint_file, 'r') as f:
+        #     data = json.load(f)
+        # region = data['partitions'][0]['regions'][region]['description']
+        #
+        # f = FLT.format(r=region, t=instance_type)
+        # # Get price info
+        # pricing = boto3.client('pricing')
+        # data = pricing.get_products(ServiceCode='AmazonEC2', Filters=json.loads(f))
+        # od = json.loads(data['PriceList'][0])['terms']['OnDemand']
+        # id1 = list(od)[0]
+        # id2 = list(od[id1]['priceDimensions'])[0]
+        #
+        # return float(od[id1]['priceDimensions'][id2]['pricePerUnit']['USD'])
 
     # def get_cpu_credits(self, instance_id):
     #
