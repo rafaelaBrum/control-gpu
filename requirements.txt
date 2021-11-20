@@ -39,7 +39,7 @@ ec2_metadata==2.4.0
 numpy==1.19.5
 # packaging==20.4
 pandas==1.1.4
-paramiko==2.7.1
+paramiko==2.8.0
 # pathtools==0.1.2
 # pbr==5.5.1
 # plac==1.2.0

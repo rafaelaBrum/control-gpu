@@ -17,7 +17,7 @@ class SSHClient:
 
         self.ip_address = ip_address
 
-        self.key = key_path + key_file
+        self.key = paramiko.RSAKey.from_private_key_file(key_path + key_file)
         self.user = user
         self.port = ssh_conf.ssh_port
         self.repeat = ssh_conf.repeat
@@ -61,30 +61,16 @@ class SSHClient:
             # self.client.load_system_host_keys()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            if '.pem' not in self.key:
-                key = paramiko.RSAKey.from_private_key_file(self.key)
-                print("key")
-                print(key)
-
             for x in range(self.repeat):
 
                 try:
-                    if '.pem' not in self.key:
-                        self.client.connect(
-                            hostname=self.ip_address,
-                            port=self.port,
-                            username=self.user,
-                            pkey=key,
-                            timeout=self.connection_timeout
-                        )
-                    else:
-                        self.client.connect(
-                            hostname=self.ip_address,
-                            port=self.port,
-                            username=self.user,
-                            key_filename=self.key,
-                            timeout=self.connection_timeout
-                        )
+                    self.client.connect(
+                        hostname=self.ip_address,
+                        port=self.port,
+                        username=self.user,
+                        pkey=self.key,
+                        timeout=self.connection_timeout
+                    )
 
                     tr = self.client.get_transport()
                     tr.default_max_packet_size = 100000000
@@ -94,7 +80,7 @@ class SSHClient:
                 except (paramiko.BadHostKeyException, paramiko.AuthenticationException,
                         paramiko.SSHException, socket.error) as e:
 
-                    logging.info("<SSH Client>:" + str(x) + "> " + str(e))
+                    # logging.info("<SSH Client>:" + str(x) + "> " + str(e))
 
                     sleep(self.retry_interval)
         else:

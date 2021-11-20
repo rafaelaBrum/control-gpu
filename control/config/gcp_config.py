@@ -34,4 +34,4 @@ class GCPConfig(Config):
 
     @property
     def vm_user(self):
-        return self.get_property(self._key, 'user')
+        return self.get_property(self._key, 'vm_user')

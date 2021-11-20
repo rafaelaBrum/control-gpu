@@ -58,7 +58,7 @@ def test_on_demand_virtual_machine(number, loader):
     status = vm.deploy()
 
     if status:
-        # vm.prepare_vm()
+        vm.prepare_vm()
 
         status = vm.terminate()
 
