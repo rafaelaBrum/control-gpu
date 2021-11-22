@@ -3,11 +3,12 @@ from control.config.ec2_config import EC2Config
 
 class InstanceType:
 
-    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='', vm_name=''):
+    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='', vm_name='',
+                 memory=0, vcpus=0):
         self.provider = provider
         self.type = instance_type
-        # self.memory = float(memory) * 1024.0  # GB to MB
-        # self.vcpu = vcpu
+        self.memory = memory  # GB
+        self.vcpus = vcpus
         # self.gflops = gflops
         self.price_ondemand = prices['on-demand']
         self.price_preemptible = prices['preemptible']
