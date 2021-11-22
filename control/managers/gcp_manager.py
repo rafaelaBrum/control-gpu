@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from control.managers.cloud_manager import CloudManager
 
 from control.config.gcp_config import GCPConfig
@@ -16,10 +14,16 @@ import json
 import math
 import time
 
-from pkg_resources import resource_filename
+import requests
 
 from ratelimit import limits, sleep_and_retry
 
+from pathlib import Path
+
+
+# TODO: get API key from GClod Python API
+file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
+api_key = file.read()
 
 class GCPManager(CloudManager):
 
@@ -28,18 +32,12 @@ class GCPManager(CloudManager):
         self.gcp_conf = GCPConfig()
 
         self.compute_engine = googleapiclient.discovery.build('compute', 'v1')
-        # self.resource = boto3.resource('ec2')
         # self.cloud_watch = boto3.client('cloudwatch')
         # self.session = boto3.Session()
         # self.credentials = self.session.get_credentials()
 
         self.instances_history = {}
 
-    # def _new_filter(self, name, values):
-    #     return {
-    #         'Name': name,
-    #         'Values': [v for v in values]
-    #     }
 
     def _update_history(self, instances, status):
 
@@ -288,11 +286,6 @@ class GCPManager(CloudManager):
 
             instance = self.__get_instance(instance_id)
 
-            # print("instance")
-            # print(instance['name'])
-
-            # return True
-
             operation = self._terminate_instance(instance, instance['id'])
 
             if wait:
@@ -332,29 +325,6 @@ class GCPManager(CloudManager):
                                                           filter=filter).execute()
         return result['items'] if 'items' in result else None
 
-        # if search_filter is None:
-        #     return self.resource.instances.filter()
-        #
-        # _filters = []
-        #
-        # if 'status' in search_filter:
-        #     _filters.append(
-        #         self._new_filter(
-        #             name="instance-state-name",
-        #             values=search_filter['status']
-        #         )
-        #     )
-        #
-        # if 'tag' in search_filter:
-        #     _filters.append(
-        #         self._new_filter(
-        #             name='tag:{}'.format(search_filter['tag']['name']),
-        #             values=search_filter['tag']['values']
-        #         )
-        #     )
-        #
-        # return [i for i in self.resource.instances.filter(Filters=_filters)]
-
     def get_instance_status(self, instance_id):
         if instance_id is None:
             return None
@@ -368,21 +338,10 @@ class GCPManager(CloudManager):
 
             return instance['status']
 
-        # if instance_id is None:
-        #     return None
-        #
-        # instance = self.__get_instance(instance_id)
-        #
-        # if instance is None:
-        #     return None
-        # else:
-        #     return instance.state["Name"].lower()
-
     def list_instances_id(self, search_filter=None):
-        pass
-        # instances = self.__get_instances(search_filter)
-        #
-        # return [i.id for i in instances]
+        instances = self.__get_instances(search_filter)
+
+        return [i['id'] for i in instances]
 
     def get_public_instance_ip(self, instance_id):
         instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
@@ -400,61 +359,131 @@ class GCPManager(CloudManager):
 
     @staticmethod
     def get_preemptible_price(instance_type, zone=None):
-        pass
+        params = {'pageToken': None}
 
-        # _filters = [
-        #     {
-        #         'Name': 'product-description',
-        #         'Values': ['Linux/UNIX']
-        #     }
-        # ]
-        #
-        # if zone is not None:
-        #     _filters.append(
-        #         {
-        #             'Name': 'availability-zone',
-        #             'Values': [zone]
-        #         }
-        #     )
-        #
-        # client = boto3.client('ec2')
-        #
-        # history = client.describe_spot_price_history(
-        #     InstanceTypes=[instance_type],
-        #     Filters=_filters,
-        #     StartTime=datetime.now()
-        # )
-        #
-        # return [(h['AvailabilityZone'], float(h['SpotPrice'])) for h in history['SpotPriceHistory']]
+        instance_data_gcp = []
 
-    # Get current AWS price for an on-demand instance
+        while len(instance_data_gcp) < 2:
+
+            if params['pageToken'] is None:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+            else:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    params=params)
+
+            all_data_gcp = r.json()
+
+            params['pageToken'] = all_data_gcp['nextPageToken']
+
+            aux_list = [x for x in all_data_gcp['skus']
+                        if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
+                        and 'Preemptible' in x['description']]
+
+            if 'us' in zone:
+                aux_list = [x for x in aux_list if 'Americas' in x['description']]
+
+            for a in aux_list:
+                instance_data_gcp.append(a)
+
+        if 'Core' in instance_data_gcp[0]['description']:
+            int_price_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
+                                     ['pricingExpression']['tieredRates']
+                                     [0]['unitPrice']['units'])
+            cents_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
+                                 ['pricingExpression']['tieredRates'][0]
+                                 ['unitPrice']['nanos']) / 1000000000
+            price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
+            int_price_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
+                                    ['pricingExpression']['tieredRates'][0]
+                                    ['unitPrice']['units'])
+            cents_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates'][0]
+                                ['unitPrice']['nanos']) / 1000000000
+            price_per_ram = int_price_per_ram + cents_per_ram
+        else:
+            int_price_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
+                                     ['pricingExpression']['tieredRates']
+                                     [0]['unitPrice']['units'])
+            cents_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
+                                 ['pricingExpression']['tieredRates'][0]
+                                 ['unitPrice']['nanos']) / 1000000000
+            price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
+            int_price_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
+                                    ['pricingExpression']['tieredRates'][0]
+                                    ['unitPrice']['units'])
+            cents_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates'][0]
+                                ['unitPrice']['nanos']) / 1000000000
+            price_per_ram = int_price_per_ram + cents_per_ram
+
+        return price_per_vcpu, price_per_ram
+
+    # Get current GCP price for an on-demand instance
     @staticmethod
     def get_ondemand_price(instance_type, region):
-        pass
-        # Search product search_filter
-        # FLT = '[{{"Field": "tenancy", "Value": "shared", "Type": "TERM_MATCH"}},' \
-        #       '{{"Field": "operatingSystem", "Value": "Linux", "Type": "TERM_MATCH"}},' \
-        #       '{{"Field": "preInstalledSw", "Value": "NA", "Type": "TERM_MATCH"}},' \
-        #       '{{"Field": "instanceType", "Value": "{t}", "Type": "TERM_MATCH"}},' \
-        #       '{{"Field": "location", "Value": "{r}", "Type": "TERM_MATCH"}},' \
-        #       '{{"Field": "capacitystatus", "Value": "Used", "Type": "TERM_MATCH"}}]'
-        #
-        # # translate region code to region name
-        # endpoint_file = resource_filename('botocore', 'data/endpoints.json')
-        #
-        # with open(endpoint_file, 'r') as f:
-        #     data = json.load(f)
-        # region = data['partitions'][0]['regions'][region]['description']
-        #
-        # f = FLT.format(r=region, t=instance_type)
-        # # Get price info
-        # pricing = boto3.client('pricing')
-        # data = pricing.get_products(ServiceCode='AmazonEC2', Filters=json.loads(f))
-        # od = json.loads(data['PriceList'][0])['terms']['OnDemand']
-        # id1 = list(od)[0]
-        # id2 = list(od[id1]['priceDimensions'])[0]
-        #
-        # return float(od[id1]['priceDimensions'][id2]['pricePerUnit']['USD'])
+
+        params = {'pageToken':None}
+
+        instance_data_gcp =[]
+
+        while len(instance_data_gcp) < 2:
+
+            if params['pageToken'] is None:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+            else:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    params=params)
+
+            all_data_gcp = r.json()
+
+            params['pageToken'] = all_data_gcp['nextPageToken']
+
+            aux_list = [x for x in all_data_gcp['skus']
+                                 if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
+                                 and 'Preemptible' not in x['description']]
+
+            if 'us' in region:
+                aux_list = [x for x in aux_list if 'Americas' in x['description']]
+
+            for a in aux_list:
+                instance_data_gcp.append(a)
+
+        if 'Core' in instance_data_gcp[0]['description']:
+            int_price_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
+                                     ['pricingExpression']['tieredRates']
+                                     [0]['unitPrice']['units'])
+            cents_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
+                                 ['pricingExpression']['tieredRates'][0]
+                                 ['unitPrice']['nanos']) / 1000000000
+            price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
+            int_price_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
+                                    ['pricingExpression']['tieredRates'][0]
+                                    ['unitPrice']['units'])
+            cents_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates'][0]
+                                ['unitPrice']['nanos']) / 1000000000
+            price_per_ram = int_price_per_ram + cents_per_ram
+        else:
+            int_price_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
+                                     ['pricingExpression']['tieredRates']
+                                     [0]['unitPrice']['units'])
+            cents_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
+                                 ['pricingExpression']['tieredRates'][0]
+                                 ['unitPrice']['nanos']) / 1000000000
+            price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
+            int_price_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
+                                    ['pricingExpression']['tieredRates'][0]
+                                    ['unitPrice']['units'])
+            cents_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates'][0]
+                                ['unitPrice']['nanos']) / 1000000000
+            price_per_ram = int_price_per_ram + cents_per_ram
+
+        return price_per_vcpu, price_per_ram
 
     # def get_cpu_credits(self, instance_id):
     #

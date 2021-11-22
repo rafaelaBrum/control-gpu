@@ -44,7 +44,9 @@ def test_on_demand_virtual_machine(number, loader):
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        vm_name=f'vm-teste-{number}'
+        vm_name=f'vm-teste-{number}',
+        memory=8,
+        vcpus=2
     )
 
     vm = VirtualMachine(
@@ -56,6 +58,11 @@ def test_on_demand_virtual_machine(number, loader):
     __prepare_logging()
 
     status = vm.deploy()
+
+    print("IP of running instances:")
+    print(vm.get_instances_ip())
+
+    print("On-demand price of instance:", vm.price)
 
     if status:
         vm.prepare_vm()

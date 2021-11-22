@@ -257,6 +257,18 @@ class VirtualMachine:
 
                         raise Exception(
                             "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
+                elif self.instance_type.provider == CloudManager.GCLOUD:
+                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
+
+                    # if self.loader.file_system_conf.type == CloudManager.EBS:
+                    #     self.__create_gcp_disk(self.loader.file_system_conf.path)
+                    # elif self.loader.file_system_conf.type == CloudManager.S3:
+                    #     self.__create_cloud_storage(self.loader.file_system_conf.path)
+                    # else:
+                    #     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+                    #
+                    #     raise Exception(
+                    #         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
@@ -364,12 +376,15 @@ class VirtualMachine:
     # return the a IP's list of all running instance on the cloud provider
     def get_instances_ip(self):
 
-        filter_instance = {
-            'status': [CloudManager.PENDING, CloudManager.RUNNING],
-            'tags': [{'Key': self.loader.ec2_conf.tag_key,
-                      'Value': self.loader.ec2_conf.tag_value
-                      }]
-        }
+        if self.instance_type.provider == CloudManager.EC2:
+            filter_instance = {
+                'status': [CloudManager.PENDING, CloudManager.RUNNING],
+                'tags': [{'Key': self.loader.ec2_conf.tag_key,
+                          'Value': self.loader.ec2_conf.tag_value
+                          }]
+            }
+        elif self.instance_type.provider == CloudManager.GCLOUD:
+            filter_instance = f'(status = {CloudManager.RUNNING}) OR (status = {CloudManager.PENDING})'
 
         instances_id = self.manager.list_instances_id(filter_instance)
         ip_list = []
@@ -441,12 +456,17 @@ class VirtualMachine:
 
     @property
     def price(self):
-        if self.market == CloudManager.PREEMPTIBLE:
-            return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
-
-        else:
-            return self.manager.get_ondemand_price(self.instance_type.type, self.loader.ec2_conf.region)
-            # return self.instance_type.price_ondemand
+        if self.instance_type.provider == CloudManager.EC2:
+            if self.market == CloudManager.PREEMPTIBLE:
+                return self.manager.get_preemptible_price(self.instance_type.type, self.loader.ec2_conf.zone)[0][1]
+            else:
+                return self.manager.get_ondemand_price(self.instance_type.type, self.loader.ec2_conf.region)
+        elif self.instance_type.provider == CloudManager.GCLOUD:
+            if self.market == CloudManager.PREEMPTIBLE:
+                vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type, self.loader.gcp_conf.region)
+            else:
+                vcpu_price, mem_price = self.manager.get_ondemand_price(self.instance_type.type, self.loader.gcp_conf.region)
+            return self.instance_type.vcpus*vcpu_price + self.instance_type.memory*mem_price
 
     @property
     def type(self):
