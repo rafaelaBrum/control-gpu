@@ -173,7 +173,7 @@ def finish_vm(vm: VirtualMachine, folder, item_name):
     except Exception as e:
         logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR - {}".format(vm.instance_id, e))
 
-    status = vm.terminate()
+    status = vm.terminate(delete_volume=False)
 
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
