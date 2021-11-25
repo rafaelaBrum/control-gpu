@@ -3,6 +3,7 @@ from control.managers.cloud_manager import CloudManager
 from control.config.gcp_config import GCPConfig
 
 import googleapiclient.discovery
+from oauth2client.client import GoogleCredentials
 
 from datetime import datetime
 from dateutil.tz import tzutc
@@ -13,6 +14,7 @@ import json
 
 import math
 import time
+import iso8601
 
 import requests
 
@@ -30,11 +32,13 @@ class GCPManager(CloudManager):
     def __init__(self):
 
         self.gcp_conf = GCPConfig()
+        self.vm_config = self.gcp_conf
 
-        self.compute_engine = googleapiclient.discovery.build('compute', 'v1')
+        credentials = GoogleCredentials.get_application_default()
+        self.compute_engine = googleapiclient.discovery.build('compute', 'v1', credentials=credentials)
         # self.cloud_watch = boto3.client('cloudwatch')
         # self.session = boto3.Session()
-        # self.credentials = self.session.get_credentials()
+        # self.credentials = GoogleCredentials.get_application_default()
 
         self.instances_history = {}
 
@@ -96,59 +100,74 @@ class GCPManager(CloudManager):
             logging.error(e)
             return None
 
-    # def create_volume(self, size, zone):
-    #
-    #     try:
-    #         ebs_vol = self.client.create_volume(
-    #             Size=size,
-    #             AvailabilityZone=zone,
-    #             TagSpecifications=[
-    #                 {
-    #                     'ResourceType': 'volume',
-    #                     'Tags': [
-    #                         {
-    #                             'Key': self.ec2_conf.tag_key,
-    #                             'Value': self.ec2_conf.tag_value
-    #                         },
-    #                     ]
-    #                 },
-    #             ],
-    #         )
-    #
-    #         if ebs_vol['ResponseMetadata']['HTTPStatusCode'] == 200:
-    #
-    #             return ebs_vol['VolumeId']
-    #         else:
-    #             return None
-    #
-    #     except Exception as e:
-    #
-    #         logging.error("<GCPManager>: Error to create Volume")
-    #         logging.error(e)
-    #         return None
+    def create_volume(self, size, volume_name=''):
+        try:
+            disk_body = {
+                'name': volume_name,
+                "sizeGb": size,
+                'type': f'projects/{self.gcp_conf.project}/zones/{self.gcp_conf.zone}/diskTypes/pd-balanced'
+            }
 
-    # def wait_volume(self, volume_id):
-    #     waiter = self.client.get_waiter('volume_available')
-    #     waiter.wait(
-    #         VolumeIds=[
-    #             volume_id
-    #         ]
-    #     )
+            operation = self.compute_engine.disks().insert(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
+                                                           body=disk_body).execute()
 
-    # def attach_volume(self, instance_id, volume_id, device):
-    #
-    #     try:
-    #         self.client.attach_volume(
-    #             VolumeId=volume_id,
-    #             InstanceId=instance_id,
-    #             Device="/dev/xvdf"
-    #         )
-    #         return True
-    #     except Exception as e:
-    #         logging.error("<GCPManager>: Error to attach volume {} to instance {}".format(volume_id,
-    #                                                                                       instance_id))
-    #         logging.error(e)
-    #         return False
+            self._wait_for_operation(operation['name'])
+
+            disk = self.__get_disk(volume_name)
+
+            return disk['id'] if disk else None
+
+        except Exception as e:
+
+            logging.error("<GCPManager>: Error to create Volume")
+            logging.error(e)
+            return None
+
+    def wait_volume(self, volume_name=''):
+        disk = self.__get_disk(volume_name)
+
+        ready = False
+
+        while disk is not None and not ready:
+            if 'lastAttachTimestamp' not in disk:
+                ready = True
+            elif 'lastDetachTimestamp' in disk:
+                last_attach_time = iso8601.parse_date(disk['lastAttachTimestamp'])
+                last_detach_time = iso8601.parse_date(disk['lastDetachTimestamp'])
+                ready = last_detach_time > last_attach_time
+            if not ready:
+                disk = self.__get_disk(volume_name)
+
+
+    def attach_volume(self, instance_id, volume_id, volume_name=''):
+
+        try:
+            instance = self.__get_instance(instance_id)
+
+            disk = self.compute_engine.disks().get(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
+                                                   disk=volume_name).execute()
+
+            if disk is not None:
+                attached_disk_body = {
+                    'source': disk['selfLink']
+                }
+
+                operation = self.compute_engine.instances().attachDisk(project=self.gcp_conf.project,
+                                                                       zone=self.gcp_conf.zone,
+                                                                       instance=instance['name'],
+                                                                       body=attached_disk_body).execute()
+
+                self._wait_for_operation(operation['name'])
+
+                return True
+            else:
+                return False
+        except Exception as e:
+            logging.error("<GCPManager>: Error to attach volume {} ({}} to instance {}".format(volume_id,
+                                                                                               volume_name,
+                                                                                               instance_id))
+            logging.error(e)
+            return False
 
     def create_on_demand_instance(self, instance_type, image_id, vm_name=''):
 
@@ -207,16 +226,17 @@ class GCPManager(CloudManager):
         else:
             return None
 
-    # def delete_volume(self, volume_id):
-    #     try:
-    #         self.client.delete_volume(VolumeId=volume_id)
-    #         status = True
-    #     except Exception as e:
-    #         logging.error("<GCPManager>: Error to delete Volume {} ".format(volume_id))
-    #         logging.error(e)
-    #         status = False
-    #
-    #     return status
+    def delete_volume(self, volume_id, volume_name=''):
+        try:
+            self.compute_engine.disks().delete(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
+                                               disk=volume_name).execute()
+            status = True
+        except Exception as e:
+            logging.error("<GCPManager>: Error to delete Volume {} ({}) ".format(volume_id, volume_name))
+            logging.error(e)
+            status = False
+
+        return status
 
     def create_preemptible_instance(self, instance_type, image_id, max_price, burstable=False):
         pass
@@ -264,7 +284,7 @@ class GCPManager(CloudManager):
         # else:
         #     return None
 
-    def _terminate_instance(self, instance, instance_name):
+    def _terminate_instance(self, instance):
         # if instance is spot, we have to remove its request
         # if instance.instance_lifecycle == 'spot':
         #     self.client.cancel_spot_instance_requests(
@@ -286,7 +306,7 @@ class GCPManager(CloudManager):
 
             instance = self.__get_instance(instance_id)
 
-            operation = self._terminate_instance(instance, instance['id'])
+            operation = self._terminate_instance(instance)
 
             if wait:
                 self._wait_for_operation(operation['name'])
@@ -338,10 +358,20 @@ class GCPManager(CloudManager):
 
             return instance['status']
 
+    def __get_disk(self, disk_name):
+        try:
+            return self.compute_engine.disks().get(project=self.gcp_conf.project,
+                                                   zone=self.gcp_conf.zone, disk=disk_name).execute()
+        except Exception as e:
+            logging.error("<GCPManager>: Error to find instance")
+            logging.error(e)
+            return None
+
+
     def list_instances_id(self, search_filter=None):
         instances = self.__get_instances(search_filter)
 
-        return [i['id'] for i in instances]
+        return [i['id'] for i in instances] if instances else []
 
     def get_public_instance_ip(self, instance_id):
         instance = self.__get_instances(filter=f'(id = {instance_id})')[0]

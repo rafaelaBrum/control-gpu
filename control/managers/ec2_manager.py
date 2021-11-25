@@ -25,6 +25,7 @@ class EC2Manager(CloudManager):
 
         self.ec2_conf = EC2Config()
         self.s3_conf = S3Config()
+        self.vm_config = self.ec2_conf
 
         self.client = boto3.client('ec2')
         self.resource = boto3.resource('ec2')
@@ -129,12 +130,12 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return None
 
-    def create_volume(self, size, zone):
+    def create_volume(self, size, volume_name=''):
 
         try:
             ebs_vol = self.client.create_volume(
                 Size=size,
-                AvailabilityZone=zone,
+                AvailabilityZone=self.ec2_conf.zone,
                 TagSpecifications=[
                     {
                         'ResourceType': 'volume',
@@ -168,7 +169,7 @@ class EC2Manager(CloudManager):
             ]
         )
 
-    def attach_volume(self, instance_id, volume_id, device):
+    def attach_volume(self, instance_id, volume_id):
 
         try:
             self.client.attach_volume(

@@ -39,7 +39,8 @@ def test_on_demand_virtual_machine(loader):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        ebs_device_name='/dev/xvdf'
     )
 
     # task = Task(

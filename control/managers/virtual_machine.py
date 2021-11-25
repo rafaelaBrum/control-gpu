@@ -24,13 +24,14 @@ import os
 class VirtualMachine:
     CPU_BURST = -1
 
-    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None):
+    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name=''):
 
         self.loader = loader
 
         self.instance_type = instance_type
         self.market = market
         self.volume_id = volume_id
+        self.disk_name = disk_name
 
         self.create_file_system = False
 
@@ -120,10 +121,11 @@ class VirtualMachine:
 
             # check if instance was create with success
             if self.instance_id is not None:
-                logging.info("<VirtualMachine {}>: Market: {} Type: {}"
+                logging.info("<VirtualMachine {}>: Market: {} Type: {} Provider: {}"
                              " Create with Success".format(self.instance_id,
                                                            self.market,
-                                                           self.instance_type.type))
+                                                           self.instance_type.type,
+                                                           self.instance_type.provider))
 
                 # update start_times
                 self.__start_time = datetime.now()
@@ -132,28 +134,38 @@ class VirtualMachine:
                 self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
                 self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
 
-                if self.instance_type.provider == CloudManager.EC2 and \
-                        self.loader.file_system_conf.type == CloudManager.EBS:
+                if self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
                     if self.volume_id is None:
                         self.volume_id = self.manager.create_volume(
                             size=self.loader.file_system_conf.size,
-                            zone=self.loader.ec2_conf.zone
+                            volume_name=self.disk_name
                         )
                         self.create_file_system = True
 
                         if self.volume_id is None:
-                            raise Exception("<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
+                            raise Exception(
+                                "<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
 
-                    logging.info("<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
-                    # attached new volume
-                    # waiting until volume available
-                    self.manager.wait_volume(volume_id=self.volume_id)
-                    self.manager.attach_volume(
-                        instance_id=self.instance_id,
-                        volume_id=self.volume_id,
-                        device=self.instance_type.ebs_device_name
-                    )
+                    logging.info(
+                        "<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
+                    if self.instance_type.provider == CloudManager.EC2:
+                        # attached new volume
+                        # waiting until volume available
+                        self.manager.wait_volume(volume_id=self.volume_id)
+                        self.manager.attach_volume(
+                            instance_id=self.instance_id,
+                            volume_id=self.volume_id
+                        )
+                    elif self.instance_type.provider == CloudManager.GCLOUD:
+                        # attached new volume
+                        # waiting until volume available
+                        self.manager.wait_volume(volume_name=self.disk_name)
+                        self.manager.attach_volume(
+                            instance_id=self.instance_id,
+                            volume_id=self.volume_id,
+                            volume_name=self.disk_name
+                        )
 
                 return True
 
@@ -174,7 +186,7 @@ class VirtualMachine:
 
         internal_device_name = self.instance_type.ebs_device_name
 
-        logging.info("<VirtualMachine {}>: - Mounting EBS".format(self.instance_id))
+        logging.info("<VirtualMachine {}>: - Mounting EBS/GCLOUD DISK".format(self.instance_id))
 
         if self.create_file_system:
             cmd1 = 'sudo mkfs.ext4 {}'.format(internal_device_name)
@@ -188,7 +200,8 @@ class VirtualMachine:
         self.ssh.execute_command(cmd2, output=True)  # mount directory
 
         if self.create_file_system:
-            cmd3 = 'sudo chown ubuntu:ubuntu -R {}'.format(self.loader.file_system_conf.path)
+            cmd3 = 'sudo chown {0}:{0} -R {1}'.format(self.manager.vm_config.vm_user,
+                                                      self.loader.file_system_conf.path)
             cmd4 = 'chmod 775 -R {}'.format(self.loader.file_system_conf.path)
 
             logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd3))
@@ -245,30 +258,30 @@ class VirtualMachine:
                                                                                    self.loader.file_system_conf.path))
                 # create directory
                 #TODO: add storage options to GCP
-                if self.instance_type.provider == CloudManager.EC2:
-                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
+                self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
-                    if self.loader.file_system_conf.type == CloudManager.EBS:
-                        self.__create_ebs(self.loader.file_system_conf.path)
-                    elif self.loader.file_system_conf.type == CloudManager.S3:
+                if self.loader.file_system_conf.type == CloudManager.EBS:
+                    self.__create_ebs(self.loader.file_system_conf.path)
+                elif self.loader.file_system_conf.type == CloudManager.S3:
+                    if self.instance_type.provider == CloudManager.EC2:
                         self.__create_s3(self.loader.file_system_conf.path)
-                    else:
-                        logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+                else:
+                    logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
-                        raise Exception(
-                            "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
-                elif self.instance_type.provider == CloudManager.GCLOUD:
-                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
-
-                    # if self.loader.file_system_conf.type == CloudManager.EBS:
-                    #     self.__create_gcp_disk(self.loader.file_system_conf.path)
-                    # elif self.loader.file_system_conf.type == CloudManager.S3:
-                    #     self.__create_cloud_storage(self.loader.file_system_conf.path)
-                    # else:
-                    #     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
-                    #
-                    #     raise Exception(
-                    #         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
+                    raise Exception(
+                        "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
+                # elif self.instance_type.provider == CloudManager.GCLOUD:
+                #     self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
+                #
+                #     # if self.loader.file_system_conf.type == CloudManager.EBS:
+                #     #     self.__create_gcp_disk(self.loader.file_system_conf.path)
+                #     # elif self.loader.file_system_conf.type == CloudManager.S3:
+                #     #     self.__create_cloud_storage(self.loader.file_system_conf.path)
+                #     # else:
+                #     #     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+                #     #
+                #     #     raise Exception(
+                #     #         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
@@ -363,7 +376,10 @@ class VirtualMachine:
             status = self.manager.terminate_instance(self.instance_id)
 
             if delete_volume and self.volume_id is not None:
-                self.manager.delete_volume(self.volume_id)
+                if self.instance_type.provider == CloudManager.EC2:
+                    self.manager.delete_volume(self.volume_id)
+                elif self.instance_type.provider == CloudManager.GCLOUD:
+                    self.manager.delete_volume(self.volume_id, volume_name=self.disk_name)
 
         self.terminate_overhead = datetime.now() - terminate_start
 

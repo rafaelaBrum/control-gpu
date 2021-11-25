@@ -50,19 +50,19 @@ class CloudManager:
     def create_preemptible_instance(self, instance_type, image_id, max_price):
         pass
 
-    # Create a storage volume (AWS ONLY)
-    # InputConfig: Volume size (int), Zone (str)
+    # Create a storage volume
+    # InputConfig: Volume size (int), volume_name (str)
     # Return: volume id (str) or None if volume was not created
-    def create_volume(self, size, zone):
+    def create_volume(self, size, volume_name=''):
         pass
 
-    # Attach a volume to an instance (AWS ONLY)
-    # InputConfig: instance_id (str), volume_id (str), device (str)
+    # Attach a volume to an instance
+    # InputConfig: instance_id (str), volume_id (str)
     # Return: True if the volume was attached with success or False otherwise
-    def attach_volume(self, instance_id, volume_id, device):
+    def attach_volume(self, instance_id, volume_id):
         pass
 
-    # Delete a storage volume (AWS ONLY)
+    # Delete a storage volume
     # InputConfig: Volume id (str)
     # Return: True if volume was delete or false otherwise
     def delete_volume(self, volume_id):

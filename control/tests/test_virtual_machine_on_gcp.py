@@ -15,27 +15,7 @@ import logging
 from pathlib import Path
 
 
-def __prepare_logging():
-    """
-    Set up the log format, level and the file where it will be recorded.
-    """
-    logging_conf = LoggingConfig()
-    log_file = Path(logging_conf.path, logging_conf.log_file)
-
-    log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging_conf.level)
-
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(log_formatter)
-    root_logger.addHandler(file_handler)
-
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(log_formatter)
-    root_logger.addHandler(console_handler)
-
-
-def test_on_demand_virtual_machine(number, loader):
+def test_on_demand_virtual_machine(number, disk_name, loader):
     instance = InstanceType(
         provider=CloudManager.GCLOUD,
         instance_type='n2-standard-2',
@@ -46,16 +26,16 @@ def test_on_demand_virtual_machine(number, loader):
                 'preemptible': 0.000031},
         vm_name=f'vm-teste-{number}',
         memory=8,
-        vcpus=2
+        vcpus=2,
+        ebs_device_name='/dev/sdb'
     )
 
     vm = VirtualMachine(
         instance_type=instance,
         market='on-demand',
-        loader=loader
+        loader=loader,
+        disk_name=disk_name
     )
-
-    __prepare_logging()
 
     status = vm.deploy()
 
