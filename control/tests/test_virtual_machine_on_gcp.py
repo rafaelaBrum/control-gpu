@@ -47,6 +47,8 @@ def test_on_demand_virtual_machine(number, disk_name, loader):
     if status:
         vm.prepare_vm()
 
+        input("Enter to continue with VM termination")
+
         status = vm.terminate()
 
         if status:

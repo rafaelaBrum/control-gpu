@@ -16,6 +16,3 @@ class S3Config(Config):
     def vm_gid(self):
         return self.get_property(self._key, 'vm_gid')
 
-    @property
-    def path(self):
-        return self.get_property(self._key, 'path')

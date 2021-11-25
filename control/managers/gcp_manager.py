@@ -1,6 +1,7 @@
 from control.managers.cloud_manager import CloudManager
 
 from control.config.gcp_config import GCPConfig
+from control.config.storage_config import StorageConfig
 
 import googleapiclient.discovery
 from oauth2client.client import GoogleCredentials
@@ -32,6 +33,7 @@ class GCPManager(CloudManager):
     def __init__(self):
 
         self.gcp_conf = GCPConfig()
+        self.storage_config = StorageConfig()
         self.vm_config = self.gcp_conf
 
         credentials = GoogleCredentials.get_application_default()
@@ -206,6 +208,14 @@ class GCPManager(CloudManager):
                     }
                 ]
             },
+
+            # Allow the instance to access cloud storage.
+            'serviceAccounts': [{
+                'email': 'default',
+                'scopes': [
+                    'https://www.googleapis.com/auth/devstorage.read_write'
+                ]
+            }],
 
             # Specify a network interface with NAT to access the public
             # internet.

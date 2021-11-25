@@ -237,6 +237,17 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
 
+    def __create_google_storage(self, path):
+
+        logging.info("<VirtualMachine {}>: - Mounting GCSFUSE".format(self.instance_id))
+
+        # Mount the bucket
+        cmd = 'gcsfuse --implicit-dirs {} {}'.format(self.manager.storage_config.bucket_name,
+                                                     path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
     def prepare_vm(self):
 
         if not self.failed_to_created:
@@ -265,6 +276,8 @@ class VirtualMachine:
                 elif self.loader.file_system_conf.type == CloudManager.S3:
                     if self.instance_type.provider == CloudManager.EC2:
                         self.__create_s3(self.loader.file_system_conf.path)
+                    elif self.instance_type.provider == CloudManager.GCLOUD:
+                        self.__create_google_storage(self.loader.file_system_conf.path)
                 else:
                     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 

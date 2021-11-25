@@ -63,6 +63,8 @@ def test_on_demand_virtual_machine(loader):
 
     vm.prepare_vm()
 
+    input("Enter to continue with VM termination")
+
     status = vm.terminate()
 
     if status:
