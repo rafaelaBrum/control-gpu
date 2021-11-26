@@ -310,7 +310,7 @@ class VirtualMachine:
                 if self.instance_type.provider == CloudManager.EC2:
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.ec2_conf.home_path,
-                                      item=self.loader.application_conf.daemon_file)
+                                      item=self.loader.application_conf.daemon_aws_file)
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.file_system_conf.path,
@@ -323,7 +323,7 @@ class VirtualMachine:
                                  "--task_id {} " \
                                  "--execution_id {}  " \
                                  "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                         self.loader.application_conf.daemon_file),
+                                                                         self.loader.application_conf.daemon_aws_file),
                                                             self.loader.ec2_conf.vm_user,
                                                             self.loader.file_system_conf.path,
                                                             self.loader.cudalign_task.task_id,
@@ -333,7 +333,7 @@ class VirtualMachine:
                 elif self.instance_type.provider == CloudManager.GCLOUD:
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
-                                      item=self.loader.application_conf.daemon_file)
+                                      item=self.loader.application_conf.daemon_gcp_file)
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.gcp_conf.home_path,
@@ -346,7 +346,7 @@ class VirtualMachine:
                                  "--task_id {} " \
                                  "--execution_id {}  " \
                                  "--instance_id {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                         self.loader.application_conf.daemon_file),
+                                                                         self.loader.application_conf.daemon_gcp_file),
                                                             self.loader.gcp_conf.vm_user,
                                                             self.loader.file_system_conf.path,
                                                             self.loader.cudalign_task.task_id,

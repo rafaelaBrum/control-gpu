@@ -91,7 +91,8 @@ class Loader:
         self.simulation_conf = SimulationConfig()
 
         # local path where the daemon file is
-        self.daemon_file = None
+        self.daemon_aws_file = None
+        self.daemon_gcp_file = None
 
         '''
         Parameters of the execution
@@ -170,7 +171,8 @@ class Loader:
         # if self.scheduler_name is None:
         #     self.scheduler_name = SchedulerConfig().name
 
-        self.daemon_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_file)
+        self.daemon_aws_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_aws_file)
+        self.daemon_gcp_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_gcp_file)
 
         if self.deadline_seconds is None:
             self.deadline_seconds = self.input_conf.deadline_seconds
@@ -316,7 +318,8 @@ class Loader:
         logging.info("\tEnv: {}".format(self.env_file))
         # logging.info("\tMap: {}".format(self.map_file))
         logging.info("\tLog File: {}".format(self.log_file))
-        logging.info("\tDaemon: {}".format(self.daemon_file))
+        logging.info("\tDaemon AWS: {}".format(self.daemon_aws_file))
+        logging.info("\tDaemon GCP: {}".format(self.daemon_gcp_file))
         logging.info("")
         logging.info("")
         logging.info("\t" + 30 * "*")

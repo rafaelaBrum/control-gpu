@@ -13,8 +13,12 @@ class ApplicationConfig(Config):
         return self.get_property(self._key, 'daemon_path')
 
     @property
-    def daemon_file(self):
-        return self.get_property(self._key, 'daemon_file')
+    def daemon_aws_file(self):
+        return self.get_property(self._key, 'daemon_aws_file')
+
+    @property
+    def daemon_gcp_file(self):
+        return self.get_property(self._key, 'daemon_gcp_file')
 
     @property
     def flower_path(self):

@@ -158,6 +158,7 @@ class Executor:
                     current_time = current_time + elapsed_time
                     self.loader.cudalign_task.update_execution_time(elapsed_time.total_seconds())
 
+                #TODO: if VM is from GCP, instance_action always returns a string ('FALSE' or 'TRUE')
                 if instance_action is not None and instance_action != 'none':
                     self.vm.interrupt()
                     self.__stopped(Task.INTERRUPTED)
