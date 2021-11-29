@@ -18,6 +18,9 @@ class Task:
 
     # RESTARTED = 'restarted'
 
+    SERVER = 'server'
+    CLIENT = 'client'
+
     def __init__(self, task_id, task_name, command, generic_ckpt, runtime):
         self.task_id = task_id
         self.task_name = task_name
@@ -101,3 +104,24 @@ class Task:
             return self.runtime[instance_type]
         else:
             return None
+
+    def is_running(self):
+        pass
+
+    def start_execution(self, instance_type):
+        pass
+
+    def stop_execution(self):
+        pass
+
+    def finish_execution(self):
+        pass
+
+    def has_task_finished(self):
+        pass
+
+    def get_running_instance(self):
+        pass
+
+    def update_execution_time(self):
+        pass

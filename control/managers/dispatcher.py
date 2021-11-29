@@ -149,14 +149,14 @@ class Executor:
 
                     self.status = status = Task.FINISHED
 
-                    self.loader.cudalign_task.finish_execution()
+                    self.task.finish_execution()
                     self.__stopped(status)
                     return
 
                 if command_status is not None and command_status == 'running':
                     elapsed_time = datetime.now() - current_time
                     current_time = current_time + elapsed_time
-                    self.loader.cudalign_task.update_execution_time(elapsed_time.total_seconds())
+                    self.task.update_execution_time(elapsed_time.total_seconds())
 
                 #TODO: if VM is from GCP, instance_action always returns a string ('FALSE' or 'TRUE')
                 if instance_action is not None and instance_action != 'none':
@@ -165,14 +165,14 @@ class Executor:
                     return
 
                 if command_status is not None and command_status != 'running':
-                    self.loader.cudalign_task.stop_execution()
+                    self.task.stop_execution()
                     self.__stopped(Task.RUNTIME_ERROR)
                     return
 
                 time.sleep(1)
 
             if self.status != Task.FINISHED:
-                self.loader.cudalign_task.stop_execution()
+                self.task.stop_execution()
 
         # if kill signal than checkpoint task (SIMULATION)
         # if self.stop_signal:
@@ -366,11 +366,14 @@ class Executor:
 class Dispatcher:
     executor: Executor
 
-    def __init__(self, vm: VirtualMachine, loader: Loader):
+    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id=0):
         self.loader = loader
 
         self.vm: VirtualMachine = vm  # Class that control a Virtual machine on the cloud
         # self.queue = queue  # Class with the scheduling plan
+
+        self.type_task = type_task
+        self.client_id = client_id
 
         # Control Flags
         self.working = False
@@ -533,7 +536,7 @@ class Dispatcher:
             self.working = True
 
             try:
-                self.vm.prepare_vm()
+                self.vm.prepare_vm(self.type_task)
                 self.__prepare_daemon()
             except Exception as e:
                 logging.error(e)
@@ -545,28 +548,31 @@ class Dispatcher:
 
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
-            cuda_task = self.loader.cudalign_task
+            if self.type_task == Task.SERVER:
+                task = self.loader.fl_server_task
+            elif self.type_task == Task.CLIENT:
+                task = self.loader.fl_client_tasks[self.client_id]
 
-            if not cuda_task.has_task_finished() and self.working:
+            if not task.has_task_finished() and self.working:
                 if self.vm.state == CloudManager.RUNNING:
 
                     self.semaphore.acquire()
                     # # check running tasks
                     # self.__update_running_executors()
 
-                    if not cuda_task.is_running():
+                    if not task.is_running():
                         self.executor = Executor(
-                            task=cuda_task,
+                            task=task,
                             vm=self.vm,
                             loader=self.loader
                         )
                         # start the executor loop to execute the task
                         self.executor.thread.start()
-                        self.loader.cudalign_task.start_execution(self.vm.instance_type.type)
+                        task.start_execution(self.vm.instance_type.type)
 
                     self.semaphore.release()
 
-            while self.working and not self.loader.cudalign_task.has_task_finished():
+            while self.working and not task.has_task_finished():
                 # waiting for work
                 # self.waiting_work.wait()
                 #

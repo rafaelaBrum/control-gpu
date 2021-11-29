@@ -21,10 +21,13 @@ import os
 # the VM was launched to executed a primary task.
 # Otherwise, if primary flag is False, the VM is a backup resource launched due to spot interruption/hibernation
 
+
 class VirtualMachine:
     CPU_BURST = -1
 
-    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name=''):
+    vm_num = 1
+
+    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name=''):
 
         self.loader = loader
 
@@ -32,6 +35,7 @@ class VirtualMachine:
         self.market = market
         self.volume_id = volume_id
         self.disk_name = disk_name
+        self.vm_name = vm_name
 
         self.create_file_system = False
 
@@ -40,6 +44,10 @@ class VirtualMachine:
             self.manager = EC2Manager()
         elif instance_type.provider == CloudManager.GCLOUD:
             self.manager = GCPManager()
+            if self.vm_name == '':
+                self.vm_name = f'vm-{self.instance_type.type}'
+            self.vm_name = f'{self.vm_name}-{self.vm_num}'
+            self.vm_num += 1
 
         self.instance_id = None
         self.instance_public_ip = None
@@ -102,7 +110,7 @@ class VirtualMachine:
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                               image_id=self.instance_type.image_id,
-                                                                              vm_name=self.instance_type.vm_name)
+                                                                              vm_name=self.vm_name)
                 elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = \
                         self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
@@ -268,7 +276,7 @@ class VirtualMachine:
                 logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
                                                                                    self.loader.file_system_conf.path))
                 # create directory
-                #TODO: add storage options to GCP
+                # TODO: add storage options to GCP
                 self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
                 if self.loader.file_system_conf.type == CloudManager.EBS:
@@ -283,23 +291,11 @@ class VirtualMachine:
 
                     raise Exception(
                         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
-                # elif self.instance_type.provider == CloudManager.GCLOUD:
-                #     self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
-                #
-                #     # if self.loader.file_system_conf.type == CloudManager.EBS:
-                #     #     self.__create_gcp_disk(self.loader.file_system_conf.path)
-                #     # elif self.loader.file_system_conf.type == CloudManager.S3:
-                #     #     self.__create_cloud_storage(self.loader.file_system_conf.path)
-                #     # else:
-                #     #     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
-                #     #
-                #     #     raise Exception(
-                #     #         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
 
-                cmd = 'mkdir {}_{}/'.format(self.loader.cudalign_task.task_id, self.loader.execution_id)
+                cmd = 'mkdir {}_{}/'.format(self.loader.fl_server_task.task_id, self.loader.execution_id)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
 
@@ -314,7 +310,7 @@ class VirtualMachine:
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.file_system_conf.path,
-                                                    '{}_{}'.format(self.loader.cudalign_task.task_id,
+                                                    '{}_{}'.format(self.loader.fl_server_task.task_id,
                                                                    self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
@@ -326,7 +322,7 @@ class VirtualMachine:
                                                                          self.loader.application_conf.daemon_aws_file),
                                                             self.loader.ec2_conf.vm_user,
                                                             self.loader.file_system_conf.path,
-                                                            self.loader.cudalign_task.task_id,
+                                                            self.loader.fl_server_task.task_id,
                                                             self.loader.execution_id,
                                                             self.instance_id)
 
@@ -337,7 +333,7 @@ class VirtualMachine:
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.gcp_conf.home_path,
-                                                    '{}_{}'.format(self.loader.cudalign_task.task_id,
+                                                    '{}_{}'.format(self.loader.fl_server_task.task_id,
                                                                    self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
@@ -349,9 +345,11 @@ class VirtualMachine:
                                                                          self.loader.application_conf.daemon_gcp_file),
                                                             self.loader.gcp_conf.vm_user,
                                                             self.loader.file_system_conf.path,
-                                                            self.loader.cudalign_task.task_id,
+                                                            self.loader.fl_server_task.task_id,
                                                             self.loader.execution_id,
                                                             self.instance_id)
+                else:
+                    cmd_daemon = ""
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
 
@@ -414,6 +412,8 @@ class VirtualMachine:
             }
         elif self.instance_type.provider == CloudManager.GCLOUD:
             filter_instance = f'(status = {CloudManager.RUNNING}) OR (status = {CloudManager.PENDING})'
+        else:
+            filter_instance = ""
 
         instances_id = self.manager.list_instances_id(filter_instance)
         ip_list = []
@@ -492,10 +492,12 @@ class VirtualMachine:
                 return self.manager.get_ondemand_price(self.instance_type.type, self.loader.ec2_conf.region)
         elif self.instance_type.provider == CloudManager.GCLOUD:
             if self.market == CloudManager.PREEMPTIBLE:
-                vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type, self.loader.gcp_conf.region)
+                vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type,
+                                                                           self.loader.gcp_conf.region)
             else:
-                vcpu_price, mem_price = self.manager.get_ondemand_price(self.instance_type.type, self.loader.gcp_conf.region)
-            return self.instance_type.vcpus*vcpu_price + self.instance_type.memory*mem_price
+                vcpu_price, mem_price = self.manager.get_ondemand_price(self.instance_type.type,
+                                                                        self.loader.gcp_conf.region)
+            return self.instance_type.vcpu*vcpu_price + self.instance_type.memory*mem_price
 
     @property
     def type(self):

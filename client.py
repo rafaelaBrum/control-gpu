@@ -18,6 +18,8 @@ def __call_control(loader: Loader):
     try:
         loader.print_execution_info()
 
+        exit()
+
         manager = ScheduleManager(loader=loader)
 
         manager.start_execution()
@@ -58,7 +60,7 @@ def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
 
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
-    parser.add_argument('--task_file', help="task file name", type=str, default=None)
+    parser.add_argument('--job_file', help="job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
     # parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)

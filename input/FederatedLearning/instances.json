@@ -1,0 +1,48 @@
+{
+    "instances": {
+        "g4dn.xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": 0.526,
+                "preemptible": 0.1578
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "ami-0072ab402faa38d64",
+            "ebs_device_name": "/dev/nvme2n1",
+            "vcpu": 0,
+            "memory": 0,
+            "gpu": "True"
+        },
+        "n2-standard-2": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": 0.09711800000000001,
+                "preemptible": 0.023498
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "disk-ubuntu-flower-server",
+            "ebs_device_name": "/dev/sdb",
+            "memory": 8,
+            "vcpu": 2,
+            "gpu": "False"
+        }
+    }
+}

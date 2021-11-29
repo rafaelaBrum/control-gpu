@@ -4,17 +4,17 @@ from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 
 # from control.repository.postgres_objects import Base, Job, Task, Instance, InstanceType, Execution, InstanceStatus
-from control.repository.postgres_objects import Base, Task, Instance, InstanceType, Execution
+from control.repository.postgres_objects import Base, Job, Task, Instance, InstanceType, Execution
 
 from control.config.database_config import DataBaseConfig
 
-from statistics import mean
+# from statistics import mean
 
 
 class PostgresRepo:
     DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
-    accepted_filters = ['task_id', 'instance_id', 'execution_id',
+    accepted_filters = ['job_id', 'task_id', 'instance_id', 'execution_id',
                         'cmd', 'instance_type', 'instance_id',
                         'region', 'zone', 'market', 'price__lt',
                         'price__gt', 'status', 'limit', 'order']
@@ -45,8 +45,8 @@ class PostgresRepo:
     def add_provenience(self, new):
         self.__add(new)
 
-    # def add_job(self, new):
-    #     self.__add(new)
+    def add_job(self, new):
+        self.__add(new)
 
     def add_task(self, new):
         self.__add(new)
@@ -75,19 +75,19 @@ class PostgresRepo:
                 if key not in self.accepted_filters:
                     raise Exception('Postgres Repo ERROR:  Filter "{}" is Invalid'.format(key))
 
-    # def get_jobs(self, filter=None):
-    #
-    #     self.__check_filter(filter)
+    def get_jobs(self, filter=None):
 
-        # query = self.session.query(Job)
+        self.__check_filter(filter)
 
-        # if filter is None:
-        #     return query.all()
-        #
-        # if 'job_id' in filter:
-        #     query = query.filter(Job.id == filter['job_id'])
-        #
-        # return query.all()
+        query = self.session.query(Job)
+
+        if filter is None:
+            return query.all()
+
+        if 'job_id' in filter:
+            query = query.filter(Job.id == filter['job_id'])
+
+        return query.all()
 
     def get_tasks(self, filter=None):
 
@@ -98,8 +98,8 @@ class PostgresRepo:
         if filter is None:
             return query.all()
 
-        # if 'job_id' in filter:
-        #     query = query.filter(Task.job_id == filter['job_id'])
+        if 'job_id' in filter:
+            query = query.filter(Task.job_id == filter['job_id'])
 
         if 'task_id' in filter:
             query = query.filter(Task.task_id == filter['task_id'])
@@ -181,8 +181,8 @@ class PostgresRepo:
         if 'execution_id' in filter:
             query = query.filter(Execution.execution_id == filter['execution_id'])
 
-        # if 'job_id' in filter:
-        #     query = query.filter(Execution.job_id == filter['job_id'])
+        if 'job_id' in filter:
+            query = query.filter(Execution.job_id == filter['job_id'])
 
         if 'task_id' in filter:
             query = query.filter(Execution.task_id == filter['task_id'])
@@ -274,20 +274,31 @@ class PostgresRepo:
     #
     #     return len(execution_list)
 
-    def get_task_runtime(self, task_id, execution_id):
+    def get_tasks_runtime(self, job_id, execution_id):
         """
-        :type task_id: int
+        :type job_id: int
         :return:
         """
 
-        task = self.session.query(Task).filter_by(id=task_id).first()
+        job = self.session.query(Job).filter_by(id=job_id).first()
 
-        executing = task.executions.filter_by(execution_id=execution_id, status='executing').all()
+        for task in job.tasks.all():
 
-        exec: Execution
-        for exec in executing:
-            fin = task.executions.filter_by(execution_id=execution_id, status='finished',
-                                            task_id=exec.task_id).first()
+            executing = task.executions.filter_by(execution_id=execution_id, status='executing').all()
 
-            if fin is not None:
-                print(task.task_id, task.command, fin.timestamp - exec.timestamp)
+            exec: Execution
+            for exec in executing:
+                fin = task.executions.filter_by(execution_id=execution_id, status='finished',
+                                                task_id=exec.task_id).first()
+
+                if fin is not None:
+                    print(task.task_id, task.command, fin.timestamp - exec.timestamp)
+
+    def get_number_of_tasks_by_status(self, execution_id, job_id, status):
+        execution_list = self.get_execution(filter={
+            'job_id': job_id,
+            'execution_id': execution_id,
+            'status': status
+        })
+
+        return len(execution_list)

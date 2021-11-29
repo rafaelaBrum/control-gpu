@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 
 
-def test_on_demand_virtual_machine(number, disk_name, loader):
+def test_on_demand_virtual_machine(disk_name, loader):
     instance = InstanceType(
         provider=CloudManager.GCLOUD,
         instance_type='n2-standard-2',
@@ -24,9 +24,8 @@ def test_on_demand_virtual_machine(number, disk_name, loader):
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        vm_name=f'vm-teste-{number}',
         memory=8,
-        vcpus=2,
+        vcpu=2,
         ebs_device_name='/dev/sdb'
     )
 

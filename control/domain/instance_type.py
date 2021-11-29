@@ -3,23 +3,23 @@ from control.config.ec2_config import EC2Config
 
 class InstanceType:
 
-    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='', vm_name='',
-                 memory=0, vcpus=0):
+    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='',
+                 memory=0, vcpu=0, gpu=False):
         self.provider = provider
         self.type = instance_type
         self.memory = memory  # GB
-        self.vcpus = vcpus
+        self.vcpu = vcpu
         # self.gflops = gflops
         self.price_ondemand = prices['on-demand']
         self.price_preemptible = prices['preemptible']
         self.restrictions = restrictions
         self.image_id = image_id
         self.ebs_device_name = ebs_device_name
-        self.vm_name = vm_name
+        self.gpu = gpu
 
         self.id = None
 
-        #TODO change this to reflect GCP as well
+        # TODO change this to reflect GCP as well
         config = EC2Config()
 
         self.boot_overhead_seconds = config.boot_overhead
@@ -46,11 +46,11 @@ class InstanceType:
                 image_id=adict['instances'][key]['image_id'],
                 ebs_device_name=adict['instances'][key]['ebs_device_name'],
                 prices=adict['instances'][key]['prices'],
-                # memory=adict['instances'][key]['memory'],
+                memory=adict['instances'][key]['memory'],
                 # gflops=adict['instances'][key]['gflops'],
-                # vcpu=adict['instances'][key]['vcpu'],
-                restrictions=adict['instances'][key]['restrictions']
-
+                vcpu=adict['instances'][key]['vcpu'],
+                restrictions=adict['instances'][key]['restrictions'],
+                gpu=adict['instances'][key]['gpu']
             )
             for key in adict['instances']
         ]
@@ -75,16 +75,17 @@ class InstanceType:
     def limits_preemptible(self):
         return self.restrictions['limits']['preemptible']
 
+    @property
+    def have_gpu(self):
+        return self.gpu
+
     def __str__(self):
         return "'{}' on-demand price: '{}' preemptible price: '{}' " \
-               "region: '{}' zone: '{}' provider: {}".format(
-                self.type,
-                # self.memory,
-                # self.vcpu,
-                self.price_ondemand,
-                self.price_preemptible,
-                self.region,
-                self.zone,
-                self.provider
-                # self.cpu_credits,
-                )
+               "region: '{}' zone: '{}' provider: {} GPU? {}".format(self.type,
+                                                                     self.price_ondemand,
+                                                                     self.price_preemptible,
+                                                                     self.region,
+                                                                     self.zone,
+                                                                     self.provider,
+                                                                     self.gpu
+                                                                     )

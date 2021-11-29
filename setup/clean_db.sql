@@ -204,6 +204,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.execution (
     execution_id integer NOT NULL,
+    job_id integer NOT NULL,
     task_id integer NOT NULL,
     instance_id character varying NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
@@ -219,6 +220,7 @@ ALTER TABLE public.execution OWNER TO postgres;
 
 CREATE TABLE public.execution_status (
     execution_id integer NOT NULL,
+	job_id integer NOT NULL,
     task_id integer NOT NULL,
     instance_id character varying NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
@@ -264,11 +266,48 @@ ALTER TABLE public.instance_status OWNER TO postgres;
 
 CREATE TABLE public.instance_type (
     type character varying NOT NULL,
+    vcpu integer,
+    memory double precision,
     provider character varying
 );
 
 
 ALTER TABLE public.instance_type OWNER TO postgres;
+
+--
+-- Name: job; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.job (
+    id integer NOT NULL,
+    name character varying,
+    description character varying
+);
+
+
+ALTER TABLE public.job OWNER TO postgres;
+
+--
+-- Name: job_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.job_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.job_id_seq OWNER TO postgres;
+
+--
+-- Name: job_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.job_id_seq OWNED BY public.job.id;
+
 
 --
 -- Name: statistic; Type: TABLE; Schema: public; Owner: postgres
@@ -291,6 +330,7 @@ ALTER TABLE public.statistic OWNER TO postgres;
 --
 
 CREATE TABLE public.task (
+    job_id integer NOT NULL,
     task_id integer NOT NULL,
     task_name character varying,
     command character varying
@@ -305,6 +345,7 @@ ALTER TABLE public.task OWNER TO postgres;
 
 CREATE TABLE public.test (
     execution_id integer NOT NULL,
+	job_id integer NOT NULL,
     task_id integer NOT NULL,
     start timestamp without time zone,
     "end" timestamp without time zone,
@@ -329,10 +370,17 @@ ALTER TABLE public.test OWNER TO postgres;
 
 
 --
+-- Name: job id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.job ALTER COLUMN id SET DEFAULT nextval('public.job_id_seq'::regclass);
+
+
+--
 -- Data for Name: execution; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.execution (execution_id, task_id, instance_id, "timestamp", status) FROM stdin;
+COPY public.execution (execution_id, job_id, task_id, instance_id, "timestamp", status) FROM stdin;
 \.
 
 
@@ -340,19 +388,19 @@ COPY public.execution (execution_id, task_id, instance_id, "timestamp", status) 
 -- Data for Name: execution_status; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.execution_status (execution_id, task_id, instance_id, "timestamp", status) FROM stdin;
-1 1 xyz	2019-03-30 15:01:38.20816 waiting
-1 2	xyz	2019-03-30 15:01:38.51292	waiting
-1 3	xyz	2019-03-30 15:01:38.553461	waiting
-1 4	xyz	2019-03-30 15:01:38.56174	waiting
-1 5	xyz	2019-03-30 15:02:14.279995	executing
-1 6	xyz	2019-03-30 15:02:14.328468	executing
-1 7	xyz	2019-03-30 15:02:14.399822	executing
-1 8	xyz	2019-03-30 15:02:42.096192	executing
-1 9	xyz	2019-03-30 15:03:12.929855	finished
-1 10	xyz	2019-03-30 15:03:13.123799	finished
-1 11	xyz	2019-03-30 15:03:13.482473	finished
-1 12	xyz	2019-03-30 15:03:51.027635	finished
+COPY public.execution_status (execution_id, job_id, task_id, instance_id, "timestamp", status) FROM stdin;
+1 1 2 xyz	2019-03-30 15:01:38.20816 waiting
+1 2	2 xyz	2019-03-30 15:01:38.51292	waiting
+1 3	2 xyz	2019-03-30 15:01:38.553461	waiting
+1 4	2 xyz	2019-03-30 15:01:38.56174	waiting
+1 5	2 xyz	2019-03-30 15:02:14.279995	executing
+1 6	2 xyz	2019-03-30 15:02:14.328468	executing
+1 7	2 xyz	2019-03-30 15:02:14.399822	executing
+1 8	2 xyz	2019-03-30 15:02:42.096192	executing
+1 9	2 xyz	2019-03-30 15:03:12.929855	finished
+1 10 2	xyz	2019-03-30 15:03:13.123799	finished
+1 11 2	xyz	2019-03-30 15:03:13.482473	finished
+1 12 2	xyz	2019-03-30 15:03:51.027635	finished
 \.
 
 
@@ -376,15 +424,15 @@ COPY public.instance_status (instance_id, "timestamp", status) FROM stdin;
 -- Data for Name: instance_type; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.instance_type (type, provider) FROM stdin;
+COPY public.instance_type (type, vcpu, memory, provider) FROM stdin;
 \.
 
 
 --
--- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: job; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.task (task_id, task_name, command) FROM stdin;
+COPY public.job (id, name, description) FROM stdin;
 \.
 
 
@@ -395,12 +443,28 @@ COPY public.task (task_id, task_name, command) FROM stdin;
 COPY public.test (execution_id, task_id, start, "end", deadline, hibernations, faults, work_stealing, hibernation_recovery, hibernation_timeout, idle_migration, working_migration, on_demand, spot, elapsed, cost, ondemand_cost, completed_tasks) FROM stdin;
 \.
 
+
+--
+-- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.task (job_id, task_id, task_name, command) FROM stdin;
+\.
+
+
+--
+-- Name: job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.job_id_seq', 1, false);
+
+
 --
 -- Name: execution execution_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_pkey PRIMARY KEY (execution_id, task_id, instance_id, "timestamp");
+    ADD CONSTRAINT execution_pkey PRIMARY KEY (execution_id, job_id, task_id, instance_id, "timestamp");
 
 
 --
@@ -408,7 +472,7 @@ ALTER TABLE ONLY public.execution
 --
 
 ALTER TABLE ONLY public.execution_status
-    ADD CONSTRAINT execution_status_pkey PRIMARY KEY (execution_id, task_id, instance_id, "timestamp");
+    ADD CONSTRAINT execution_status_pkey PRIMARY KEY (execution_id, job_id, task_id, instance_id, "timestamp");
 
 
 --
@@ -436,11 +500,11 @@ ALTER TABLE ONLY public.instance_type
 
 
 --
--- Name: task task_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: job job_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.task
-    ADD CONSTRAINT task_pkey PRIMARY KEY (task_id);
+ALTER TABLE ONLY public.job
+    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
 
 
 --
@@ -448,7 +512,15 @@ ALTER TABLE ONLY public.task
 --
 
 ALTER TABLE ONLY public.test
-    ADD CONSTRAINT test_pkey PRIMARY KEY (execution_id, task_id);
+    ADD CONSTRAINT test_pkey PRIMARY KEY (execution_id, job_id, task_id);
+
+
+--
+-- Name: task task_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.task
+    ADD CONSTRAINT task_pkey PRIMARY KEY (job_id, task_id);
 
 
 --
@@ -460,11 +532,11 @@ ALTER TABLE ONLY public.test
 
 
 --
--- Name: execution execution_task_id_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: execution execution_job_id_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 --ALTER TABLE ONLY public.execution
---    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
+--    ADD CONSTRAINT execution_job_id_task_id_fkey FOREIGN KEY (job_id, task_id) REFERENCES public.task(job_id, task_id);
 
 
 --
@@ -481,6 +553,14 @@ ALTER TABLE ONLY public.test
 
 --ALTER TABLE ONLY public.instance
 --    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
+
+
+--
+-- Name: task task_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.task
+    ADD CONSTRAINT task_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.job(id);
 
 
 --
@@ -2711,6 +2791,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.execution (
     id integer NOT NULL,
+    job_id integer NOT NULL,
     task_id integer NOT NULL,
     instance_id character varying NOT NULL
 );
@@ -2724,6 +2805,7 @@ ALTER TABLE public.execution OWNER TO postgres;
 
 CREATE TABLE public.execution_status (
     execution_id integer NOT NULL,
+    job_id integer NOT NULL,
     task_id integer NOT NULL,
     instance_id character varying NOT NULL,
     "timestamp" timestamp without time zone NOT NULL,
@@ -2768,16 +2850,54 @@ ALTER TABLE public.instance_status OWNER TO postgres;
 --
 
 CREATE TABLE public.instance_type (
-    type character varying NOT NULL
+    type character varying NOT NULL,
+    vcpu integer,
+    memory integer
 );
 
 
 ALTER TABLE public.instance_type OWNER TO postgres;
 
 --
+-- Name: job; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.job (
+    id integer NOT NULL,
+    name character varying,
+    description character varying
+);
+
+
+ALTER TABLE public.job OWNER TO postgres;
+
+--
+-- Name: job_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.job_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.job_id_seq OWNER TO postgres;
+
+--
+-- Name: job_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.job_id_seq OWNED BY public.job.id;
+
+
+--
 -- Name: statistic; Type: TABLE; Schema: public; Owner: postgres
 --
 
+--
 CREATE TABLE public.statistic (
     execution_id integer NOT NULL,
     job_id integer NOT NULL,
@@ -2795,6 +2915,7 @@ ALTER TABLE public.statistic OWNER TO postgres;
 --
 
 CREATE TABLE public.task (
+    job_id integer NOT NULL,
     task_id integer NOT NULL,
     task_name character varying,
     command character varying
@@ -2803,14 +2924,20 @@ CREATE TABLE public.task (
 
 ALTER TABLE public.task OWNER TO postgres;
 
+--
+-- Name: job id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.job ALTER COLUMN id SET DEFAULT nextval('public.job_id_seq'::regclass);
+
 
 --
 -- Data for Name: execution; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.execution (id, task_id, instance_id) FROM stdin;
-1	0	xyz
-1	1	xyz
+COPY public.execution (id, job_id, task_id, instance_id) FROM stdin;
+1	1	0	xyz
+1	1	1	xyz
 \.
 
 
@@ -2818,10 +2945,10 @@ COPY public.execution (id, task_id, instance_id) FROM stdin;
 -- Data for Name: execution_status; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.execution_status (execution_id, task_id, instance_id, "timestamp", status) FROM stdin;
-1	1	xyz	2019-03-13 13:45:19.089362	waiting
-1	2	xyz	2019-03-13 13:45:19.08952	waiting
-1	3	xyz	2019-03-13 13:45:19.089662	running
+COPY public.execution_status (execution_id, job_id, task_id, instance_id, "timestamp", status) FROM stdin;
+1	1	0	xyz	2019-03-13 13:45:19.089362	waiting
+1	1	0	xyz	2019-03-13 13:45:19.08952	waiting
+1	1	0	xyz	2019-03-13 13:45:19.089662	running
 \.
 
 
@@ -2847,20 +2974,35 @@ xyz	2019-03-13 13:45:19.055422	running
 -- Data for Name: instance_type; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.instance_type (type) FROM stdin;
-c3.xlarge
+COPY public.instance_type (type, vcpu, memory) FROM stdin;
+c3.xlarge	2	2
 \.
 
+
+--
+-- Data for Name: job; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.job (id, name, description) FROM stdin;
+1	Test	A Simple Job
+\.
 
 
 --
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.task (task_id, task_name, command) FROM stdin;
-1 "Task de Teste"	Test
-2 "Task2" Test
+COPY public.task (job_id, task_id, task_name, command) FROM stdin;
+1 1 "Task de Teste"	Test
+1 2 "Task2" Test
 \.
+
+
+--
+-- Name: job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.job_id_seq', 1, false);
 
 
 --
@@ -2868,7 +3010,7 @@ COPY public.task (task_id, task_name, command) FROM stdin;
 --
 
 ALTER TABLE ONLY public.execution
-    ADD CONSTRAINT execution_pkey PRIMARY KEY (id, task_id, instance_id);
+    ADD CONSTRAINT execution_pkey PRIMARY KEY (id, job_id, task_id, instance_id);
 
 
 --
@@ -2876,7 +3018,7 @@ ALTER TABLE ONLY public.execution
 --
 
 ALTER TABLE ONLY public.execution_status
-    ADD CONSTRAINT execution_status_pkey PRIMARY KEY (execution_id, task_id, instance_id, "timestamp");
+    ADD CONSTRAINT execution_status_pkey PRIMARY KEY (execution_id, job_id, task_id, instance_id, "timestamp");
 
 
 --
@@ -2904,11 +3046,19 @@ ALTER TABLE ONLY public.instance_type
 
 
 --
+-- Name: job job_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.job
+    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: task task_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.task
-    ADD CONSTRAINT task_pkey PRIMARY KEY (task_id);
+    ADD CONSTRAINT task_pkey PRIMARY KEY (job_id, task_id);
 
 
 --
@@ -2920,11 +3070,11 @@ ALTER TABLE ONLY public.task
 
 
 --
--- Name: execution execution_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: execution execution_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 --ALTER TABLE ONLY public.execution
---    ADD CONSTRAINT execution_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(task_id);
+--    ADD CONSTRAINT execution_job_id_fkey FOREIGN KEY (job_id, task_id) REFERENCES public.task(task_id);
 
 
 --
@@ -2932,7 +3082,7 @@ ALTER TABLE ONLY public.task
 --
 
 --ALTER TABLE ONLY public.execution_status
---    ADD CONSTRAINT execution_status_execution_id_fkey FOREIGN KEY (execution_id, task_id, instance_id) REFERENCES public.execution(id, task_id, instance_id);
+--    ADD CONSTRAINT execution_status_execution_id_fkey FOREIGN KEY (execution_id, job_id, task_id, instance_id) REFERENCES public.execution(id, job_id, task_id, instance_id);
 
 
 --
@@ -2949,6 +3099,14 @@ ALTER TABLE ONLY public.task
 
 --ALTER TABLE ONLY public.instance
 --    ADD CONSTRAINT instance_type_fkey FOREIGN KEY (type) REFERENCES public.instance_type(type);
+
+
+--
+-- Name: task task_job_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.task
+    ADD CONSTRAINT task_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.job(id);
 
 
 --

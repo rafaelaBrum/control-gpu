@@ -12,7 +12,6 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
 
-    parser.add_argument('--vm_number', required=True)
     parser.add_argument('--disk_name', default='disk-extra')
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
     parser.add_argument('--task_file', help="task file name", type=str, default=None)
@@ -35,7 +34,7 @@ def main():
     test_aws_on_demand(loader)
 
     print("Testing on-demand VM on GCP")
-    test_gcp_on_demand(args.vm_number, args.disk_name, loader)
+    test_gcp_on_demand(args.disk_name, loader)
 
 
 if __name__ == "__main__":
