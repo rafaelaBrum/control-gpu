@@ -3,13 +3,14 @@ from control.domain.task import Task
 
 class FLServerTask(Task):
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, n_clients, n_rounds):
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, n_clients, n_rounds, zip_file):
         super().__init__(task_id, task_name, command, generic_ckpt, runtime)
 
         self.simple_command = command
 
         self.n_clients = n_clients
         self.n_rounds = n_rounds
+        self.zip_file = zip_file
 
         self.running_instance = ""
         self.running = False
@@ -46,7 +47,8 @@ class FLServerTask(Task):
             runtime=adict['tasks']['server']['runtime'],
             generic_ckpt=adict['tasks']['server']['generic_ckpt'],
             n_clients=adict['tasks']['server']['n_clients'],
-            n_rounds=adict['tasks']['server']['n_rounds']
+            n_rounds=adict['tasks']['server']['n_rounds'],
+            zip_file=adict['tasks']['server']['zip_file']
         )
 
     def __str__(self):

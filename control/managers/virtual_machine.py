@@ -7,6 +7,8 @@ from control.managers.gcp_manager import GCPManager
 from control.util.ssh_client import SSHClient
 from control.util.loader import Loader
 
+from control.domain.job import Job
+
 from datetime import datetime, timedelta
 
 import uuid
@@ -47,6 +49,9 @@ class VirtualMachine:
             if self.vm_name == '':
                 self.vm_name = f'vm-{self.instance_type.type}'
             self.vm_name = f'{self.vm_name}-{self.vm_num}'
+            if self.disk_name == '':
+                self.disk_name = f'disk-{self.instance_type.type}'
+            self.disk_name = f'{self.disk_name}-{self.vm_num}'
             self.vm_num += 1
 
         self.instance_id = None
@@ -256,7 +261,7 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
 
-    def prepare_vm(self):
+    def prepare_vm(self, type_task, client_id):
 
         if not self.failed_to_created:
 
@@ -276,7 +281,6 @@ class VirtualMachine:
                 logging.info("<VirtualMachine {}>: - Creating directory {}".format(self.instance_id,
                                                                                    self.loader.file_system_conf.path))
                 # create directory
-                # TODO: add storage options to GCP
                 self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
                 if self.loader.file_system_conf.type == CloudManager.EBS:
@@ -295,57 +299,90 @@ class VirtualMachine:
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
 
-                cmd = 'mkdir {}_{}/'.format(self.loader.fl_server_task.task_id, self.loader.execution_id)
+                cmd = 'mkdir {}_{}_{}/'.format(self.loader.job.job_id, client_id, self.loader.execution_id)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
 
                 stdout, stderr, code_return = self.ssh.execute_command(cmd, output=True)
                 print(stdout)
 
-                # Send daemon file
+                if type_task == Job.SERVER:
+                    item = self.loader.job.server_task.zip_file
+                elif type_task == Job.CLIENT:
+                    item = self.loader.job.client_tasks[0].zip_file
+                else:
+                    item = ""
+                    logging.info(f"<VirtualMachine {self.instance_id}>: Not sending any additional file"
+                                 f" (type_task {type_task})")
+
+
+                # Send files
                 if self.instance_type.provider == CloudManager.EC2:
+
+                    self.ssh.put_file(source=self.loader.application_conf.flower_path,
+                                    target=self.loader.ec2_conf.home_path,
+                                    item=item)
+
+                    cmd1 = f'unzip {item} -d .'
+
+                    self.ssh.execute_command(cmd1, output=True)
+
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.ec2_conf.home_path,
                                       item=self.loader.application_conf.daemon_aws_file)
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.file_system_conf.path,
-                                                    '{}_{}'.format(self.loader.fl_server_task.task_id,
+                                                    '{}_{}_{}'.format(self.loader.job.job_id,
+                                                                   client_id,
                                                                    self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
                                  "--vm_user {} " \
                                  "--root_path {} " \
+                                 "--job_id {} " \
                                  "--task_id {} " \
                                  "--execution_id {}  " \
                                  "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
                                                                          self.loader.application_conf.daemon_aws_file),
                                                             self.loader.ec2_conf.vm_user,
                                                             self.loader.file_system_conf.path,
-                                                            self.loader.fl_server_task.task_id,
+                                                            self.loader.job.job_id,
+                                                            client_id,
                                                             self.loader.execution_id,
                                                             self.instance_id)
 
                 elif self.instance_type.provider == CloudManager.GCLOUD:
+                    self.ssh.put_file(source=self.loader.application_conf.flower_path,
+                                      target=self.loader.gcp_conf.home_path,
+                                      item=item)
+
+                    cmd1 = f'unzip {item} -d .'
+
+                    self.ssh.execute_command(cmd1, output=True)
+
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
                                       item=self.loader.application_conf.daemon_gcp_file)
 
                     # create execution folder
                     self.root_folder = os.path.join(self.loader.gcp_conf.home_path,
-                                                    '{}_{}'.format(self.loader.fl_server_task.task_id,
+                                                    '{}_{}_{}'.format(self.loader.job.job_id,
+                                                                   client_id,
                                                                    self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
                                  "--vm_user {} " \
                                  "--root_path {} " \
+                                 "--job_id {} " \
                                  "--task_id {} " \
                                  "--execution_id {}  " \
                                  "--instance_id {} ".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                          self.loader.application_conf.daemon_gcp_file),
                                                             self.loader.gcp_conf.vm_user,
                                                             self.loader.file_system_conf.path,
-                                                            self.loader.fl_server_task.task_id,
+                                                            self.loader.job.job_id,
+                                                            client_id,
                                                             self.loader.execution_id,
                                                             self.instance_id)
                 else:

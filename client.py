@@ -20,8 +20,6 @@ def __call_control(loader: Loader):
 
         manager = ScheduleManager(loader=loader)
 
-        exit()
-
         manager.start_execution()
 
         # status = "SUCCESS"

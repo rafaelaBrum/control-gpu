@@ -49,7 +49,8 @@ class Executor:
 
         # socket.communicator
         # used to send commands to the ec2 instance
-        self.communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
+        self.communicator = Communicator(host=self.vm.instance_public_ip,
+                                         port=self.loader.communication_conf.socket_port)
 
         """Track INFO """
         # used to abort the execution loop
@@ -69,6 +70,7 @@ class Executor:
         self.repo.add_execution(
             ExecutionRepo(
                 execution_id=self.loader.execution_id,
+                job_id=self.loader.job.job_id,
                 task_id=self.task.task_id,
                 instance_id=self.vm.instance_id,
                 timestamp=datetime.now(),
@@ -84,7 +86,7 @@ class Executor:
         # logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
         self.repo = PostgresRepo()
-        current_time = None
+        # current_time = None
         action = Daemon.START
 
         # if self.task.has_checkpoint:
@@ -120,7 +122,7 @@ class Executor:
 
                 try:
                     # logging.info(
-                        # "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
+                    #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
                     command_status, current_stage = self.__get_task_status()
                     # logging.info(
                     #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
@@ -129,8 +131,8 @@ class Executor:
                     instance_action = None
                     if self.vm.market == CloudManager.PREEMPTIBLE:
                         # logging.info(
-                            # "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
-                            #                                                          self.vm.instance_id))
+                        #     "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
+                        #                                                              self.vm.instance_id))
                         instance_action = self.__get_instance_action()
                         # logging.info(
                         #     "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
@@ -159,7 +161,7 @@ class Executor:
                     current_time = current_time + elapsed_time
                     self.task.update_execution_time(elapsed_time.total_seconds())
 
-                #TODO: if VM is from GCP, instance_action always returns a string ('FALSE' or 'TRUE')
+                # TODO: if VM is from GCP, instance_action always returns a string ('FALSE' or 'TRUE')
                 if instance_action is not None and instance_action != 'none':
                     self.vm.interrupt()
                     self.__stopped(Task.INTERRUPTED)
@@ -279,7 +281,7 @@ class Executor:
                 current_stage = result['value']['current_stage']
 
                 return command_status, current_stage
-            except:
+            except Exception:
                 logging.error("<Executor {}-{}>: Get task Status {}/3".format(self.task.task_id,
                                                                               self.vm.instance_id,
                                                                               i + 1))
@@ -301,7 +303,7 @@ class Executor:
                 instance_action = result['value']
 
                 return instance_action
-            except:
+            except Exception:
                 logging.error("<Executor {}-{}>: Get instance action {}/3".format(self.task.task_id,
                                                                                   self.vm.instance_id,
                                                                                   i + 1))
@@ -358,7 +360,8 @@ class Executor:
 
         info = {
             "task_id": self.task.task_id,
-            "command": self.task.command
+            "command": self.task.command,
+            "server_ip": self.task.server_ip
         }
 
         return info
@@ -476,7 +479,9 @@ class Dispatcher:
     def __notify(self, value):
 
         kwargs = {'instance_id': self.vm.instance_id,
-                  'dispatcher': self}
+                  'dispatcher': self,
+                  'type_task': self.type_task,
+                  'client_id': self.client_id}
 
         notify(
             Event(
@@ -492,7 +497,8 @@ class Dispatcher:
             time.sleep(self.loader.communication_conf.retry_interval)
 
             try:
-                communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
+                communicator = Communicator(host=self.vm.instance_public_ip,
+                                            port=self.loader.communication_conf.socket_port)
                 communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
 
                 if communicator.response['status'] == 'success':
@@ -550,9 +556,11 @@ class Dispatcher:
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
             if self.type_task == Job.SERVER:
-                task = self.loader.fl_server_task
+                task = self.loader.job.server_task
             elif self.type_task == Job.CLIENT:
-                task = self.loader.fl_client_tasks[self.client_id]
+                task = self.loader.job.client_tasks[self.client_id]
+            else:
+                task = None
 
             if not task.has_task_finished() and self.working:
                 if self.vm.state == CloudManager.RUNNING:

@@ -33,14 +33,15 @@ class DaemonGCP:
     ERROR = 'error'
     INSTANCE_ACTION = 'instance_action'
 
-    def __init__(self, vm_user, root_path, task_id, execution_id, instance_id):
+    def __init__(self, vm_user, root_path, job_id, task_id, execution_id, instance_id):
         self.vm_user = vm_user
 
+        self.job_id = job_id
         self.task_id = task_id
         self.execution_id = execution_id
         self.instance_id = instance_id
 
-        self.root_path = os.path.join(root_path, "{}_{}".format(self.task_id, self.execution_id))
+        self.root_path = os.path.join(root_path, "{}_{}_{}".format(self.job_id, self.task_id, self.execution_id))
 
         self.__prepare_logging()
 
@@ -53,7 +54,7 @@ class DaemonGCP:
         root_logger.setLevel('INFO')
 
         file_name = os.path.join(self.root_path,
-                                 "{}_{}_{}.log".format(self.task_id, self.execution_id, self.instance_id))
+                                 "{}_{}_{}_{}.log".format(self.job_id, self.task_id, self.execution_id, self.instance_id))
 
         file_handler = logging.FileHandler(file_name)
         file_handler.setFormatter(log_formatter)
@@ -67,19 +68,22 @@ class DaemonGCP:
 
         task_id = value['task_id']
         command = value['command']
+        server_ip = value['server_ip']
         session = ''
 
         if command is not None:
             session = command.split()[0]
 
-        session_name = "Session_{}_{}_{}_{}".format(
+        session_name = "Session_{}_{}_{}_{}_{}".format(
             session,
+            self.job_id,
             self.task_id,
             self.execution_id,
             task_id
         )
 
-        vm_name = "VM_{}_{}_{}".format(
+        vm_name = "VM_{}_{}_{}_{}".format(
+            self.job_id,
             self.task_id,
             self.execution_id,
             task_id
@@ -96,6 +100,9 @@ class DaemonGCP:
 
             # Starting job
             try:
+
+                if 'client' in command:
+                    command.replace("-epochs", f" -server_address {server_ip} -epochs")
 
                 self.__start_command(session_name, command)
 
@@ -231,22 +238,22 @@ class DaemonGCP:
     def __start_command(self, session_name, command):
         # start application without checkpoint
 
-        # Get PATH and LD_LIBRARY_PATH environment variables
-        path = os.getenv('PATH')
-        ld_library_path = os.getenv('LD_LIBRARY_PATH')
-
-        if ld_library_path is None:
-            ld_library_path = '/usr/local/cuda-10.0/lib64'
-        else:
-            ld_library_path = ld_library_path + ":/usr/local/cuda-10.0/lib64"
-
-        path = path + ":/usr/local/cuda-10.0/bin:/home/ubuntu/MASA-CUDAlign/masa-cudalign-3.9.1.1024"
-
-        # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
-        os.environ['PATH'] = path
-        os.environ['LD_LIBRARY_PATH'] = ld_library_path
-
-        logging.info("PATH env: {} - LD_LIBRARY_PATH: {}".format(os.getenv('PATH'), os.getenv('LD_LIBRARY_PATH')))
+        # # Get PATH and LD_LIBRARY_PATH environment variables
+        # path = os.getenv('PATH')
+        # ld_library_path = os.getenv('LD_LIBRARY_PATH')
+        #
+        # if ld_library_path is None:
+        #     ld_library_path = '/usr/local/cuda-10.0/lib64'
+        # else:
+        #     ld_library_path = ld_library_path + ":/usr/local/cuda-10.0/lib64"
+        #
+        # path = path + ":/usr/local/cuda-10.0/bin:/home/ubuntu/MASA-CUDAlign/masa-cudalign-3.9.1.1024"
+        #
+        # # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
+        # os.environ['PATH'] = path
+        # os.environ['LD_LIBRARY_PATH'] = ld_library_path
+        #
+        # logging.info("PATH env: {} - LD_LIBRARY_PATH: {}".format(os.getenv('PATH'), os.getenv('LD_LIBRARY_PATH')))
 
         cmd = "screen -L -Logfile {}/screen_task_log -S {} -dm bash -c {}".format(
             self.root_path, session_name, command
@@ -278,13 +285,13 @@ class DaemonGCP:
         return r.text
 
 
-
 class MyWebService(object):
 
     def __init__(self, args):
         self.daemon = DaemonGCP(
             vm_user=args.vm_user,
             root_path=args.root_path,
+            job_id=args.job_id,
             task_id=args.task_id,
             execution_id=args.execution_id,
             instance_id=args.instance_id
@@ -304,6 +311,7 @@ def main():
 
     parser.add_argument('--root_path', type=str, required=True)
 
+    parser.add_argument('--job_id', type=int, required=True)
     parser.add_argument('--task_id', type=int, required=True)
     parser.add_argument('--execution_id', type=int, required=True)
     parser.add_argument('--instance_id', type=str, required=True)

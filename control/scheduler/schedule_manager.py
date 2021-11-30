@@ -33,8 +33,12 @@ import threading
 
 
 class ScheduleManager:
-    task_dispatcher: Dispatcher
-    task_status = Task.WAITING
+    # hibernated_dispatcher: List[Dispatcher]
+    terminated_dispatcher: List[Dispatcher]
+    idle_dispatchers: List[Dispatcher]
+    working_dispatchers: List[Dispatcher]
+    # hibernating_dispatcher: List[Dispatcher]
+    job_status = Task.WAITING
 
     def __init__(self, loader: Loader):
 
@@ -82,6 +86,8 @@ class ScheduleManager:
         self.server_task_dispatcher: Dispatcher
         self.client_tasks_dispatches: List[Dispatcher]
         self.terminated_dispatchers = []
+        self.working_dispatchers = []
+        self.idle_dispatchers = []
         # self.server_task_status = Task.WAITING
         # self.client_tasks_status = []
         # for i in range(self.loader.job.num_clients):
@@ -141,6 +147,8 @@ class ScheduleManager:
 
         self.server_task_dispatcher = server_dispatcher
 
+        self.working_dispatchers.append(server_dispatcher)
+
         self.client_task_dispatchers = []
 
         for i in range(self.loader.job.num_clients):
@@ -163,6 +171,7 @@ class ScheduleManager:
             self.semaphore.acquire()
 
             self.client_task_dispatchers.append(client_dispatcher)
+            self.working_dispatchers.append(client_dispatcher)
 
             self.semaphore.release()
 
@@ -302,6 +311,22 @@ class ScheduleManager:
     HANDLES FUNCTIONS
     '''
 
+    def __idle_handle(self, dispatcher: Dispatcher, type_affected_task, affected_client_id):
+        self.semaphore.acquire()
+
+        if dispatcher in self.working_dispatchers:
+            self.working_dispatchers.remove(dispatcher)
+
+            self.idle_dispatchers.append(dispatcher)
+
+        self.semaphore.release()
+
+        if type_affected_task == Job.SERVER:
+            self.loader.job.server_task.finish_execution()
+            # self.server_task_status = Task.FINISHED
+        elif affected_client_id in self.loader.job.client_tasks:
+            self.loader.job.client_tasks[affected_client_id].finish_execution()
+
     def __interruption_handle(self):
         pass
         # # Move task to other VM
@@ -412,24 +437,26 @@ class ScheduleManager:
 
     def __event_handle(self, event):
 
+        affected_dispatcher: Dispatcher = event.kwargs['dispatcher']
+        type_affected_task = event.kwargs['type_task']
+        affected_client_id = event.kwargs['client_id']
+
         logging.info("<Scheduler Manager {}_{}>: - EVENT_HANDLE "
                      "Instance: '{}', Type: '{}', Market: '{}',"
-                     "Event: '{}'".format(self.loader.fl_server_task.task_id,
+                     "Event: '{}'".format(self.loader.job.job_id,
                                           self.loader.execution_id,
-                                          self.task_dispatcher.vm.instance_id,
-                                          self.task_dispatcher.vm.type,
-                                          self.task_dispatcher.vm.market,
+                                          affected_dispatcher.vm.instance_id,
+                                          affected_dispatcher.vm.type,
+                                          affected_dispatcher.vm.market,
                                           event.value))
 
         if event.value == CloudManager.IDLE:
-            logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.fl_server_task.task_id,
+            logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.job.job_id,
                                                                                    self.loader.execution_id))
 
-            self.loader.fl_server_task.finish_execution()
-            self.server_task_status = Task.FINISHED
-            for i in range(self.loader.fl_server_task.n_clients):
-                self.loader.fl_client_tasks[i].finish_execution()
-                self.client_tasks_status[i] = Task.FINISHED
+            self.__idle_handle(affected_dispatcher, type_affected_task, affected_client_id)
+
+                # self.client_tasks_status[i] = Task.FINISHED
         # elif event.value == CloudManager.STOPPED:
         #     # self.semaphore_count.acquire()
         #     self.n_interruptions += 1
@@ -458,25 +485,43 @@ class ScheduleManager:
     def __checkers(self):
         # Checker loop
         # Checker if all dispatchers have finished the execution
-        while self.task_status != Task.FINISHED:
+        # while len(self.working_dispatchers) > 0 or len(self.hibernating_dispatcher) > 0:
+        while len(self.working_dispatchers) > 0:
 
             if self.abort:
                 break
-
+            #
+            # # If new checkers would be created that function have to be updated
+            # self.__check_hibernated_dispatchers()
+            # self.__check_idle_dispatchers()
             time.sleep(5)
 
     '''
     Manager Functions
     '''
 
-    def __start_dispatcher(self):
+    def __start_server_dispatcher(self):
         self.semaphore.acquire()
 
         # Starting working dispatcher
         self.server_task_dispatcher.main_thread.start()
-        for i in range(self.loader.fl_server_task.n_clients):
+        while not self.server_task_dispatcher.vm.ready:
+            if self.server_task_dispatcher.vm.failed_to_created:
+                break
+            time.sleep(1)
+        for i in range (self.loader.job.num_clients):
+            self.loader.job.client_tasks[i].server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:8080"
+
+        self.semaphore.release()
+
+        return not self.server_task_dispatcher.vm.failed_to_created
+
+    def __start_clients_dispatchers(self):
+        self.semaphore.acquire()
+
+        # Starting working dispatcher
+        for i in range(self.loader.job.num_clients):
             self.client_task_dispatchers[i].main_thread.start()
-        # self.task_dispatcher.waiting_work.set()
 
         self.semaphore.release()
 
@@ -491,38 +536,51 @@ class ScheduleManager:
 
         logging.info("")
         logging.info("<Scheduler Manager {}_{}>: - Start termination process... "
-                     .format(self.loader.fl_server_task.task_id, self.loader.execution_id))
+                     .format(self.loader.job.job_id, self.loader.execution_id))
 
         # terminate simulation
         if self.loader.simulation_conf.with_simulation:
             self.simulator.stop_simulation()
 
-        # self.semaphore.acquire()
+        self.semaphore.acquire()
 
-        # Terminate DISPATCHER
+        # Terminate all working dispatchers
         logging.info("<Scheduler Manager {}_{}>: - "
-                     "Terminating Dispatcher".format(self.loader.fl_server_task.task_id,
-                                                     self.loader.execution_id))
+                     "Terminating working Dispatcher instances".format(self.loader.job.job_id,
+                                                                       self.loader.execution_id))
+        for working_dispatcher in self.working_dispatchers[:]:
+            working_dispatcher.debug_wait_command = False
 
-        self.task_dispatcher.debug_wait_command = False
+            working_dispatcher.working = False
 
-        self.task_dispatcher.working = False
-        # self.task_dispatcher.waiting_work.set()
+            self.working_dispatchers.remove(working_dispatcher)
+            self.terminated_dispatchers.append(working_dispatcher)
+
+        # Terminate all  idle dispatchers
+        logging.info("<Scheduler Manager {}_{}>: - Terminating idle instances".format(self.loader.job.job_id,
+                                                                                      self.loader.execution_id))
+        for idle_dispatcher in self.idle_dispatchers[:]:
+            idle_dispatcher.debug_wait_command = False
+
+            idle_dispatcher.working = False
+
+            self.idle_dispatchers.remove(idle_dispatcher)
+            self.terminated_dispatchers.append(idle_dispatcher)
 
         # Confirm Termination
-        logging.info("<Scheduler Manager {}_{}>: - Waiting Termination process..."
-                     .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
+        logging.info("<Scheduler Manager {}_{}>: - Waiting Termination process...".format(self.loader.job.job_id,
+                                                                                          self.loader.execution_id))
 
-        self.task_dispatcher.debug_wait_command = False
-        # waiting thread to terminate
+        for terminated_dispatcher in self.terminated_dispatchers:
+            terminated_dispatcher.debug_wait_command = False
+            # waiting thread to terminate
 
-        self.task_dispatcher.main_thread.join()
+            if terminated_dispatcher.main_thread.is_alive():
+                terminated_dispatcher.main_thread.join()
 
-        # getting volume-id
-        if self.loader.file_system_conf.type == EC2Manager.EBS:
-            self.ebs_volume_id = self.task_dispatcher.vm.volume_id
-
-        self.terminated_dispatchers.append(self.task_dispatcher)
+            # getting volume-id
+            if self.loader.file_system_conf.type == EC2Manager.EBS:
+                self.ebs_volumes.append(terminated_dispatcher.vm.volume_id)
 
         # self.semaphore.release()
 
@@ -532,7 +590,7 @@ class ScheduleManager:
         self.end_timestamp = datetime.now()
         self.elapsed_time = (self.end_timestamp - self.start_timestamp)
 
-        logging.info("<Scheduler Manager {}_{}>: - Waiting Termination...".format(self.loader.cudalign_task.task_id,
+        logging.info("<Scheduler Manager {}_{}>: - Waiting Termination...".format(self.loader.job.job_id,
                                                                                   self.loader.execution_id))
 
         cost = 0.0
@@ -553,11 +611,11 @@ class ScheduleManager:
         logging.info("")
 
         if not self.abort:
-            execution_info = "    Task: {} Execution: {} Scheduler: SimpleScheduler    "\
-                .format(self.loader.cudalign_task.task_id, self.loader.execution_id)
+            execution_info = "    Job: {} Execution: {} Scheduler: FLSimpleScheduler    "\
+                .format(self.loader.job.job_id, self.loader.execution_id)
         else:
-            execution_info = "    Job: {} Execution: {} Scheduler: SimpleScheduler" \
-                             " - EXECUTION ABORTED    ".format(self.loader.cudalign_task.task_id,
+            execution_info = "    Job: {} Execution: {} Scheduler: FLSimpleScheduler" \
+                             " - EXECUTION ABORTED    ".format(self.loader.job.job_id,
                                                                self.loader.execution_id)
 
         execution_info = 20 * "#" + execution_info + 20 * "#"
@@ -586,7 +644,8 @@ class ScheduleManager:
 
         if self.loader.file_system_conf.type == CloudManager.EBS and not self.loader.file_system_conf.ebs_delete:
             logging.warning("The following EBS VOLUMES will note be deleted by HADS: ")
-            logging.warning("\t-> {}".format(self.ebs_volume_id))
+            for volume_id in self.ebs_volumes:
+                logging.warning("\t-> {}".format(volume_id))
 
         logging.info("")
         logging.info(len(execution_info) * "#")
@@ -598,7 +657,7 @@ class ScheduleManager:
 
         self.repo.add_statistic(
             StatisticRepo(execution_id=self.loader.execution_id,
-                          task_id=self.loader.cudalign_task.task_id,
+                          job_id=self.loader.job.job_id,
                           status=status,
                           start=self.start_timestamp,
                           end=self.end_timestamp,
@@ -610,7 +669,7 @@ class ScheduleManager:
 
         if self.abort:
             error_msg = "<Scheduler Manager {}_{}>: - " \
-                        "Check all log-files. Execution Aborted".format(self.loader.cudalign_task.task_id,
+                        "Check all log-files. Execution Aborted".format(self.loader.job.job_id,
                                                                         self.loader.execution_id)
             logging.error(error_msg)
             raise Exception
@@ -622,14 +681,17 @@ class ScheduleManager:
         self.start_timestamp = datetime.now()
         # UPDATE DATETIME DEADLINE
 
-        logging.info("<Scheduler Manager {}_{}>: - Starting Execution.".format(self.loader.fl_server_task.task_id,
+        logging.info("<Scheduler Manager {}_{}>: - Starting Execution.".format(self.loader.job.job_id,
                                                                                self.loader.execution_id))
         logging.info("")
 
-        self.__start_dispatcher()
+        status = self.__start_server_dispatcher()
 
-        # Call checkers loop
-        self.__checkers()
+        if status:
+            self.__start_clients_dispatchers()
+
+            # Call checkers loop
+            self.__checkers()
 
         self.__terminate_dispatcher()
 

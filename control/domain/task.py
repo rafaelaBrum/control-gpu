@@ -42,6 +42,8 @@ class Task:
         self.has_checkpoint = False
         self.do_checkpoint = True
 
+        self.server_ip = None
+
     def __compute_checkpoint_values(self):
 
         self.checkpoint_factor = 0.0
