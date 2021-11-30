@@ -370,7 +370,7 @@ class Executor:
 class Dispatcher:
     executor: Executor
 
-    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id=0):
+    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id):
         self.loader = loader
 
         self.vm: VirtualMachine = vm  # Class that control a Virtual machine on the cloud
@@ -499,7 +499,7 @@ class Dispatcher:
             try:
                 communicator = Communicator(host=self.vm.instance_public_ip,
                                             port=self.loader.communication_conf.socket_port)
-                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
+                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None, 'server_ip': None})
 
                 if communicator.response['status'] == 'success':
                     return True
@@ -543,8 +543,8 @@ class Dispatcher:
             self.working = True
 
             try:
-                self.vm.prepare_vm(self.type_task)
-                self.__prepare_daemon()
+                self.vm.prepare_vm(self.type_task, self.client_id)
+                status = self.__prepare_daemon()
             except Exception as e:
                 logging.error(e)
 
@@ -552,6 +552,11 @@ class Dispatcher:
                 # self.waiting_work.clear()
                 # Notify abort!
                 self.__notify(CloudManager.ABORT)
+
+            if not status:
+                logging.error("<Dispatcher {}>: Daemon not working!".format(self.vm.instance_id))
+                self.__notify(CloudManager.ABORT)
+                self.working = False
 
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
@@ -563,7 +568,7 @@ class Dispatcher:
                 task = None
 
             if not task.has_task_finished() and self.working:
-                if self.vm.state == CloudManager.RUNNING:
+                if self.vm.state.lower() == CloudManager.RUNNING:
 
                     self.semaphore.acquire()
                     # # check running tasks

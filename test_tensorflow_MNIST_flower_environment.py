@@ -187,11 +187,11 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties):
             # print(stdout)
 
             # Send daemon file
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+            vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                             target=vm.loader.ec2_conf.home_path,
                             item="fedavg_strategy.py")
 
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+            vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                             target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.server_flower_file)
 
@@ -288,7 +288,7 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
             # print(stdout)
 
             # Send daemon file
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+            vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                             target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.client_flower_file)
 

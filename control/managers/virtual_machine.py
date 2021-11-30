@@ -48,10 +48,10 @@ class VirtualMachine:
             self.manager = GCPManager()
             if self.vm_name == '':
                 self.vm_name = f'vm-{self.instance_type.type}'
-            self.vm_name = f'{self.vm_name}-{self.vm_num}'
+            self.vm_name = f'{self.vm_name}-{self.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
             if self.disk_name == '':
                 self.disk_name = f'disk-{self.instance_type.type}'
-            self.disk_name = f'{self.disk_name}-{self.vm_num}'
+            self.disk_name = f'{self.disk_name}-{self.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
             self.vm_num += 1
 
         self.instance_id = None
@@ -319,23 +319,20 @@ class VirtualMachine:
                 # Send files
                 if self.instance_type.provider == CloudManager.EC2:
 
-                    self.ssh.put_file(source=self.loader.application_conf.flower_path,
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                     target=self.loader.ec2_conf.home_path,
                                     item=item)
 
                     cmd1 = f'unzip {item} -d .'
 
-                    self.ssh.execute_command(cmd1, output=True)
+                    logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd1))
+
+                    stdout, stderr, code_return = self.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.ec2_conf.home_path,
                                       item=self.loader.application_conf.daemon_aws_file)
-
-                    # create execution folder
-                    self.root_folder = os.path.join(self.loader.file_system_conf.path,
-                                                    '{}_{}_{}'.format(self.loader.job.job_id,
-                                                                   client_id,
-                                                                   self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
                                  "--vm_user {} " \
@@ -353,23 +350,28 @@ class VirtualMachine:
                                                             self.instance_id)
 
                 elif self.instance_type.provider == CloudManager.GCLOUD:
-                    self.ssh.put_file(source=self.loader.application_conf.flower_path,
+
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
                                       item=item)
 
-                    cmd1 = f'unzip {item} -d .'
+                    cmd_unzip = f'unzip {item} -d .'
 
-                    self.ssh.execute_command(cmd1, output=True)
+                    logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_unzip))
+
+                    stdout, stderr, code_return = self.ssh.execute_command(cmd_unzip, output=True)
+                    print(stdout)
+
+                    cmd_pip = f'pip3 install -r requirements.txt'
+
+                    # logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_pip))
+                    #
+                    # stdout, stderr, code_return = self.ssh.execute_command(cmd_pip, output=True)
+                    # print(stdout)
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
                                       item=self.loader.application_conf.daemon_gcp_file)
-
-                    # create execution folder
-                    self.root_folder = os.path.join(self.loader.gcp_conf.home_path,
-                                                    '{}_{}_{}'.format(self.loader.job.job_id,
-                                                                   client_id,
-                                                                   self.loader.execution_id))
 
                     cmd_daemon = "python3 {} " \
                                  "--vm_user {} " \
@@ -387,6 +389,12 @@ class VirtualMachine:
                                                             self.instance_id)
                 else:
                     cmd_daemon = ""
+
+                # create execution folder
+                self.root_folder = os.path.join(self.loader.file_system_conf.path,
+                                                '{}_{}_{}'.format(self.loader.job.job_id,
+                                                                  client_id,
+                                                                  self.loader.execution_id))
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
 

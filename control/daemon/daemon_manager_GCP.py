@@ -54,7 +54,8 @@ class DaemonGCP:
         root_logger.setLevel('INFO')
 
         file_name = os.path.join(self.root_path,
-                                 "{}_{}_{}_{}.log".format(self.job_id, self.task_id, self.execution_id, self.instance_id))
+                                 "{}_{}_{}_{}.log".format(self.job_id, self.task_id,
+                                                          self.execution_id, self.instance_id))
 
         file_handler = logging.FileHandler(file_name)
         file_handler.setFormatter(log_formatter)
@@ -238,22 +239,23 @@ class DaemonGCP:
     def __start_command(self, session_name, command):
         # start application without checkpoint
 
-        # # Get PATH and LD_LIBRARY_PATH environment variables
-        # path = os.getenv('PATH')
+        # Get PATH and LD_LIBRARY_PATH environment variables
+        path = os.getenv('PATH')
         # ld_library_path = os.getenv('LD_LIBRARY_PATH')
         #
         # if ld_library_path is None:
         #     ld_library_path = '/usr/local/cuda-10.0/lib64'
         # else:
         #     ld_library_path = ld_library_path + ":/usr/local/cuda-10.0/lib64"
-        #
-        # path = path + ":/usr/local/cuda-10.0/bin:/home/ubuntu/MASA-CUDAlign/masa-cudalign-3.9.1.1024"
-        #
-        # # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
-        # os.environ['PATH'] = path
+
+        path = path + ":/home/rafinhacbrum_gmail_com/.local/bin"
+
+        # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
+        os.environ['PATH'] = path
         # os.environ['LD_LIBRARY_PATH'] = ld_library_path
-        #
+
         # logging.info("PATH env: {} - LD_LIBRARY_PATH: {}".format(os.getenv('PATH'), os.getenv('LD_LIBRARY_PATH')))
+        logging.info("PATH env: {}".format(os.getenv('PATH')))
 
         cmd = "screen -L -Logfile {}/screen_task_log -S {} -dm bash -c {}".format(
             self.root_path, session_name, command

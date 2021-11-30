@@ -37,7 +37,7 @@ class FLClientTask(Task):
         self.running = False
 
     def has_task_finished(self):
-        return self.finished is True
+        return self.finished
 
     def get_running_instance(self):
         return self.running_instance

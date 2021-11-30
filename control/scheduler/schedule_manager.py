@@ -139,7 +139,8 @@ class ScheduleManager:
 
         # than a dispatcher, that will execute the tasks, is create
 
-        server_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Job.SERVER)
+        server_dispatcher = Dispatcher(vm=vm, loader=self.loader,
+                                       type_task=Job.SERVER, client_id=self.loader.job.num_clients)
 
         # check if the VM need to be register on the simulator
         if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
@@ -162,7 +163,8 @@ class ScheduleManager:
             )
 
             # than a dispatcher, that will execute the tasks, is create
-            client_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Job.CLIENT)
+            client_dispatcher = Dispatcher(vm=vm, loader=self.loader,
+                                           type_task=Job.CLIENT, client_id=i)
 
             # check if the VM need to be register on the simulator
             if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
@@ -486,11 +488,11 @@ class ScheduleManager:
         # Checker loop
         # Checker if all dispatchers have finished the execution
         # while len(self.working_dispatchers) > 0 or len(self.hibernating_dispatcher) > 0:
-        while len(self.working_dispatchers) > 0:
+        while len(self.working_dispatchers) == (self.loader.job.num_clients + 1):
 
             if self.abort:
                 break
-            #
+
             # # If new checkers would be created that function have to be updated
             # self.__check_hibernated_dispatchers()
             # self.__check_idle_dispatchers()
@@ -501,7 +503,7 @@ class ScheduleManager:
     '''
 
     def __start_server_dispatcher(self):
-        self.semaphore.acquire()
+        # self.semaphore.acquire()
 
         # Starting working dispatcher
         self.server_task_dispatcher.main_thread.start()
@@ -512,7 +514,7 @@ class ScheduleManager:
         for i in range (self.loader.job.num_clients):
             self.loader.job.client_tasks[i].server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:8080"
 
-        self.semaphore.release()
+        # self.semaphore.release()
 
         return not self.server_task_dispatcher.vm.failed_to_created
 
@@ -688,7 +690,7 @@ class ScheduleManager:
         status = self.__start_server_dispatcher()
 
         if status:
-            self.__start_clients_dispatchers()
+            # self.__start_clients_dispatchers()
 
             # Call checkers loop
             self.__checkers()
