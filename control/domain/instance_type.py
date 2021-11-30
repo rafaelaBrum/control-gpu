@@ -4,7 +4,7 @@ from control.config.ec2_config import EC2Config
 class InstanceType:
 
     def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='',
-                 memory=0, vcpu=0, gpu=False):
+                 memory=0, vcpu=0, gpu='no'):
         self.provider = provider
         self.type = instance_type
         self.memory = memory  # GB
@@ -77,7 +77,7 @@ class InstanceType:
 
     @property
     def have_gpu(self):
-        return self.gpu
+        return self.gpu.lower() in ['yes']
 
     def __str__(self):
         return "'{}' on-demand price: '{}' preemptible price: '{}' " \

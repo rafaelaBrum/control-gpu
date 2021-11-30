@@ -10,6 +10,7 @@ from typing import List
 from zope.event import subscribers
 
 from control.domain.task import Task
+from control.domain.job import Job
 
 from control.managers.virtual_machine import VirtualMachine
 from control.managers.dispatcher import Dispatcher
@@ -55,8 +56,8 @@ class ScheduleManager:
             # start simulator
             self.simulator = RevocationSim(self.loader.revocation_rate)
 
-        # Keep Used EBS Volume
-        self.ebs_volume_id = None
+        # Keep Used EBS Volumes
+        self.ebs_volumes = []
 
         # Vars Datetime to keep track of global execution time
         self.start_timestamp = None
@@ -81,10 +82,10 @@ class ScheduleManager:
         self.server_task_dispatcher: Dispatcher
         self.client_tasks_dispatches: List[Dispatcher]
         self.terminated_dispatchers = []
-        self.server_task_status = Task.WAITING
-        self.client_tasks_status = []
-        for i in range(self.loader.fl_server_task.n_clients):
-            self.client_tasks_status.append(Task.WAITING)
+        # self.server_task_status = Task.WAITING
+        # self.client_tasks_status = []
+        # for i in range(self.loader.job.num_clients):
+        #     self.client_tasks_status.append(Task.WAITING)
 
         '''
                 Build the initial dispatchers
@@ -132,7 +133,7 @@ class ScheduleManager:
 
         # than a dispatcher, that will execute the tasks, is create
 
-        server_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Task.SERVER)
+        server_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Job.SERVER)
 
         # check if the VM need to be register on the simulator
         if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
@@ -142,7 +143,7 @@ class ScheduleManager:
 
         self.client_task_dispatchers = []
 
-        for i in range(self.loader.fl_server_task.n_clients):
+        for i in range(self.loader.job.num_clients):
             instance_type, market = self.scheduler.get_client_initial_instance()
 
             # Create the Vm that will be used by the dispatcher
@@ -153,7 +154,7 @@ class ScheduleManager:
             )
 
             # than a dispatcher, that will execute the tasks, is create
-            client_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Task.CLIENT)
+            client_dispatcher = Dispatcher(vm=vm, loader=self.loader, type_task=Job.CLIENT)
 
             # check if the VM need to be register on the simulator
             if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
@@ -167,8 +168,8 @@ class ScheduleManager:
 
     def __prepare_execution(self):
         """
-                   Prepare control database and all directories to start the execution process
-                """
+           Prepare control database and all directories to start the execution process
+        """
         # get job from control database
         jobs_repo = self.repo.get_jobs(
             filter={
@@ -198,25 +199,41 @@ class ScheduleManager:
 
             tasks_repo = job_repo.tasks.all()
 
-            assert len(tasks_repo) == len(
-                self.loader.job.tasks), "Consistency error (number of tasks): {} <> {} ".format(
-                len(tasks_repo), len(self.loader.job.tasks)
+            assert len(tasks_repo) == \
+                   self.loader.job.total_tasks, "Consistency error (number of tasks): {} <> {} ".format(
+                len(tasks_repo), self.loader.job.total_tasks
             )
 
             # check tasks consistency
             for t in tasks_repo:
-                assert str(t.task_id) in self.loader.job.tasks, "Consistency error (task id): {}".format(
-                    t.task_id)
+                # server task
+                if 'server' in t.command:
+                    task = self.loader.job.server_task
 
-                task = self.loader.job.tasks[str(t.task_id)]
+                    assert t.task_id == task.task_id, \
+                        "Consistency error (server task id): {} <>".format(t.task_id,
+                                                                           self.loader.job.server_task.task_id)
 
-                assert task.memory == t.memory, "Consistency error (task {} memory): {} <> {} ".format(
-                    task.task_id, t.memory, task.memory)
+                    assert task.task_name == t.task_name, "Consistency error (server task {} memory): " \
+                                                          "{} <> {} ".format(task.task_id, t.task_name, task.task_name)
 
-                assert task.command == t.command, "Consistency error (task {} command): {} <> {} ".format(
-                    task.task_id, t.command, task.command)
+                    assert task.simple_command == t.command, "Consistency error (server task {} command): " \
+                                                             "{} <> {} ".format(task.task_id, t.command,
+                                                                                task.simple_command)
 
-                assert task.io == t.io, "Consistency error (task {} io):".format(task.task_id, t.io, task.io)
+                # client tasks
+                else:
+                    assert t.task_id in self.loader.job.client_tasks, "Consistency error (client task id): {}".format(
+                        t.task_id)
+
+                    task = self.loader.job.client_tasks[t.task_id]
+
+                    assert task.task_name == t.task_name, "Consistency error (client task {} memory): " \
+                                                          "{} <> {} ".format(task.task_id, t.task_name, task.task_name)
+
+                    assert task.simple_command == t.command, "Consistency error (client task {} command): " \
+                                                             "{} <> {} ".format(task.task_id, t.command,
+                                                                                task.simple_command)
 
         # Check Instances Type
         for key, instance_type in self.loader.env.items():
@@ -240,92 +257,6 @@ class ScheduleManager:
                                                                       "{} <> {}".format(key,
                                                                                         inst_type_repo.memory,
                                                                                         instance_type.memory)
-        # """
-        #    Prepare control database and all directories to start the execution process
-        # """
-        # # get server job from control database
-        # tasks_repo = self.repo.get_tasks(
-        #     filter={
-        #         'task_id': self.loader.fl_server_task.task_id
-        #     }
-        # )
-        #
-        # # Check if server Job is already in the database
-        # if len(tasks_repo) == 0:
-        #     # add task to database
-        #     self.__add_task_to_database(task_id=self.loader.fl_server_task.task_id,
-        #                                 task_name=self.loader.fl_server_task.task_name,
-        #                                 command=self.loader.fl_server_task.simple_command)
-        # else:
-        #     # Task is already in database
-        #     # Check task and Instances consistency
-        #     logging.info("<Scheduler Manager {}_{}>: - "
-        #                  "Checking database consistency...".format(self.loader.fl_server_task.task_id,
-        #                                                            self.loader.execution_id))
-        #
-        #     task_repo = tasks_repo[0]
-        #
-        #     assert task_repo.task_name == self.loader.fl_server_task.task_name, "Consistency error (task name): " \
-        #                                                                        "{} <> {}"\
-        #         .format(task_repo.task_name, self.loader.fl_server_task.task_name)
-        #
-        #     assert task_repo.command == self.loader.fl_server_task.simple_command, "Consistency error (task command): " \
-        #                                                                           "{} <> {} "\
-        #         .format(task_repo.command, self.loader.fl_server_task.simple_command)
-        #
-        # for i in range(self.loader.fl_server_task.n_clients):
-        #     # get client job from control database
-        #     tasks_repo = self.repo.get_tasks(
-        #         filter={
-        #             'task_id': self.loader.fl_client_tasks[i].task_id
-        #         }
-        #     )
-        #
-        #     # Check if Job is already in the database
-        #     if len(tasks_repo) == 0:
-        #         # add task to database
-        #         self.__add_task_to_database(task_id=self.loader.fl_client_tasks[i].task_id,
-        #                                     task_name=self.loader.fl_client_tasks[i].task_name,
-        #                                     command=self.loader.fl_client_tasks[i].simple_command)
-        #     else:
-        #         # Task is already in database
-        #         # Check task and Instances consistency
-        #         logging.info("<Scheduler Manager {}_{}>: - "
-        #                      "Checking database consistency...".format(self.loader.fl_client_tasks[i].task_id,
-        #                                                                self.loader.execution_id))
-        #
-        #         task_repo = tasks_repo[0]
-        #
-        #         assert task_repo.task_name == self.loader.fl_client_tasks[i].task_name, "Consistency error (task name): " \
-        #                                                                             "{} <> {}" \
-        #             .format(task_repo.task_name, self.loader.fl_client_tasks[i].task_name)
-        #
-        #         assert task_repo.command == self.loader.fl_client_tasks[i].simple_command, "Consistency error (task command): " \
-        #                                                                                "{} <> {} " \
-        #             .format(task_repo.command, self.loader.fl_client_tasks[i].simple_command)
-        #
-        # # Check Instances Type
-        # for key, instance_type in self.loader.env.items():
-        #
-        #     types = self.repo.get_instance_type(filter={
-        #         'instance_type': key
-        #     })
-        #
-        #     if len(types) == 0:
-        #         # add instance to control database
-        #         self.__add_instance_type_to_database(instance_type)
-        #     else:
-        #         # check instance type consistency
-        #         inst_type_repo = types[0]
-        #         assert inst_type_repo.vcpu == instance_type.vcpu, "Consistency error (vcpu instance {}): " \
-        #                                                           "{} <> {} ".format(key,
-        #                                                                              inst_type_repo.vcpu,
-        #                                                                              instance_type.vcpu)
-        #
-        #         assert inst_type_repo.memory == instance_type.memory, "Consistency error (memory instance {}):" \
-        #                                                               "{} <> {}".format(key,
-        #                                                                                 inst_type_repo.memory,
-        #                                                                                 instance_type.memory)
 
     def __add_job_to_database(self):
         """Record a Job and its tasks to the control database"""
@@ -353,26 +284,17 @@ class ScheduleManager:
                     job=job_repo,
                     task_id=task.task_id,
                     task_name=task.task_name,
-                    command=task.command,
+                    command=task.simple_command,
                 )
             )
-
-    def __add_task_to_database(self, task_id, task_name, command):
-        """Record a Task to the controlgpu database"""
-
-        task_repo = TaskRepo(
-            task_id=task_id,
-            task_name=task_name,
-            command=command
-        )
-
-        self.repo.add_task(task_repo)
 
     def __add_instance_type_to_database(self, instance_type):
         self.repo.add_instance_type(
             InstanceTypeRepo(
                 type=instance_type.type,
-                provider=instance_type.provider
+                provider=instance_type.provider,
+                vcpu=instance_type.vcpu,
+                memory=instance_type.memory
             )
         )
 

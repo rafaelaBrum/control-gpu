@@ -18,9 +18,9 @@ def __call_control(loader: Loader):
     try:
         loader.print_execution_info()
 
-        exit()
-
         manager = ScheduleManager(loader=loader)
+
+        exit()
 
         manager.start_execution()
 

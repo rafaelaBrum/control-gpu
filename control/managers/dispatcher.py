@@ -4,6 +4,7 @@ from control.managers.virtual_machine import VirtualMachine
 # import tarfile
 
 from control.domain.task import Task
+from control.domain.job import Job
 
 # from control.scheduler.queue import Queue
 
@@ -548,9 +549,9 @@ class Dispatcher:
 
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
-            if self.type_task == Task.SERVER:
+            if self.type_task == Job.SERVER:
                 task = self.loader.fl_server_task
-            elif self.type_task == Task.CLIENT:
+            elif self.type_task == Job.CLIENT:
                 task = self.loader.fl_client_tasks[self.client_id]
 
             if not task.has_task_finished() and self.working:
