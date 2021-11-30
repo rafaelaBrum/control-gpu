@@ -11,6 +11,8 @@ import logging
 class FLSimpleScheduler:
 
     def __init__(self, instance_types: Dict[str, InstanceType]):
+        self.instances_server: Dict[str, InstanceType] = {}
+        self.instances_client: Dict[str, InstanceType] = {}
         self.__divide_instances_for_server_and_for_client(instance_types)
 
     # def __init__(self, instance_types: Dict[str, InstanceType]):
@@ -148,25 +150,27 @@ class FLSimpleScheduler:
     #             logging.error("<Scheduler>: No VM could be selected!")
     #             return "", ""
     def __divide_instances_for_server_and_for_client(self, instance_types):
-        self.instances_server: Dict[str, InstanceType] = {}
-        self.instances_client: Dict[str, InstanceType] = {}
+        # logging.info("<Scheduler>: Dividing instances types for server and client")
 
         for name, instance in instance_types.items():
+            # logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
             if instance.have_gpu:
                 self.instances_client[name] = instance
+                # logging.info("<Scheduler>: Instance type {} added to instances_client".format(name))
             else:
                 self.instances_server[name] = instance
+                # logging.info("<Scheduler>: Instance type {} added to instances_server".format(name))
 
     def get_server_initial_instance(self):
         logging.info("<Scheduler>: Choosing initial instance for server task")
         if len(self.instances_server) == 1:
-            for name, instance in self.instances_server:
+            for name, instance in self.instances_server.items():
                 logging.info("<Scheduler>: On-demand instance chosen {}".format(name))
                 return instance, CloudManager.ON_DEMAND
 
     def get_client_initial_instance(self):
         logging.info("<Scheduler>: Choosing initial instance for client task")
         if len(self.instances_client) == 1:
-            for name, instance in self.instances_client:
+            for name, instance in self.instances_client.items():
                 logging.info("<Scheduler>: On-demand instance chosen {}".format(name))
                 return instance, CloudManager.ON_DEMAND

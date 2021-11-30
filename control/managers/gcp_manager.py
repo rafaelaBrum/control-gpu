@@ -8,12 +8,12 @@ from oauth2client.client import GoogleCredentials
 
 from datetime import datetime
 from dateutil.tz import tzutc
-from datetime import timedelta
+# from datetime import timedelta
 
 import logging
-import json
+# import json
 
-import math
+# import math
 import time
 import iso8601
 
@@ -28,6 +28,7 @@ from pathlib import Path
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
 api_key = file.read()
 
+
 class GCPManager(CloudManager):
 
     def __init__(self):
@@ -37,13 +38,13 @@ class GCPManager(CloudManager):
         self.vm_config = self.gcp_conf
 
         credentials = GoogleCredentials.get_application_default()
-        self.compute_engine = googleapiclient.discovery.build('compute', 'v1', credentials=credentials)
+        self.compute_engine = googleapiclient.discovery.build('compute', 'v1',
+                                                              credentials=credentials, cache_discovery=False)
         # self.cloud_watch = boto3.client('cloudwatch')
         # self.session = boto3.Session()
         # self.credentials = GoogleCredentials.get_application_default()
 
         self.instances_history = {}
-
 
     def _update_history(self, instances, status):
 
@@ -139,7 +140,6 @@ class GCPManager(CloudManager):
                 ready = last_detach_time > last_attach_time
             if not ready:
                 disk = self.__get_disk(volume_name)
-
 
     def attach_volume(self, instance_id, volume_id, volume_name=''):
 
@@ -377,7 +377,6 @@ class GCPManager(CloudManager):
             logging.error(e)
             return None
 
-
     def list_instances_id(self, search_filter=None):
         instances = self.__get_instances(search_filter)
 
@@ -464,9 +463,9 @@ class GCPManager(CloudManager):
     @staticmethod
     def get_ondemand_price(instance_type, region):
 
-        params = {'pageToken':None}
+        params = {'pageToken': None}
 
-        instance_data_gcp =[]
+        instance_data_gcp = []
 
         while len(instance_data_gcp) < 2:
 
@@ -483,8 +482,8 @@ class GCPManager(CloudManager):
             params['pageToken'] = all_data_gcp['nextPageToken']
 
             aux_list = [x for x in all_data_gcp['skus']
-                                 if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
-                                 and 'Preemptible' not in x['description']]
+                        if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
+                        and 'Preemptible' not in x['description']]
 
             if 'us' in region:
                 aux_list = [x for x in aux_list if 'Americas' in x['description']]

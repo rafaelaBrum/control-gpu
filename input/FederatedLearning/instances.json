@@ -20,7 +20,7 @@
             "ebs_device_name": "/dev/nvme2n1",
             "vcpu": 0,
             "memory": 0,
-            "gpu": "True"
+            "gpu": "yes"
         },
         "n2-standard-2": {
             "provider": "gcloud",
@@ -42,7 +42,7 @@
             "ebs_device_name": "/dev/sdb",
             "memory": 8,
             "vcpu": 2,
-            "gpu": "False"
+            "gpu": "no"
         }
     }
 }

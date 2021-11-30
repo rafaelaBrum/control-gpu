@@ -40,7 +40,7 @@ class FLServerTask(Task):
         """return a list of tasks created from a dict"""
 
         return cls(
-            task_id=adict['tasks']['server']['task_id'],
+            task_id=int(adict['tasks']['server']['n_clients']),
             task_name=adict['tasks']['server']['task_name'],
             command=adict['tasks']['server']['command'],
             runtime=adict['tasks']['server']['runtime'],

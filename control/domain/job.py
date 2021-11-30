@@ -4,6 +4,9 @@ from control.domain.app_specific.fl_client_task import FLClientTask
 
 class Job:
 
+    SERVER = 'server'
+    CLIENT = 'client'
+
     def __init__(self, job_id, job_name, job_dict, description=""):
         self.job_id = job_id
         self.job_name = job_name
@@ -23,6 +26,10 @@ class Job:
     @property
     def num_clients(self):
         return len(self.client_tasks)
+
+    @property
+    def total_tasks(self):
+        return len(self.client_tasks)+1
 
     @classmethod
     def from_dict(cls, adict):

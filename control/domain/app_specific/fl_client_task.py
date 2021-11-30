@@ -48,7 +48,7 @@ class FLClientTask(Task):
 
         return [
             cls(
-                task_id=adict['tasks']['clients'][key]['task_id'],
+                task_id=int(key),
                 task_name=adict['tasks']['clients'][key]['task_name'],
                 client_id=int(key),
                 command=adict['tasks']['clients'][key]['command'],

@@ -4,7 +4,6 @@
     "description": "Job de Teste de FL",
     "tasks": {
         "server": {
-            "task_id": 0,
             "task_name": "Task de teste (server)",
             "command": "python3 TIL_Inception_server.py",
             "runtime": {
@@ -17,8 +16,7 @@
         },
         "clients": {
             "0" : {
-                "task_id": 1,
-                "task_name": "Task de teste (client)",
+                "task_name": "Task de teste (client 0)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
                 "runtime": {
                     "g4dn.xlarge": 65
@@ -33,8 +31,7 @@
                 "train_epochs": 10
             },
             "1" : {
-                "task_id": 1,
-                "task_name": "Task de teste (client)",
+                "task_name": "Task de teste (client 1)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
                 "runtime": {
                     "g4dn.xlarge": 65
@@ -49,8 +46,7 @@
                 "train_epochs": 10
             },
             "2" : {
-                "task_id": 1,
-                "task_name": "Task de teste (client)",
+                "task_name": "Task de teste (client 2)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
                 "runtime": {
                     "g4dn.xlarge": 65
@@ -65,8 +61,7 @@
                 "train_epochs": 10
             },
             "3" : {
-                "task_id": 1,
-                "task_name": "Task de teste (client)",
+                "task_name": "Task de teste (client 3)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
                 "runtime": {
                     "g4dn.xlarge": 65
