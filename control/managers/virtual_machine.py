@@ -223,7 +223,7 @@ class VirtualMachine:
             logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
             self.ssh.execute_command(cmd4, output=True)
 
-    def __create_s3(self, path):
+    def __create_s3(self, path, client_id=None):
 
         logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
 
@@ -233,12 +233,17 @@ class VirtualMachine:
 
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
+        if client_id is not None:
+            bucket_name = f'{self.manager.bucket_config.bucket_name}-client-{client_id}'
+        else:
+            bucket_name = self.manager.bucket_config.bucket_name
+
         # Mount the bucket
         cmd3 = 'sudo s3fs {} ' \
                '-o use_cache=/tmp -o allow_other -o uid={} -o gid={} ' \
-               '-o mp_umask=002 -o multireq_max=5 {}'.format(self.manager.s3_conf.bucket_name,
-                                                             self.manager.s3_conf.vm_uid,
-                                                             self.manager.s3_conf.vm_gid,
+               '-o mp_umask=002 -o multireq_max=5 {}'.format(bucket_name,
+                                                             self.manager.bucket_config.vm_uid,
+                                                             self.manager.bucket_config.vm_gid,
                                                              path)
 
         logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
@@ -250,12 +255,17 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
 
-    def __create_google_storage(self, path):
+    def __create_google_storage(self, path, client_id=None):
 
         logging.info("<VirtualMachine {}>: - Mounting GCSFUSE".format(self.instance_id))
 
+        if client_id is not None:
+            bucket_name = f'{self.manager.bucket_config.bucket_name}-client-{client_id}'
+        else:
+            bucket_name = self.manager.bucket_config.bucket_name
+
         # Mount the bucket
-        cmd = 'gcsfuse --implicit-dirs {} {}'.format(self.manager.storage_config.bucket_name,
+        cmd = 'gcsfuse --implicit-dirs {} {}'.format(bucket_name,
                                                      path)
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
@@ -299,12 +309,15 @@ class VirtualMachine:
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")
 
-                cmd = 'mkdir {}_{}_{}/'.format(self.loader.job.job_id, client_id, self.loader.execution_id)
+                # connect to bucket if task is client
+                if type_task == Job.CLIENT:
+                    logging.info("<VirtualMachine {}>: "
+                                 "- Creating directory {}".format(self.instance_id,
+                                                                  self.loader.file_system_conf.path_storage))
+                    # create directory
+                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage), output=True)
 
-                logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
-
-                stdout, stderr, code_return = self.ssh.execute_command(cmd, output=True)
-                print(stdout)
+                    self.__create_s3(self.loader.file_system_conf.path_storage, client_id)
 
                 if type_task == Job.SERVER:
                     item = self.loader.job.server_task.zip_file
@@ -340,14 +353,16 @@ class VirtualMachine:
                                  "--job_id {} " \
                                  "--task_id {} " \
                                  "--execution_id {}  " \
-                                 "--instance_id {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                         self.loader.application_conf.daemon_aws_file),
-                                                            self.loader.ec2_conf.vm_user,
-                                                            self.loader.file_system_conf.path,
-                                                            self.loader.job.job_id,
-                                                            client_id,
-                                                            self.loader.execution_id,
-                                                            self.instance_id)
+                                 "--instance_id {} " \
+                                 "--socket_port {}".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                        self.loader.application_conf.daemon_aws_file),
+                                                           self.loader.ec2_conf.vm_user,
+                                                           self.loader.file_system_conf.path,
+                                                           self.loader.job.job_id,
+                                                           client_id,
+                                                           self.loader.execution_id,
+                                                           self.instance_id,
+                                                           self.loader.communication_conf.socket_port)
 
                 elif self.instance_type.provider == CloudManager.GCLOUD:
 
@@ -379,14 +394,16 @@ class VirtualMachine:
                                  "--job_id {} " \
                                  "--task_id {} " \
                                  "--execution_id {}  " \
-                                 "--instance_id {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                         self.loader.application_conf.daemon_gcp_file),
-                                                            self.loader.gcp_conf.vm_user,
-                                                            self.loader.file_system_conf.path,
-                                                            self.loader.job.job_id,
-                                                            client_id,
-                                                            self.loader.execution_id,
-                                                            self.instance_id)
+                                 "--instance_id {} " \
+                                 "--socket_port {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                        self.loader.application_conf.daemon_gcp_file),
+                                                           self.loader.gcp_conf.vm_user,
+                                                           self.loader.file_system_conf.path,
+                                                           self.loader.job.job_id,
+                                                           client_id,
+                                                           self.loader.execution_id,
+                                                           self.instance_id,
+                                                           self.loader.communication_conf.socket_port)
                 else:
                     cmd_daemon = ""
 

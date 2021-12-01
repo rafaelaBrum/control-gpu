@@ -1,10 +1,10 @@
 {
     "instances": {
-        "g4dn.2xlarge": {
+        "g3s.xlarge": {
             "provider": "ec2",
             "prices": {
-                "on-demand": 0.752,
-                "preemptible": 0.2256
+                "on-demand": 0.75,
+                "preemptible": 0.225
             },
             "restrictions": {
                 "limits": {
@@ -17,7 +17,7 @@
                 }
             },
             "image_id": "ami-080af420cdfb56e39",
-            "ebs_device_name": "/dev/nvme2n1",
+            "ebs_device_name": "/dev/xvdf",
             "vcpu": 0,
             "memory": 0,
             "gpu": "yes"

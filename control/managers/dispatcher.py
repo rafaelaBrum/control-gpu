@@ -161,8 +161,11 @@ class Executor:
                     current_time = current_time + elapsed_time
                     self.task.update_execution_time(elapsed_time.total_seconds())
 
-                # TODO: if VM is from GCP, instance_action always returns a string ('FALSE' or 'TRUE')
-                if instance_action is not None and instance_action != 'none':
+                if ((self.vm.instance_type.provider == CloudManager.EC2 and
+                     instance_action is not None and
+                     instance_action != 'none') or
+                        (self.vm.instance_type.provider == CloudManager.GCLOUD and
+                         instance_action == 'TRUE')):
                     self.vm.interrupt()
                     self.__stopped(Task.INTERRUPTED)
                     return
@@ -568,7 +571,7 @@ class Dispatcher:
                 task = None
 
             if not task.has_task_finished() and self.working:
-                if self.vm.state.lower() == CloudManager.RUNNING:
+                if self.vm.state == CloudManager.RUNNING:
 
                     self.semaphore.acquire()
                     # # check running tasks
@@ -599,7 +602,8 @@ class Dispatcher:
                 # self.semaphore.release()
 
                 # Error: instance was not deployed or was terminated
-                if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN, CloudManager.TERMINATED):
+                if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN,
+                                     CloudManager.TERMINATED, CloudManager.STOPPING):
                     # waiting running tasks
                     self.executor.thread.join()
                     # VM was not created, raise a event

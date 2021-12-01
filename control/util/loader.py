@@ -311,47 +311,39 @@ class Loader:
     def __update_command(self):
         if self.application_conf.fl_framework == 'flower':
             self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
-                                          " --min_num_clients {2} > {3} 2> {4}"\
+                                          " --min_num_clients {2} --server_address [::]:{3}"\
                 .format(self.job.server_task.simple_command,
                         self.job.server_task.n_rounds,
                         self.job.server_task.n_clients,
-                        os.path.join(self.file_system_conf.path,
-                                     '{}_{}/output.txt'.format(self.job.server_task.task_id,
-                                                               self.execution_id)),
-                        os.path.join(self.file_system_conf.path,
-                                     '{}_{}/error.txt'.format(self.job.server_task.task_id,
-                                                              self.execution_id))
+                        self.application_conf.fl_port
                         )
             for i in range(self.job.num_clients):
                 if self.job.client_tasks[i].test_dir:
                     self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
                                                       "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
-                                                      " -epochs {7} > {8} 2> {9}"\
+                                                      " -epochs {7}"\
                         .format(self.job.client_tasks[i].simple_command,
-                                self.job.client_tasks[i].trainset_dir,
+                                os.path.join(self.file_system_conf.path_storage,
+                                             self.job.client_tasks[i].trainset_dir),
                                 self.job.client_tasks[i].split,
                                 self.job.client_tasks[i].batch,
-                                os.path.join(self.file_system_conf.path_disk, 'logs'),
-                                os.path.join(self.file_system_conf.path_disk, 'results'),
-                                self.job.client_tasks[i].test_dir,
-                                self.job.client_tasks[i].train_epochs,
-                                os.path.join(self.file_system_conf.path,
-                                             '{}_{}/output.txt'.format(self.job.client_tasks[i].task_id,
-                                                                       self.execution_id)),
-                                os.path.join(self.file_system_conf.path,
-                                             '{}_{}/error.txt'.format(self.job.client_tasks[i].task_id,
-                                                                      self.execution_id))
+                                os.path.join(self.file_system_conf.path, 'logs'),
+                                os.path.join(self.file_system_conf.path, 'results'),
+                                os.path.join(self.file_system_conf.path_storage,
+                                             self.job.client_tasks[i].test_dir),
+                                self.job.client_tasks[i].train_epochs
                                 )
                 else:
                     self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
                                                       "-model_dir {5} -logdir {5} -cache {5} -epochs {6} " \
                                                       " > {7} 2> {8}" \
                         .format(self.job.client_tasks[i].simple_command,
-                                self.job.client_tasks[i].trainset_dir,
+                                os.path.join(self.file_system_conf.path_storage,
+                                             self.job.client_tasks[i].trainset_dir),
                                 self.job.client_tasks[i].split,
                                 self.job.client_tasks[i].batch,
-                                os.path.join(self.file_system_conf.path_disk, 'logs'),
-                                os.path.join(self.file_system_conf.path_disk, 'results'),
+                                os.path.join(self.file_system_conf.path, 'logs'),
+                                os.path.join(self.file_system_conf.path, 'results'),
                                 self.job.client_tasks[i].train_epochs,
                                 os.path.join(self.file_system_conf.path,
                                              '{}_{}/output.txt'.format(self.job.client_tasks[i].task_id,

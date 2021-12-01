@@ -20,18 +20,18 @@ from ratelimit import limits, sleep_and_retry
 
 
 class EC2Manager(CloudManager):
+    ec2_conf = EC2Config()
+    s3_conf = S3Config()
+    vm_config = ec2_conf
+    bucket_config = s3_conf
+
+    client = boto3.client('ec2')
+    resource = boto3.resource('ec2')
+    cloud_watch = boto3.client('cloudwatch')
+    session = boto3.Session()
+    credentials = session.get_credentials()
 
     def __init__(self):
-
-        self.ec2_conf = EC2Config()
-        self.s3_conf = S3Config()
-        self.vm_config = self.ec2_conf
-
-        self.client = boto3.client('ec2')
-        self.resource = boto3.resource('ec2')
-        self.cloud_watch = boto3.client('cloudwatch')
-        self.session = boto3.Session()
-        self.credentials = self.session.get_credentials()
 
         self.instances_history = {}
 

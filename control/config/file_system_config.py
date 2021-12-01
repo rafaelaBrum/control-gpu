@@ -17,8 +17,8 @@ class FileSystemConfig(Config):
         return self.get_property(self._key, 'path')
 
     @property
-    def path_disk(self):
-        return self.get_property(self._key, 'path_disk')
+    def path_storage(self):
+        return self.get_property(self._key, 'path_storage')
 
     @property
     def ebs_delete(self):

@@ -383,8 +383,18 @@ class ScheduleManager:
         #
         # # self.semaphore.release()
 
-    def __terminated_handle(self):
-        pass
+    def __terminated_handle(self, dispatcher: Dispatcher):
+        self.semaphore.acquire()
+
+        if dispatcher in self.working_dispatchers:
+            self.working_dispatchers.remove(dispatcher)
+
+            self.idle_dispatchers.append(dispatcher)
+
+        if len(self.working_dispatchers) == 1:
+            self.abort = True
+
+        self.semaphore.release()
         # # Move task to others VM
         # # self.semaphore.acquire()
         #
@@ -452,7 +462,7 @@ class ScheduleManager:
                                           affected_dispatcher.vm.market,
                                           event.value))
 
-        if event.value == CloudManager.IDLE:
+        if event.value == CloudManager.IDLE and affected_dispatcher.working:
             logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.job.job_id,
                                                                                    self.loader.execution_id))
 
@@ -471,11 +481,12 @@ class ScheduleManager:
         #     # self.__interruption_handle()
         #
         # elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR]:
-        #     logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
-        #                  .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-        #     if not self.task_dispatcher.vm.marked_to_interrupt:
-        #         self.n_sim_interruptions += 1
-        #     self.__terminated_handle()
+        elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR, CloudManager.STOPPING]:
+            logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
+                         .format(self.loader.job.job_id, self.loader.execution_id))
+            if not affected_dispatcher.vm.marked_to_interrupt:
+                self.n_sim_interruptions += 1
+            self.__terminated_handle(affected_dispatcher)
 
         elif event.value in CloudManager.ABORT:
             self.abort = True
@@ -488,7 +499,7 @@ class ScheduleManager:
         # Checker loop
         # Checker if all dispatchers have finished the execution
         # while len(self.working_dispatchers) > 0 or len(self.hibernating_dispatcher) > 0:
-        while len(self.working_dispatchers) == (self.loader.job.num_clients + 1):
+        while len(self.working_dispatchers) > 0:
 
             if self.abort:
                 break
@@ -507,12 +518,17 @@ class ScheduleManager:
 
         # Starting working dispatcher
         self.server_task_dispatcher.main_thread.start()
+        # print("Testing vm.ready: ", self.server_task_dispatcher.vm.ready)
         while not self.server_task_dispatcher.vm.ready:
             if self.server_task_dispatcher.vm.failed_to_created:
                 break
             time.sleep(1)
-        for i in range (self.loader.job.num_clients):
-            self.loader.job.client_tasks[i].server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:8080"
+            # print("Testing vm.ready: ", self.server_task_dispatcher.vm.ready)
+        if not self.server_task_dispatcher.vm.failed_to_created:
+            server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:{self.loader.application_conf.fl_port}"
+            print("server_ip:", server_ip)
+            for i in range(self.loader.job.num_clients):
+                self.loader.job.client_tasks[i].server_ip = server_ip
 
         # self.semaphore.release()
 
@@ -690,7 +706,7 @@ class ScheduleManager:
         status = self.__start_server_dispatcher()
 
         if status:
-            # self.__start_clients_dispatchers()
+            self.__start_clients_dispatchers()
 
             # Call checkers loop
             self.__checkers()

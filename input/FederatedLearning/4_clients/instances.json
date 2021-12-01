@@ -16,7 +16,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-080af420cdfb56e39",
+            "image_id": "ami-096d4801a3da106fa",
             "ebs_device_name": "/dev/nvme2n1",
             "vcpu": 0,
             "memory": 0,

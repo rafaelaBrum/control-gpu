@@ -23,6 +23,8 @@ from ratelimit import limits, sleep_and_retry
 
 from pathlib import Path
 
+import threading
+
 
 # TODO: get API key from GClod Python API
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
@@ -30,19 +32,17 @@ api_key = file.read()
 
 
 class GCPManager(CloudManager):
+    gcp_conf = GCPConfig()
+    storage_config = StorageConfig()
+    vm_config = gcp_conf
+    bucket_config = storage_config
+
+    mutex = threading.Lock()
+    credentials = GoogleCredentials.get_application_default()
+    compute_engine = googleapiclient.discovery.build('compute', 'v1',
+                                                     credentials=credentials, cache_discovery=True)
 
     def __init__(self):
-
-        self.gcp_conf = GCPConfig()
-        self.storage_config = StorageConfig()
-        self.vm_config = self.gcp_conf
-
-        credentials = GoogleCredentials.get_application_default()
-        self.compute_engine = googleapiclient.discovery.build('compute', 'v1',
-                                                              credentials=credentials, cache_discovery=False)
-        # self.cloud_watch = boto3.client('cloudwatch')
-        # self.session = boto3.Session()
-        # self.credentials = GoogleCredentials.get_application_default()
 
         self.instances_history = {}
 
@@ -84,6 +84,8 @@ class GCPManager(CloudManager):
 
     def _create_instance(self, info):
 
+        self.mutex.acquire()
+
         try:
             operation = self.compute_engine.instances().insert(
                 project=self.gcp_conf.project,
@@ -91,6 +93,8 @@ class GCPManager(CloudManager):
                 body=info).execute()
 
             self._wait_for_operation(operation['name'])
+
+            self.mutex.release()
 
             instances = self.__get_instances(filter=f'(name = {info["name"]})')
 
@@ -101,6 +105,8 @@ class GCPManager(CloudManager):
         except Exception as e:
             logging.error("<GCPManager>: Error to create instance")
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             return None
 
     def create_volume(self, size, volume_name=''):
@@ -111,10 +117,14 @@ class GCPManager(CloudManager):
                 'type': f'projects/{self.gcp_conf.project}/zones/{self.gcp_conf.zone}/diskTypes/pd-balanced'
             }
 
+            self.mutex.acquire()
+
             operation = self.compute_engine.disks().insert(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
                                                            body=disk_body).execute()
 
             self._wait_for_operation(operation['name'])
+
+            self.mutex.release()
 
             disk = self.__get_disk(volume_name)
 
@@ -124,6 +134,8 @@ class GCPManager(CloudManager):
 
             logging.error("<GCPManager>: Error to create Volume")
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             return None
 
     def wait_volume(self, volume_name=''):
@@ -146,13 +158,19 @@ class GCPManager(CloudManager):
         try:
             instance = self.__get_instance(instance_id)
 
+            self.mutex.acquire()
+
             disk = self.compute_engine.disks().get(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
                                                    disk=volume_name).execute()
+
+            self.mutex.release()
 
             if disk is not None:
                 attached_disk_body = {
                     'source': disk['selfLink']
                 }
+
+                self.mutex.acquire()
 
                 operation = self.compute_engine.instances().attachDisk(project=self.gcp_conf.project,
                                                                        zone=self.gcp_conf.zone,
@@ -160,6 +178,8 @@ class GCPManager(CloudManager):
                                                                        body=attached_disk_body).execute()
 
                 self._wait_for_operation(operation['name'])
+
+                self.mutex.release()
 
                 return True
             else:
@@ -169,14 +189,20 @@ class GCPManager(CloudManager):
                                                                                                volume_name,
                                                                                                instance_id))
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             return False
 
     def create_on_demand_instance(self, instance_type, image_id, vm_name=''):
 
         machine_type = f'zones/{self.gcp_conf.zone}/machineTypes/n2-standard-2'
 
+        self.mutex.acquire()
+
         image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
                                                           image=f'{image_id}').execute()
+        self.mutex.release()
+
         source_disk_image = image_response['selfLink']
 
         config = {
@@ -225,6 +251,9 @@ class GCPManager(CloudManager):
                     {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
                 ]
             }],
+            'tags': [{
+                'items': ['http-server', 'https-server']
+            }]
         }
 
         instances = self._create_instance(config)
@@ -238,12 +267,16 @@ class GCPManager(CloudManager):
 
     def delete_volume(self, volume_id, volume_name=''):
         try:
+            self.mutex.acquire()
             self.compute_engine.disks().delete(project=self.gcp_conf.project, zone=self.gcp_conf.zone,
                                                disk=volume_name).execute()
+            self.mutex.release()
             status = True
         except Exception as e:
             logging.error("<GCPManager>: Error to delete Volume {} ({}) ".format(volume_id, volume_name))
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             status = False
 
         return status
@@ -305,27 +338,33 @@ class GCPManager(CloudManager):
 
         self._update_history([instance], status='terminate')
 
+        self.mutex.acquire()
+
         operation = self.compute_engine.instances().delete(project=self.gcp_conf.project,
                                                            zone=self.gcp_conf.zone,
                                                            instance=instance['name']).execute()
+
+        self.mutex.release()
 
         return operation
 
     def terminate_instance(self, instance_id, wait=True):
         try:
-
             instance = self.__get_instance(instance_id)
-
             operation = self._terminate_instance(instance)
 
             if wait:
+                self.mutex.acquire()
                 self._wait_for_operation(operation['name'])
+                self.mutex.release()
 
             status = True
 
         except Exception as e:
             logging.error("<GCPManager>: Error to terminate instance {}".format(instance_id))
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
 
             status = False
 
@@ -336,7 +375,12 @@ class GCPManager(CloudManager):
     def __get_instance(self, instance_id):
         try:
 
-            instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
+            instances = self.__get_instances(filter=f'(id = {instance_id})')
+
+            if instances is not None:
+                instance = instances[0]
+            else:
+                instance = None
 
         except Exception as e:
             logging.info(e)
@@ -346,6 +390,8 @@ class GCPManager(CloudManager):
 
     def __get_instances(self, filter=None):
 
+        self.mutex.acquire()
+
         if filter is None:
             result = self.compute_engine.instances().list(project=self.gcp_conf.project,
                                                           zone=self.gcp_conf.zone).execute()
@@ -353,28 +399,41 @@ class GCPManager(CloudManager):
             result = self.compute_engine.instances().list(project=self.gcp_conf.project,
                                                           zone=self.gcp_conf.zone,
                                                           filter=filter).execute()
-        return result['items'] if 'items' in result else None
+
+        self.mutex.release()
+        return result['items'] if result is not None and 'items' in result else None
 
     def get_instance_status(self, instance_id):
         if instance_id is None:
             return None
 
-        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
+        instances = self.__get_instances(filter=f'(id = {instance_id})')
+
+        if instances is not None:
+            instance = instances[0]
+        else:
+            instance = None
 
         if instance is None:
-            return None
+            # print("instance status", CloudManager.TERMINATED)
+            return CloudManager.TERMINATED
         else:
             # print("instance status", instance['status'])
 
-            return instance['status']
+            return instance['status'].lower()
 
     def __get_disk(self, disk_name):
         try:
-            return self.compute_engine.disks().get(project=self.gcp_conf.project,
-                                                   zone=self.gcp_conf.zone, disk=disk_name).execute()
+            self.mutex.acquire()
+            ret = self.compute_engine.disks().get(project=self.gcp_conf.project,
+                                                  zone=self.gcp_conf.zone, disk=disk_name).execute()
+            self.mutex.release()
+            return ret
         except Exception as e:
             logging.error("<GCPManager>: Error to find instance")
             logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             return None
 
     def list_instances_id(self, search_filter=None):
@@ -383,14 +442,22 @@ class GCPManager(CloudManager):
         return [i['id'] for i in instances] if instances else []
 
     def get_public_instance_ip(self, instance_id):
-        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
+        instances = self.__get_instances(filter=f'(id = {instance_id})')
+        if instances is not None:
+            instance = instances[0]
+        else:
+            instance = None
         if instance is None:
             return None
         else:
             return instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
     def get_private_instance_ip(self, instance_id):
-        instance = self.__get_instances(filter=f'(id = {instance_id})')[0]
+        instances = self.__get_instances(filter=f'(id = {instance_id})')
+        if instances is not None:
+            instance = instances[0]
+        else:
+            instance = None
         if instance is None:
             return None
         else:

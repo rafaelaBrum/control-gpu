@@ -102,8 +102,10 @@ class DaemonGCP:
             # Starting job
             try:
 
-                if 'client' in command:
-                    command.replace("-epochs", f" -server_address {server_ip} -epochs")
+                if "client" in command:
+                    command = command.replace("-epochs", f" -server_address {server_ip} -epochs")
+
+                print("Final command:", command)
 
                 self.__start_command(session_name, command)
 
@@ -190,7 +192,7 @@ class DaemonGCP:
     def __get_command_status(self, session_name):
 
         # check if our screen session is still running
-        cmd = "screen -list | grep '{}'"
+        cmd = f"screen -list | grep {session_name}"
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         out, err = process.communicate()
@@ -319,10 +321,11 @@ def main():
     parser.add_argument('--instance_id', type=str, required=True)
 
     parser.add_argument('--vm_user', type=str, required=True)
+    parser.add_argument('--socket_port', type=str, required=True)
 
     args = parser.parse_args()
 
-    config = {'server.socket_host': '0.0.0.0'}
+    config = {'server.socket_host': '0.0.0.0', 'server.socket_port': int(args.socket_port)}
     cherrypy.config.update(config)
     cherrypy.quickstart(MyWebService(args))
 

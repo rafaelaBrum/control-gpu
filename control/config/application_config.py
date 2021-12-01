@@ -25,6 +25,10 @@ class ApplicationConfig(Config):
         return self.get_property(self._key, 'fl_framework')
 
     @property
+    def fl_port(self):
+        return self.get_property(self._key, 'fl_port')
+
+    @property
     def centralized_path(self):
         return self.get_property(self._key, 'centralized_path')
 
