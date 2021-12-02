@@ -2,15 +2,11 @@
 from datetime import datetime
 from datetime import timedelta
 
-from pathlib import Path
-
 import cherrypy
 
 import argparse
 import subprocess
-# import re
 
-# import shutil
 import os
 import logging
 
@@ -51,7 +47,8 @@ class DaemonAWS:
         root_logger.setLevel('INFO')
 
         file_name = os.path.join(self.root_path,
-                                 "{}_{}_{}_{}.log".format(self.job_id, self.task_id, self.execution_id, self.instance_id))
+                                 "{}_{}_{}_{}.log".format(self.job_id, self.task_id,
+                                                          self.execution_id, self.instance_id))
 
         file_handler = logging.FileHandler(file_name)
         file_handler.setFormatter(log_formatter)
@@ -116,7 +113,7 @@ class DaemonAWS:
         elif action == DaemonAWS.STATUS:
             try:
 
-                value_return = self.__get_command_status(session_name)
+                value_return = self.__get_command_status(session_name, server_ip)
                 status_return = DaemonAWS.SUCCESS
             except Exception as e:
                 logging.error(e)
@@ -136,7 +133,7 @@ class DaemonAWS:
         elif action == DaemonAWS.STOP:
 
             try:
-                value_return = self.___stop_command(session_name, command)
+                value_return = self.___stop_command(session_name, command, server_ip)
                 status_return = DaemonAWS.SUCCESS
             except Exception as e:
                 logging.error(e)
@@ -185,7 +182,7 @@ class DaemonAWS:
     #         "cpu": cpu_usage
     #     }
 
-    def __get_command_status(self, session_name):
+    def __get_command_status(self, session_name, server_ip):
 
         # check if our screen session is still running
         cmd = f"screen -list | grep {session_name}"
@@ -199,21 +196,38 @@ class DaemonAWS:
         if test in out:
             status = 'running'
         else:
-            path = os.path.join(self.root_path, "alignment.00.txt")
-            if Path(path).is_file():
+            if server_ip is None:
+                # server task
+                search_string = 'FL finished'
+            else:
+                # job task
+                search_string = 'Disconnect and shut down'
+            cmd = f"cat {self.root_path}/screen_task_log | grep '{search_string}'"
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            out, err = process.communicate()
+
+            test = str.encode(search_string)
+
+            if test in out:
                 status = 'finished'
             else:
                 status = 'not running'
+            # CUDAlign task
+            # path = os.path.join(self.root_path, "alignment.00.txt")
+            # if Path(path).is_file():
+            #     status = 'finished'
+            # else:
+            #     status = 'not running'
 
         current_stage = 0
 
         return {"status": status, "current_stage": current_stage}
 
-    def ___stop_command(self, session_name, command):
+    def ___stop_command(self, session_name, command, server_ip):
 
         operation_time = timedelta(seconds=0.0)
 
-        values = self.__get_command_status(session_name)
+        values = self.__get_command_status(session_name, server_ip)
 
         if values['status'] == 'running':
 

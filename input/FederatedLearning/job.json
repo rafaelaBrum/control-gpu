@@ -19,7 +19,7 @@
                 "task_name": "Task de teste (client 0)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
                 "runtime": {
-                    "g4dn.xlarge": 65
+                    "g4dn.xlarge": 0
                 },
                 "generic_ckpt": "False",
                 "zip_file": "TIL_Inception_client.zip",
@@ -28,7 +28,7 @@
                 "bucket_name": "rafaela-fl-hads-client-0",
                 "trainset_dir": "data/CellRep/4_clients/0/trainset",
                 "test_dir": "data/CellRep/4_clients/0/testset",
-                "train_epochs": 1
+                "train_epochs": 10
             }
         }
     }
