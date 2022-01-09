@@ -58,7 +58,7 @@ def main():
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-07ae9c26b070d6a66',
+        image_id='ami-05967bab0d693d334',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},

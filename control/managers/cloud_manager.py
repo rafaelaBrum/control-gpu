@@ -27,8 +27,10 @@ class CloudManager:
     # BURSTABLE = 'burstable'
 
     # PROVIDERs
+    AWS = 'aws'
     EC2 = 'ec2'
     GCLOUD = 'gcloud'
+    GCP = 'gcp'
 
     # FILE SYSTEM
 

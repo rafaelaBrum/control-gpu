@@ -1,0 +1,53 @@
+{
+    "locations": {
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ]
+        },
+        "AWS_us-east-2": {
+            "provider": "aws",
+            "region": "us-east-2",
+            "zones": [
+                "us-east-2a",
+                "us-east-2b",
+                "us-east-2c"
+            ]
+        },
+        "GCP_us-west1": {
+            "provider": "gcp",
+            "region": "us-west1",
+            "zones": [
+                "us-west1-a",
+                "us-west1-b",
+                "us-west1-c"
+            ]
+        },
+        "GCP_us-central1": {
+            "provider": "gcp",
+            "region": "us-central1",
+            "zones": [
+                "us-central1-a",
+                "us-central1-b",
+                "us-central1-c",
+                "us-central1-f"
+            ]
+        },
+        "GCP_us-east1": {
+            "provider": "gcp",
+            "region": "us-east1",
+            "zones": [
+                "us-east1-b",
+                "us-east1-c",
+                "us-east1-d"
+            ]
+        }
+    }
+}

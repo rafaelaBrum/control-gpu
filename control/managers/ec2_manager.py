@@ -18,6 +18,8 @@ from pkg_resources import resource_filename
 
 from ratelimit import limits, sleep_and_retry
 
+from botocore.config import Config
+
 
 class EC2Manager(CloudManager):
     ec2_conf = EC2Config()
@@ -429,6 +431,23 @@ class EC2Manager(CloudManager):
         id2 = list(od[id1]['priceDimensions'])[0]
 
         return float(od[id1]['priceDimensions'][id2]['pricePerUnit']['USD'])
+
+
+    # Get availability zones of a AWS region
+    @staticmethod
+    def get_availability_zones(region):
+        # Get zones info
+        my_config = Config(region_name=region)
+        ec2 = boto3.client('ec2', config=my_config)
+        data = ec2.describe_availability_zones()
+
+        zones = []
+
+        for az in data['AvailabilityZones']:
+            if az['State'] == 'available':
+                zones.append(az['ZoneName'])
+
+        return zones
 
     def get_cpu_credits(self, instance_id):
 

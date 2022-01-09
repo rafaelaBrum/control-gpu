@@ -34,6 +34,22 @@ def __call_control(loader: Loader):
     #     logging.info("Backup finished...")
 
 
+def __call_pre_scheduling(loader: Loader):
+    try:
+        loader.print_execution_info()
+
+        # status = "SUCCESS"
+
+    except Exception as e:
+        logging.error(e)
+        # status = "ERROR"
+
+    # if loader.dump:
+    #     logging.info("Backup Database..")
+    #     dump.dump_db()
+    #     logging.info("Backup finished...")
+
+
 def __call_recreate_database(loader: Loader):
     logging.info("Are you sure that you want to recreate the database  {}? (yes or no):"
                  "".format(loader.database_conf.database_name))
@@ -55,11 +71,12 @@ def __print_execution_info(loader: Loader):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
+    parser = argparse.ArgumentParser(description='Multi-FedLS - v. 0.0.1')
 
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
     parser.add_argument('--job_file', help="job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
+    parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
     # parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",
@@ -83,7 +100,7 @@ def main():
 
     options_map = {
         'control': __call_control,
-        # 'map': __call_primary_scheduling,
+        'pre': __call_pre_scheduling,
         'recreate_db': __call_recreate_database,
         'info': __print_execution_info,
     }

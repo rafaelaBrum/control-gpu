@@ -21,6 +21,7 @@ from control.config.simulation_config import SimulationConfig
 
 from control.domain.instance_type import InstanceType
 from control.domain.job import Job
+from control.domain.cloud_region import CloudRegion
 
 from control.repository.postgres_repo import PostgresRepo
 
@@ -40,6 +41,7 @@ class Loader:
 
     env: Dict[str, InstanceType]
     job: Job
+    loc: Dict[str, CloudRegion]
 
     def __init__(self, args):
 
@@ -48,6 +50,7 @@ class Loader:
         self.input_path = args.input_path
         self.job_file = args.job_file
         self.env_file = args.env_file
+        self.loc_file = args.loc_file
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -112,17 +115,25 @@ class Loader:
         Class domain.job contains all tasks that will be executed
         and the information  about the job
         '''
-        self.job: Job = None
+        self.job = None
+
+        '''
+        Dictionary with the domain.cloud_region that can be used in the execution
+        Read from loc.json
+        '''
+        self.loc = None
 
         self.__prepare_logging()
         self.__load_input_parameters()
 
         self.__load_job()
         self.__load_env()
+        self.__load_loc()
 
         self.__get_execution_id()
 
         self.__update_prices()
+        self.__update_zones()
 
         self.__update_command()
 
@@ -164,6 +175,11 @@ class Loader:
             self.env_file = os.path.join(self.input_path, self.input_conf.env_file)
         else:
             self.env_file = os.path.join(self.input_path, self.env_file)
+
+        if self.loc_file is None:
+            self.loc_file = os.path.join(self.input_path, self.input_conf.loc_file)
+        else:
+            self.loc_file = os.path.join(self.input_path, self.loc_file)
 
         # if self.map_file is None:
         #     self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
@@ -227,6 +243,23 @@ class Loader:
 
             self.instances_list.append(instance)
 
+    def __load_loc(self):
+        """
+        Read the file loc_file and create a dictionary with all available regions
+        """
+
+        try:
+            with open(self.loc_file) as f:
+                loc_json = json.load(f)
+        except Exception as e:
+            logging.error("<Loader>: Error file {} ".format(self.loc_file))
+            raise Exception(e)
+
+        self.loc = {}
+
+        for region in CloudRegion.from_dict(loc_json):
+            self.loc[region.id] = region
+
     def __get_execution_id(self):
         # """
         # Get next execution_id
@@ -248,7 +281,7 @@ class Loader:
 
     def __update_prices(self):
         """
-        get current instances prices on EC2 and update the env dictionary and also the env.json input file
+        get current instances prices on EC2 and GCP and update the env dictionary and also the env.json input file
         """
 
         ec2_zone = self.ec2_conf.zone
@@ -305,6 +338,36 @@ class Loader:
         data["instances"] = tmp
 
         with open(self.env_file, "w") as jsonFile:
+            json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
+
+    def __update_zones(self):
+        """
+        get current zones within regions on EC2 and GCP and update the loc dictionary and also the loc.json input file
+        """
+        gcp_manager = GCPManager()
+
+        for region in self.loc.values():
+
+            if region.provider == CloudManager.EC2 or region.provider == CloudManager.AWS:
+                region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
+
+            elif region.provider == CloudManager.GCLOUD or region.provider == CloudManager.GCP:
+                region.setup_zones(zones=gcp_manager.get_availability_zones(region.region))
+
+        del gcp_manager
+
+        # Update loc file
+        with open(self.loc_file, "r") as jsonFile:
+            data = json.load(jsonFile)
+
+        # updating prices on env_file
+        tmp = data["locations"]
+        for region in tmp:
+            tmp[region]['zones'] = self.loc[region].zones
+
+        data["locations"] = tmp
+
+        with open(self.loc_file, "w") as jsonFile:
             json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
 
     # update Federated Learning command
@@ -367,6 +430,7 @@ class Loader:
         logging.info("\tInput Files:")
         logging.info("\tJob: {}".format(self.job_file))
         logging.info("\tEnv: {}".format(self.env_file))
+        logging.info("\tLoc: {}".format(self.loc_file))
         # logging.info("\tMap: {}".format(self.map_file))
         logging.info("\tLog File: {}".format(self.log_file))
         logging.info("\tDaemon AWS: {}".format(self.daemon_aws_file))

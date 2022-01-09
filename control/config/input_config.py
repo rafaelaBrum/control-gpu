@@ -16,6 +16,10 @@ class InputConfig(Config):
     def env_file(self):
         return self.get_property(self._key, 'env_file')
 
+    @property
+    def loc_file(self):
+        return self.get_property(self._key, 'loc_file')
+
     # @property
     # def map_file(self):
     #     return self.get_property(self._key, 'map_file')

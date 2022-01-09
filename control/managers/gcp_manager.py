@@ -591,6 +591,21 @@ class GCPManager(CloudManager):
 
         return price_per_vcpu, price_per_ram
 
+    # Get availability zones of a GCP region
+    def get_availability_zones(self, region):
+        # Get zones info
+        request = self.compute_engine.regions().list(project=self.gcp_conf.project, filter=f'(description = {region})')
+
+        zones = []
+
+        if request is not None:
+            response = request.execute()
+
+            for az in response['items'][0]['zones']:
+                zones.append(az.split('/')[-1])
+
+        return zones
+
     # def get_cpu_credits(self, instance_id):
     #
     #     end_time = datetime.utcnow()
