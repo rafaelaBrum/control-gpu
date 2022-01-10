@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from typing import Dict
 
 from control.util.loader import Loader
 # from control.util.mail_me import MailMe
@@ -8,6 +9,8 @@ from control.scheduler.schedule_manager import ScheduleManager
 from distutils.util import strtobool
 
 from control.util.recreate_database import RecreateDatabase
+
+from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 
 import logging
 import argparse
@@ -37,6 +40,15 @@ def __call_control(loader: Loader):
 def __call_pre_scheduling(loader: Loader):
     try:
         loader.print_execution_info()
+
+        pre_sched = PreSchedulingManager(loader=loader)
+
+        pre_sched.calculate_rtt_values()
+
+        exec_times: Dict[str, (float, float)] = {'n2-standard-1': (234234, 23423423)}
+
+        PreSchedulingManager.write_json(pre_sched.rtt_values, exec_times, loader.job.job_id, loader.job.job_name,
+                                        loader.pre_file)
 
         # status = "SUCCESS"
 
@@ -77,6 +89,7 @@ def main():
     parser.add_argument('--job_file', help="job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
     parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
+    parser.add_argument('--pre_file', help="pre scheduling file name", type=str, default=None)
     # parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",

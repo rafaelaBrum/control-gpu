@@ -20,6 +20,10 @@ class InputConfig(Config):
     def loc_file(self):
         return self.get_property(self._key, 'loc_file')
 
+    @property
+    def pre_file(self):
+        return self.get_property(self._key, 'pre_file')
+
     # @property
     # def map_file(self):
     #     return self.get_property(self._key, 'map_file')

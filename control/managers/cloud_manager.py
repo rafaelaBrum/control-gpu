@@ -75,7 +75,7 @@ class CloudManager:
     # Terminate an instance
     # InputConfig: Instance_id (str)
     # Output: Operate State (Success: True, Error: False)
-    def terminate_instance(self, instance_id):
+    def terminate_instance(self, instance_id, wait=True):
         pass
 
     # [GET_INFO]

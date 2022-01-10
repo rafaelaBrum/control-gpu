@@ -1,0 +1,21 @@
+{
+    "exec_times": {
+        "n2-standard-1": [
+            234234,
+            23423423
+        ]
+    },
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "number_datacenters": 3,
+    "rtt": {
+        "AWS_us-east-2_us-east-2a": {
+            "AWS_us-east-2_us-east-2b": 0.06874299049377441,
+            "AWS_us-east-2_us-east-2c": 0.04475092887878418
+        },
+        "AWS_us-east-2_us-east-2b": {
+            "AWS_us-east-2_us-east-2c": 0.037143707275390625
+        },
+        "AWS_us-east-2_us-east-2c": {}
+    }
+}

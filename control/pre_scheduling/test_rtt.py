@@ -47,7 +47,7 @@ def main():
     parser.add_argument('--ip', help="IP to testing instance", type=str, default=None, required=True)
     parser.add_argument('--path', help="Path inside VM where the key is located", type=str, default=None, required=True)
     parser.add_argument('--file', help="Key file name", type=str, default=None, required=True)
-    parser.add_argument('--user', help="VM user to connect to the instance", type=int, default=None, required=True)
+    parser.add_argument('--user', help="VM user to connect to the instance", type=str, default=None, required=True)
 
     args = parser.parse_args()
 

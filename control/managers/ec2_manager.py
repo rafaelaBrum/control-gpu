@@ -7,12 +7,12 @@ import boto3
 
 from datetime import datetime
 from dateutil.tz import tzutc
-from datetime import timedelta
+# from datetime import timedelta
 
 import logging
 import json
 
-import math
+# import math
 
 from pkg_resources import resource_filename
 
@@ -21,27 +21,49 @@ from ratelimit import limits, sleep_and_retry
 from botocore.config import Config
 
 
+def get_ec2_client(region):
+    if region != '':
+        client = boto3.client('ec2', region_name=region)
+    else:
+        client = boto3.client('ec2')
+    return client
+
+
+def get_ec2_resource(region):
+    if region != '':
+        client = boto3.resource('ec2', region_name=region)
+    else:
+        client = boto3.resource('ec2')
+    return client
+
+
+def get_cloudwatch_client(region):
+    if region != '':
+        client = boto3.client('cloudwatch', region_name=region)
+    else:
+        client = boto3.client('cloudwatch')
+    return client
+
+
+def _new_filter(name, values):
+    return {
+        'Name': name,
+        'Values': [v for v in values]
+    }
+
+
 class EC2Manager(CloudManager):
     ec2_conf = EC2Config()
     s3_conf = S3Config()
     vm_config = ec2_conf
     bucket_config = s3_conf
 
-    client = boto3.client('ec2')
-    resource = boto3.resource('ec2')
-    cloud_watch = boto3.client('cloudwatch')
     session = boto3.Session()
     credentials = session.get_credentials()
 
     def __init__(self):
 
         self.instances_history = {}
-
-    def _new_filter(self, name, values):
-        return {
-            'Name': name,
-            'Values': [v for v in values]
-        }
 
     def _update_history(self, instances, status):
         for i in instances:
@@ -66,13 +88,14 @@ class EC2Manager(CloudManager):
                     self.instances_history[i.id]['EndTime'] = \
                         datetime.now(tz=tzutc())
 
-    def _create_instance(self, info, burstable):
+    def _create_instance(self, info, burstable, region=''):
 
         try:
+            resource = get_ec2_resource(region)
 
             if burstable:
 
-                instances = self.resource.create_instances(
+                instances = resource.create_instances(
                     ImageId=info['ImageId'],
                     InstanceType=info['InstanceType'],
                     KeyName=info['KeyName'],
@@ -98,7 +121,7 @@ class EC2Manager(CloudManager):
                 )
 
             else:
-                instances = self.resource.create_instances(
+                instances = resource.create_instances(
                     ImageId=info['ImageId'],
                     InstanceType=info['InstanceType'],
                     KeyName=info['KeyName'],
@@ -132,10 +155,12 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return None
 
-    def create_volume(self, size, volume_name=''):
+    def create_volume(self, size, volume_name='', region=''):
 
         try:
-            ebs_vol = self.client.create_volume(
+            client = get_ec2_client(region)
+
+            ebs_vol = client.create_volume(
                 Size=size,
                 AvailabilityZone=self.ec2_conf.zone,
                 TagSpecifications=[
@@ -163,18 +188,22 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return None
 
-    def wait_volume(self, volume_id):
-        waiter = self.client.get_waiter('volume_available')
+    def wait_volume(self, volume_id, region):
+        client = get_ec2_client(region)
+
+        waiter = client.get_waiter('volume_available')
         waiter.wait(
             VolumeIds=[
                 volume_id
             ]
         )
 
-    def attach_volume(self, instance_id, volume_id):
+    def attach_volume(self, instance_id, volume_id, region=''):
 
         try:
-            self.client.attach_volume(
+            client = get_ec2_client(region)
+
+            client.attach_volume(
                 VolumeId=volume_id,
                 InstanceId=instance_id,
                 Device="/dev/xvdf"
@@ -186,24 +215,45 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return False
 
-    def create_on_demand_instance(self, instance_type, image_id, burstable=False):
+    def create_on_demand_instance(self, instance_type, image_id, burstable=False, zone='', key_name=''):
 
-        parameters = {
+        region = ''
+        if zone != '':
+            parameters = {
 
-            'ImageId': image_id,
-            'InstanceType': instance_type,
-            'KeyName': self.ec2_conf.key_name,
-            'MaxCount': 1,
-            'MinCount': 1,
-            'SecurityGroups': [
-                self.ec2_conf.security_group,
-                self.ec2_conf.security_vpc_group
-            ],
-            'InstanceMarketOptions': {},
-            'Placement': {'AvailabilityZone': self.ec2_conf.zone},
-        }
+                'ImageId': image_id,
+                'InstanceType': instance_type,
+                'KeyName': self.ec2_conf.key_name,
+                'MaxCount': 1,
+                'MinCount': 1,
+                'SecurityGroups': [
+                    self.ec2_conf.security_group,
+                    self.ec2_conf.security_vpc_group
+                ],
+                'InstanceMarketOptions': {},
+                'Placement': {'AvailabilityZone': zone},
+            }
+            region = zone[:-1]
+        else:
+            parameters = {
 
-        instances = self._create_instance(parameters, burstable)
+                'ImageId': image_id,
+                'InstanceType': instance_type,
+                'KeyName': self.ec2_conf.key_name,
+                'MaxCount': 1,
+                'MinCount': 1,
+                'SecurityGroups': [
+                    self.ec2_conf.security_group,
+                    self.ec2_conf.security_vpc_group
+                ],
+                'InstanceMarketOptions': {},
+                'Placement': {'AvailabilityZone': self.ec2_conf.zone},
+            }
+
+        if key_name != '':
+            parameters['KeyName'] = key_name
+
+        instances = self._create_instance(parameters, burstable, region=region)
 
         if instances is not None:
             created_instances = [i for i in instances]
@@ -212,9 +262,11 @@ class EC2Manager(CloudManager):
         else:
             return None
 
-    def delete_volume(self, volume_id):
+    def delete_volume(self, volume_id, region=''):
         try:
-            self.client.delete_volume(VolumeId=volume_id)
+            client = get_ec2_client(region)
+
+            client.delete_volume(VolumeId=volume_id)
             status = True
         except Exception as e:
             logging.error("<EC2Manager>: Error to delete Volume {} ".format(volume_id))
@@ -268,11 +320,13 @@ class EC2Manager(CloudManager):
         else:
             return None
 
-    def _terminate_instance(self, instance):
+    def _terminate_instance(self, instance, region):
 
         # if instance is spot, we have to remove its request
         if instance.instance_lifecycle == 'spot':
-            self.client.cancel_spot_instance_requests(
+            client = get_ec2_client(region)
+
+            client.cancel_spot_instance_requests(
                 SpotInstanceRequestIds=[
                     instance.spot_instance_request_id
                 ]
@@ -282,13 +336,13 @@ class EC2Manager(CloudManager):
 
         instance.terminate()
 
-    def terminate_instance(self, instance_id, wait=True):
+    def terminate_instance(self, instance_id, wait=True, region=''):
 
         try:
 
-            instance = self.__get_instance(instance_id)
+            instance = self.__get_instance(instance_id, region=region)
 
-            self._terminate_instance(instance)
+            self._terminate_instance(instance, region=region)
 
             if wait:
                 instance.wait_until_terminated()
@@ -305,11 +359,15 @@ class EC2Manager(CloudManager):
 
     @sleep_and_retry
     @limits(calls=10, period=1)
-    def __get_instance(self, instance_id):
+    def __get_instance(self, instance_id, region):
+
+        # print("instance_id", instance_id)
+        # print("region", region)
 
         try:
+            resource = get_ec2_resource(region)
 
-            instance = self.resource.Instance(instance_id)
+            instance = resource.Instance(instance_id)
 
             instance.reload()
         except Exception as e:
@@ -318,16 +376,17 @@ class EC2Manager(CloudManager):
 
         return instance
 
-    def __get_instances(self, search_filter=None):
+    def __get_instances(self, search_filter=None, region=''):
 
         if search_filter is None:
-            return self.resource.instances.filter()
+            resource = get_ec2_resource(region)
+            return resource.instances.filter()
 
         _filters = []
 
         if 'status' in search_filter:
             _filters.append(
-                self._new_filter(
+                _new_filter(
                     name="instance-state-name",
                     values=search_filter['status']
                 )
@@ -335,41 +394,43 @@ class EC2Manager(CloudManager):
 
         if 'tag' in search_filter:
             _filters.append(
-                self._new_filter(
+                _new_filter(
                     name='tag:{}'.format(search_filter['tag']['name']),
                     values=search_filter['tag']['values']
                 )
             )
 
-        return [i for i in self.resource.instances.filter(Filters=_filters)]
+        resource = get_ec2_resource(region)
 
-    def get_instance_status(self, instance_id):
+        return [i for i in resource.instances.filter(Filters=_filters)]
+
+    def get_instance_status(self, instance_id, region=''):
 
         if instance_id is None:
             return None
 
-        instance = self.__get_instance(instance_id)
+        instance = self.__get_instance(instance_id, region)
 
         if instance is None:
             return None
         else:
             return instance.state["Name"].lower()
 
-    def list_instances_id(self, search_filter=None):
-        instances = self.__get_instances(search_filter)
+    def list_instances_id(self, search_filter=None, region=''):
+        instances = self.__get_instances(search_filter, region=region)
 
         return [i.id for i in instances]
 
-    def get_public_instance_ip(self, instance_id):
-        instance = self.__get_instance(instance_id)
+    def get_public_instance_ip(self, instance_id, region):
+        instance = self.__get_instance(instance_id, region)
 
         if instance is None:
             return None
         else:
             return instance.public_ip_address
 
-    def get_private_instance_ip(self, instance_id):
-        instance = self.__get_instance(instance_id)
+    def get_private_instance_ip(self, instance_id, region):
+        instance = self.__get_instance(instance_id, region)
 
         if instance is None:
             return None
@@ -449,33 +510,33 @@ class EC2Manager(CloudManager):
 
         return zones
 
-    def get_cpu_credits(self, instance_id):
-
-        end_time = datetime.utcnow()
-
-        start_time = end_time - timedelta(minutes=5)
-
-        # print(start_time)
-        # print(end_time)
-
-        response = self.cloud_watch.get_metric_statistics(
-            Namespace='AWS/EC2',
-            MetricName='CPUCreditBalance',
-            Dimensions=[
-                {
-                    'Name': 'InstanceId',
-                    'Value': instance_id
-                },
-            ],
-            Period=60,
-            Statistics=['Average'],
-            StartTime=start_time,
-            EndTime=end_time
-        )
-
-        cpu_credits = 0
-
-        if len(response['Datapoints']) > 0:
-            cpu_credits = math.ceil(response['Datapoints'][-1]['Average'])
-
-        return cpu_credits
+    # def get_cpu_credits(self, instance_id):
+    #
+    #     end_time = datetime.utcnow()
+    #
+    #     start_time = end_time - timedelta(minutes=5)
+    #
+    #     # print(start_time)
+    #     # print(end_time)
+    #
+    #     response = self.cloud_watch.get_metric_statistics(
+    #         Namespace='AWS/EC2',
+    #         MetricName='CPUCreditBalance',
+    #         Dimensions=[
+    #             {
+    #                 'Name': 'InstanceId',
+    #                 'Value': instance_id
+    #             },
+    #         ],
+    #         Period=60,
+    #         Statistics=['Average'],
+    #         StartTime=start_time,
+    #         EndTime=end_time
+    #     )
+    #
+    #     cpu_credits = 0
+    #
+    #     if len(response['Datapoints']) > 0:
+    #         cpu_credits = math.ceil(response['Datapoints'][-1]['Average'])
+    #
+    #     return cpu_credits

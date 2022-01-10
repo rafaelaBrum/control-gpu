@@ -18,6 +18,7 @@ from control.config.logging_config import LoggingConfig
 from control.config.notify_config import NotifyConfig
 # from control.config.scheduler_config import SchedulerConfig
 from control.config.simulation_config import SimulationConfig
+from control.config.pre_sched_config import PreSchedConfig
 
 from control.domain.instance_type import InstanceType
 from control.domain.job import Job
@@ -51,6 +52,7 @@ class Loader:
         self.job_file = args.job_file
         self.env_file = args.env_file
         self.loc_file = args.loc_file
+        self.pre_file = args.pre_file
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -94,6 +96,7 @@ class Loader:
         self.notify_conf = NotifyConfig()
         # self.scheduler_conf = SchedulerConfig()
         self.simulation_conf = SimulationConfig()
+        self.pre_sched_conf = PreSchedConfig()
 
         # local path where the daemon file is
         self.daemon_aws_file = None
@@ -180,6 +183,11 @@ class Loader:
             self.loc_file = os.path.join(self.input_path, self.input_conf.loc_file)
         else:
             self.loc_file = os.path.join(self.input_path, self.loc_file)
+
+        if self.pre_file is None:
+            self.pre_file = os.path.join(self.input_path, self.input_conf.pre_file)
+        else:
+            self.pre_file = os.path.join(self.input_path, self.pre_file)
 
         # if self.map_file is None:
         #     self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
@@ -431,6 +439,7 @@ class Loader:
         logging.info("\tJob: {}".format(self.job_file))
         logging.info("\tEnv: {}".format(self.env_file))
         logging.info("\tLoc: {}".format(self.loc_file))
+        logging.info("\tPre: {}".format(self.pre_file))
         # logging.info("\tMap: {}".format(self.map_file))
         logging.info("\tLog File: {}".format(self.log_file))
         logging.info("\tDaemon AWS: {}".format(self.daemon_aws_file))

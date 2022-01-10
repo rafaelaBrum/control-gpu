@@ -193,9 +193,12 @@ class GCPManager(CloudManager):
                 self.mutex.release()
             return False
 
-    def create_on_demand_instance(self, instance_type, image_id, vm_name=''):
+    def create_on_demand_instance(self, instance_type, image_id, vm_name='', zone=''):
 
-        machine_type = f'zones/{self.gcp_conf.zone}/machineTypes/n2-standard-2'
+        if zone != '':
+            machine_type = f'zones/{zone}/machineTypes/{instance_type}'
+        else:
+            machine_type = f'zones/{self.gcp_conf.zone}/machineTypes/{instance_type}'
 
         self.mutex.acquire()
 
@@ -348,7 +351,7 @@ class GCPManager(CloudManager):
 
         return operation
 
-    def terminate_instance(self, instance_id, wait=True):
+    def terminate_instance(self, instance_id, wait=True, region=''):
         try:
             instance = self.__get_instance(instance_id)
             operation = self._terminate_instance(instance)
@@ -441,7 +444,7 @@ class GCPManager(CloudManager):
 
         return [i['id'] for i in instances] if instances else []
 
-    def get_public_instance_ip(self, instance_id):
+    def get_public_instance_ip(self, instance_id, region):
         instances = self.__get_instances(filter=f'(id = {instance_id})')
         if instances is not None:
             instance = instances[0]
@@ -452,7 +455,7 @@ class GCPManager(CloudManager):
         else:
             return instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
-    def get_private_instance_ip(self, instance_id):
+    def get_private_instance_ip(self, instance_id, region):
         instances = self.__get_instances(filter=f'(id = {instance_id})')
         if instances is not None:
             instance = instances[0]

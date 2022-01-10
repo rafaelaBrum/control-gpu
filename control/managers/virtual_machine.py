@@ -95,7 +95,10 @@ class VirtualMachine:
 
     # Start the virtual machine
     # Return (boolean) True if success otherwise return False
-    def deploy(self):
+    def deploy(self, zone='', needs_volume=True, key_name=''):
+        region = ''
+        if zone != '':
+            region = zone[:-1]
 
         self.start_deploy = datetime.now()
 
@@ -111,11 +114,14 @@ class VirtualMachine:
                     raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
-                                                                              image_id=self.instance_type.image_id)
+                                                                              image_id=self.instance_type.image_id,
+                                                                              zone=zone,
+                                                                              key_name=key_name)
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                               image_id=self.instance_type.image_id,
-                                                                              vm_name=self.vm_name)
+                                                                              vm_name=self.vm_name,
+                                                                              zone=zone)
                 elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = \
                         self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
@@ -144,10 +150,10 @@ class VirtualMachine:
                 self.__start_time = datetime.now()
                 self.__start_time_utc = datetime.utcnow()
 
-                self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
-                self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
+                self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
+                self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
 
-                if self.loader.file_system_conf.type == CloudManager.EBS:
+                if needs_volume and self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
                     if self.volume_id is None:
                         self.volume_id = self.manager.create_volume(
@@ -189,8 +195,8 @@ class VirtualMachine:
 
                 return False
         else:
-            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
-            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
+            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
+            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
 
         # Instance was already started
         return False
@@ -315,7 +321,8 @@ class VirtualMachine:
                                  "- Creating directory {}".format(self.instance_id,
                                                                   self.loader.file_system_conf.path_storage))
                     # create directory
-                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage), output=True)
+                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
+                                             output=True)
 
                     self.__create_s3(self.loader.file_system_conf.path_storage, client_id)
 
@@ -328,13 +335,12 @@ class VirtualMachine:
                     logging.info(f"<VirtualMachine {self.instance_id}>: Not sending any additional file"
                                  f" (type_task {type_task})")
 
-
                 # Send files
                 if self.instance_type.provider == CloudManager.EC2:
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
-                                    target=self.loader.ec2_conf.home_path,
-                                    item=item)
+                                      target=self.loader.ec2_conf.home_path,
+                                      item=item)
 
                     cmd1 = f'unzip {item} -d .'
 
@@ -376,13 +382,6 @@ class VirtualMachine:
 
                     stdout, stderr, code_return = self.ssh.execute_command(cmd_unzip, output=True)
                     print(stdout)
-
-                    cmd_pip = f'pip3 install -r requirements.txt'
-
-                    # logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_pip))
-                    #
-                    # stdout, stderr, code_return = self.ssh.execute_command(cmd_pip, output=True)
-                    # print(stdout)
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
@@ -436,7 +435,7 @@ class VirtualMachine:
     # Terminate the virtual machine
     # and delete volume (if delete_volume = True)
     # Return True if success otherwise return False
-    def terminate(self, delete_volume=True):
+    def terminate(self, delete_volume=True, wait=True, region=''):
 
         logging.info("<VirtualMachine>: Terminating instance {} ".format(self.instance_id))
 
@@ -446,11 +445,11 @@ class VirtualMachine:
 
         if self.state not in (CloudManager.TERMINATED, None):
             self.__end_time = datetime.now()
-            status = self.manager.terminate_instance(self.instance_id)
+            status = self.manager.terminate_instance(self.instance_id, wait=wait, region=region)
 
             if delete_volume and self.volume_id is not None:
                 if self.instance_type.provider == CloudManager.EC2:
-                    self.manager.delete_volume(self.volume_id)
+                    self.manager.delete_volume(self.volume_id, region=region)
                 elif self.instance_type.provider == CloudManager.GCLOUD:
                     self.manager.delete_volume(self.volume_id, volume_name=self.disk_name)
 
@@ -458,9 +457,9 @@ class VirtualMachine:
 
         return status
 
-    def update_ip(self):
-        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id)
-        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id)
+    def update_ip(self, region=''):
+        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
+        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
 
     # return the a IP's list of all running instance on the cloud provider
     def get_instances_ip(self):
