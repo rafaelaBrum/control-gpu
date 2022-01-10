@@ -64,13 +64,16 @@ class PreSchedulingManager:
             else:
                 logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
                 return
+            vm_initial.region = region.region
+            key_file_initial = ''
+            if region.key_file != '':
+                key_file_initial = region.key_file.split('.')[0]
             for zone in region.zones:
                 id_rtt = region_id + '_' + zone
+                logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
+                             f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
-                key_file = ''
-                if region.key_file!='':
-                    key_file = region.key_file.split('.')[0]
-                vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file)
+                vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
                 vm_initial.update_ip(region.region)
                 self.rtt_values[id_rtt] = {}
                 for region_copy in loc_copy.values():
@@ -82,14 +85,17 @@ class PreSchedulingManager:
                         logging.error(
                             f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
                         return
+                    vm_final.region = region_copy.region
+                    vm_final.instance_type.image_id = region_copy.server_image_id
+                    key_file = ''
+                    if region_copy.key_file != '':
+                        key_file = region_copy.key_file.split('.')[0]
                     for zone_copy in region_copy.zones:
+                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
+                                     f"region {region_copy.region} of provider {region.provider}")
                         id_rtt_final = region_copy.id + '_' + zone_copy
                         if region.id == region_id and zone_copy == zone:
                             continue
-                        vm_final.instance_type.image_id = region_copy.server_image_id
-                        key_file = ''
-                        if region_copy.key_file != '':
-                            key_file = region_copy.key_file.split('.')[0]
                         vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file)
                         if not vm_final.failed_to_created:
                             # update instance IP

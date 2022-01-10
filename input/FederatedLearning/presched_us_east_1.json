@@ -1,0 +1,39 @@
+{
+    "exec_times": {
+        "n2-standard-1": [
+            234234,
+            23423423
+        ]
+    },
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "number_datacenters": 6,
+    "rtt": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1b": 0.08596205711364746,
+            "AWS_us-east-1_us-east-1c": 0.03843235969543457,
+            "AWS_us-east-1_us-east-1d": 0.04567456245422363,
+            "AWS_us-east-1_us-east-1e": 0.03787589073181152,
+            "AWS_us-east-1_us-east-1f": 0.04809117317199707
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1c": 0.09376668930053711,
+            "AWS_us-east-1_us-east-1d": 0.0360713005065918,
+            "AWS_us-east-1_us-east-1e": 0.0352935791015625,
+            "AWS_us-east-1_us-east-1f": 0.04476189613342285
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1d": 0.221327543258667,
+            "AWS_us-east-1_us-east-1e": 0.05243062973022461,
+            "AWS_us-east-1_us-east-1f": 0.037836551666259766
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1e": 0.1356039047241211,
+            "AWS_us-east-1_us-east-1f": 0.04622602462768555
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1f": 0.06377196311950684
+        },
+        "AWS_us-east-1_us-east-1f": {}
+    }
+}

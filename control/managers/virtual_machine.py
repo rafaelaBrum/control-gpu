@@ -38,6 +38,7 @@ class VirtualMachine:
         self.volume_id = volume_id
         self.disk_name = disk_name
         self.vm_name = vm_name
+        self.region = ''
 
         self.create_file_system = False
 
@@ -437,6 +438,9 @@ class VirtualMachine:
     # Return True if success otherwise return False
     def terminate(self, delete_volume=True, wait=True, region=''):
 
+        # print("instance_id:", self.instance_id)
+        # print("region: ", region)
+
         logging.info("<VirtualMachine>: Terminating instance {} ".format(self.instance_id))
 
         terminate_start = datetime.now()
@@ -493,7 +497,7 @@ class VirtualMachine:
             self.current_state = CloudManager.STOPPING
         elif not self.in_simulation:
             if not self.failed_to_created:
-                self.current_state = self.manager.get_instance_status(self.instance_id)
+                self.current_state = self.manager.get_instance_status(self.instance_id, region=self.region)
             else:
                 self.current_state = CloudManager.ERROR
 
