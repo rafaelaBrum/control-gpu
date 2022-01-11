@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Dict, List
 from copy import deepcopy
 
@@ -64,7 +65,6 @@ class PreSchedulingManager:
             else:
                 logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
                 return
-            vm_initial.region = region.region
             key_file_initial = ''
             if region.key_file != '':
                 key_file_initial = region.key_file.split('.')[0]
@@ -73,8 +73,9 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
+                vm_initial.zone = zone
                 vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
-                vm_initial.update_ip(region.region)
+                vm_initial.update_ip(zone=zone)
                 self.rtt_values[id_rtt] = {}
                 for region_copy in loc_copy.values():
                     if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -85,29 +86,29 @@ class PreSchedulingManager:
                         logging.error(
                             f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
                         return
-                    vm_final.region = region_copy.region
                     vm_final.instance_type.image_id = region_copy.server_image_id
                     key_file = ''
                     if region_copy.key_file != '':
                         key_file = region_copy.key_file.split('.')[0]
                     for zone_copy in region_copy.zones:
                         logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
-                                     f"region {region_copy.region} of provider {region.provider}")
+                                     f"region {region_copy.region} of provider {region_copy.provider}")
                         id_rtt_final = region_copy.id + '_' + zone_copy
                         if region.id == region_id and zone_copy == zone:
                             continue
+                        vm_final.zone = zone_copy
                         vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file)
                         if not vm_final.failed_to_created:
                             # update instance IP
-                            vm_final.update_ip(region=region_copy.region)
+                            vm_final.update_ip(zone=zone_copy)
                             self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
                                                                                         region.key_file,
                                                                                         region_copy.key_file)
-                        status = vm_final.terminate(wait=False, region=region_copy.region)
+                        status = vm_final.terminate(wait=False, zone=zone_copy)
                         if status:
                             vm_final.instance_id = None
                 loc_copy[region_id].zones.remove(zone)
-                status = vm_initial.terminate(wait=False, region=region.region)
+                status = vm_initial.terminate(wait=False, zone=zone)
                 if status:
                     vm_initial.instance_id = None
             loc_copy.pop(region_id, None)
@@ -221,9 +222,20 @@ class PreSchedulingManager:
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd,
                                                                                         vm_final.instance_id))
 
-            stdout, stderr, code_return = vm_final.ssh.execute_command(cmd, output=True)
+            trying = 0
+            rtt_value = -1
+            while trying < 3:
+                try:
+                    stdout, stderr, code_return = vm_final.ssh.execute_command(cmd, output=True)
 
-            rtt_value = float(stdout.split(" ")[-1])
+                    rtt_value = float(stdout.split(" ")[-1])
+                    break
+                except Exception as e:
+                    print("Error to convert: '", stdout, "'")
+                    print(f"Try {trying}/3")
+                    print(e)
+                    trying = trying + 1
+                    time.sleep(5)
 
             return rtt_value
 

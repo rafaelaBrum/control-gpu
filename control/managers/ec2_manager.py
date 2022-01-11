@@ -88,7 +88,7 @@ class EC2Manager(CloudManager):
                     self.instances_history[i.id]['EndTime'] = \
                         datetime.now(tz=tzutc())
 
-    def _create_instance(self, info, burstable, region=''):
+    def _create_instance(self, info, burstable, region):
 
         try:
             resource = get_ec2_resource(region)
@@ -155,7 +155,11 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return None
 
-    def create_volume(self, size, volume_name='', region=''):
+    def create_volume(self, size, volume_name='', zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
 
         try:
             client = get_ec2_client(region)
@@ -188,7 +192,12 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return None
 
-    def wait_volume(self, volume_id, region):
+    def wait_volume(self, volume_id, zone):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
+
         client = get_ec2_client(region)
 
         waiter = client.get_waiter('volume_available')
@@ -198,7 +207,11 @@ class EC2Manager(CloudManager):
             ]
         )
 
-    def attach_volume(self, instance_id, volume_id, region=''):
+    def attach_volume(self, instance_id, volume_id, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
 
         try:
             client = get_ec2_client(region)
@@ -215,7 +228,7 @@ class EC2Manager(CloudManager):
             logging.error(e)
             return False
 
-    def create_on_demand_instance(self, instance_type, image_id, burstable=False, zone='', key_name=''):
+    def create_on_demand_instance(self, instance_type, image_id, zone='', burstable=False, key_name=''):
 
         region = ''
         if zone != '':
@@ -262,7 +275,12 @@ class EC2Manager(CloudManager):
         else:
             return None
 
-    def delete_volume(self, volume_id, region=''):
+    def delete_volume(self, volume_id, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
+
         try:
             client = get_ec2_client(region)
 
@@ -275,7 +293,7 @@ class EC2Manager(CloudManager):
 
         return status
 
-    def create_preemptible_instance(self, instance_type, image_id, max_price, burstable=False):
+    def create_preemptible_instance(self, instance_type, image_id, max_price, zone='', burstable=False):
 
         # user_data = '''#!/bin/bash
         # /usr/bin/enable-ec2-spot-hibernation
@@ -283,6 +301,7 @@ class EC2Manager(CloudManager):
         # '''
 
         zone = self.ec2_conf.zone
+        region = zone[:-1]
         interruption_behaviour = 'stop'
 
         parameters = {
@@ -311,7 +330,7 @@ class EC2Manager(CloudManager):
         if zone:
             parameters['Placement'] = {'AvailabilityZone': zone}
 
-        instances = self._create_instance(parameters, burstable)
+        instances = self._create_instance(parameters, burstable, region)
 
         if instances is not None:
             created_instances = [i for i in instances]
@@ -336,7 +355,11 @@ class EC2Manager(CloudManager):
 
         instance.terminate()
 
-    def terminate_instance(self, instance_id, wait=True, region=''):
+    def terminate_instance(self, instance_id, wait=True, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
 
         try:
 
@@ -404,7 +427,11 @@ class EC2Manager(CloudManager):
 
         return [i for i in resource.instances.filter(Filters=_filters)]
 
-    def get_instance_status(self, instance_id, region=''):
+    def get_instance_status(self, instance_id, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
 
         if instance_id is None:
             return None
@@ -416,12 +443,22 @@ class EC2Manager(CloudManager):
         else:
             return instance.state["Name"].lower()
 
-    def list_instances_id(self, search_filter=None, region=''):
+    def list_instances_id(self, search_filter=None, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
+
         instances = self.__get_instances(search_filter, region=region)
 
         return [i.id for i in instances]
 
-    def get_public_instance_ip(self, instance_id, region):
+    def get_public_instance_ip(self, instance_id, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
+
         instance = self.__get_instance(instance_id, region)
 
         if instance is None:
@@ -429,7 +466,12 @@ class EC2Manager(CloudManager):
         else:
             return instance.public_ip_address
 
-    def get_private_instance_ip(self, instance_id, region):
+    def get_private_instance_ip(self, instance_id, zone=''):
+
+        region = zone
+        if region != '':
+            region = zone[:-1]
+
         instance = self.__get_instance(instance_id, region)
 
         if instance is None:
@@ -492,7 +534,6 @@ class EC2Manager(CloudManager):
         id2 = list(od[id1]['priceDimensions'])[0]
 
         return float(od[id1]['priceDimensions'][id2]['pricePerUnit']['USD'])
-
 
     # Get availability zones of a AWS region
     @staticmethod

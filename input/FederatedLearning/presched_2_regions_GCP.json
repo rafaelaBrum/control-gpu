@@ -1,0 +1,39 @@
+{
+    "exec_times": {
+        "n2-standard-1": [
+            234234,
+            23423423
+        ]
+    },
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "number_datacenters": 6,
+    "rtt": {
+        "GCP_us-east1_us-east1-b": {
+            "GCP_us-east1_us-east1-c": 6.254954814910889,
+            "GCP_us-east1_us-east1-d": -1
+        },
+        "GCP_us-east1_us-east1-c": {
+            "GCP_us-east1_us-east1-d": 12.584769487380981
+        },
+        "GCP_us-east1_us-east1-d": {},
+        "GCP_us-west1_us-west1-a": {
+            "GCP_us-east1_us-east1-b": 6.237727165222168,
+            "GCP_us-east1_us-east1-c": 11.785964965820312,
+            "GCP_us-east1_us-east1-d": 3.013747453689575,
+            "GCP_us-west1_us-west1-b": 4.99898362159729,
+            "GCP_us-west1_us-west1-c": 3.400224447250366
+        },
+        "GCP_us-west1_us-west1-b": {
+            "GCP_us-east1_us-east1-b": 8.015199661254883,
+            "GCP_us-east1_us-east1-c": 4.346301794052124,
+            "GCP_us-east1_us-east1-d": 4.7507359981536865,
+            "GCP_us-west1_us-west1-c": 4.741602897644043
+        },
+        "GCP_us-west1_us-west1-c": {
+            "GCP_us-east1_us-east1-b": 13.44469141960144,
+            "GCP_us-east1_us-east1-c": -1,
+            "GCP_us-east1_us-east1-d": 3.2269089221954346
+        }
+    }
+}

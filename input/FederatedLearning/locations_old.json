@@ -4,7 +4,7 @@
             "provider": "aws",
             "region": "us-east-1",
             "key_file": "rafaelabrum_key.pem",
-            "client_image_id": "",
+            "client_image_id": "ami-05ebc5d3ed24bcca1",
             "server_image_id": "ami-0cdc662c42e7c28ed",
             "zones": [
                 "us-east-1a",
@@ -30,6 +30,9 @@
         "GCP_us-west1": {
             "provider": "gcp",
             "region": "us-west1",
+            "key_file": "",
+            "client_image_id": "",
+            "server_image_id": "disk-ubuntu-flower-server",
             "zones": [
                 "us-west1-a",
                 "us-west1-b",

@@ -38,7 +38,7 @@ class VirtualMachine:
         self.volume_id = volume_id
         self.disk_name = disk_name
         self.vm_name = vm_name
-        self.region = ''
+        self.zone = ''
 
         self.create_file_system = False
 
@@ -49,11 +49,12 @@ class VirtualMachine:
             self.manager = GCPManager()
             if self.vm_name == '':
                 self.vm_name = f'vm-{self.instance_type.type}'
-            self.vm_name = f'{self.vm_name}-{self.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
+            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
             if self.disk_name == '':
                 self.disk_name = f'disk-{self.instance_type.type}'
-            self.disk_name = f'{self.disk_name}-{self.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
-            self.vm_num += 1
+            self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
+                             f'-{self.loader.execution_id}'
+            VirtualMachine.vm_num += 1
 
         self.instance_id = None
         self.instance_public_ip = None
@@ -97,9 +98,6 @@ class VirtualMachine:
     # Start the virtual machine
     # Return (boolean) True if success otherwise return False
     def deploy(self, zone='', needs_volume=True, key_name=''):
-        region = ''
-        if zone != '':
-            region = zone[:-1]
 
         self.start_deploy = datetime.now()
 
@@ -151,8 +149,8 @@ class VirtualMachine:
                 self.__start_time = datetime.now()
                 self.__start_time_utc = datetime.utcnow()
 
-                self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
-                self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
+                self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+                self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
                 if needs_volume and self.loader.file_system_conf.type == CloudManager.EBS:
                     # if there is not a volume create a new volume
@@ -172,19 +170,21 @@ class VirtualMachine:
                     if self.instance_type.provider == CloudManager.EC2:
                         # attached new volume
                         # waiting until volume available
-                        self.manager.wait_volume(volume_id=self.volume_id)
+                        self.manager.wait_volume(volume_id=self.volume_id, zone=self.zone)
                         self.manager.attach_volume(
                             instance_id=self.instance_id,
-                            volume_id=self.volume_id
+                            volume_id=self.volume_id,
+                            zone=self.zone
                         )
                     elif self.instance_type.provider == CloudManager.GCLOUD:
                         # attached new volume
                         # waiting until volume available
-                        self.manager.wait_volume(volume_name=self.disk_name)
+                        self.manager.wait_volume(volume_name=self.disk_name, zone=self.zone)
                         self.manager.attach_volume(
                             instance_id=self.instance_id,
                             volume_id=self.volume_id,
-                            volume_name=self.disk_name
+                            volume_name=self.disk_name,
+                            zone=self.zone
                         )
 
                 return True
@@ -196,8 +196,8 @@ class VirtualMachine:
 
                 return False
         else:
-            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
-            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
+            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
         # Instance was already started
         return False
@@ -436,7 +436,7 @@ class VirtualMachine:
     # Terminate the virtual machine
     # and delete volume (if delete_volume = True)
     # Return True if success otherwise return False
-    def terminate(self, delete_volume=True, wait=True, region=''):
+    def terminate(self, delete_volume=True, wait=True, zone=''):
 
         # print("instance_id:", self.instance_id)
         # print("region: ", region)
@@ -449,11 +449,11 @@ class VirtualMachine:
 
         if self.state not in (CloudManager.TERMINATED, None):
             self.__end_time = datetime.now()
-            status = self.manager.terminate_instance(self.instance_id, wait=wait, region=region)
+            status = self.manager.terminate_instance(self.instance_id, wait=wait, zone=zone)
 
             if delete_volume and self.volume_id is not None:
                 if self.instance_type.provider == CloudManager.EC2:
-                    self.manager.delete_volume(self.volume_id, region=region)
+                    self.manager.delete_volume(self.volume_id, zone=zone)
                 elif self.instance_type.provider == CloudManager.GCLOUD:
                     self.manager.delete_volume(self.volume_id, volume_name=self.disk_name)
 
@@ -461,9 +461,9 @@ class VirtualMachine:
 
         return status
 
-    def update_ip(self, region=''):
-        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, region)
-        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, region)
+    def update_ip(self, zone=''):
+        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
     # return the a IP's list of all running instance on the cloud provider
     def get_instances_ip(self):
@@ -497,7 +497,7 @@ class VirtualMachine:
             self.current_state = CloudManager.STOPPING
         elif not self.in_simulation:
             if not self.failed_to_created:
-                self.current_state = self.manager.get_instance_status(self.instance_id, region=self.region)
+                self.current_state = self.manager.get_instance_status(self.instance_id, zone=self.zone)
             else:
                 self.current_state = CloudManager.ERROR
 
