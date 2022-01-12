@@ -1,18 +1,10 @@
-import argparse
-
 from control.domain.instance_type import InstanceType
 # from control.domain.task import Task
-
-from control.util.loader import Loader
 
 from control.managers.cloud_manager import CloudManager
 from control.managers.virtual_machine import VirtualMachine
 
-from control.config.logging_config import LoggingConfig
-
 import logging
-
-from pathlib import Path
 
 
 def test_on_demand_virtual_machine(disk_name, loader):
@@ -44,7 +36,7 @@ def test_on_demand_virtual_machine(disk_name, loader):
     print("On-demand price of instance:", vm.price)
 
     if status:
-        vm.prepare_vm()
+        vm.prepare_vm(type_task='server', client_id=0)
 
         input("Enter to continue with VM termination")
 

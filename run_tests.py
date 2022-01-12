@@ -14,8 +14,10 @@ def main():
 
     parser.add_argument('--disk_name', default='disk-extra')
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
-    parser.add_argument('--task_file', help="task file name", type=str, default=None)
+    parser.add_argument('--job_file', help="job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
+    parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
+    parser.add_argument('--pre_file', help="pre scheduling file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
 
     parser.add_argument('--log_file', help="log file name", type=str, default=None)

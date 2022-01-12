@@ -35,7 +35,7 @@ def test_on_demand_virtual_machine(loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-05967bab0d693d334',
+        image_id='ami-0cdc662c42e7c28ed',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
@@ -61,7 +61,7 @@ def test_on_demand_virtual_machine(loader):
 
     vm.deploy()
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server', client_id=0)
 
     input("Enter to continue with VM termination")
 
@@ -100,7 +100,7 @@ def test_preemptible_virtual_machine(loader):
 
     vm.deploy()
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server', client_id=0)
 
     status = vm.terminate()
 
@@ -141,7 +141,7 @@ def test_vm_with_EBS(volume_id='', loader=None):
 
     vm.deploy()
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server', client_id=0)
 
     status = vm.terminate(delete_volume=False)
 
