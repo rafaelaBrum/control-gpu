@@ -1,15 +1,14 @@
 {
     "locations": {
-        "AWS_us-east-2": {
+        "AWS_us-west-1": {
             "provider": "aws",
-            "region": "us-east-2",
-            "key_file": "par_rafaelabrum_key.pem",
+            "region": "us-west-1",
+            "key_file": "rafaelabrum_key_west.pem",
             "client_image_id": "",
-            "server_image_id": "ami-03418876e538c3c1a",
+            "server_image_id": "ami-0c9f0bda38384dd3b",
             "zones": [
-                "us-east-2a",
-                "us-east-2b",
-                "us-east-2c"
+                "us-west-1b",
+                "us-west-1c"
             ]
         },
         "GCP_us-west1": {
@@ -22,6 +21,33 @@
                 "us-west1-a",
                 "us-west1-b",
                 "us-west1-c"
+            ]
+        },
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "key_file": "rafaelabrum_key.pem",
+            "client_image_id": "ami-05ebc5d3ed24bcca1",
+            "server_image_id": "ami-0cdc662c42e7c28ed",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ]
+        },
+        "GCP_us-east1": {
+            "provider": "gcp",
+            "region": "us-east1",
+            "key_file": "",
+            "client_image_id": "",
+            "server_image_id": "disk-ubuntu-flower-server",
+            "zones": [
+                "us-east1-b",
+                "us-east1-c",
+                "us-east1-d"
             ]
         }
     }

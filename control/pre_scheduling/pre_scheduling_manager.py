@@ -74,8 +74,6 @@ class PreSchedulingManager:
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
                 vm_initial.zone = zone
-                vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
-                vm_initial.update_ip(zone=zone)
                 self.rtt_values[id_rtt] = {}
                 for region_copy in loc_copy.values():
                     if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -96,6 +94,10 @@ class PreSchedulingManager:
                         id_rtt_final = region_copy.id + '_' + zone_copy
                         if region.id == region_id and zone_copy == zone:
                             continue
+                        if not vm_initial.failed_to_created:
+                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
+                            if not vm_initial.failed_to_created:
+                                vm_initial.update_ip(zone=zone)
                         vm_final.zone = zone_copy
                         vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file)
                         if not vm_final.failed_to_created:
@@ -104,13 +106,22 @@ class PreSchedulingManager:
                             self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
                                                                                         region.key_file,
                                                                                         region_copy.key_file)
-                        status = vm_final.terminate(wait=False, zone=zone_copy)
-                        if status:
+                            status = vm_final.terminate(wait=False, zone=zone_copy)
+                            if status:
+                                vm_final.instance_id = None
+                                vm_final.failed_to_created = False
+                        else:
                             vm_final.instance_id = None
+                            vm_final.failed_to_created = False
                 loc_copy[region_id].zones.remove(zone)
-                status = vm_initial.terminate(wait=False, zone=zone)
-                if status:
+                if not vm_initial.failed_to_created:
+                    status = vm_initial.terminate(wait=False, zone=zone)
+                    if status:
+                        vm_initial.instance_id = None
+                        vm_initial.failed_to_created = False
+                else:
                     vm_initial.instance_id = None
+                    vm_initial.failed_to_created = False
             loc_copy.pop(region_id, None)
         # print("rtt_values")
         # print(json.dumps(self.rtt_values, sort_keys=True, indent=4))

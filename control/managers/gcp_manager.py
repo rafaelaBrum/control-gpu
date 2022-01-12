@@ -202,76 +202,84 @@ class GCPManager(CloudManager):
 
     def create_on_demand_instance(self, instance_type, image_id, zone='', vm_name=''):
 
-        if zone == '':
-            zone = self.gcp_conf.zone
-        machine_type = f'zones/{zone}/machineTypes/{instance_type}'
+        try:
 
-        self.mutex.acquire()
+            if zone == '':
+                zone = self.gcp_conf.zone
+            machine_type = f'zones/{zone}/machineTypes/{instance_type}'
 
-        image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
-                                                          image=f'{image_id}').execute()
-        self.mutex.release()
+            self.mutex.acquire()
 
-        source_disk_image = image_response['selfLink']
+            image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
+                                                              image=f'{image_id}').execute()
+            self.mutex.release()
 
-        config = {
-            'name': vm_name,
-            'machineType': machine_type,
+            source_disk_image = image_response['selfLink']
 
-            # Not working. Still in Beta on GCP API!
-            # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
-            # 'soourceMachineImage': source_machine_image,
+            config = {
+                'name': vm_name,
+                'machineType': machine_type,
 
-            # Specify the boot disk and the image to use as a source.
-            'disks': [
-                {
-                    'boot': True,
-                    'autoDelete': True,
-                    'initializeParams': {
-                        'sourceImage': source_disk_image,
-                    }
+                # Not working. Still in Beta on GCP API!
+                # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                # 'soourceMachineImage': source_machine_image,
 
-                }
-            ],
-
-            # Allowing SSH connection from third-parties
-            "metadata": {
-                "items": [
+                # Specify the boot disk and the image to use as a source.
+                'disks': [
                     {
-                        "key": 'enable-oslogin',
-                        "value": 'TRUE'
+                        'boot': True,
+                        'autoDelete': True,
+                        'initializeParams': {
+                            'sourceImage': source_disk_image,
+                        }
+
                     }
-                ]
-            },
+                ],
 
-            # Allow the instance to access cloud storage.
-            'serviceAccounts': [{
-                'email': 'default',
-                'scopes': [
-                    'https://www.googleapis.com/auth/devstorage.read_write'
-                ]
-            }],
+                # Allowing SSH connection from third-parties
+                "metadata": {
+                    "items": [
+                        {
+                            "key": 'enable-oslogin',
+                            "value": 'TRUE'
+                        }
+                    ]
+                },
 
-            # Specify a network interface with NAT to access the public
-            # internet.
-            'networkInterfaces': [{
-                'network': 'global/networks/default',
-                'accessConfigs': [
-                    {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                ]
-            }],
-            'tags': [{
-                'items': ['http-server', 'https-server']
-            }]
-        }
+                # Allow the instance to access cloud storage.
+                'serviceAccounts': [{
+                    'email': 'default',
+                    'scopes': [
+                        'https://www.googleapis.com/auth/devstorage.read_write'
+                    ]
+                }],
 
-        instances = self._create_instance(config, zone)
+                # Specify a network interface with NAT to access the public
+                # internet.
+                'networkInterfaces': [{
+                    'network': 'global/networks/default',
+                    'accessConfigs': [
+                        {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                    ]
+                }],
+                'tags': [{
+                    'items': ['http-server', 'https-server']
+                }]
+            }
 
-        if instances is not None:
-            created_instances = [i for i in instances]
-            instance = created_instances[0]
-            return instance['id']
-        else:
+            instances = self._create_instance(config, zone)
+
+            if instances is not None:
+                created_instances = [i for i in instances]
+                instance = created_instances[0]
+                return instance['id']
+            else:
+                return None
+
+        except Exception as e:
+            logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
             return None
 
     def delete_volume(self, volume_id, zone='', volume_name=''):
@@ -347,17 +355,25 @@ class GCPManager(CloudManager):
         #         ]
         #     )
 
-        self._update_history([instance], status='terminate')
+        try:
 
-        self.mutex.acquire()
+            self._update_history([instance], status='terminate')
 
-        operation = self.compute_engine.instances().delete(project=self.gcp_conf.project,
-                                                           zone=zone,
-                                                           instance=instance['name']).execute()
+            self.mutex.acquire()
 
-        self.mutex.release()
+            operation = self.compute_engine.instances().delete(project=self.gcp_conf.project,
+                                                               zone=zone,
+                                                               instance=instance['name']).execute()
 
-        return operation
+            self.mutex.release()
+
+            return operation
+
+        except Exception as e:
+            logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
+            return None
 
     def terminate_instance(self, instance_id, wait=True, zone=''):
         if zone == '':
@@ -403,21 +419,29 @@ class GCPManager(CloudManager):
 
     def __get_instances(self, get_filter=None, zone=''):
 
-        if zone == '':
-            zone = self.gcp_conf.zone
+        try:
 
-        self.mutex.acquire()
+            if zone == '':
+                zone = self.gcp_conf.zone
 
-        if get_filter is None:
-            result = self.compute_engine.instances().list(project=self.gcp_conf.project,
-                                                          zone=zone).execute()
-        else:
-            result = self.compute_engine.instances().list(project=self.gcp_conf.project,
-                                                          zone=zone,
-                                                          filter=get_filter).execute()
+            self.mutex.acquire()
 
-        self.mutex.release()
-        return result['items'] if result is not None and 'items' in result else None
+            if get_filter is None:
+                result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                                                              zone=zone).execute()
+            else:
+                result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                                                              zone=zone,
+                                                              filter=get_filter).execute()
+
+            self.mutex.release()
+            return result['items'] if result is not None and 'items' in result else None
+
+        except Exception as e:
+            logging.info(e)
+            if self.mutex.locked():
+                self.mutex.release()
+            return None
 
     def get_instance_status(self, instance_id, zone=''):
         if instance_id is None:
