@@ -255,6 +255,68 @@ class PreSchedulingManager:
             logging.error("<PreScheduler> VirtualMachine {}:: SSH CONNECTION ERROR".format(vm_final.instance_id))
             raise Exception("<PreScheduler> VirtualMachine {}:: SSH Exception ERROR".format(vm_final.instance_id))
 
+    def get_first_rounds_times(self):
+        logging.info("<PreSchedulerManager>: Computing training times")
+
+        cli_aws, cli_gcp = self.separate_cli_per_cloud()
+        env_aws, env_gcp = self.separate_env_per_cloud()
+        loc_aws, loc_gcp = self.separate_loc_per_cloud()
+        logging.info("<PreSchedulerManager>: Calculating AWS training times")
+        for env_id, env in env_aws.items():
+            logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+            #TODO: colocar em paralelo
+            for cli in cli_aws.values():
+                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id}")
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                region_bucket = loc_aws.get('AWS_' + cli.bucket_region)
+                vm.instance_type.image_id = region_bucket.client_image_id
+                key_file = region_bucket.key_file.split('.')[0]
+                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region_bucket.region}")
+                final_zone = ''
+                for zone in region_bucket.zones:
+                    try:
+                        vm.deploy(zone=zone, needs_volume=False, key_name=key_file)
+                        final_zone = zone
+                        break
+                    except Exception as e:
+                        logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
+                        logging.error(e)
+                        vm.instance_id = None
+                if not vm.failed_to_created:
+                    # update instance IP
+                    vm.update_ip(zone=final_zone)
+                    #TODO: get training times
+                    status = vm.terminate(wait=False, zone=final_zone)
+                    if status:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+        #TODO: add multiple regions to GCP clients
+        logging.info("<PreSchedulerManager>: Calculating GCP training times")
+        for env_id, env in env_gcp.items():
+            logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+            # TODO: colocar em paralelo
+            for cli in cli_gcp.values():
+                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id}")
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                region_bucket = loc_gcp.get('GCP_' + cli.bucket_region)
+                vm.instance_type.image_id = region_bucket.client_image_id
+                key_file = region_bucket.key_file.split('.')[0]
+                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region_bucket.region}")
+                final_zone = ''
+                for zone in region_bucket.zones:
+                    vm.deploy(zone=region_bucket.zones[0], needs_volume=False, key_name=key_file)
+                    if not vm.failed_to_created:
+                        final_zone = zone
+                        break
+                if not vm.failed_to_created:
+                    # update instance IP
+                    vm.update_ip(zone=final_zone)
+                    # TODO: get training times
+                    status = vm.terminate(wait=False, zone=final_zone) # TODO: GCP instance does not terminate
+                    if status:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+
     @staticmethod
     def write_json(rtt_values: Dict[str, Dict[str, float]], exec_times: Dict[str, List[float]], job_id, job_name,
                    file_output):
@@ -276,3 +338,39 @@ class PreSchedulingManager:
 
         with open(file_output, "w") as fp:
             json.dump(dict_json, fp, sort_keys=True, indent=4, default=str)
+
+    def separate_env_per_cloud(self):
+        env_aws = {}
+        env_gcp = {}
+        for env_id, env in self.loader.env.items():
+            if env.provider in (CloudManager.EC2, CloudManager.AWS):
+                env_aws[env_id] = env
+            elif env.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                env_gcp[env_id] = env
+            else:
+                logging.error(f"<PreSchedulingManager>: {env.provider} does not have support ({env_id})")
+        return env_aws, env_gcp
+
+    def separate_loc_per_cloud(self):
+        loc_aws = {}
+        loc_gcp = {}
+        for loc_id, loc in self.loader.loc.items():
+            if loc.provider in (CloudManager.EC2, CloudManager.AWS):
+                loc_aws[loc_id] = loc
+            elif loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                loc_gcp[loc_id] = loc
+            else:
+                logging.error(f"<PreSchedulingManager>: {loc.provider} does not have support ({loc_id})")
+        return loc_aws, loc_gcp
+
+    def separate_cli_per_cloud(self):
+        cli_aws = {}
+        cli_gcp = {}
+        for cli_id, cli in self.loader.job.client_tasks.items():
+            if cli.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
+                cli_aws[cli_id] = cli
+            elif cli.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                cli_gcp[cli_id] = cli
+            else:
+                logging.error(f"<PreSchedulingManager>: {cli.bucket_provider} does not have support ({cli_id})")
+        return cli_aws, cli_gcp

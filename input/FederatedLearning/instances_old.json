@@ -16,7 +16,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-096d4801a3da106fa",
+            "image_id": "",
             "ebs_device_name": "/dev/nvme2n1",
             "vcpu": 0,
             "memory": 0,
@@ -38,7 +38,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-080af420cdfb56e39",
+            "image_id": "",
             "ebs_device_name": "/dev/xvdf",
             "vcpu": 0,
             "memory": 0,
@@ -60,7 +60,7 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "disk-ubuntu-flower-server",
+            "image_id": "",
             "ebs_device_name": "/dev/sdb",
             "memory": 8,
             "vcpu": 2,

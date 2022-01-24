@@ -1,7 +1,7 @@
 {
-    "job_id": 3,
-    "job_name": "Job de Teste de FL (2 client)",
-    "description": "Job de Teste de FL (2 client)",
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "description": "Job de Teste de FL (1 client)",
     "tasks": {
         "server": {
             "task_name": "Task de teste (server)",
@@ -12,7 +12,7 @@
             "generic_ckpt": "False",
             "zip_file": "TIL_Inception_server.zip",
             "n_rounds": 1,
-            "n_clients": 2
+            "n_clients": 1
         },
         "clients": {
             "0" : {
@@ -30,23 +30,6 @@
                 "bucket_name": "rafaela-fl-client-0",
                 "trainset_dir": "data/CellRep/4_clients/0/trainset",
                 "test_dir": "data/CellRep/4_clients/0/testset",
-                "train_epochs": 10
-            },
-            "1" : {
-                "task_name": "Task de teste (client 1)",
-                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -cpu 4 -gpu 1 -tdim 240 240 -f1 10",
-                "runtime": {
-                    "g4dn.xlarge": 0
-                },
-                "bucket_provider": "gcp",
-                "bucket_region": "us-central1",
-                "generic_ckpt": "False",
-                "zip_file": "TIL_Inception_client.zip",
-                "split": "0.9 0.1 0.0",
-                "batch": 32,
-                "bucket_name": "small_dataset_segframe",
-                "trainset_dir": "trainset",
-                "test_dir": "testset",
                 "train_epochs": 10
             }
         }
