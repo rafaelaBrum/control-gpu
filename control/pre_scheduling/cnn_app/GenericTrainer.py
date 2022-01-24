@@ -57,15 +57,10 @@ class Trainer(object):
         self._config = config
         self._verbose = config.verbose
         self._ds = None
+        self._ds_test = None
         self._rex = r'{0}-t(?P<try>[0-9]+)e(?P<epoch>[0-9]+).h5'
-        self.min_epochs = config.epochs
-        self.x_test = None
-        self.y_test = None
-        self.sample_idx = None
 
-        self._build_run()
-        
-    def _load_modules(self, net_name=None):
+    def load_modules(self, net_name=None):
         if net_name is None:
             net_name = self._config.network
         if net_name is None or net_name == '':
@@ -75,15 +70,17 @@ class Trainer(object):
         if self._config.data:
             dsm = importlib.import_module('cnn_app', self._config.data)
             self._ds = getattr(dsm, self._config.data)(self._config.predst, self._config.keepimg, self._config)
+            self._ds_test = getattr(dsm, self._config.data)(self._config.testdir, self._config.keepimg, self._config)
         else:
             self._ds = CellRep(self._config.predst, self._config.keepimg, self._config)
+            self._ds_test = CellRep(self._config.testdir, self._config.keepimg, self._config)
 
         net_module = importlib.import_module('cnn_app', net_name)
         net_model = getattr(net_module, net_name)(self._config, self._ds)
 
         return net_model
-    
-    def _build_run(self):
+
+    def start_execution(self):
         """
         Checks configurations, loads correct module, loads data
         Trains!
@@ -92,12 +89,12 @@ class Trainer(object):
         by the Models module.
         """
 
-        self.net_model = self._load_modules()
+        net_model = self.load_modules()
 
         # Test set splitting done in the same code now, outside GenericDatasource
         self.x_test, self.y_test, X, Y = split_test(self._config, self._ds)
 
-        self._rex = self._rex.format(self.net_model.name)
+        self._rex = self._rex.format(net_model.name)
 
         # Define training data
         if self._config.sample != 1.0:
@@ -106,48 +103,9 @@ class Trainer(object):
             self._ds.check_paths(X, self._config.predst)
 
         # After test set is separated, after data sampling is done, now split train and val
-        if self._config.split[-1:][0] > 0:
-            self.train_data, self.val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y),
-                                                                     test_size=len(self.x_test))
-        else:
-            self.train_data, self.val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y))
+        self.train_data, self.val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y))
 
-        self._build_model()
-
-    def train(self):
-
-        old_e_offset = 0
-        wf_header = "{0}-t{1}".format(self.net_model.name, old_e_offset + 1)
-
-        # Define special behaviour CALLBACKS
-        callbacks = []
-        # ModelCheckpoint
-        if self._config.save_w:
-            callbacks.append(ModelCheckpoint(os.path.join(
-                self._config.weights_path, wf_header + "e{epoch:02d}.h5"),
-                save_weights_only=True, period=5, save_best_only=True, monitor='val_acc'))
-        # ReduceLROnPlateau
-        callbacks.append(ReduceLROnPlateau(monitor='loss', factor=0.7,
-                                           patience=10, verbose=self._verbose,
-                                           mode='auto', min_lr=1e-7))
-        # LearningRateScheduler
-        callbacks.append(LearningRateScheduler(_reduce_lr_on_epoch, verbose=self._verbose))
-
-        self.training_model.fit_generator(
-            generator=self.train_generator,
-            steps_per_epoch=len(self.train_generator),  # self._config.batch_size,
-            epochs=self._config.epochs,
-            validation_data=self.val_generator,
-            validation_steps=len(self.val_generator),  # self._config.batch_size,
-            verbose=self._verbose,
-            use_multiprocessing=False,
-            workers=self._config.cpu_count * 2,
-            max_queue_size=self._config.batch_size * 3,
-            callbacks=callbacks,
-        )
-
-        if self._verbose > 1:
-            print("Done training model: {0}".format(hex(id(self.training_model))))
+        self.build_model(net_model)
 
     def _choose_generator(self, train_data, val_data, fix_dim):
         """B
@@ -236,36 +194,10 @@ class Trainer(object):
 
         return train_generator, val_generator, test_generator
 
-    def evaluate(self):
-
-        self.training_model.evaluate_generator(
-            generator=self.test_generator,
-            steps=len(self.test_generator),
-            verbose=self._verbose,
-            use_multiprocessing=False,
-            workers=self._config.cpu_count * 2,
-            max_queue_size=self._config.batch_size * 3,
-        )
-
-        self.training_model.predict_generator(
-            generator=self.test_generator,
-            steps=len(self.test_generator),  # self._args.batch_size,
-            # epochs=epochs,
-            verbose=self._verbose,
-            use_multiprocessing=False,
-            workers=self._config.cpu_count*2,
-            max_queue_size=self._config.batch_size*3,
-            )
-
-        # if self._verbose > 1:
-        print("Done evaluate model: {0}".format(hex(id(self.training_model))))
-
-    def _build_model(self, **kwargs):
+    def build_model(self, model, **kwargs):
         """
         Generic trainer. Receives a GenericModel and trains it
         @param model <GenericModel>
-        @param train_data <list>
-        @param val_data <list>
 
         Optional keyword arguments:
         """
@@ -294,7 +226,7 @@ class Trainer(object):
             allocated_gpus = kwargs['allocated_gpus']
         else:
             allocated_gpus = self._config.gpu_count
-            
+
         # session setup
         if set_session:
             session = K.get_session()
@@ -305,43 +237,43 @@ class Trainer(object):
                 inter_op_parallelism_threads=self._config.cpu_count if self._config.gpu_count == 0
                 else self._config.gpu_count,
                 log_device_placement=True if self._verbose > 1 else False
-                )
+            )
             session.config = ses_config
             K.set_session(session)
-            
+
         if self._verbose > 0 and (stats is None or stats):
             unique, count = np.unique(train_data[1], return_counts=True)
             l_count = dict(zip(unique, count))
             if len(unique) > 2:
                 print("Training items:")
-                print("\n".join(["label {0}: {1} items" .format(key, l_count[key]) for key in unique]))
+                print("\n".join(["label {0}: {1} items".format(key, l_count[key]) for key in unique]))
             else:
                 if unique.shape[0] == 1:
                     l_count[unique[0] ^ 1] = 0
                 print("Train labels: {0} are 0; {1} are 1;\n - "
-                      "{2:.2f} are positives".format(l_count[0], l_count[1], (l_count[1]/(l_count[0]+l_count[1]))))
-            
+                      "{2:.2f} are positives".format(l_count[0], l_count[1], (l_count[1] / (l_count[0] + l_count[1]))))
+
             unique, count = np.unique(val_data[1], return_counts=True)
             l_count = dict(zip(unique, count))
             if len(unique) > 2:
                 print("Validation items:")
-                print("\n".join(["label {0}: {1} items" .format(key, l_count[key]) for key in unique]))
-            else:            
+                print("\n".join(["label {0}: {1} items".format(key, l_count[key]) for key in unique]))
+            else:
                 if 1 not in l_count:
                     l_count[1] = 0
                 print("Validation labels: {0} are 0; {1} are 1;\n - "
-                      "{2:.2f} are positives".format(l_count[0], l_count[1], (l_count[1]/(l_count[0]+l_count[1]))))
-            
+                      "{2:.2f} are positives".format(l_count[0], l_count[1], (l_count[1] / (l_count[0] + l_count[1]))))
+
             print("Train set: {0} items".format(len(train_data[0])))
             print("Validate set: {0} items".format(len(val_data[0])))
 
         self.train_generator, self.val_generator, self.test_generator = self._choose_generator(
-            train_data, val_data, self.net_model.check_input_shape())
-        
-        single, parallel = self.net_model.build(data_size=len(train_data[0]),
-                                                allocated_gpus=allocated_gpus,
-                                                preload_w=self._config.plw,
-                                                layer_freeze=self._config.lyf)
+            train_data, val_data, model.check_input_shape())
+
+        single, parallel = model.build(data_size=len(train_data[0]),
+                                       allocated_gpus=allocated_gpus,
+                                       preload_w=self._config.plw,
+                                       layer_freeze=self._config.lyf)
         if parallel is not None:
             self.training_model = parallel
         else:
@@ -351,6 +283,68 @@ class Trainer(object):
             print(single.summary())
             print("Model parameters: {}".format(single.count_params()))
             print("Model layers: {}".format(len(single.layers)))
+
+    def train(self, net_name, epochs):
+        old_e_offset = 0
+        wf_header = "{0}-t{1}".format(net_name, old_e_offset + 1)
+
+        # Define special behaviour CALLBACKS
+        callbacks = []
+        # ModelCheckpoint
+        if self._config.save_w:
+            callbacks.append(ModelCheckpoint(os.path.join(
+                self._config.weights_path, wf_header + "e{epoch:02d}.h5"),
+                save_weights_only=True, period=5, save_best_only=True, monitor='val_acc'))
+        # ReduceLROnPlateau
+        callbacks.append(ReduceLROnPlateau(monitor='loss', factor=0.7,
+                                           patience=10, verbose=self._verbose,
+                                           mode='auto', min_lr=1e-7))
+        # LearningRateScheduler
+        callbacks.append(LearningRateScheduler(_reduce_lr_on_epoch, verbose=self._verbose))
+
+        hist = self.training_model.fit_generator(
+            generator=self.train_generator,
+            steps_per_epoch=len(self.train_generator),  # self._config.batch_size,
+            validation_data=self.val_generator,
+            validation_steps=len(self.val_generator),  # self._config.batch_size,
+            epochs=epochs,
+            verbose=self._verbose,
+            use_multiprocessing=False,
+            workers=self._config.cpu_count * 2,
+            max_queue_size=self._config.batch_size * 3,
+            callbacks=callbacks,
+        )
+
+        if self._verbose > 1:
+            print("Done training model: {0}".format(hex(id(self.training_model))))
+
+        return hist
+
+    def evaluate(self):
+
+        hist = self.training_model.evaluate_generator(
+            generator=self.test_generator,
+            steps=len(self.test_generator),
+            verbose=self._verbose,
+            use_multiprocessing=False,
+            workers=self._config.cpu_count * 2,
+            max_queue_size=self._config.batch_size * 3,
+        )
+
+        self.training_model.predict_generator(
+            generator=self.test_generator,
+            steps=len(self.test_generator),  # self._args.batch_size,
+            # epochs=epochs,
+            verbose=self._verbose,
+            use_multiprocessing=False,
+            workers=self._config.cpu_count * 2,
+            max_queue_size=self._config.batch_size * 3,
+        )
+
+        # if self._verbose > 1:
+        print("Done evaluate model: {0}".format(hex(id(self.training_model))))
+
+        return hist
 
 
 class TrainerSingletonFactory:

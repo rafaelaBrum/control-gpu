@@ -3,6 +3,7 @@
 
 import os
 import argparse
+import json
 
 # Filter warnings
 import warnings
@@ -45,13 +46,15 @@ def main_exec(config):
 
     times_epochs = {}
 
-    time_start = time()
-
     if config.info:
         print("Starting training process....")
 
     trainer = TrainerSingletonFactory.get_instance(config)
-    trainer.train()
+    trainer.start_execution()
+
+    time_start = time()
+
+    trainer.train(net_name=config.network, epochs=config.epochs)
 
     time_end = time()
 
@@ -67,7 +70,7 @@ def main_exec(config):
 
     time_start = time()
 
-    trainer.train()
+    trainer.train(net_name=config.network, epochs=config.epochs)
 
     time_end = time()
 
@@ -83,6 +86,9 @@ def main_exec(config):
 
     print("times_epochs")
     print(times_epochs)
+
+    with open(config.file, 'w') as f:
+        f.write(json.dumps(times_epochs))
 
 
 if __name__ == "__main__":
@@ -137,8 +143,6 @@ if __name__ == "__main__":
                             help='Split data in as much as 3 sets (Default: 80%% train, 10%% validation, 10%% test). '
                                  'If AL experiment, test set can be defined as integer.',
                             default=(0.8, 0.1, 0.1), metavar=('Train', 'Validation', 'Test'))
-    train_args.add_argument('-met', dest='metricsperiod', type=int,
-                            help='Calculate metrics in test dataset every X epochs (Default: 0).', default=0)
     train_args.add_argument('-sample', dest='sample', type=float,
                             help='Use a sample of the whole data for training '
                                  '(Default: 100.0%% - use floats [0.0-1.0]).',
@@ -170,10 +174,10 @@ if __name__ == "__main__":
                         help='Base dir to store all temporary data and general output', required=True)
     parser.add_argument('-cache', dest='cache', type=str, default='cache',
                         help='Keeps caches in this directory', required=False)
-    parser.add_argument('-v', action='count', default=0, dest='verbose',
-                        help='Amount of verbosity (more \'v\'s means more verbose).')
     parser.add_argument('-i', action='store_true', dest='info', default=False,
                         help='Return general info about data input, the CNN, etc.')
+    parser.add_argument('-v', action='count', default=0, dest='verbose',
+                        help='Amount of verbosity (more \'v\'s means more verbose).')
     parser.add_argument('-logdir', dest='logdir', type=str, default='logs',
                         help='Keep logs of current execution instance in dir.')
     parser.add_argument('-k', action='store_true', dest='keepimg', default=False,
@@ -182,10 +186,6 @@ if __name__ == "__main__":
                         help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
     # #Run prediction options
-    parser.add_argument('--pred', action='store_true', dest='pred', default=False,
-                        help='Runs prediction with a given model (use -net parameter).')
-    parser.add_argument('-print', action='store_true', dest='print_pred', default=False,
-                        help='Prints stored prediction results.')
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)
     parser.add_argument('-test_dir', dest='testdir', type=str, default=None,
@@ -197,23 +197,9 @@ if __name__ == "__main__":
     parser.add_argument('-pb', action='store_true', dest='progressbar', default=False,
                         help='Print progress bars of processing execution.')
 
-    # #System tests
-    test_args = parser.add_argument_group('Tests')
-    arg_groups.append(test_args)
-    
-    parser.add_argument('-t', action='store_true', dest='runtest', default=False,
-                        help='Run tests.')
-    test_args.add_argument('-tmode', dest='tmode', type=int,
-                           help='Run tests for individual subsystems: \n '
-                                '0 - Run all tests; \n '
-                                '1 - Run training test; \n '
-                                '2 - Run Datasources test; \n '
-                                '3 - Run Prediction test; \n '
-                                '4 - Run AL test.',
-                           choices=[0, 1, 2, 3, 4], default=0)
-    parser.add_argument('-tlocal', action='store_true', dest='local_test', default=False,
-                        help='Test is local (assumes a small dataset).')
-    
+    # Pre Scheduling options
+    parser.add_argument('-file', dest='file', type=str, default='times.txt', help='File to print execution times')
+
     config, unparsed = parser.parse_known_args()
     
     files = {

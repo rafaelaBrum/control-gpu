@@ -3,9 +3,11 @@ echo " ----------------------------
   Without FL
  ---------------------------- "
 FOLDER="results/"
-time python3 main_training.py -i -v --train -predst ~/bucket_folder/trainset/ -split 0.9 0.10 0.00 -net Inception \
--data CellRep -d -e 10 -b 32 -tdim 240 240 -f1 10 -met 30 -out logs/ -cpu 7 -gpu 1 -tn -wpath $FOLDER -model_dir $FOLDER \
--logdir $FOLDER -cache $FOLDER -test_dir ~/bucket_folder/testset/
+NET="VGG16"
+TRAINSET="bucket_folder/data/CellRep/4_clients/0/trainset/"
+TESTSET="bucket_folder/data/CellRep/4_clients/0/testset/"
+EPOCHS=5
+time python3 main_training.py -i -v -predst $TRAINSET -split 0.9 0.10 0.00 -net $NET -data CellRep -d -e $EPOCHS -b 32 -tdim 240 240 -out logs/ -cpu 4 -gpu 1 -tn -wpath $FOLDER -model_dir $FOLDER -logdir $FOLDER -cache $FOLDER -test_dir $TESTSET
 echo " ----------------------------
   Finished
  ---------------------------- "
