@@ -116,7 +116,7 @@ def get_args():
 
     train_args.add_argument('--train', action='store_true', dest='train', default=False,
                             help='Train model')
-    train_args.add_argument('-net', dest='network', type=str, default='Inception',
+    train_args.add_argument('-net', dest='network', type=str, default='VGG16',
                             help='Network name which should be trained.\n Check documentation for available models.')
     train_args.add_argument('-data', dest='data', type=str, help='Dataset name to train model.\n '
                                                                  'Check documentation for available datasets.',
@@ -206,8 +206,7 @@ def get_args():
     flwr_args.add_argument("-server_address", dest='server_address', type=str, required=True,
                            help=f"gRPC server address", default='localhost:8080')
     flwr_args.add_argument("-epochs", type=int, required=True, default=10,
-                        help="Number of epochs per round of federated learning",
-    )
+                           help="Number of epochs per round of federated learning")
 
     args, unparsed = parser.parse_known_args()
     return args, unparsed
@@ -262,7 +261,6 @@ class Trainer(object):
 
         net_model = self.load_modules()
 
-
         # Test set splitting done in the same code now, outside GenericDatasource
         self.x_test, self.y_test, X, Y = split_test(self._args, self._ds)
         # self.x_test, self.y_test, _, _ = split_test(self._args, self._ds_test, test=True)
@@ -270,7 +268,6 @@ class Trainer(object):
         self._rex = self._rex.format(net_model.name)
 
         # Define training data
-        train_data, val_data = None, None
         if self._args.sample != 1.0:
             X, Y, self.sample_idx = self._ds.sample_metadata(self._args.sample, data=(X, Y),
                                                              pos_rt=self._args.pos_rt)
@@ -477,7 +474,7 @@ class Trainer(object):
     def train(self, epochs):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('VGG16', old_e_offset + 1)
 
         # Define special behaviour CALLBACKS
         callbacks = []
@@ -514,7 +511,7 @@ class Trainer(object):
     def evaluate(self):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('VGG16', old_e_offset + 1)
 
         hist = self.training_model.evaluate_generator(
             generator=self.test_generator,
@@ -629,7 +626,7 @@ def main_exec(args):
         trainer.start_execution()
 
         # Start Flower client
-        client = InceptionClient(trainer)
+        client = VGG16Client(trainer)
         fl.client.start_numpy_client(args.server_address, client=client)
 
     if not args.train:
@@ -747,7 +744,7 @@ def split_test(args, ds, test=False):
 
 
 # Flower client
-class InceptionClient(fl.client.NumPyClient):
+class VGG16Client(fl.client.NumPyClient):
     def __init__(self, model:Trainer):
         self.model = model
 

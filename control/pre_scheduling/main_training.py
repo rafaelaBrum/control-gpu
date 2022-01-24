@@ -198,7 +198,7 @@ if __name__ == "__main__":
                         help='Print progress bars of processing execution.')
 
     # Pre Scheduling options
-    parser.add_argument('-file', dest='file', type=str, default='times.txt', help='File to print execution times')
+    parser.add_argument('-file', dest='file', type=str, default='times.json', help='File to print execution times')
 
     config, unparsed = parser.parse_known_args()
     
