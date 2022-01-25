@@ -5,16 +5,16 @@ import os
 import argparse
 import json
 
-# Filter warnings
-import warnings
-warnings.filterwarnings('ignore')
-
 # Project imports
 # from Preprocessing import Preprocess
 # from Testing import TrainTest, DatasourcesTest,PredictionTest,ActiveLearningTest
 from cnn_app.CacheManager import CacheManager
 from cnn_app.GenericTrainer import TrainerSingletonFactory
 from time import time
+
+# Filter warnings
+import warnings
+warnings.filterwarnings('ignore')
 
 
 # Supported image types

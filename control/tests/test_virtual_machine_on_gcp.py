@@ -36,7 +36,7 @@ def test_on_demand_virtual_machine(disk_name, loader):
     print("On-demand price of instance:", vm.price)
 
     if status:
-        vm.prepare_vm(type_task='server', client_id=0)
+        vm.prepare_vm(type_task='server')
 
         input("Enter to continue with VM termination")
 

@@ -79,7 +79,7 @@ def main():
 
     vm.deploy()
 
-    vm.prepare_vm('server', 0)
+    vm.prepare_vm('server')
 
 
 if __name__ == "__main__":

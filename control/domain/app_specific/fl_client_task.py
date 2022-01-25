@@ -4,7 +4,7 @@ from control.domain.task import Task
 class FLClientTask(Task):
 
     def __init__(self, task_id, task_name, command, generic_ckpt, runtime, bucket_name, trainset_dir, client_id,
-                 zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region):
+                 zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net):
         super().__init__(task_id, task_name, command, generic_ckpt, runtime)
 
         self.simple_command = command
@@ -19,6 +19,7 @@ class FLClientTask(Task):
         self.batch = batch
         self.test_dir = test_dir
         self.train_epochs = train_epochs
+        self.net = net
 
         self.running_instance = ""
         self.running = False
@@ -64,7 +65,8 @@ class FLClientTask(Task):
                 test_dir=adict['tasks']['clients'][key]['test_dir'],
                 train_epochs=adict['tasks']['clients'][key]['train_epochs'],
                 bucket_provider=adict['tasks']['clients'][key]['bucket_provider'],
-                bucket_region=adict['tasks']['clients'][key]['bucket_region']
+                bucket_region=adict['tasks']['clients'][key]['bucket_region'],
+                net=adict['tasks']['clients'][key]['net']
             )
             for key in adict['tasks']['clients']
         ]

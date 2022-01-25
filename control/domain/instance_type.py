@@ -3,12 +3,12 @@ from control.config.ec2_config import EC2Config
 
 class InstanceType:
 
-    def __init__(self, provider, instance_type, image_id, prices, restrictions, ebs_device_name='',
-                 memory=0, vcpu=0, gpu='no'):
+    def __init__(self, provider, instance_type, image_id, prices, restrictions,
+                 vcpu, gpu, count_gpu, memory, ebs_device_name=''):
         self.provider = provider
         self.type = instance_type
-        self.memory = memory  # GB
         self.vcpu = vcpu
+        self.memory = memory
         # self.gflops = gflops
         self.price_ondemand = prices['on-demand']
         self.price_preemptible = prices['preemptible']
@@ -16,6 +16,7 @@ class InstanceType:
         self.image_id = image_id
         self.ebs_device_name = ebs_device_name
         self.gpu = gpu
+        self.count_gpu = count_gpu
 
         self.id = None
 
@@ -46,11 +47,11 @@ class InstanceType:
                 image_id=adict['instances'][key]['image_id'],
                 ebs_device_name=adict['instances'][key]['ebs_device_name'],
                 prices=adict['instances'][key]['prices'],
-                memory=adict['instances'][key]['memory'],
-                # gflops=adict['instances'][key]['gflops'],
                 vcpu=adict['instances'][key]['vcpu'],
                 restrictions=adict['instances'][key]['restrictions'],
-                gpu=adict['instances'][key]['gpu']
+                gpu=adict['instances'][key]['gpu'],
+                memory=adict['instances'][key]['memory'],
+                count_gpu=adict['instances'][key]['gpu_count']
             )
             for key in adict['instances']
         ]

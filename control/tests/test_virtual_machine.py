@@ -61,7 +61,7 @@ def test_on_demand_virtual_machine(loader):
 
     vm.deploy()
 
-    vm.prepare_vm(type_task='server', client_id=0)
+    vm.prepare_vm(type_task='server')
 
     input("Enter to continue with VM termination")
 
@@ -100,7 +100,7 @@ def test_preemptible_virtual_machine(loader):
 
     vm.deploy()
 
-    vm.prepare_vm(type_task='server', client_id=0)
+    vm.prepare_vm(type_task='server')
 
     status = vm.terminate()
 
@@ -141,7 +141,7 @@ def test_vm_with_EBS(volume_id='', loader=None):
 
     vm.deploy()
 
-    vm.prepare_vm(type_task='server', client_id=0)
+    vm.prepare_vm(type_task='server')
 
     status = vm.terminate(delete_volume=False)
 

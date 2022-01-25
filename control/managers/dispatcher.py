@@ -381,6 +381,9 @@ class Dispatcher:
 
         self.type_task = type_task
         self.client_id = client_id
+        self.client = None
+        if client_id > 0:
+            self.client = self.loader.job.client_tasks[client_id]
 
         # Control Flags
         self.working = False
@@ -546,7 +549,7 @@ class Dispatcher:
             self.working = True
 
             try:
-                self.vm.prepare_vm(self.type_task, self.client_id)
+                self.vm.prepare_vm(self.type_task, self.client)
                 status = self.__prepare_daemon()
             except Exception as e:
                 logging.error(e)

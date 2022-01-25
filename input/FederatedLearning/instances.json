@@ -18,37 +18,16 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/nvme2n1",
-            "vcpu": 0,
-            "memory": 0,
-            "gpu": "yes"
-        },
-        "p2.xlarge": {
-            "provider": "ec2",
-            "prices": {
-                "on-demand": 0.9,
-                "preemptible": 0.27
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/xvdf",
-            "vcpu": 0,
-            "memory": 0,
-            "gpu": "yes"
+            "vcpu": 4,
+            "memory": 16,
+            "gpu": "yes",
+            "gpu_count": 1
         },
         "n2-standard-2": {
             "provider": "gcloud",
             "prices": {
-                "on-demand": 0.09711800000000001,
-                "preemptible": 0.023498
+                "on-demand": 0.16034,
+                "preemptible": 0.038796000000000004
             },
             "restrictions": {
                 "limits": {
@@ -62,9 +41,10 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/sdb",
+            "vcpu": 4,
             "memory": 8,
-            "vcpu": 2,
-            "gpu": "no"
+            "gpu": "no",
+            "gpu_count": 0
         }
     }
 }

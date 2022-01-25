@@ -27,10 +27,11 @@
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
-                "bucket_name": "rafaela-fl-client-0",
-                "trainset_dir": "data/CellRep/4_clients/0/trainset",
-                "test_dir": "data/CellRep/4_clients/0/testset",
-                "train_epochs": 10
+                "bucket_name": "rafaela-fl-client-1",
+                "trainset_dir": "data/CellRep/4_clients/1/trainset",
+                "test_dir": "data/CellRep/4_clients/1/testset",
+                "train_epochs": 1,
+                "net": "Inception"
             },
             "1" : {
                 "task_name": "Task de teste (client 1)",
@@ -44,10 +45,11 @@
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
-                "bucket_name": "small_dataset_segframe",
-                "trainset_dir": "trainset",
-                "test_dir": "testset",
-                "train_epochs": 10
+                "bucket_name": "fl_client_0",
+                "trainset_dir": "data/CellRep/4_clients/0/trainset",
+                "test_dir": "data/CellRep/4_clients/0/testset",
+                "train_epochs": 1,
+                "net": "Inception"
             }
         }
     }

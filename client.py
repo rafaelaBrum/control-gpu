@@ -43,13 +43,11 @@ def __call_pre_scheduling(loader: Loader):
 
         pre_sched = PreSchedulingManager(loader=loader)
 
-        pre_sched.calculate_rtt_values()
+        # pre_sched.calculate_rtt_values()
 
-        # pre_sched.get_first_rounds_times()
+        pre_sched.get_first_rounds_times()
 
-        exec_times: Dict[str, (float, float)] = {'n2-standard-1': (234234, 23423423)}
-
-        PreSchedulingManager.write_json(pre_sched.rtt_values, exec_times, loader.job.job_id, loader.job.job_name,
+        PreSchedulingManager.write_json(pre_sched.rtt_values, pre_sched.exec_times, loader.job.job_id, loader.job.job_name,
                                         loader.pre_file)
 
         # status = "SUCCESS"

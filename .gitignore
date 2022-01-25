@@ -99,3 +99,6 @@ screen*
 
 #PyCharm WSL folder
 %SystemDrive%/
+
+# temp pre_sched files
+control/pre_scheduling/*.json

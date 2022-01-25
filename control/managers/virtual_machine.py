@@ -9,6 +9,8 @@ from control.util.loader import Loader
 
 from control.domain.job import Job
 
+from control.domain.app_specific.fl_client_task import FLClientTask
+
 from datetime import datetime, timedelta
 
 import uuid
@@ -230,7 +232,7 @@ class VirtualMachine:
             logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
             self.ssh.execute_command(cmd4, output=True)
 
-    def __create_s3(self, path, client_id=None):
+    def __create_s3(self, path, client=None):
 
         logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
 
@@ -240,8 +242,8 @@ class VirtualMachine:
 
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
-        if client_id is not None:
-            bucket_name = f'{self.manager.bucket_config.bucket_name}-client-{client_id}'
+        if client is not None:
+            bucket_name = client.bucket_name
         else:
             bucket_name = self.manager.bucket_config.bucket_name
 
@@ -262,12 +264,12 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
 
-    def __create_google_storage(self, path, client_id=None):
+    def __create_google_storage(self, path, client=None):
 
         logging.info("<VirtualMachine {}>: - Mounting GCSFUSE".format(self.instance_id))
 
-        if client_id is not None:
-            bucket_name = f'{self.manager.bucket_config.bucket_name}-client-{client_id}'
+        if client is not None:
+            bucket_name = client.bucket_name
         else:
             bucket_name = self.manager.bucket_config.bucket_name
 
@@ -278,7 +280,7 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
 
-    def prepare_vm(self, type_task, client_id):
+    def prepare_vm(self, type_task, client=None):
 
         if not self.failed_to_created:
 
@@ -325,7 +327,7 @@ class VirtualMachine:
                     self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
                                              output=True)
 
-                    self.__create_s3(self.loader.file_system_conf.path_storage, client_id)
+                    self.__create_s3(self.loader.file_system_conf.path_storage, client)
 
                 if type_task == Job.SERVER:
                     item = self.loader.job.server_task.zip_file
@@ -567,3 +569,9 @@ class VirtualMachine:
     @property
     def type(self):
         return self.instance_type.type
+
+    def create_bucket_pre_sched(self, path, client):
+        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+            self.__create_s3(path, client)
+        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.__create_google_storage(path, client)
