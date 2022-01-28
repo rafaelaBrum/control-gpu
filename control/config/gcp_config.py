@@ -35,3 +35,7 @@ class GCPConfig(Config):
     @property
     def vm_user(self):
         return self.get_property(self._key, 'vm_user')
+
+    @property
+    def credentials_file(self):
+        return self.get_property(self._key, 'credentials_file')

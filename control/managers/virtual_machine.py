@@ -247,13 +247,20 @@ class VirtualMachine:
         else:
             bucket_name = self.manager.bucket_config.bucket_name
 
-        # Mount the bucket
-        cmd3 = 'sudo s3fs {} ' \
-               '-o use_cache=/tmp -o allow_other -o uid={} -o gid={} ' \
-               '-o mp_umask=002 -o multireq_max=5 {}'.format(bucket_name,
-                                                             self.manager.bucket_config.vm_uid,
-                                                             self.manager.bucket_config.vm_gid,
-                                                             path)
+        region_bucket = self.loader.loc.get('AWS_' + client.bucket_region)
+
+        # Mount the bucket within AWS
+        cmd3 = 's3fs {} ' \
+               '-o use_cache=/tmp -o uid={} -o gid={} ' \
+               '-o mp_umask=002 -o multireq_max=5 {}' \
+               '-o url=https://s3.{}.amazonaws.com'.format(bucket_name,
+                                                           self.manager.bucket_config.vm_uid,
+                                                           self.manager.bucket_config.vm_gid,
+                                                           path,
+                                                           region_bucket.region)
+        # Mount the bucket in GCP
+        # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
+        # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
 
         logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
         self.ssh.execute_command(cmd1, output=True)
@@ -264,7 +271,7 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd3))
         self.ssh.execute_command(cmd3, output=True)
 
-    def __create_google_storage(self, path, client=None):
+    def __create_cloud_storage(self, path, client=None):
 
         logging.info("<VirtualMachine {}>: - Mounting GCSFUSE".format(self.instance_id))
 
@@ -273,9 +280,23 @@ class VirtualMachine:
         else:
             bucket_name = self.manager.bucket_config.bucket_name
 
-        # Mount the bucket
-        cmd = 'gcsfuse --implicit-dirs {} {}'.format(bucket_name,
-                                                     path)
+        if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            # Mount the bucket within GCP
+            cmd = 'gcsfuse --implicit-dirs {} {}'.format(bucket_name,
+                                                         path)
+        else:
+            # Mount bucket outside GCP
+            if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                self.ssh.put_file(source=self.loader.gcp_conf.key_path,
+                                  target=self.loader.ec2_conf.home_path,
+                                  item=self.loader.gcp_conf.credentials_file)
+                cmd = 'GOOGLE_APPLICATION_CREDENTIALS={} ' \
+                      'gcsfuse --implicit-dirs {} {}'.format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                          self.loader.gcp_conf.credentials_file),
+                                                             bucket_name,
+                                                             path)
+            else:
+                cmd = ""
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
@@ -308,7 +329,7 @@ class VirtualMachine:
                     if self.instance_type.provider == CloudManager.EC2:
                         self.__create_s3(self.loader.file_system_conf.path)
                     elif self.instance_type.provider == CloudManager.GCLOUD:
-                        self.__create_google_storage(self.loader.file_system_conf.path)
+                        self.__create_cloud_storage(self.loader.file_system_conf.path)
                 else:
                     logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
@@ -368,7 +389,7 @@ class VirtualMachine:
                                                            self.loader.ec2_conf.vm_user,
                                                            self.loader.file_system_conf.path,
                                                            self.loader.job.job_id,
-                                                           client_id,
+                                                           client.client_id,
                                                            self.loader.execution_id,
                                                            self.instance_id,
                                                            self.loader.communication_conf.socket_port)
@@ -402,7 +423,7 @@ class VirtualMachine:
                                                            self.loader.gcp_conf.vm_user,
                                                            self.loader.file_system_conf.path,
                                                            self.loader.job.job_id,
-                                                           client_id,
+                                                           client.client_id,
                                                            self.loader.execution_id,
                                                            self.instance_id,
                                                            self.loader.communication_conf.socket_port)
@@ -412,7 +433,7 @@ class VirtualMachine:
                 # create execution folder
                 self.root_folder = os.path.join(self.loader.file_system_conf.path,
                                                 '{}_{}_{}'.format(self.loader.job.job_id,
-                                                                  client_id,
+                                                                  client.client_id,
                                                                   self.loader.execution_id))
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
@@ -570,8 +591,26 @@ class VirtualMachine:
     def type(self):
         return self.instance_type.type
 
-    def create_bucket_pre_sched(self, path, client):
-        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+    def create_bucket_pre_sched(self, path, client: FLClientTask):
+        if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             self.__create_s3(path, client)
-        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            self.__create_google_storage(path, client)
+        elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.__create_cloud_storage(path, client)
+
+    def remove_bucket_pre_sched(self, path, client: FLClientTask):
+        if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
+            self.__detach_s3(path)
+        elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.__detach_cloud_storage(path)
+
+    def __detach_s3(self, path):
+        cmd = 'sudo umount {}'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+    def __detach_cloud_storage(self, path):
+        cmd = 'fusermount -u {}'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)

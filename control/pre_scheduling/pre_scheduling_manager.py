@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 
 from control.domain.instance_type import InstanceType
@@ -16,7 +16,7 @@ from control.domain.app_specific.fl_client_task import FLClientTask
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
     instance_type='t2.micro',
-    image_id='ami-0cdc662c42e7c28ed',
+    image_id='ami-0d638c42b2e92c091',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
     prices={'on-demand': 0.001,
@@ -62,6 +62,8 @@ class PreSchedulingManager:
         self.rtt_values: Dict[str, Dict[str, float]] = {}
         self.exec_times: Dict[str, Dict[str, Dict[str, float]]] = {}
 
+        self.stop_execution = self.__read_json()
+
     def calculate_rtt_values(self):
         logging.info("<PreSchedulerManager>: Calculating RTT values")
         loc_copy = deepcopy(self.loader.loc)
@@ -82,7 +84,8 @@ class PreSchedulingManager:
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
                 vm_initial.zone = zone
-                self.rtt_values[id_rtt] = {}
+                if id_rtt not in self.rtt_values:
+                    self.rtt_values[id_rtt] = {}
                 for region_copy in loc_copy.values():
                     if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
                         vm_final = VirtualMachine(instance_type=instance_aws, market='on-demand', loader=self.loader)
@@ -101,6 +104,8 @@ class PreSchedulingManager:
                                      f"region {region_copy.region} of provider {region_copy.provider}")
                         id_rtt_final = region_copy.id + '_' + zone_copy
                         if region.id == region_id and zone_copy == zone:
+                            continue
+                        if id_rtt_final in self.rtt_values[id_rtt]:
                             continue
                         if not vm_initial.failed_to_created:
                             vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
@@ -219,7 +224,7 @@ class PreSchedulingManager:
                              "--path {} " \
                              "--file {} " \
                              "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                              self.loader.pre_sched_conf.rtt_file),
+                                                              item),
                                                  vm_initial.instance_public_ip,
                                                  self.loader.gcp_conf.home_path,
                                                  item_key,
@@ -265,26 +270,31 @@ class PreSchedulingManager:
 
     def get_first_rounds_times(self):
         logging.info("<PreSchedulerManager>: Computing training times")
-
-        cli_aws, cli_gcp = self.separate_cli_per_cloud()
+        clients = self.loader.job.client_tasks
+        locations = self.loader.loc
         env_aws, env_gcp = self.separate_env_per_cloud()
         loc_aws, loc_gcp = self.separate_loc_per_cloud()
         logging.info("<PreSchedulerManager>: Calculating AWS training times")
+        #TODO: parallelize
         for env_id, env in env_aws.items():
             logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
             self.exec_times[env_id] = {}
-            #TODO: paralelize
-            for cli in cli_aws.values():
-                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id}")
-                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
-                region_bucket = loc_aws.get('AWS_' + cli.bucket_region)
-                vm.instance_type.image_id = region_bucket.client_image_id
-                key_file = region_bucket.key_file
-                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region_bucket.region}")
+            vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+            for loc_id, region in loc_aws.items():
+                if region.provider in (CloudManager.AWS, CloudManager.EC2):
+                    key_name = region.key_file.split('.')[0]
+                elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    key_name = region.key_file
+                else:
+                    logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({loc_id})")
+                    return
+                vm.instance_type.image_id = region.client_image_id
+                key_file = region.key_file
                 final_zone = ''
-                for zone in region_bucket.zones:
+                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                for zone in region.zones:
                     try:
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_file.split('.')[0])
+                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name)
                         final_zone = zone
                         break
                     except Exception as e:
@@ -294,16 +304,20 @@ class PreSchedulingManager:
                 if not vm.failed_to_created:
                     # update instance IP
                     vm.update_ip(zone=final_zone)
+                for cli in clients.values():
+                    logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
                     self.exec_times[env_id][cli.client_id] = self.__compute_training_times(vm, key_file, cli)
-                    status = vm.terminate(wait=False, zone=final_zone)
-                    if status:
-                        vm.instance_id = None
-                        vm.failed_to_created = False
+            status = vm.terminate(wait=False, zone=final_zone)
+            if status:
+                vm.instance_id = None
+                vm.failed_to_created = False
+        return
         #TODO: add multiple regions to GCP clients
+        #TODO: refactor
         logging.info("<PreSchedulerManager>: Calculating GCP training times")
         for env_id, env in env_gcp.items():
             logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
-            # TODO: colocar em paralelo
+            # TODO: parallelize
             for cli in cli_gcp.values():
                 logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id}")
                 vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
@@ -400,10 +414,6 @@ class PreSchedulingManager:
             # Send files
             if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                print("source=", self.loader.pre_sched_conf.path)
-                print("target=", self.loader.ec2_conf.home_path)
-                print("item=", app_item)
-                print("item=", train_item)
                 vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
                                 target=self.loader.ec2_conf.home_path,
                                 item=app_item)
@@ -417,6 +427,13 @@ class PreSchedulingManager:
                 logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
+                print(stdout)
+
+                cmd_remove = "rm results/*"
+
+                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                 print(stdout)
 
                 cmd1 = f'unzip {app_item} -d .'
@@ -466,6 +483,13 @@ class PreSchedulingManager:
                 logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
+                print(stdout)
+
+                cmd_remove = "rm results/*"
+
+                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                 print(stdout)
 
                 cmd1 = f'unzip {app_item} -d .'
@@ -521,6 +545,15 @@ class PreSchedulingManager:
                                 target=self.loader.pre_sched_conf.path,
                                 item=self.loader.pre_sched_conf.results_temp_file)
 
+            vm.remove_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
+
+            cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
+
+            logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+            stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+            print(stdout)
+
             try:
                 with open(os.path.join(self.loader.pre_sched_conf.path,
                                        self.loader.pre_sched_conf.results_temp_file)) as f:
@@ -537,27 +570,45 @@ class PreSchedulingManager:
             logging.error("<PreScheduler> VirtualMachine {}:: SSH CONNECTION ERROR".format(vm.instance_id))
             raise Exception("<PreScheduler> VirtualMachine {}:: SSH Exception ERROR".format(vm.instance_id))
 
-    @staticmethod
-    def write_json(rtt_values: Dict[str, Dict[str, float]], exec_times: Dict[str, List[float]], job_id, job_name,
-                   file_output):
+    def write_json(self):
         # build a map
-        dict_json = {"job_id": job_id,
-                     "job_name": job_name,
-                     "number_datacenters": len(rtt_values),
+        dict_json = {"job_id": self.loader.job.job_id,
+                     "job_name": self.loader.job.job_name,
+                     "number_datacenters": len(self.rtt_values),
                      "rtt": {},
-                     "exec_times": exec_times
+                     "exec_times": self.exec_times
                      }
 
-        print("dict_json")
-        print(dict_json)
+        # print("dict_json")
+        # print(dict_json)
 
-        for datacenter, rtt_value in rtt_values.items():
+        for datacenter, rtt_value in self.rtt_values.items():
             # print(datacenter)
             # print("rtt_value", rtt_value)
             dict_json['rtt'][datacenter] = rtt_value
+
+        file_output = self.loader.pre_file
 
         # print(dict_json)
         logging.info(f"<PreSchedulerManager> Writing {file_output} file")
 
         with open(file_output, "w") as fp:
             json.dump(dict_json, fp, sort_keys=True, indent=4, default=str)
+
+    def __read_json(self):
+        if os.path.exists(self.loader.pre_file):
+            try:
+                with open(self.loader.pre_file) as f:
+                    data = f.read()
+                json_data = json.loads(data)
+                if json_data['job_id'] != self.loader.job.job_id or json_data['job_name'] != self.loader.job.job_name:
+                    logging.error(f"<PreSchedulerManager> Current file {self.loader.pre_file} is not for this job!")
+                    rep = str(input("Do you want to stop execution? [N] for no; otherwise yes]"))
+                    return rep.upper() != 'N'
+                self.exec_times = json_data['exec_times']
+                self.rtt_values = json_data['rtt_values']
+
+            except Exception as e:
+                logging.error(e)
+
+        return False

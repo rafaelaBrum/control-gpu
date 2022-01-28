@@ -35,7 +35,7 @@ def test_on_demand_virtual_machine(loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0cdc662c42e7c28ed',
+        image_id='ami-0d638c42b2e92c091',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,

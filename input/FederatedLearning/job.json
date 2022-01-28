@@ -27,9 +27,9 @@
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
-                "bucket_name": "rafaela-fl-client-1",
-                "trainset_dir": "data/CellRep/4_clients/1/trainset",
-                "test_dir": "data/CellRep/4_clients/1/testset",
+                "bucket_name": "rafaela-fl-client-0",
+                "trainset_dir": "data/CellRep/4_clients/0/trainset",
+                "test_dir": "data/CellRep/4_clients/0/testset",
                 "train_epochs": 1,
                 "net": "Inception"
             },

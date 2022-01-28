@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-from typing import Dict
 
 from control.util.loader import Loader
-# from control.util.mail_me import MailMe
 
 from control.scheduler.schedule_manager import ScheduleManager
 
@@ -14,7 +12,6 @@ from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 
 import logging
 import argparse
-# import datetime
 
 
 def __call_control(loader: Loader):
@@ -43,12 +40,14 @@ def __call_pre_scheduling(loader: Loader):
 
         pre_sched = PreSchedulingManager(loader=loader)
 
-        # pre_sched.calculate_rtt_values()
+        if pre_sched.stop_execution:
+            return
+
+        pre_sched.calculate_rtt_values()
 
         pre_sched.get_first_rounds_times()
 
-        PreSchedulingManager.write_json(pre_sched.rtt_values, pre_sched.exec_times, loader.job.job_id, loader.job.job_name,
-                                        loader.pre_file)
+        pre_sched.write_json()
 
         # status = "SUCCESS"
 
