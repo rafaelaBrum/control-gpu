@@ -252,12 +252,12 @@ class VirtualMachine:
         # Mount the bucket within AWS
         cmd3 = 's3fs {} ' \
                '-o use_cache=/tmp -o uid={} -o gid={} ' \
-               '-o mp_umask=002 -o multireq_max=5 {}' \
-               '-o url=https://s3.{}.amazonaws.com'.format(bucket_name,
-                                                           self.manager.bucket_config.vm_uid,
-                                                           self.manager.bucket_config.vm_gid,
-                                                           path,
-                                                           region_bucket.region)
+               '-o mp_umask=002 -o multireq_max=5 ' \
+               '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
+                                                               self.manager.bucket_config.vm_uid,
+                                                               self.manager.bucket_config.vm_gid,
+                                                               region_bucket.region,
+                                                               path)
         # Mount the bucket in GCP
         # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
         # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/

@@ -597,6 +597,7 @@ class PreSchedulingManager:
 
     def __read_json(self):
         if os.path.exists(self.loader.pre_file):
+            logging.info(f"<PreSchedulerManager> File {self.loader.pre_file} already exists. Reading info")
             try:
                 with open(self.loader.pre_file) as f:
                     data = f.read()
@@ -606,7 +607,7 @@ class PreSchedulingManager:
                     rep = str(input("Do you want to stop execution? [N] for no; otherwise yes]"))
                     return rep.upper() != 'N'
                 self.exec_times = json_data['exec_times']
-                self.rtt_values = json_data['rtt_values']
+                self.rtt_values = json_data['rtt']
 
             except Exception as e:
                 logging.error(e)
