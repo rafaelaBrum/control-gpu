@@ -63,6 +63,8 @@ class DaemonAWS:
         task_id = value['task_id']
         command = value['command']
         server_ip = value['server_ip']
+        cpu = value['cpu']
+        gpu = value['gpu']
         session = ''
 
         if command is not None:
@@ -91,6 +93,9 @@ class DaemonAWS:
         start_time = datetime.now()
 
         if action == DaemonAWS.START:
+
+            if self.task_id != -1:
+                command = command + f' -cpu {cpu} -gpu {gpu}'
 
             # Starting job
             try:

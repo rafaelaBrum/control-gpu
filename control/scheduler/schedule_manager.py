@@ -45,7 +45,7 @@ class ScheduleManager:
         self.loader = loader
 
         # load the Scheduler that will be used
-        self.scheduler = FLSimpleScheduler(instance_types=self.loader.env)
+        self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
         # self.__load_scheduler()
 
         # read expected_makespan on build_dispatcher()
@@ -128,13 +128,15 @@ class ScheduleManager:
 
     def __build_dispatchers(self):
 
-        instance_type, market = self.scheduler.get_server_initial_instance()
+        instance_type, market, region, zone = self.scheduler.get_server_initial_instance()
 
         # Create the Vm that will be used by the dispatcher
         vm = VirtualMachine(
             instance_type=instance_type,
             market=market,
-            loader=self.loader
+            loader=self.loader,
+            region=region,
+            zone=zone
         )
 
         # than a dispatcher, that will execute the tasks, is create
@@ -153,13 +155,15 @@ class ScheduleManager:
         self.client_task_dispatchers = []
 
         for i in range(self.loader.job.num_clients):
-            instance_type, market = self.scheduler.get_client_initial_instance()
+            instance_type, market, region, zone = self.scheduler.get_client_initial_instance()
 
             # Create the Vm that will be used by the dispatcher
             vm = VirtualMachine(
                 instance_type=instance_type,
                 market=market,
-                loader=self.loader
+                loader=self.loader,
+                region=region,
+                zone=zone
             )
 
             # than a dispatcher, that will execute the tasks, is create

@@ -1,5 +1,5 @@
-from control.domain.app_specific.cudalign_task import CUDAlignTask
 from control.domain.instance_type import InstanceType
+from control.domain.cloud_region import CloudRegion
 
 from control.managers.cloud_manager import CloudManager
 
@@ -10,10 +10,13 @@ import logging
 
 class FLSimpleScheduler:
 
-    def __init__(self, instance_types: Dict[str, InstanceType]):
+    def __init__(self, instance_types: Dict[str, InstanceType], locations: Dict[str, CloudRegion]):
         self.instances_server: Dict[str, InstanceType] = {}
         self.instances_client: Dict[str, InstanceType] = {}
+        self.loc_aws: Dict[str, CloudRegion] = {}
+        self.loc_gcp: Dict[str, CloudRegion] = {}
         self.__divide_instances_for_server_and_for_client(instance_types)
+        self.__separate_location_by_cloud(locations)
 
     # def __init__(self, instance_types: Dict[str, InstanceType]):
     #     self.instance_types_spot = instance_types
@@ -166,11 +169,38 @@ class FLSimpleScheduler:
         if len(self.instances_server) == 1:
             for name, instance in self.instances_server.items():
                 logging.info("<Scheduler>: On-demand instance chosen {}".format(name))
-                return instance, CloudManager.ON_DEMAND
+                if instance.provider in (CloudManager.EC2, CloudManager.AWS):
+                    if len(self.loc_aws) == 1:
+                        for loc_id, region in self.loc_aws.items():
+                            for zone in region.zones:
+                                return instance, CloudManager.ON_DEMAND, region, zone
+                elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    if len(self.loc_gcp) == 1:
+                        for loc_id, region in self.loc_gcp.items():
+                            for zone in region.zones:
+                                return instance, CloudManager.ON_DEMAND, region, zone
 
     def get_client_initial_instance(self):
         logging.info("<Scheduler>: Choosing initial instance for client task")
         if len(self.instances_client) == 1:
             for name, instance in self.instances_client.items():
                 logging.info("<Scheduler>: On-demand instance chosen {}".format(name))
-                return instance, CloudManager.ON_DEMAND
+                if instance.provider in (CloudManager.EC2, CloudManager.AWS):
+                    if len(self.loc_aws) == 1:
+                        for loc_id, region in self.loc_aws.items():
+                            for zone in region.zones:
+                                return instance, CloudManager.ON_DEMAND, region, zone
+                elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    if len(self.loc_gcp) == 1:
+                        for loc_id, region in self.loc_gcp.items():
+                            for zone in region.zones:
+                                return instance, CloudManager.ON_DEMAND, region, zone
+
+    def __separate_location_by_cloud(self, locations):
+        for loc_id, loc in locations.items():
+            if loc.provider in (CloudManager.EC2, CloudManager.AWS):
+                self.loc_aws[loc_id] = loc
+            elif loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                self.loc_gcp[loc_id] = loc
+            else:
+                logging.error(f"<PreSchedulingManager>: {loc.provider} does not have support ({loc_id})")

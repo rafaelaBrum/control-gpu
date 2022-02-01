@@ -3,9 +3,9 @@ from control.domain.task import Task
 
 class FLClientTask(Task):
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, bucket_name, trainset_dir, client_id,
+    def __init__(self, task_id, task_name, command, generic_ckpt, bucket_name, trainset_dir, client_id,
                  zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net):
-        super().__init__(task_id, task_name, command, generic_ckpt, runtime)
+        super().__init__(task_id, task_name, command, generic_ckpt)
 
         self.simple_command = command
 
@@ -55,7 +55,6 @@ class FLClientTask(Task):
                 task_name=adict['tasks']['clients'][key]['task_name'],
                 client_id=int(key),
                 command=adict['tasks']['clients'][key]['command'],
-                runtime=adict['tasks']['clients'][key]['runtime'],
                 generic_ckpt=adict['tasks']['clients'][key]['generic_ckpt'],
                 bucket_name=adict['tasks']['clients'][key]['bucket_name'],
                 trainset_dir=adict['tasks']['clients'][key]['trainset_dir'],

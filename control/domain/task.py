@@ -18,7 +18,7 @@ class Task:
 
     # RESTARTED = 'restarted'
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime):
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime=None):
         self.task_id = task_id
         self.task_name = task_name
         # self.memory = memory

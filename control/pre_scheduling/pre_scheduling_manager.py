@@ -109,11 +109,11 @@ class PreSchedulingManager:
                         if id_rtt_final in self.rtt_values[id_rtt]:
                             continue
                         if not vm_initial.failed_to_created:
-                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial)
+                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='')
                             if not vm_initial.failed_to_created:
                                 vm_initial.update_ip(zone=zone)
                         vm_final.zone = zone_copy
-                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file)
+                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='')
                         if not vm_final.failed_to_created:
                             # update instance IP
                             vm_final.update_ip(zone=zone_copy)
@@ -272,7 +272,6 @@ class PreSchedulingManager:
     def get_first_rounds_times(self):
         logging.info("<PreSchedulerManager>: Computing training times")
         clients = self.loader.job.client_tasks
-        locations = self.loader.loc
         env_aws, env_gcp = self.separate_env_per_cloud()
         loc_aws, loc_gcp = self.separate_loc_per_cloud()
         logging.info("<PreSchedulerManager>: Calculating AWS training times")
@@ -297,7 +296,7 @@ class PreSchedulingManager:
                 final_zone = ''
                 for zone in region.zones:
                     try:
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name)
+                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='')
                         final_zone = zone
                         break
                     except Exception as e:
@@ -332,7 +331,7 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region_bucket.region}")
                 final_zone = ''
                 for zone in region_bucket.zones:
-                    vm.deploy(zone=zone, needs_volume=False, key_name=key_file)
+                    vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='')
                     if not vm.failed_to_created:
                         final_zone = zone
                         break
@@ -609,12 +608,12 @@ class PreSchedulingManager:
                 with open(self.loader.pre_file) as f:
                     data = f.read()
                 json_data = json.loads(data)
+                self.exec_times = json_data['exec_times']
+                self.rtt_values = json_data['rtt']
                 if json_data['job_id'] != self.loader.job.job_id or json_data['job_name'] != self.loader.job.job_name:
                     logging.error(f"<PreSchedulerManager> Current file {self.loader.pre_file} is not for this job!")
                     rep = str(input("Do you want to stop execution? [N] for no; otherwise yes"))
                     return rep.upper() != 'N'
-                self.exec_times = json_data['exec_times']
-                self.rtt_values = json_data['rtt']
 
                 # print("self.exec_times:")
                 # print(json.dumps(self.exec_times, indent=4, sort_keys=True))

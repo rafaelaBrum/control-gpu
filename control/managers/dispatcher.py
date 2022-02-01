@@ -364,7 +364,9 @@ class Executor:
         info = {
             "task_id": self.task.task_id,
             "command": self.task.command,
-            "server_ip": self.task.server_ip
+            "server_ip": self.task.server_ip,
+            "cpu": self.vm.instance_type.vcpu,
+            "gpu": self.vm.instance_type.count_gpu
         }
 
         return info
@@ -382,7 +384,7 @@ class Dispatcher:
         self.type_task = type_task
         self.client_id = client_id
         self.client = None
-        if client_id > 0:
+        if client_id < self.loader.job.num_clients:
             self.client = self.loader.job.client_tasks[client_id]
 
         # Control Flags
@@ -505,7 +507,8 @@ class Dispatcher:
             try:
                 communicator = Communicator(host=self.vm.instance_public_ip,
                                             port=self.loader.communication_conf.socket_port)
-                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None, 'server_ip': None})
+                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None,
+                                                             'server_ip': None, 'cpu': None, 'gpu': None})
 
                 if communicator.response['status'] == 'success':
                     return True
@@ -529,7 +532,7 @@ class Dispatcher:
     def __execution_loop(self):
 
         # Start the VM in the cloud
-        status = self.vm.deploy()
+        status = self.vm.deploy(type_task=self.type_task)
 
         # self.expected_makespan_timestamp = self.vm.start_time + timedelta(seconds=self.queue.makespan_seconds)
 

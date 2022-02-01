@@ -18,7 +18,7 @@
         "GCP_us-central1": {
             "provider": "gcp",
             "region": "us-central1",
-            "key_file": "",
+            "key_file": "my-ssh-key",
             "client_image_id": "disk-ubuntu-pre-sched",
             "server_image_id": "disk-ubuntu-flower-server",
             "zones": [

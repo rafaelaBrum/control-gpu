@@ -10,6 +10,7 @@ from control.util.loader import Loader
 from control.domain.job import Job
 
 from control.domain.app_specific.fl_client_task import FLClientTask
+from control.domain.cloud_region import CloudRegion
 
 from datetime import datetime, timedelta
 
@@ -31,7 +32,8 @@ class VirtualMachine:
 
     vm_num = 1
 
-    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name=''):
+    def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name='',
+                 region: CloudRegion=None, zone=''):
 
         self.loader = loader
 
@@ -40,7 +42,8 @@ class VirtualMachine:
         self.volume_id = volume_id
         self.disk_name = disk_name
         self.vm_name = vm_name
-        self.zone = ''
+        self.zone = zone
+        self.region = region
 
         self.create_file_system = False
 
@@ -99,7 +102,20 @@ class VirtualMachine:
 
     # Start the virtual machine
     # Return (boolean) True if success otherwise return False
-    def deploy(self, zone='', needs_volume=True, key_name=''):
+    def deploy(self, type_task, zone='', needs_volume=True, key_name=''):
+
+        if zone == '':
+            zone = self.zone
+
+        if self.region is not None:
+            if type_task == Job.SERVER:
+                self.instance_type.image_id = self.region.server_image_id
+            elif type_task == Job.CLIENT:
+                self.instance_type.image_id = self.region.client_image_id
+            else:
+                item = ""
+                logging.info(f"<VirtualMachine {self.instance_id}>: Not updating image_id"
+                             f" (type_task {type_task})")
 
         self.start_deploy = datetime.now()
 
@@ -159,7 +175,8 @@ class VirtualMachine:
                     if self.volume_id is None:
                         self.volume_id = self.manager.create_volume(
                             size=self.loader.file_system_conf.size,
-                            volume_name=self.disk_name
+                            volume_name=self.disk_name,
+                            zone=zone
                         )
                         self.create_file_system = True
 
@@ -172,21 +189,21 @@ class VirtualMachine:
                     if self.instance_type.provider == CloudManager.EC2:
                         # attached new volume
                         # waiting until volume available
-                        self.manager.wait_volume(volume_id=self.volume_id, zone=self.zone)
+                        self.manager.wait_volume(volume_id=self.volume_id, zone=zone)
                         self.manager.attach_volume(
                             instance_id=self.instance_id,
                             volume_id=self.volume_id,
-                            zone=self.zone
+                            zone=zone
                         )
                     elif self.instance_type.provider == CloudManager.GCLOUD:
                         # attached new volume
                         # waiting until volume available
-                        self.manager.wait_volume(volume_name=self.disk_name, zone=self.zone)
+                        self.manager.wait_volume(volume_name=self.disk_name, zone=zone)
                         self.manager.attach_volume(
                             instance_id=self.instance_id,
                             volume_id=self.volume_id,
                             volume_name=self.disk_name,
-                            zone=self.zone
+                            zone=zone
                         )
 
                 return True
@@ -303,6 +320,11 @@ class VirtualMachine:
 
     def prepare_vm(self, type_task, client=None):
 
+        if client is None:
+            client_id = -1
+        else:
+            client_id = client.client_id
+
         if not self.failed_to_created:
 
             # update instance IP
@@ -389,7 +411,7 @@ class VirtualMachine:
                                                            self.loader.ec2_conf.vm_user,
                                                            self.loader.file_system_conf.path,
                                                            self.loader.job.job_id,
-                                                           client.client_id,
+                                                           client_id,
                                                            self.loader.execution_id,
                                                            self.instance_id,
                                                            self.loader.communication_conf.socket_port)
@@ -423,7 +445,7 @@ class VirtualMachine:
                                                            self.loader.gcp_conf.vm_user,
                                                            self.loader.file_system_conf.path,
                                                            self.loader.job.job_id,
-                                                           client.client_id,
+                                                           client_id,
                                                            self.loader.execution_id,
                                                            self.instance_id,
                                                            self.loader.communication_conf.socket_port)
@@ -433,7 +455,7 @@ class VirtualMachine:
                 # create execution folder
                 self.root_folder = os.path.join(self.loader.file_system_conf.path,
                                                 '{}_{}_{}'.format(self.loader.job.job_id,
-                                                                  client.client_id,
+                                                                  client_id,
                                                                   self.loader.execution_id))
 
                 self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
@@ -461,6 +483,9 @@ class VirtualMachine:
     # Return True if success otherwise return False
     def terminate(self, delete_volume=True, wait=True, zone=''):
 
+        if zone == '':
+            zone = self.zone
+
         # print("instance_id:", self.instance_id)
         # print("region: ", region)
 
@@ -478,13 +503,15 @@ class VirtualMachine:
                 if self.instance_type.provider == CloudManager.EC2:
                     self.manager.delete_volume(self.volume_id, zone=zone)
                 elif self.instance_type.provider == CloudManager.GCLOUD:
-                    self.manager.delete_volume(self.volume_id, volume_name=self.disk_name)
+                    self.manager.delete_volume(self.volume_id, volume_name=self.disk_name, zone=zone)
 
         self.terminate_overhead = datetime.now() - terminate_start
 
         return status
 
     def update_ip(self, zone=''):
+        if zone == '':
+            zone = self.zone
         self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
         self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
