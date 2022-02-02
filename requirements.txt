@@ -36,7 +36,7 @@ ec2_metadata==2.4.0
 # matplotlib==3.3.0
 # mccabe==0.6.1
 # more-itertools==8.4.0
-numpy==1.19.5
+# numpy==1.19.5
 # packaging==20.4
 pandas==1.1.4
 paramiko==2.8.0
@@ -105,3 +105,9 @@ google-auth-httplib2==0.1.0
 oauth2client==4.1.3
 
 iso8601==1.0.2
+
+Keras==2.2.4
+git+https://www.github.com/keras-team/keras-contrib.git
+tensorflow == 1.15.5
+tqdm >= 4.56.2
+scikit-image >= 0.17.2

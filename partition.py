@@ -220,19 +220,55 @@ def partition_CellRep_data(dataset, n_parties):
         foldername = "{}/{}/testset".format(root_foldername, party)
         generate_label_files(foldername)
 
+def partition_patches_data_homogeneously(dataset, n_parties, folder):
+    dataset_folder = os.path.join(os.path.expanduser('~'), dataset, folder, 'samples')
+    x_list, y_list = _load_metadata_from_dir(dataset_folder)
 
-def partition_data(dataset, n_parties):
+    y_array = np.array(y_list)
+
+    n_dataset = len(y_array)
+
+    # random partition
+    idxs = np.random.permutation(n_dataset)
+    batch_idxs = np.array_split(idxs, n_parties)
+    net_dataidx_map = {i: batch_idxs[i] for i in range(n_parties)}
+
+    root_foldername = "{}/{}/{}_clients".format(dataset, folder, n_parties)
+    mkdirs(root_foldername)
+
+    for party in range(n_parties):
+        foldername = "{}/{}".format(root_foldername, party)
+        mkdirs(foldername)
+        print(f"created {foldername}")
+        # saving train dataset
+        x_local = []
+        for i in range(len(x_list)):
+            if i in net_dataidx_map[party]:
+                x_local.append(x_list[i])
+        foldername = f"{foldername}/samples/"
+        mkdirs(foldername)
+        print(f"created {foldername}")
+        copy_images(x_local, foldername)
+        foldername = "{}/{}".format(root_foldername, party)
+        generate_label_files(foldername)
+
+
+def partition_data(dataset, n_parties, folder):
 
     if dataset == 'MNIST':
         partition_MNIST_data(dataset, n_parties)
     elif dataset == 'CellRep':
         partition_CellRep_data(dataset, n_parties)
+    elif dataset == 'patches':
+        partition_patches_data_homogeneously(dataset, n_parties, folder)
     else:
         print("No available dataset to partition.")
         return
 
 
 if __name__ == "__main__":
-    dataset = 'CellRep'
-    n_parties = 4
-    partition_data(dataset, n_parties)
+    dataset = 'patches'
+    for folder in ('blca', 'brca', 'cesc', 'coad', 'paad', 'prad', 'read', 'skcm', 'stad', 'ucec'):
+        for n_parties in (2, 3, 4):
+            print(f"Partitioning folder {folder} into {n_parties} clients")
+            partition_data(dataset, n_parties, folder)
