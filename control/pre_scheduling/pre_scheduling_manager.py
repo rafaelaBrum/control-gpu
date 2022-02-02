@@ -284,12 +284,15 @@ class PreSchedulingManager:
             for loc_id, region in loc_aws.items():
                 logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                 if loc_id in self.exec_times[env_id]:
+                    new_loc = False
                     skip_loc = True
                     for cli in clients.values():
                         if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
                             skip_loc = False
                     if skip_loc:
                         continue
+                else:
+                    new_loc = True
                 key_name = region.key_file.split('.')[0]
                 vm.instance_type.image_id = region.client_image_id
                 key_file = region.key_file
@@ -308,7 +311,7 @@ class PreSchedulingManager:
                     vm.update_ip(zone=final_zone)
                 for cli in clients.values():
                     logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                    if cli.client_id in self.exec_times[env_id][loc_id]:
+                    if not new_loc and cli.client_id in self.exec_times[env_id][loc_id]:
                         continue
                     self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
                 status = vm.terminate(wait=False, zone=final_zone)
