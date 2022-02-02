@@ -20,7 +20,8 @@
             "ebs_device_name": "/dev/nvme2n1",
             "vcpu": 0,
             "memory": 0,
-            "gpu": "yes"
+            "gpu": "yes",
+            "gpu_count": 1
         },
         "t2.xlarge": {
             "provider": "ec2",
@@ -42,7 +43,8 @@
             "ebs_device_name": "/dev/xvdf",
             "vcpu": 0,
             "memory": 0,
-            "gpu": "no"
+            "gpu": "no",
+            "gpu_count": 0
         }
     }
 }

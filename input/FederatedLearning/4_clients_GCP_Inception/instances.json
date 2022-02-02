@@ -16,17 +16,18 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "ami-080af420cdfb56e39",
+            "image_id": "",
             "ebs_device_name": "/dev/nvme2n1",
             "vcpu": 0,
             "memory": 0,
-            "gpu": "yes"
+            "gpu": "yes",
+            "gpu_count": 1
         },
-        "n2-standard-2": {
-            "provider": "gcloud",
+        "t2.xlarge": {
+            "provider": "ec2",
             "prices": {
-                "on-demand": 0.09711800000000001,
-                "preemptible": 0.023498
+                "on-demand": 0.752,
+                "preemptible": 0.2256
             },
             "restrictions": {
                 "limits": {
@@ -38,11 +39,12 @@
                     "preemptible": "yes"
                 }
             },
-            "image_id": "disk-ubuntu-flower-server",
-            "ebs_device_name": "/dev/sdb",
-            "memory": 8,
-            "vcpu": 2,
-            "gpu": "no"
+            "image_id": "",
+            "ebs_device_name": "/dev/xvdf",
+            "vcpu": 0,
+            "memory": 0,
+            "gpu": "no",
+            "gpu_count": 0
         }
     }
 }
