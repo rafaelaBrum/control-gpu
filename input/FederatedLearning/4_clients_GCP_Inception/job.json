@@ -1,0 +1,80 @@
+{
+    "job_id": 410,
+    "job_name": "4 clients - Inception (all GCP)",
+    "description": "4 clients executing Inception with smaller dataset stored in GCP",
+    "tasks": {
+        "server": {
+            "task_name": "Task server Inception",
+            "command": "python3 TIL_Inception_server.py",
+            "runtime": {
+                "g4dn.xlarge": 65
+            },
+            "generic_ckpt": "False",
+            "zip_file": "TIL_Inception_server.zip",
+            "n_rounds": 10,
+            "n_clients": 4
+        },
+        "clients": {
+            "0" : {
+                "task_name": "Task Inception (client 0)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "fl_client_0",
+                "trainset_dir": "data/CellRep/4_clients/0/trainset",
+                "test_dir": "data/CellRep/4_clients/0/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            },
+            "1" : {
+                "task_name": "Task Inception (client 1)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "fl_client_1",
+                "trainset_dir": "data/CellRep/4_clients/1/trainset",
+                "test_dir": "data/CellRep/4_clients/1/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            },
+            "2" : {
+                "task_name": "Task Inception (client 2)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "fl_client_2",
+                "trainset_dir": "data/CellRep/4_clients/2/trainset",
+                "test_dir": "data/CellRep/4_clients/2/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            },
+            "3" : {
+                "task_name": "Task Inception (client 3)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "fl_client_3",
+                "trainset_dir": "data/CellRep/4_clients/3/trainset",
+                "test_dir": "data/CellRep/4_clients/3/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            }
+        }
+    }
+}
