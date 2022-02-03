@@ -277,6 +277,8 @@ class PreSchedulingManager:
         logging.info("<PreSchedulerManager>: Calculating AWS training times")
         #TODO: parallelize
         for env_id, env in env_aws.items():
+            if not env.have_gpu:
+                continue
             logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
             if env_id not in self.exec_times:
                 self.exec_times[env_id] = {}
