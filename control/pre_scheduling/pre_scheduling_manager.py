@@ -405,174 +405,176 @@ class PreSchedulingManager:
 
         # try to open the connection
         if vm.ssh.open_connection():
-            logging.info("<VirtualMachine {}>: "
-                         "- Creating directory {}".format(vm.instance_id,
-                                                          self.loader.file_system_conf.path_storage))
-            # create directory
-            vm.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
-                                     output=True)
-
-            vm.create_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
-
-            logging.info(f"<VirtualMachine {vm.instance_id}>: - Sending Files Training test")
-
-            app_item = self.loader.pre_sched_conf.app_file
-            train_item = self.loader.pre_sched_conf.train_file
-
-            # Send files
-            if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
-
-                vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
-                                target=self.loader.ec2_conf.home_path,
-                                item=app_item)
-
-                vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
-                                target=self.loader.ec2_conf.home_path,
-                                item=train_item)
-
-                cmd_before_daemon = "mkdir results/"
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
-                print(stdout)
-
-                cmd_remove = "rm results/*"
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
-                print(stdout)
-
-                cmd1 = f'unzip {app_item} -d .'
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
-                print(stdout)
-
-                cmd_daemon = "python3 {} " \
-                             "-i -v -predst {} " \
-                             "-split 0.9 0.10 0.00 " \
-                             "-net {} -data CellRep -d " \
-                             "-e {} -b {} -tdim 240 240 " \
-                             "-out logs/ -cpu {} -gpu {} " \
-                             "-tn -wpath results " \
-                             "-model_dir results " \
-                             "-logdir results " \
-                             "-cache results " \
-                             "-test_dir {} " \
-                             "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                             self.loader.pre_sched_conf.train_file),
-                                                os.path.join(self.loader.file_system_conf.path_storage,
-                                                             cli.trainset_dir),
-                                                cli.net,
-                                                cli.train_epochs,
-                                                cli.batch,
-                                                vm.instance_type.vcpu,
-                                                vm.instance_type.count_gpu,
-                                                os.path.join(self.loader.file_system_conf.path_storage,
-                                                             cli.test_dir),
-                                                self.loader.pre_sched_conf.results_temp_file
-                                                )
-
-            elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-
-                vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
-                                target=self.loader.gcp_conf.home_path,
-                                item=app_item)
-
-                vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
-                                target=self.loader.gcp_conf.home_path,
-                                item=train_item)
-
-                cmd_before_daemon = "mkdir results/"
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
-                print(stdout)
-
-                cmd_remove = "rm results/*"
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
-                print(stdout)
-
-                cmd1 = f'unzip {app_item} -d .'
-
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
-
-                stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
-                print(stdout)
-
-                cmd_daemon = "python3 {} " \
-                             "-i -v -predst {} " \
-                             "-split 0.9 0.10 0.00 " \
-                             "-net {} -data CellRep -d " \
-                             "-e {} -b {} -tdim 240 240 " \
-                             "-out logs/ -cpu {} -gpu {} " \
-                             "-tn -wpath results " \
-                             "-model_dir results " \
-                             "-logdir results " \
-                             "-cache results " \
-                             "-test_dir {} " \
-                             "-file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                             self.loader.pre_sched_conf.train_file),
-                                                os.path.join(self.loader.file_system_conf.path_storage,
-                                                             cli.trainset_dir),
-                                                cli.net,
-                                                cli.train_epochs,
-                                                cli.batch,
-                                                vm.instance_type.vcpu,
-                                                vm.instance_type.count_gpu,
-                                                os.path.join(self.loader.file_system_conf.path_storage,
-                                                             cli.test_dir),
-                                                self.loader.pre_sched_conf.results_temp_file
-                                                )
-            else:
-                cmd_daemon = ""
-
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
-            logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd_screen,
-                                                                                        vm.instance_id))
-
-            stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
-            print(stdout)
-
-            while not has_command_finished(vm):
-                continue
-
-            if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
-                vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
-                                target=self.loader.pre_sched_conf.path,
-                                item=self.loader.pre_sched_conf.results_temp_file)
-            elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-                vm.ssh.get_file(source=vm.loader.gcp_conf.home_path,
-                                target=self.loader.pre_sched_conf.path,
-                                item=self.loader.pre_sched_conf.results_temp_file)
-
-            vm.remove_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
-
-            cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
-
-            logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
-
-            stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
-            print(stdout)
-
             try:
-                with open(os.path.join(self.loader.pre_sched_conf.path,
-                                       self.loader.pre_sched_conf.results_temp_file)) as f:
-                    data = f.read()
-                times = json.loads(data)
+                logging.info("<VirtualMachine {}>: "
+                             "- Creating directory {}".format(vm.instance_id,
+                                                              self.loader.file_system_conf.path_storage))
+                # create directory
+                vm.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
+                                         output=True)
+
+                vm.create_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
+
+                logging.info(f"<VirtualMachine {vm.instance_id}>: - Sending Files Training test")
+
+                app_item = self.loader.pre_sched_conf.app_file
+                train_item = self.loader.pre_sched_conf.train_file
+
+                # Send files
+                if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+
+                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                    target=self.loader.ec2_conf.home_path,
+                                    item=app_item)
+
+                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                    target=self.loader.ec2_conf.home_path,
+                                    item=train_item)
+
+                    cmd_before_daemon = "mkdir results/"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
+                    print(stdout)
+
+                    cmd_remove = "rm results/*"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+                    print(stdout)
+
+                    cmd1 = f'unzip {app_item} -d .'
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
+
+                    cmd_daemon = "python3 {} " \
+                                 "-i -v -predst {} " \
+                                 "-split 0.9 0.10 0.00 " \
+                                 "-net {} -data CellRep -d " \
+                                 "-e {} -b {} -tdim 240 240 " \
+                                 "-out logs/ -cpu {} -gpu {} " \
+                                 "-tn -wpath results " \
+                                 "-model_dir results " \
+                                 "-logdir results " \
+                                 "-cache results " \
+                                 "-test_dir {} " \
+                                 "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                 self.loader.pre_sched_conf.train_file),
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.trainset_dir),
+                                                    cli.net,
+                                                    cli.train_epochs,
+                                                    cli.batch,
+                                                    vm.instance_type.vcpu,
+                                                    vm.instance_type.count_gpu,
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.test_dir),
+                                                    self.loader.pre_sched_conf.results_temp_file
+                                                    )
+
+                elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                    target=self.loader.gcp_conf.home_path,
+                                    item=app_item)
+
+                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                    target=self.loader.gcp_conf.home_path,
+                                    item=train_item)
+
+                    cmd_before_daemon = "mkdir results/"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
+                    print(stdout)
+
+                    cmd_remove = "rm results/*"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+                    print(stdout)
+
+                    cmd1 = f'unzip {app_item} -d .'
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
+
+                    cmd_daemon = "python3 {} " \
+                                 "-i -v -predst {} " \
+                                 "-split 0.9 0.10 0.00 " \
+                                 "-net {} -data CellRep -d " \
+                                 "-e {} -b {} -tdim 240 240 " \
+                                 "-out logs/ -cpu {} -gpu {} " \
+                                 "-tn -wpath results " \
+                                 "-model_dir results " \
+                                 "-logdir results " \
+                                 "-cache results " \
+                                 "-test_dir {} " \
+                                 "-file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                 self.loader.pre_sched_conf.train_file),
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.trainset_dir),
+                                                    cli.net,
+                                                    cli.train_epochs,
+                                                    cli.batch,
+                                                    vm.instance_type.vcpu,
+                                                    vm.instance_type.count_gpu,
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.test_dir),
+                                                    self.loader.pre_sched_conf.results_temp_file
+                                                    )
+                else:
+                    cmd_daemon = ""
+
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd_screen,
+                                                                                            vm.instance_id))
+
+                stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
+
+                while not has_command_finished(vm):
+                    continue
+
+                if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                    vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
+                                    target=self.loader.pre_sched_conf.path,
+                                    item=self.loader.pre_sched_conf.results_temp_file)
+                elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    vm.ssh.get_file(source=vm.loader.gcp_conf.home_path,
+                                    target=self.loader.pre_sched_conf.path,
+                                    item=self.loader.pre_sched_conf.results_temp_file)
+
+                vm.remove_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
+
+                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
+
+                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+                print(stdout)
+
+                try:
+                    with open(os.path.join(self.loader.pre_sched_conf.path,
+                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                        data = f.read()
+                    times = json.loads(data)
+                except Exception as e:
+                    logging.error(e)
+                    return {}
+
+                return times
             except Exception as e:
-                logging.error(e)
                 return {}
-
-            return times
-
         else:
 
             logging.error("<PreScheduler> VirtualMachine {}:: SSH CONNECTION ERROR".format(vm.instance_id))
