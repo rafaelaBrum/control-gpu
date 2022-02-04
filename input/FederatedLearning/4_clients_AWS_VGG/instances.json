@@ -18,7 +18,7 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/nvme2n1",
-            "vcpu": 0,
+            "vcpu": 7,
             "memory": 0,
             "gpu": "yes",
             "gpu_count": 1
@@ -26,8 +26,8 @@
         "t2.xlarge": {
             "provider": "ec2",
             "prices": {
-                "on-demand": 0.1856,
-                "preemptible": 0.0571
+                "on-demand": 0.752,
+                "preemptible": 0.2256
             },
             "restrictions": {
                 "limits": {
@@ -41,7 +41,7 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/xvdf",
-            "vcpu": 0,
+            "vcpu": 3,
             "memory": 0,
             "gpu": "no",
             "gpu_count": 0

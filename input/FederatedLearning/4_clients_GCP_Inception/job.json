@@ -26,8 +26,8 @@
                 "trainset_dir": "data/CellRep/4_clients/0/trainset",
                 "test_dir": "data/CellRep/4_clients/0/testset",
                 "train_epochs": 5,
-                "bucket_provider": "aws",
-                "bucket_region": "us-east-1",
+                "bucket_provider": "gcp",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "1" : {
@@ -41,8 +41,8 @@
                 "trainset_dir": "data/CellRep/4_clients/1/trainset",
                 "test_dir": "data/CellRep/4_clients/1/testset",
                 "train_epochs": 5,
-                "bucket_provider": "aws",
-                "bucket_region": "us-east-1",
+                "bucket_provider": "gcp",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "2" : {
@@ -56,8 +56,8 @@
                 "trainset_dir": "data/CellRep/4_clients/2/trainset",
                 "test_dir": "data/CellRep/4_clients/2/testset",
                 "train_epochs": 5,
-                "bucket_provider": "aws",
-                "bucket_region": "us-east-1",
+                "bucket_provider": "gcp",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "3" : {
@@ -71,8 +71,8 @@
                 "trainset_dir": "data/CellRep/4_clients/3/trainset",
                 "test_dir": "data/CellRep/4_clients/3/testset",
                 "train_epochs": 5,
-                "bucket_provider": "aws",
-                "bucket_region": "us-east-1",
+                "bucket_provider": "gcp",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             }
         }
