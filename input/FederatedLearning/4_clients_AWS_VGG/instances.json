@@ -26,8 +26,8 @@
         "t2.xlarge": {
             "provider": "ec2",
             "prices": {
-                "on-demand": 0.752,
-                "preemptible": 0.2256
+                "on-demand": 0.1856,
+                "preemptible": 0.0566
             },
             "restrictions": {
                 "limits": {

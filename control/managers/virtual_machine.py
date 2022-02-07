@@ -138,7 +138,9 @@ class VirtualMachine:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                               image_id=self.instance_type.image_id,
                                                                               vm_name=self.vm_name,
-                                                                              zone=zone)
+                                                                              zone=zone,
+                                                                              gpu_type=self.instance_type.gpu,
+                                                                              gpu_count=self.instance_type.count_gpu)
                 elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = \
                         self.manager.create_preemptible_instance(instance_type=self.instance_type.type,

@@ -40,7 +40,11 @@ def test_on_demand_virtual_machine(loader):
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        ebs_device_name='/dev/xvdf'
+        ebs_device_name='/dev/xvdf',
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -59,7 +63,7 @@ def test_on_demand_virtual_machine(loader):
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     vm.prepare_vm(type_task='server')
 
@@ -79,7 +83,11 @@ def test_preemptible_virtual_machine(loader):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -98,7 +106,7 @@ def test_preemptible_virtual_machine(loader):
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     vm.prepare_vm(type_task='server')
 
@@ -117,7 +125,11 @@ def test_vm_with_EBS(volume_id='', loader=None):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -139,7 +151,7 @@ def test_vm_with_EBS(volume_id='', loader=None):
     if volume_id is not None:
         vm.volume_id = volume_id
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     vm.prepare_vm(type_task='server')
 

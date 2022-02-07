@@ -200,7 +200,7 @@ class GCPManager(CloudManager):
                 self.mutex.release()
             return False
 
-    def create_on_demand_instance(self, instance_type, image_id, zone='', vm_name=''):
+    def create_on_demand_instance(self, instance_type, image_id, zone='', vm_name='', gpu_type='', gpu_count=0):
 
         try:
 
@@ -216,56 +216,122 @@ class GCPManager(CloudManager):
 
             source_disk_image = image_response['selfLink']
 
-            config = {
-                'name': vm_name,
-                'machineType': machine_type,
+            if gpu_count > 0:
+                print("creating with GPU")
+                config = {
+                    'name': vm_name,
+                    'machineType': machine_type,
 
-                # Not working. Still in Beta on GCP API!
-                # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
-                # 'soourceMachineImage': source_machine_image,
+                    # Not working. Still in Beta on GCP API!
+                    # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'soourceMachineImage': source_machine_image,
 
-                # Specify the boot disk and the image to use as a source.
-                'disks': [
-                    {
-                        'boot': True,
-                        'autoDelete': True,
-                        'initializeParams': {
-                            'sourceImage': source_disk_image,
-                        }
-
-                    }
-                ],
-
-                # Allowing SSH connection from third-parties
-                "metadata": {
-                    "items": [
+                    # Specify the boot disk and the image to use as a source.
+                    'disks': [
                         {
-                            "key": 'enable-oslogin',
-                            "value": 'TRUE'
+                            'boot': True,
+                            'autoDelete': True,
+                            'initializeParams': {
+                                'sourceImage': source_disk_image,
+                            }
+
                         }
-                    ]
-                },
+                    ],
 
-                # Allow the instance to access cloud storage.
-                'serviceAccounts': [{
-                    'email': 'default',
-                    'scopes': [
-                        'https://www.googleapis.com/auth/devstorage.read_write'
-                    ]
-                }],
+                    # Allowing SSH connection from third-parties
+                    "metadata": {
+                        "items": [
+                            {
+                                "key": 'enable-oslogin',
+                                "value": 'TRUE'
+                            }
+                        ]
+                    },
 
-                # Specify a network interface with NAT to access the public
-                # internet.
-                'networkInterfaces': [{
-                    'network': 'global/networks/default',
-                    'accessConfigs': [
-                        {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                    ]
-                }],
-                'tags': [{
-                    'items': ['http-server', 'https-server']
-                }]
-            }
+                    # Allow the instance to access cloud storage.
+                    'serviceAccounts': [{
+                        'email': 'default',
+                        'scopes': [
+                            'https://www.googleapis.com/auth/devstorage.read_write'
+                        ]
+                    }],
+
+                    "guestAccelerators":
+                    [
+                        {
+                            "acceleratorCount": gpu_count,
+                            "acceleratorType": f"projects/{self.gcp_conf.project}/zones/{zone}/"
+                                               f"acceleratorTypes/{gpu_type}"
+                        }
+                    ],
+
+                    # Specify a network interface with NAT to access the public
+                    # internet.
+                    'networkInterfaces': [{
+                        'network': 'global/networks/default',
+                        'accessConfigs': [
+                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                        ]
+                    }],
+                    'tags': [{
+                        'items': ['http-server', 'https-server']
+                    }],
+                    "scheduling":
+                    {
+                    "onHostMaintenance": "terminate"
+                    }
+                }
+            else:
+                config = {
+                    'name': vm_name,
+                    'machineType': machine_type,
+
+                    # Not working. Still in Beta on GCP API!
+                    # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'soourceMachineImage': source_machine_image,
+
+                    # Specify the boot disk and the image to use as a source.
+                    'disks': [
+                        {
+                            'boot': True,
+                            'autoDelete': True,
+                            'initializeParams': {
+                                'sourceImage': source_disk_image,
+                            }
+
+                        }
+                    ],
+
+                    # Allowing SSH connection from third-parties
+                    "metadata": {
+                        "items": [
+                            {
+                                "key": 'enable-oslogin',
+                                "value": 'TRUE'
+                            }
+                        ]
+                    },
+
+                    # Allow the instance to access cloud storage.
+                    'serviceAccounts': [{
+                        'email': 'default',
+                        'scopes': [
+                            'https://www.googleapis.com/auth/devstorage.read_write'
+                        ]
+                    }],
+
+                    # Specify a network interface with NAT to access the public
+                    # internet.
+                    'networkInterfaces': [{
+                        'network': 'global/networks/default',
+                        'accessConfigs': [
+                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                        ]
+                    }],
+                    'tags': [{
+                        'items': ['http-server', 'https-server']
+                    }]
+                }
 
             instances = self._create_instance(config, zone)
 

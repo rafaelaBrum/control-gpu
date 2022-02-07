@@ -78,7 +78,7 @@ class InstanceType:
 
     @property
     def have_gpu(self):
-        return self.gpu.lower() in ['yes']
+        return self.count_gpu > 0
 
     def __str__(self):
         return "'{}' on-demand price: '{}' preemptible price: '{}' " \

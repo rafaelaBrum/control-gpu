@@ -10,15 +10,17 @@ import logging
 def test_on_demand_virtual_machine(disk_name, loader):
     instance = InstanceType(
         provider=CloudManager.GCLOUD,
-        instance_type='n2-standard-2',
-        image_id='disk-ubuntu-flower-server',
+        instance_type='n1-standard-8',
+        image_id='disk-ubuntu-flower-client-test',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        memory=8,
-        vcpu=2,
-        ebs_device_name='/dev/sdb'
+        memory=30,
+        vcpu=8,
+        ebs_device_name='/dev/sdb',
+        count_gpu=1,
+        gpu='nvidia-tesla-t4'
     )
 
     vm = VirtualMachine(
@@ -28,12 +30,12 @@ def test_on_demand_virtual_machine(disk_name, loader):
         disk_name=disk_name
     )
 
-    status = vm.deploy()
+    status = vm.deploy(type_task='server')
 
     print("IP of running instances:")
     print(vm.get_instances_ip())
 
-    print("On-demand price of instance:", vm.price)
+    # print("On-demand price of instance:", vm.price)
 
     if status:
         vm.prepare_vm(type_task='server')
