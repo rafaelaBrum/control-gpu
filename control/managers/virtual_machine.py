@@ -263,6 +263,7 @@ class VirtualMachine:
                                                             self.manager.credentials.secret_key)
         else:
             cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(credentials['access_key'], credentials['secret_key'])
+            print("cmd1", cmd1)
 
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
@@ -286,7 +287,7 @@ class VirtualMachine:
 
         elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             # Mount the bucket in GCP
-            cmd3 = 's3fs {}  -o use_path_request_style' \
+            cmd3 = 's3fs {} -o use_path_request_style ' \
                    '-o use_cache=/tmp -o uid={} -o gid={} ' \
                    '-o mp_umask=002 -o multireq_max=5 ' \
                    '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
