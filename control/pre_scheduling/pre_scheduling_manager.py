@@ -405,6 +405,10 @@ class PreSchedulingManager:
 
         # try to open the connection
         if vm.ssh.open_connection():
+
+            app_item = self.loader.pre_sched_conf.app_file
+            train_item = self.loader.pre_sched_conf.train_file
+
             try:
                 logging.info("<VirtualMachine {}>: "
                              "- Creating directory {}".format(vm.instance_id,
@@ -416,9 +420,6 @@ class PreSchedulingManager:
                 vm.create_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
 
                 logging.info(f"<VirtualMachine {vm.instance_id}>: - Sending Files Training test")
-
-                app_item = self.loader.pre_sched_conf.app_file
-                train_item = self.loader.pre_sched_conf.train_file
 
                 # Send files
                 if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -574,6 +575,15 @@ class PreSchedulingManager:
 
                 return times
             except Exception as e:
+
+                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
+
+                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+
+                stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+                print(stdout)
+
+                logging.error(e)
                 return {}
         else:
 
