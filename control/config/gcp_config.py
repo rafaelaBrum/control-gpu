@@ -39,3 +39,7 @@ class GCPConfig(Config):
     @property
     def credentials_file(self):
         return self.get_property(self._key, 'credentials_file')
+
+    @property
+    def aws_settings(self):
+        return self.get_property(self._key, 'aws_settings')

@@ -1,3 +1,5 @@
+import json
+
 from control.domain.instance_type import InstanceType
 
 from control.managers.cloud_manager import CloudManager
@@ -251,13 +253,16 @@ class VirtualMachine:
             logging.info("<VirtualMachine {}>: - {} ".format(self.instance_id, cmd4))
             self.ssh.execute_command(cmd4, output=True)
 
-    def __create_s3(self, path, client=None):
+    def __create_s3(self, path, client=None, credentials=None):
 
         logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
 
         # prepare S3FS
-        cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
-                                                        self.manager.credentials.secret_key)
+        if credentials is None:
+            cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
+                                                            self.manager.credentials.secret_key)
+        else:
+            cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(credentials['access_key'], credentials['secret_key'])
 
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
@@ -622,7 +627,17 @@ class VirtualMachine:
 
     def create_bucket_pre_sched(self, path, client: FLClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
-            self.__create_s3(path, client)
+            if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                self.__create_s3(path, client)
+            elif  self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                try:
+                    with open(os.path.join(self.loader.gcp_conf.key_path,
+                                           self.loader.gcp_conf.aws_settings)) as f:
+                        data = f.read()
+                    credentials = json.loads(data)
+                    self.__create_s3(path, client, credentials)
+                except Exception as e:
+                    logging.error(e)
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
             self.__create_cloud_storage(path, client)
 
