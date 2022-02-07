@@ -273,18 +273,30 @@ class VirtualMachine:
 
         region_bucket = self.loader.loc.get('AWS_' + client.bucket_region)
 
-        # Mount the bucket within AWS
-        cmd3 = 's3fs {} ' \
-               '-o use_cache=/tmp -o uid={} -o gid={} ' \
-               '-o mp_umask=002 -o multireq_max=5 ' \
-               '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
-                                                               self.manager.bucket_config.vm_uid,
-                                                               self.manager.bucket_config.vm_gid,
-                                                               region_bucket.region,
-                                                               path)
-        # Mount the bucket in GCP
-        # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
-        # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
+        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+            # Mount the bucket within AWS
+            cmd3 = 's3fs {} ' \
+                   '-o use_cache=/tmp -o uid={} -o gid={} ' \
+                   '-o mp_umask=002 -o multireq_max=5 ' \
+                   '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
+                                                                   self.manager.bucket_config.vm_uid,
+                                                                   self.manager.bucket_config.vm_gid,
+                                                                   region_bucket.region,
+                                                                   path)
+
+        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            # Mount the bucket in GCP
+            cmd3 = 's3fs {}  -o use_path_request_style' \
+                   '-o use_cache=/tmp -o uid={} -o gid={} ' \
+                   '-o mp_umask=002 -o multireq_max=5 ' \
+                   '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
+                                                                   self.loader.gcp_conf.uid,
+                                                                   self.loader.gcp_conf.gid,
+                                                                   region_bucket.region,
+                                                                   path)
+            # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
+            # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
+
 
         logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
         self.ssh.execute_command(cmd1, output=True)

@@ -43,3 +43,11 @@ class GCPConfig(Config):
     @property
     def aws_settings(self):
         return self.get_property(self._key, 'aws_settings')
+
+    @property
+    def gid(self):
+        return self.get_property(self._key, 'gid')
+
+    @property
+    def uid(self):
+        return self.get_property(self._key, 'uid')
