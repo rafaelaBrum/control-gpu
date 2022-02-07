@@ -45,6 +45,29 @@
             "memory": 0,
             "gpu": "no",
             "gpu_count": 0
+        },
+        "n1-standard-8": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": 0.16034,
+                "preemptible": 0.038796000000000004
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-t4",
+            "gpu_count": 1
         }
     }
 }
