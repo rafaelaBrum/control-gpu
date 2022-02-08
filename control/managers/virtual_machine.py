@@ -257,6 +257,8 @@ class VirtualMachine:
 
         logging.info("<VirtualMachine {}>: - Mounting S3FS".format(self.instance_id))
 
+        cmd_install = "sudo apt install s3fs -y"
+
         # prepare S3FS
         if credentials is None:
             cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(self.manager.credentials.access_key,
@@ -297,7 +299,11 @@ class VirtualMachine:
                                                                    path)
             # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
             # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
+        else:
+            cmd3 = ""
 
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_install))
+        self.ssh.execute_command(cmd_install, output=True)
 
         logging.info("<VirtualMachine {}>: - Creating .passwd-s3fs".format(self.instance_id))
         self.ssh.execute_command(cmd1, output=True)
