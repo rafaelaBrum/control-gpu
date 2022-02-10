@@ -677,3 +677,14 @@ class VirtualMachine:
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
+
+    def reboot(self):
+        cmd = 'sudo reboot'.format()
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=False)
+
+        reboot_complete = False
+        while not reboot_complete:
+            if self.ssh.open_connection():
+                reboot_complete = True
