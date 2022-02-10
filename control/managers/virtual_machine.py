@@ -684,7 +684,13 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=False)
 
+        start_reboot = datetime.now()
+
         reboot_complete = False
         while not reboot_complete:
             if self.ssh.open_connection():
                 reboot_complete = True
+
+        reboot_overhead = datetime.now() - start_reboot
+
+        logging.info("<VirtualMachine {}>: - Reboot overhead: {}".format(self.instance_id, reboot_overhead))
