@@ -62,6 +62,7 @@
     "number_datacenters": 10,
     "rtt": {
         "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": 0.1250438690185547,
             "AWS_us-east-1_us-east-1b": 0.14763522148132324,
             "AWS_us-east-1_us-east-1c": 0.13022685050964355,
             "AWS_us-east-1_us-east-1d": 0.04256415367126465,
@@ -73,6 +74,7 @@
             "GCP_us-central1_us-central1-f": 1.4885354042053223
         },
         "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": 0.13025283813476562,
             "AWS_us-east-1_us-east-1c": 0.07843828201293945,
             "AWS_us-east-1_us-east-1d": 0.042093515396118164,
             "AWS_us-east-1_us-east-1e": 0.04220938682556152,
@@ -83,6 +85,7 @@
             "GCP_us-central1_us-central1-f": 1.7454230785369873
         },
         "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": 0.09696340560913086,
             "AWS_us-east-1_us-east-1d": 0.21982645988464355,
             "AWS_us-east-1_us-east-1e": 0.061846256256103516,
             "AWS_us-east-1_us-east-1f": 0.03534245491027832,
@@ -92,6 +95,7 @@
             "GCP_us-central1_us-central1-f": 0.2317509651184082
         },
         "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": 0.1199030876159668,
             "AWS_us-east-1_us-east-1e": 0.1318352222442627,
             "AWS_us-east-1_us-east-1f": 0.05032825469970703,
             "GCP_us-central1_us-central1-a": 0.24460244178771973,
@@ -100,6 +104,7 @@
             "GCP_us-central1_us-central1-f": 1.7430613040924072
         },
         "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": 0.1601109504699707,
             "AWS_us-east-1_us-east-1f": 0.10804533958435059,
             "GCP_us-central1_us-central1-a": 0.24550199508666992,
             "GCP_us-central1_us-central1-b": 1.496196985244751,
@@ -107,23 +112,29 @@
             "GCP_us-central1_us-central1-f": 0.28298282623291016
         },
         "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": 0.1234290599822998,
             "GCP_us-central1_us-central1-a": 0.3271939754486084,
             "GCP_us-central1_us-central1-b": 1.7265400886535645,
             "GCP_us-central1_us-central1-c": 0.23771452903747559,
             "GCP_us-central1_us-central1-f": 1.9740631580352783
         },
         "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": 7.182409048080444,
             "GCP_us-central1_us-central1-b": 8.500431299209595,
             "GCP_us-central1_us-central1-c": 0.953974723815918,
             "GCP_us-central1_us-central1-f": 1.9499728679656982
         },
         "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": 9.49443769454956,
             "GCP_us-central1_us-central1-c": 3.358510732650757,
             "GCP_us-central1_us-central1-f": 6.494251728057861
         },
         "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": 7.610565900802612,
             "GCP_us-central1_us-central1-f": 10.737019777297974
         },
-        "GCP_us-central1_us-central1-f": {}
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-central1_us-central1-f": 7.505433559417725
+        }
     }
 }
