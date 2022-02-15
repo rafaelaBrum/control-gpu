@@ -84,8 +84,7 @@ class PreSchedulingManager:
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
                 vm_initial.zone = zone
-                if id_rtt not in self.rtt_values\
-                        :
+                if id_rtt not in self.rtt_values:
                     self.rtt_values[id_rtt] = {}
                 for region_copy in loc_copy.values():
                     if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -104,8 +103,6 @@ class PreSchedulingManager:
                         logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
                                      f"region {region_copy.region} of provider {region_copy.provider}")
                         id_rtt_final = region_copy.id + '_' + zone_copy
-                        if region.id == region_id and zone_copy == zone:
-                            continue
                         if id_rtt_final in self.rtt_values[id_rtt]:
                             continue
                         if not vm_initial.failed_to_created:
