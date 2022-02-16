@@ -1,6 +1,6 @@
 {
     "job_id": 411,
-    "job_name": "4 clients - VGG16 (all AWS)",
+    "job_name": "4 clients - VGG16 (all GCP)",
     "description": "4 clients executing VGG16 with smaller dataset stored in GCP",
     "tasks": {
         "server": {

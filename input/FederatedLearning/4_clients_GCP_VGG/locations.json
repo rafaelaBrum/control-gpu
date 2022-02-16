@@ -19,7 +19,7 @@
             "provider": "gcp",
             "region": "us-central1",
             "key_file": "my-ssh-key",
-            "client_image_id": "disk-ubuntu-flower-client-test",
+            "client_image_id": "disk-ubuntu-flower-client-gcsfuse-s3fs",
             "server_image_id": "disk-ubuntu-flower-server",
             "zones": [
                 "us-central1-a",
