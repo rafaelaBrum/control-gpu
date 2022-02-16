@@ -309,7 +309,7 @@ class PreSchedulingManager:
                     vm.update_ip(zone=final_zone)
                 for cli in clients.values():
                     logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                    if cli.client_id in self.exec_times[env_id][loc_id]:
+                    if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
                     self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
                     vm.reboot()
@@ -354,7 +354,7 @@ class PreSchedulingManager:
                     vm.update_ip(zone=final_zone)
                 for cli in clients.values():
                     logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                    if cli.client_id in self.exec_times[env_id][loc_id]:
+                    if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
                     self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
                 status = vm.terminate(wait=False, zone=final_zone)
