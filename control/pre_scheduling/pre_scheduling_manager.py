@@ -357,6 +357,7 @@ class PreSchedulingManager:
                     if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
                     self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
+                    vm.reboot()
                 status = vm.terminate(wait=False, zone=final_zone)
                 if status:
                     vm.instance_id = None
