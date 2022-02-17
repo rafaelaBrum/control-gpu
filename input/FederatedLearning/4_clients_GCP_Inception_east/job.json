@@ -27,7 +27,7 @@
                 "test_dir": "data/CellRep/4_clients/0/testset",
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
-                "bucket_region": "us-central1",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "1" : {
@@ -42,7 +42,7 @@
                 "test_dir": "data/CellRep/4_clients/1/testset",
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
-                "bucket_region": "us-central1",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "2" : {
@@ -57,7 +57,7 @@
                 "test_dir": "data/CellRep/4_clients/2/testset",
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
-                "bucket_region": "us-central1",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             },
             "3" : {
@@ -72,7 +72,7 @@
                 "test_dir": "data/CellRep/4_clients/3/testset",
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
-                "bucket_region": "us-central1",
+                "bucket_region": "us-east1",
                 "net": "Inception"
             }
         }
