@@ -18,6 +18,17 @@ def __call_control(loader: Loader):
     try:
         loader.print_execution_info()
 
+        pre_sched = PreSchedulingManager(loader=loader)
+
+        if pre_sched.stop_execution:
+            return
+
+        pre_sched.calculate_rtt_values()
+
+        pre_sched.get_first_rounds_times()
+
+        pre_sched.write_json()
+
         manager = ScheduleManager(loader=loader)
 
         manager.start_execution()

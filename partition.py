@@ -220,6 +220,7 @@ def partition_CellRep_data(dataset, n_parties):
         foldername = "{}/{}/testset".format(root_foldername, party)
         generate_label_files(foldername)
 
+
 def partition_patches_data_homogeneously(dataset, n_parties, folder):
     dataset_folder = os.path.join(os.path.expanduser('~'), dataset, folder, 'samples')
     x_list, y_list = _load_metadata_from_dir(dataset_folder)
@@ -253,6 +254,57 @@ def partition_patches_data_homogeneously(dataset, n_parties, folder):
         generate_label_files(foldername)
 
 
+def partition_data_homogeneously(dataset, n_parties, folder):
+    trainset_folder = os.path.join(os.path.expanduser('~'), dataset, folder, 'trainset', 'samples')
+    x_train_list, y_train_list = _load_metadata_from_dir(trainset_folder)
+    testset_folder = os.path.join(os.path.expanduser('~'), dataset, folder, 'testset', 'samples')
+    x_test_list, y_test_list = _load_metadata_from_dir(testset_folder)
+
+    y_train = np.array(y_train_list)
+    y_test = np.array(y_test_list)
+
+    n_train = len(y_train)
+    n_test = len(y_test)
+
+    # random partition
+    idxs = np.random.permutation(n_train)
+    batch_idxs = np.array_split(idxs, n_parties)
+    net_dataidx_map = {i: batch_idxs[i] for i in range(n_parties)}
+    idxs_test = np.random.permutation(n_test)
+    batch_idxs_test = np.array_split(idxs_test, n_parties)
+    net_test_dataidx_map = {i: batch_idxs_test[i] for i in range(n_parties)}
+
+    root_foldername = "data/{}/{}_clients".format(dataset, n_parties)
+    mkdirs(root_foldername)
+
+    for party in range(n_parties):
+        foldername = "{}/{}".format(root_foldername, party)
+        mkdirs(foldername)
+        print(f"created {foldername}")
+        # saving train dataset
+        x_train_local = []
+        for i in range(len(x_train_list)):
+            if i in net_dataidx_map[party]:
+                x_train_local.append(x_train_list[i])
+        foldername = f"{foldername}/trainset/samples/"
+        mkdirs(foldername)
+        print(f"created {foldername}")
+        copy_images(x_train_local, foldername)
+        foldername = "{}/{}/trainset".format(root_foldername, party)
+        generate_label_files(foldername)
+        # saving test dataset
+        x_test_local = []
+        for i in range(len(x_test_list)):
+            if i in net_test_dataidx_map[party]:
+                x_test_local.append(x_train_list[i])
+        foldername = f"{root_foldername}/{party}/testset/samples/"
+        mkdirs(foldername)
+        print(f"created {foldername}")
+        copy_images(x_test_local, foldername)
+        foldername = "{}/{}/testset".format(root_foldername, party)
+        generate_label_files(foldername)
+
+
 def partition_data(dataset, n_parties, folder):
 
     if dataset == 'MNIST':
@@ -267,8 +319,13 @@ def partition_data(dataset, n_parties, folder):
 
 
 if __name__ == "__main__":
-    dataset = 'patches'
-    for folder in ('blca', 'brca', 'cesc', 'coad', 'paad', 'prad', 'read', 'skcm', 'stad', 'ucec'):
-        for n_parties in (2, 3, 4):
-            print(f"Partitioning folder {folder} into {n_parties} clients")
-            partition_data(dataset, n_parties, folder)
+    # dataset = 'patches'
+    # for folder in ('blca', 'brca', 'cesc', 'coad', 'paad', 'prad', 'read', 'skcm', 'stad', 'ucec'):
+    #     for n_parties in (2, 3, 4):
+    #         print(f"Partitioning folder {folder} into {n_parties} clients")
+    #         partition_data(dataset, n_parties, folder)
+    n_parties = 4
+    dataset = 'client_0'
+    folder = 'CellRep/4_clients/0'
+
+    partition_data_homogeneously(dataset, n_parties, folder)
