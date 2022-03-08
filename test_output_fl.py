@@ -38,7 +38,8 @@ def main():
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
     parser.add_argument('--job_file', help="Job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
-    # parser.add_argument('--map_file', help="map file name", type=str, default=None)
+    parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
+    parser.add_argument('--pre_file', help="pre scheduling file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",
     #                     type=int, default=None)
@@ -58,12 +59,16 @@ def main():
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-05967bab0d693d334',
+        image_id='ami-0888499069c5ebe05',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='',
+        memory=8,
+        vcpu=4
     )
 
     vm = VirtualMachine(
@@ -77,7 +82,7 @@ def main():
     if volume_id is not None:
         vm.volume_id = volume_id
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     vm.prepare_vm('server')
 

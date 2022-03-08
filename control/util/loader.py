@@ -294,8 +294,8 @@ class Loader:
 
         ec2_zone = self.ec2_conf.zone
         ec2_region = self.ec2_conf.region
-        gcp_zone = self.gcp_conf.zone
-        gcp_region = self.gcp_conf.region
+        # gcp_zone = self.gcp_conf.zone
+        # gcp_region = self.gcp_conf.region
 
         for instance in self.env.values():
 
@@ -315,23 +315,24 @@ class Loader:
                     )
 
             elif instance.provider == CloudManager.GCLOUD:
+                continue
 
-                if instance.market_ondemand:
-                    cpu_price, mem_price = GCPManager.get_ondemand_price(instance_type=instance.type, region=gcp_region)
-                    price = instance.vcpu * cpu_price + instance.memory * mem_price
-                    instance.setup_ondemand_price(
-                        price=price,
-                        region=gcp_region
-                    )
-
-                if instance.market_preemptible:
-                    cpu_price, mem_price = GCPManager.get_preemptible_price(instance_type=instance.type, zone=gcp_zone)
-                    price = instance.vcpu * cpu_price + instance.memory * mem_price
-                    instance.setup_preemptible_price(
-                        price=price,
-                        region=gcp_region,
-                        zone=gcp_zone
-                    )
+                # if instance.market_ondemand:
+                #     cpu_price, mem_price = GCPManager.get_ondemand_price(instance_type=instance.type, region=gcp_region)
+                #     price = instance.vcpu * cpu_price + instance.memory * mem_price
+                #     instance.setup_ondemand_price(
+                #         price=price,
+                #         region=gcp_region
+                #     )
+                #
+                # if instance.market_preemptible:
+                #     cpu_price, mem_price = GCPManager.get_preemptible_price(instance_type=instance.type, zone=gcp_zone)
+                #     price = instance.vcpu * cpu_price + instance.memory * mem_price
+                #     instance.setup_preemptible_price(
+                #         price=price,
+                #         region=gcp_region,
+                #         zone=gcp_zone
+                #     )
 
         # Update env file
         with open(self.env_file, "r") as jsonFile:

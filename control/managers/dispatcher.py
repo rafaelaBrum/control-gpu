@@ -595,7 +595,7 @@ class Dispatcher:
 
                     self.semaphore.release()
 
-            while self.working and not task.has_task_finished():
+            while self.working and not task.has_task_finished() and task.is_running():
                 # waiting for work
                 # self.waiting_work.wait()
                 #
