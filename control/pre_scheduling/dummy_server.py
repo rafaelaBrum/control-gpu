@@ -25,10 +25,14 @@ class DummyServicer(dummy_pb2_grpc.DummyServiceServicer):
     def TestEval(self, request, context):
         logging.info("Received TestEval message")
         evaluate_ins_from_proto(request)
-        metrics = {"test": 10.0,
-                   "test1": 10.0,
+        metrics = {"test1": 10.0,
                    "test2": 10.0,
-                   "test3": 10.0}
+                   "test3": 10.0,
+                   "test4": 10.0,
+                   "test5": 10.0,
+                   "test6": 10.0,
+                   "test7": 10.0,
+                   "test8": 10.0}
         return evaluate_res_to_proto(EvaluateRes(loss=0.1, num_examples=10, metrics=metrics))
 
     def Finish(self, request, context):
