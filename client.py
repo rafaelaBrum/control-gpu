@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from control.util.loader import Loader
 
 from control.scheduler.schedule_manager import ScheduleManager
@@ -17,17 +16,6 @@ import argparse
 def __call_control(loader: Loader):
     try:
         loader.print_execution_info()
-
-        pre_sched = PreSchedulingManager(loader=loader)
-
-        if pre_sched.stop_execution:
-            return
-
-        pre_sched.calculate_rtt_values()
-
-        pre_sched.get_first_rounds_times()
-
-        pre_sched.write_json()
 
         manager = ScheduleManager(loader=loader)
 
@@ -57,6 +45,8 @@ def __call_pre_scheduling(loader: Loader):
         pre_sched.calculate_rtt_values()
 
         pre_sched.get_first_rounds_times()
+
+        pre_sched.calculate_rpc_times()
 
         pre_sched.write_json()
 

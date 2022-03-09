@@ -23,3 +23,19 @@ class PreSchedConfig(Config):
     @property
     def results_temp_file(self):
         return self.get_property(self._key, 'results_temp_file')
+
+    @property
+    def rpc_file(self):
+        return self.get_property(self._key, 'rpc_file')
+
+    @property
+    def client_file(self):
+        return self.get_property(self._key, 'client_file')
+
+    @property
+    def server_file(self):
+        return self.get_property(self._key, 'server_file')
+
+    @property
+    def length_msg(self):
+        return self.get_property(self._key, 'length_msg')

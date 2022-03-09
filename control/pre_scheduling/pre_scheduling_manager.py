@@ -27,6 +27,22 @@ instance_aws = InstanceType(
     vcpu='2',
     memory=0
 )
+
+instance_aws_rpc = InstanceType(
+    provider=CloudManager.EC2,
+    instance_type='t2.large',
+    image_id='ami-0d638c42b2e92c091',
+    restrictions={'on-demand': 1,
+                  'preemptible': 1},
+    prices={'on-demand': 0.001,
+            'preemptible': 0.000031},
+    ebs_device_name='/dev/xvdf',
+    gpu='no',
+    count_gpu=0,
+    vcpu=2,
+    memory=8
+)
+
 instance_gcp = InstanceType(
     provider=CloudManager.GCLOUD,
     instance_type='e2-micro',
@@ -40,6 +56,21 @@ instance_gcp = InstanceType(
     gpu='no',
     count_gpu=0,
     memory=4
+)
+
+instance_gcp_rpc = InstanceType(
+    provider=CloudManager.GCLOUD,
+    instance_type='e2-standard-2',
+    image_id='disk-ubuntu-flower-server',
+    restrictions={'on-demand': 1,
+                  'preemptible': 1},
+    prices={'on-demand': 0.001,
+            'preemptible': 0.000031},
+    vcpu=2,
+    ebs_device_name='/dev/sdb',
+    gpu='no',
+    count_gpu=0,
+    memory=8
 )
 
 
@@ -61,6 +92,7 @@ class PreSchedulingManager:
         self.loader = loader
         self.rtt_values: Dict[str, Dict[str, float]] = {}
         self.exec_times: Dict[str, Dict[str, Dict[str, float]]] = {}
+        self.rpc_times: Dict[str, Dict[str, Dict[str, float]]] = {}
 
         self.stop_execution = self.__read_json()
 
@@ -230,9 +262,9 @@ class PreSchedulingManager:
             else:
                 cmd_daemon = ""
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
-            logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd_screen,
-                                                                                        vm_final.instance_id))
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+            logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                         vm_final.instance_id))
 
             stdout, stderr, code_return = vm_final.ssh.execute_command(cmd_screen, output=True)
             print(stdout)
@@ -241,8 +273,8 @@ class PreSchedulingManager:
                 continue
 
             cmd = "cat $HOME/screen_log"
-            logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd,
-                                                                                        vm_final.instance_id))
+            logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd,
+                                                                                         vm_final.instance_id))
 
             trying = 0
             rtt_value = -1
@@ -272,7 +304,7 @@ class PreSchedulingManager:
         env_aws, env_gcp = self.separate_env_per_cloud()
         loc_aws, loc_gcp = self.separate_loc_per_cloud()
         logging.info("<PreSchedulerManager>: Calculating AWS training times")
-        #TODO: parallelize
+        # TODO: parallelize
         for env_id, env in env_aws.items():
             if not env.have_gpu:
                 continue
@@ -311,13 +343,15 @@ class PreSchedulingManager:
                     logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
                     if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
-                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
+                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                        key_file,
+                                                                                                        cli)
                     vm.reboot()
                 status = vm.terminate(wait=False, zone=final_zone)
                 if status:
                     vm.instance_id = None
                     vm.failed_to_created = False
-        #TODO: add multiple regions to GCP clients
+        # TODO: add multiple regions to GCP clients
         logging.info("<PreSchedulerManager>: Calculating GCP training times")
         for env_id, env in env_gcp.items():
             if not env.have_gpu:
@@ -356,7 +390,9 @@ class PreSchedulingManager:
                     logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
                     if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
-                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm, key_file, cli)
+                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                        key_file,
+                                                                                                        cli)
                     vm.reboot()
                 status = vm.terminate(wait=False, zone=final_zone)
                 if status:
@@ -399,7 +435,7 @@ class PreSchedulingManager:
                 logging.error(f"<PreSchedulingManager>: {cli.bucket_provider} does not have support ({cli_id})")
         return cli_aws, cli_gcp
 
-    def __compute_training_times(self, vm : VirtualMachine, key, cli: FLClientTask):
+    def __compute_training_times(self, vm: VirtualMachine, key, cli: FLClientTask):
 
         if key == '':
             if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -426,11 +462,11 @@ class PreSchedulingManager:
 
             try:
                 logging.info("<VirtualMachine {}>: "
-                             "- Creating directory {}".format(vm.instance_id,
-                                                              self.loader.file_system_conf.path_storage))
+                             "- Creating directory {} ".format(vm.instance_id,
+                                                               self.loader.file_system_conf.path_storage))
                 # create directory
                 vm.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
-                                         output=True)
+                                       output=True)
 
                 vm.create_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
 
@@ -449,21 +485,21 @@ class PreSchedulingManager:
 
                     cmd_before_daemon = "mkdir results/"
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_before_daemon))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
                     print(stdout)
 
                     cmd_remove = "rm results/*"
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                     print(stdout)
 
                     cmd1 = f'unzip {app_item} -d .'
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd1))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
@@ -505,21 +541,21 @@ class PreSchedulingManager:
 
                     cmd_before_daemon = "mkdir results/"
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_before_daemon))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_before_daemon))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
                     print(stdout)
 
                     cmd_remove = "rm results/*"
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                     print(stdout)
 
                     cmd1 = f'unzip {app_item} -d .'
 
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd1))
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd1))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
@@ -551,9 +587,9 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
-                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {}".format(cmd_screen,
-                                                                                            vm.instance_id))
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                             vm.instance_id))
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
                 print(stdout)
@@ -574,7 +610,7 @@ class PreSchedulingManager:
 
                 cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
 
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                 print(stdout)
@@ -593,7 +629,7 @@ class PreSchedulingManager:
 
                 cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
 
-                logging.info("<PreScheduling - VirtualMachine {}>: - {}".format(vm.instance_id, cmd_remove))
+                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
                 print(stdout)
@@ -605,13 +641,405 @@ class PreSchedulingManager:
             logging.error("<PreScheduler> VirtualMachine {}:: SSH CONNECTION ERROR".format(vm.instance_id))
             raise Exception("<PreScheduler> VirtualMachine {}:: SSH Exception ERROR".format(vm.instance_id))
 
+    def calculate_rpc_times(self):
+        logging.info("<PreSchedulerManager>: Calculating RPC times")
+        loc_copy = deepcopy(self.loader.loc)
+        for region_id, region in self.loader.loc.items():
+            if region.provider in (CloudManager.EC2, CloudManager.AWS):
+                vm_initial = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand', loader=self.loader)
+            elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                vm_initial = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand', loader=self.loader)
+            else:
+                logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
+                return
+            key_file_initial = ''
+            if region.key_file != '':
+                key_file_initial = region.key_file.split('.')[0]
+            for zone in region.zones:
+                id_rpc = region_id + '_' + zone
+                logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
+                             f" or provider {region.provider}")
+                vm_initial.instance_type.image_id = region.server_image_id
+                vm_initial.zone = zone
+                if id_rpc not in self.rpc_times:
+                    self.rpc_times[id_rpc] = {}
+                for region_copy in loc_copy.values():
+                    if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
+                        vm_final = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand',
+                                                  loader=self.loader)
+                    elif region_copy.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                        vm_final = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand',
+                                                  loader=self.loader)
+                    else:
+                        logging.error(
+                            f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
+                        return
+                    vm_final.instance_type.image_id = region_copy.server_image_id
+                    key_file = ''
+                    if region_copy.key_file != '':
+                        key_file = region_copy.key_file.split('.')[0]
+                    for zone_copy in region_copy.zones:
+                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
+                                     f"region {region_copy.region} of provider {region_copy.provider}")
+                        id_rpc_final = region_copy.id + '_' + zone_copy
+                        if id_rpc_final in self.rpc_times[id_rpc]:
+                            continue
+                        if not vm_initial.failed_to_created:
+                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='')
+                            if not vm_initial.failed_to_created:
+                                vm_initial.update_ip(zone=zone)
+                        vm_final.zone = zone_copy
+                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='')
+                        if not vm_final.failed_to_created:
+                            # update instance IP
+                            vm_final.update_ip(zone=zone_copy)
+                            self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
+                                                                                       region.key_file,
+                                                                                       region_copy.key_file)
+                            status = vm_final.terminate(wait=False, zone=zone_copy)
+                            if status:
+                                vm_final.instance_id = None
+                                vm_final.failed_to_created = False
+                                vm_final.ssh = None
+                        else:
+                            vm_final.instance_id = None
+                            vm_final.failed_to_created = False
+                            vm_final.ssh = None
+                loc_copy[region_id].zones.remove(zone)
+                if not vm_initial.failed_to_created:
+                    status = vm_initial.terminate(wait=False, zone=zone)
+                    if status:
+                        vm_initial.instance_id = None
+                        vm_initial.failed_to_created = False
+                        vm_initial.ssh = None
+                else:
+                    vm_initial.instance_id = None
+                    vm_initial.failed_to_created = False
+                    vm_initial.ssh = None
+            loc_copy.pop(region_id, None)
+
+    def __exec_rpc_vms(self, vm_server, vm_client, key_server, key_client):
+
+        times = {}
+
+        server_configured = False
+
+        if vm_server.ssh is not None:
+            server_configured = True
+        else:
+            # Start a new SSH Client
+            if vm_server.instance_type.provider == CloudManager.EC2:
+                vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.ec2_conf.key_path,
+                                          key_server, self.loader.ec2_conf.vm_user)
+            elif vm_server.instance_type.provider == CloudManager.GCLOUD:
+                vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.gcp_conf.key_path,
+                                          key_server, self.loader.gcp_conf.vm_user)
+
+        # Start a new SSH Client
+        if vm_client.instance_type.provider == CloudManager.EC2:
+            vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.ec2_conf.key_path,
+                                      key_client, self.loader.ec2_conf.vm_user)
+        elif vm_client.instance_type.provider == CloudManager.GCLOUD:
+            vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.gcp_conf.key_path,
+                                      key_client, self.loader.gcp_conf.vm_user)
+
+        # try to open the connection
+        if vm_server.ssh.open_connection() and vm_client.ssh.open_connection():
+
+            rpc_app_item = self.loader.pre_sched_conf.rpc_file
+            rpc_client_item = self.loader.pre_sched_conf.client_file
+            rpc_server_item = self.loader.pre_sched_conf.server_file
+
+            try:
+                logging.info(f"<VirtualMachine {vm_server.instance_id}>: - Sending RPC Files test")
+
+                # Send files
+                if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+
+                    if not server_configured:
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.ec2_conf.home_path,
+                                               item=rpc_app_item)
+
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.ec2_conf.home_path,
+                                               item=rpc_client_item)
+
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.ec2_conf.home_path,
+                                               item=rpc_server_item)
+
+                        cmd1 = f'unzip {rpc_app_item} -d .'
+
+                        logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id, cmd1))
+
+                        stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
+                        print(stdout)
+                    else:
+                        cmd_json = f'rm {self.loader.pre_sched_conf.results_temp_file}'
+
+                        logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
+                                                                                         cmd_json))
+
+                        stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_json, output=True)
+                        print(stdout)
+
+                    cmd_daemon = "python3 {} " \
+                                 "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                     self.loader.pre_sched_conf.server_file),
+                                                        self.loader.application_conf.fl_port
+                                                        )
+
+                elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    if not server_configured:
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.gcp_conf.home_path,
+                                               item=rpc_app_item)
+
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.gcp_conf.home_path,
+                                               item=rpc_client_item)
+
+                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                               target=self.loader.gcp_conf.home_path,
+                                               item=rpc_server_item)
+
+                        cmd1 = f'unzip {rpc_app_item} -d .'
+
+                        logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id, cmd1))
+
+                        stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
+                        print(stdout)
+                    else:
+                        cmd_json = f'rm {self.loader.pre_sched_conf.results_temp_file}'
+
+                        logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
+                                                                                         cmd_json))
+
+                    cmd_daemon = "python3 {} " \
+                                 "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                     self.loader.pre_sched_conf.server_file),
+                                                        self.loader.application_conf.fl_port
+                                                        )
+                else:
+                    cmd_daemon = ""
+
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                             vm_server.instance_id))
+
+                stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
+
+                time.sleep(30)
+
+                server_ip = f"{vm_server.instance_public_ip}:{self.loader.application_conf.fl_port}"
+
+                logging.info(f"<VirtualMachine {vm_client.instance_id}>: - Sending RPC Files test")
+
+                # Send files
+                if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.ec2_conf.home_path,
+                                           item=rpc_app_item)
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.ec2_conf.home_path,
+                                           item=rpc_client_item)
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.ec2_conf.home_path,
+                                           item=rpc_server_item)
+
+                    cmd1 = f'unzip {rpc_app_item} -d .'
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_client.instance_id, cmd1))
+
+                    stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
+
+                    cmd_daemon = "python3 {} " \
+                                 "--server_address {} " \
+                                 "--length_parameters {} " \
+                                 "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                       self.loader.pre_sched_conf.client_file),
+                                                          server_ip,
+                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          )
+
+                elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.gcp_conf.home_path,
+                                           item=rpc_app_item)
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.gcp_conf.home_path,
+                                           item=rpc_client_item)
+
+                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                                           target=self.loader.gcp_conf.home_path,
+                                           item=rpc_server_item)
+
+                    cmd1 = f'unzip {rpc_app_item} -d .'
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_client.instance_id, cmd1))
+
+                    stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
+
+                    cmd_daemon = "python3 {} " \
+                                 "--server_address {} " \
+                                 "--length_parameters {} " \
+                                 "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                       self.loader.pre_sched_conf.client_file),
+                                                          server_ip,
+                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          )
+                else:
+                    cmd_daemon = ""
+
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                             vm_client.instance_id))
+
+                stdout, stderr, code_return = vm_client.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
+
+                while not has_command_finished(vm_client):
+                    continue
+
+                try:
+                    if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                        vm_client.ssh.get_file(source=vm_client.loader.ec2_conf.home_path,
+                                               target=self.loader.pre_sched_conf.path,
+                                               item=self.loader.pre_sched_conf.results_temp_file)
+                    elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                        vm_client.ssh.get_file(source=vm_client.loader.gcp_conf.home_path,
+                                               target=self.loader.pre_sched_conf.path,
+                                               item=self.loader.pre_sched_conf.results_temp_file)
+
+                    with open(os.path.join(self.loader.pre_sched_conf.path,
+                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                        data = f.read()
+                    times['server-client'] = json.loads(data)
+                except Exception as e:
+                    logging.error(e)
+                    times['server-client'] = {}
+
+                # Client-server
+
+                if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+
+                    cmd_daemon = "python3 {} " \
+                                 "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                     self.loader.pre_sched_conf.server_file),
+                                                        self.loader.application_conf.fl_port
+                                                        )
+
+                elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    cmd_daemon = "python3 {} " \
+                                 "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                     self.loader.pre_sched_conf.server_file),
+                                                        self.loader.application_conf.fl_port
+                                                        )
+                else:
+                    cmd_daemon = ""
+
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                             vm_client.instance_id))
+
+                stdout, stderr, code_return = vm_client.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
+
+                time.sleep(30)
+
+                server_ip = f"{vm_client.instance_public_ip}:{self.loader.application_conf.fl_port}"
+
+                if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+
+                    cmd_daemon = "python3 {} " \
+                                 "--server_address {} " \
+                                 "--length_parameters {} " \
+                                 "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                       self.loader.pre_sched_conf.client_file),
+                                                          server_ip,
+                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          )
+
+                elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    cmd_daemon = "python3 {} " \
+                                 "--server_address {} " \
+                                 "--length_parameters {} " \
+                                 "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                       self.loader.pre_sched_conf.client_file),
+                                                          server_ip,
+                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          )
+                else:
+                    cmd_daemon = ""
+
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                             vm_server.instance_id))
+
+                stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_screen, output=True)
+                print(stdout)
+
+                while not has_command_finished(vm_server):
+                    continue
+
+                try:
+                    if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                        vm_server.ssh.get_file(source=vm_server.loader.ec2_conf.home_path,
+                                               target=self.loader.pre_sched_conf.path,
+                                               item=self.loader.pre_sched_conf.results_temp_file)
+                    elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                        vm_server.ssh.get_file(source=vm_server.loader.gcp_conf.home_path,
+                                               target=self.loader.pre_sched_conf.path,
+                                               item=self.loader.pre_sched_conf.results_temp_file)
+
+                    with open(os.path.join(self.loader.pre_sched_conf.path,
+                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                        data = f.read()
+                    times['client-server'] = json.loads(data)
+                except Exception as e:
+                    logging.error(e)
+                    times['client-server'] = {}
+
+                vm_server.ssh.close_connection()
+                vm_client.ssh.close_connection()
+
+                return times
+            except Exception as e:
+
+                logging.error(e)
+                return times
+
+        else:
+
+            logging.error("<PreScheduler> VirtualMachine {} or {}:: "
+                          "SSH CONNECTION ERROR".format(vm_server.instance_id, vm_client.instance_id))
+            raise Exception("<PreScheduler> VirtualMachine {} or {}:: "
+                            "SSH Exception ERROR".format(vm_server.instance_id, vm_client.instance_id))
+
     def write_json(self):
         # build a map
         dict_json = {"job_id": self.loader.job.job_id,
                      "job_name": self.loader.job.job_name,
                      "number_datacenters": len(self.rtt_values),
                      "rtt": {},
-                     "exec_times": self.exec_times
+                     "exec_times": self.exec_times,
+                     "rpc": {}
                      }
 
         # print("dict_json")
@@ -621,6 +1049,11 @@ class PreSchedulingManager:
             # print(datacenter)
             # print("rtt_value", rtt_value)
             dict_json['rtt'][datacenter] = rtt_value
+
+        for datacenter, rpc_value in self.rpc_times.items():
+            print(datacenter)
+            print("rpc_value", rpc_value)
+            dict_json['rpc'][datacenter] = rpc_value
 
         file_output = self.loader.pre_file
 
@@ -641,6 +1074,7 @@ class PreSchedulingManager:
                 json_data = json.loads(data)
                 self.exec_times = json_data['exec_times']
                 self.rtt_values = json_data['rtt']
+                self.rpc_times = json_data['rpc']
                 if json_data['job_id'] != self.loader.job.job_id or json_data['job_name'] != self.loader.job.job_name:
                     logging.error(f"<PreSchedulerManager> Current file {self.loader.pre_file} is not for this job!")
                     rep = str(input("Do you want to stop execution? [N] for no; otherwise yes"))
