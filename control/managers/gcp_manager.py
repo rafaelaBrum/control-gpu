@@ -217,14 +217,14 @@ class GCPManager(CloudManager):
             source_disk_image = image_response['selfLink']
 
             if gpu_count > 0:
-                print("creating with GPU")
+                # print("creating with GPU")
                 config = {
                     'name': vm_name,
                     'machineType': machine_type,
 
                     # Not working. Still in Beta on GCP API!
-                    # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
-                    # 'soourceMachineImage': source_machine_image,
+                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'sourceMachineImage': source_machine_image,
 
                     # Specify the boot disk and the image to use as a source.
                     'disks': [
@@ -278,7 +278,7 @@ class GCPManager(CloudManager):
                     }],
                     "scheduling":
                     {
-                    "onHostMaintenance": "terminate"
+                        "onHostMaintenance": "terminate"
                     }
                 }
             else:
@@ -287,8 +287,8 @@ class GCPManager(CloudManager):
                     'machineType': machine_type,
 
                     # Not working. Still in Beta on GCP API!
-                    # # 'soourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
-                    # 'soourceMachineImage': source_machine_image,
+                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'sourceMachineImage': source_machine_image,
 
                     # Specify the boot disk and the image to use as a source.
                     'disks': [
@@ -580,7 +580,7 @@ class GCPManager(CloudManager):
             return instance['networkInterfaces'][0]['networkIP']
 
     @staticmethod
-    def get_preemptible_price(instance_type, zone=None):
+    def get_preemptible_price(instance_type, region=None):
         params = {'pageToken': None}
 
         instance_data_gcp = []
@@ -600,11 +600,12 @@ class GCPManager(CloudManager):
             params['pageToken'] = all_data_gcp['nextPageToken']
 
             aux_list = [x for x in all_data_gcp['skus']
-                        if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
-                        and 'Preemptible' in x['description']]
+                        if (f'{instance_type.split("-")[0].upper()} ' in x['description']
+                            and 'Instance' in x['description'])
+                        and 'Preemptible' in x['description']
+                        and 'Custom' not in x['description']]
 
-            if 'us' in zone:
-                aux_list = [x for x in aux_list if 'Americas' in x['description']]
+            aux_list = [x for x in aux_list if region in x['serviceRegions']]
 
             for a in aux_list:
                 instance_data_gcp.append(a)
@@ -650,6 +651,9 @@ class GCPManager(CloudManager):
 
         instance_data_gcp = []
 
+        # print("instance type:'", instance_type, "'")
+        # print("region: ", region)
+
         while len(instance_data_gcp) < 2:
 
             if params['pageToken'] is None:
@@ -665,11 +669,12 @@ class GCPManager(CloudManager):
             params['pageToken'] = all_data_gcp['nextPageToken']
 
             aux_list = [x for x in all_data_gcp['skus']
-                        if f'{instance_type.split("-")[0].upper()} Instance' in x['description']
-                        and 'Preemptible' not in x['description']]
+                        if (f'{instance_type.split("-")[0].upper()} ' in x['description']
+                            and 'Instance' in x['description'])
+                        and 'Preemptible' not in x['description']
+                        and 'Custom' not in x['description']]
 
-            if 'us' in region:
-                aux_list = [x for x in aux_list if 'Americas' in x['description']]
+            aux_list = [x for x in aux_list if region in x['serviceRegions']]
 
             for a in aux_list:
                 instance_data_gcp.append(a)
@@ -705,7 +710,106 @@ class GCPManager(CloudManager):
                                 ['unitPrice']['nanos']) / 1000000000
             price_per_ram = int_price_per_ram + cents_per_ram
 
+        # print("price_per_vcpu: ", price_per_vcpu)
+        # print("price_per_ram: ", price_per_ram)
         return price_per_vcpu, price_per_ram
+
+    # Get current on-demand GPU price for GCP
+    @staticmethod
+    def get_ondemand_gpu_price(gpu_type, region):
+
+        params = {'pageToken': None}
+
+        gpu_data_gcp = []
+
+        gpu_type_search = gpu_type.replace("-", " ")
+
+        # print("gpu type:'", gpu_type, "'")
+        # print("gpu type search:'", gpu_type_search, "'")
+        # print("region: ", region)
+
+        while len(gpu_data_gcp) < 1:
+
+            if params['pageToken'] is None:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+            else:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    params=params)
+
+            all_data_gcp = r.json()
+
+            params['pageToken'] = all_data_gcp['nextPageToken']
+
+            aux_list = [x for x in all_data_gcp['skus']
+                        if gpu_type_search.lower() in x['description'].lower()
+                        and 'Preemptible' not in x['description']
+                        and 'OnDemand' in x['category']['usageType']]
+
+            aux_list = [x for x in aux_list if region in x['serviceRegions']]
+
+            for a in aux_list:
+                gpu_data_gcp.append(a)
+
+        int_price_per_gpu = int(gpu_data_gcp[0]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates']
+                                [0]['unitPrice']['units'])
+        cents_per_gpu = int(gpu_data_gcp[0]['pricingInfo'][0]
+                            ['pricingExpression']['tieredRates'][0]
+                            ['unitPrice']['nanos']) / 1000000000
+        price_per_gpu = int_price_per_gpu + cents_per_gpu
+
+        # print("price_per_gpu: ", price_per_gpu)
+        return price_per_gpu
+
+    # Get current on-demand GPU price for GCP
+    @staticmethod
+    def get_preemptible_gpu_price(gpu_type, region):
+
+        params = {'pageToken': None}
+
+        gpu_data_gcp = []
+
+        gpu_type_search = gpu_type.replace("-", " ")
+
+        # print("gpu type:'", gpu_type, "'")
+        # print("gpu type search:'", gpu_type_search, "'")
+        # print("region: ", region)
+
+        while len(gpu_data_gcp) < 1:
+
+            if params['pageToken'] is None:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+            else:
+                r = requests.get(
+                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    params=params)
+
+            all_data_gcp = r.json()
+
+            params['pageToken'] = all_data_gcp['nextPageToken']
+
+            aux_list = [x for x in all_data_gcp['skus']
+                        if gpu_type_search.lower() in x['description'].lower()
+                        and 'Preemptible' in x['description']]
+
+            aux_list = [x for x in aux_list if region in x['serviceRegions']]
+
+            for a in aux_list:
+                gpu_data_gcp.append(a)
+
+        int_price_per_gpu = int(gpu_data_gcp[0]['pricingInfo'][0]
+                                ['pricingExpression']['tieredRates']
+                                [0]['unitPrice']['units'])
+        cents_per_gpu = int(gpu_data_gcp[0]['pricingInfo'][0]
+                            ['pricingExpression']['tieredRates'][0]
+                            ['unitPrice']['nanos']) / 1000000000
+        price_per_gpu = int_price_per_gpu + cents_per_gpu
+
+        # print("price_per_gpu: ", price_per_gpu)
+        return price_per_gpu
 
     # Get availability zones of a GCP region
     def get_availability_zones(self, region):
