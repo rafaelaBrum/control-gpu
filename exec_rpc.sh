@@ -22,6 +22,10 @@ while [  $COUNTER -lt 6 ]; do
  ----------------------------"
         python client.py pre
         cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_$COUNTER.json
+	cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
+        echo " ----------------------------
+  Sleeping
+ ----------------------------"
         sleep 5m
         COUNTER=$((COUNTER+1))
 done
