@@ -1,10 +1,10 @@
 {
     "instances": {
-        "r5a.16xlarge": {
+        "c6a.16xlarge": {
             "provider": "ec2",
             "prices": {
-                "on-demand": 3.616,
-                "preemptible": 1.2722
+                "on-demand": 6.048,
+                "preemptible": 1.8692
             },
             "restrictions": {
                 "limits": {
@@ -18,8 +18,8 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/nvme1n1",
-            "vcpu": 32,
-            "memory": 0,
+            "vcpu": 64,
+            "memory": 128,
             "gpu": "yes",
             "gpu_count": 1
         },
@@ -27,7 +27,7 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": 0.1856,
-                "preemptible": 0.0574
+                "preemptible": 0.0558
             },
             "restrictions": {
                 "limits": {
