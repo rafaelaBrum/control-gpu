@@ -1,0 +1,50 @@
+{
+    "job_id": 400102,
+    "job_name": "2 clients - Inception (all AWS)",
+    "description": "2 clients executing Inception with dataset from a single client stored in AWS (10 epochs per round)",
+    "tasks": {
+        "server": {
+            "task_name": "Task server Inception",
+            "command": "python3 TIL_Inception_server.py",
+            "runtime": {
+                "g4dn.xlarge": 65
+            },
+            "generic_ckpt": "False",
+            "zip_file": "TIL_Inception_server.zip",
+            "n_rounds": 5,
+            "n_clients": 2
+        },
+        "clients": {
+            "0" : {
+                "task_name": "Task Inception (client 0)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-0",
+                "trainset_dir": "client_0/2_clients/0/trainset",
+                "test_dir": "client_0/2_clients/0/testset",
+                "train_epochs": 10,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            },
+            "1" : {
+                "task_name": "Task Inception (client 1)",
+                "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_Inception_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-1",
+                "trainset_dir": "client_0/2_clients/1/trainset",
+                "test_dir": "client_0/2_clients/1/testset",
+                "train_epochs": 10,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "Inception"
+            }
+        }
+    }
+}

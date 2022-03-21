@@ -324,7 +324,7 @@ if __name__ == "__main__":
     #     for n_parties in (2, 3, 4):
     #         print(f"Partitioning folder {folder} into {n_parties} clients")
     #         partition_data(dataset, n_parties, folder)
-    n_parties = 4
+    n_parties = 2
     dataset = 'client_0'
     folder = 'CellRep/4_clients/0'
 
