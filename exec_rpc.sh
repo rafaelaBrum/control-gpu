@@ -14,19 +14,20 @@ export POSTGRES_PASS=rafaela123
 echo " ----------------------------
  RPC tests
  ---------------------------- "
-FOLDER_TESTS=input/FederatedLearning/teste_rpc
+FOLDER_TESTS=input/FederatedLearning/rpc_tests
 COUNTER=1
 while [  $COUNTER -lt 6 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"
+        cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
         python client.py pre
         cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_$COUNTER.json
-	cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
+        cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
         echo " ----------------------------
   Sleeping
  ----------------------------"
-        sleep 5m
+        sleep 4h
         COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------
