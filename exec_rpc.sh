@@ -15,7 +15,7 @@ echo " ----------------------------
  RPC tests
  ---------------------------- "
 FOLDER_TESTS=input/FederatedLearning/rpc_tests
-COUNTER=1
+COUNTER=5
 while [  $COUNTER -lt 6 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -27,7 +27,9 @@ while [  $COUNTER -lt 6 ]; do
         echo " ----------------------------
   Sleeping
  ----------------------------"
-        sleep 4h
+        if [  $COUNTER -lt 5 ]; then
+                sleep 4h
+        fi
         COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------

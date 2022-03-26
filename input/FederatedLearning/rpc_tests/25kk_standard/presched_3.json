@@ -16,6 +16,16 @@
     "number_datacenters": 10,
     "rpc": {
         "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": {
+                "client-server": {
+                    "TestMsg": "3.336463212966919",
+                    "TrainMsg": "5.714105606079102"
+                },
+                "server-client": {
+                    "TestMsg": "3.0371267795562744",
+                    "TrainMsg": "5.881489276885986"
+                }
+            },
             "AWS_us-east-1_us-east-1b": {
                 "client-server": {},
                 "server-client": {}
@@ -35,6 +45,16 @@
             "AWS_us-east-1_us-east-1f": {
                 "client-server": {},
                 "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "19.932780742645264",
+                    "TrainMsg": "27.315175533294678"
+                },
+                "server-client": {
+                    "TestMsg": "12.601295948028564",
+                    "TrainMsg": "30.638899564743042"
+                }
             },
             "GCP_us-central1_us-central1-b": {
                 "client-server": {},
@@ -200,6 +220,16 @@
             }
         },
         "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "1.1284518241882324",
+                    "TrainMsg": "2.0434646606445312"
+                },
+                "server-client": {
+                    "TestMsg": "1.136051893234253",
+                    "TrainMsg": "2.1625871658325195"
+                }
+            },
             "GCP_us-central1_us-central1-b": {
                 "client-server": {},
                 "server-client": {}

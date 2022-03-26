@@ -18,12 +18,12 @@
         "AWS_us-east-1_us-east-1a": {
             "AWS_us-east-1_us-east-1a": {
                 "client-server": {
-                    "TestMsg": "3.070032835006714",
-                    "TrainMsg": "5.696688652038574"
+                    "TestMsg": "1.4268310070037842",
+                    "TrainMsg": "2.7588744163513184"
                 },
                 "server-client": {
-                    "TestMsg": "3.0205512046813965",
-                    "TrainMsg": "5.654607772827148"
+                    "TestMsg": "1.4436416625976562",
+                    "TrainMsg": "2.7074499130249023"
                 }
             },
             "AWS_us-east-1_us-east-1b": {
@@ -48,12 +48,12 @@
             },
             "GCP_us-central1_us-central1-a": {
                 "client-server": {
-                    "TestMsg": "22.011704444885254",
-                    "TrainMsg": "34.70359563827515"
+                    "TestMsg": "8.910537004470825",
+                    "TrainMsg": "9.054584503173828"
                 },
                 "server-client": {
-                    "TestMsg": "11.183067798614502",
-                    "TrainMsg": "30.009822368621826"
+                    "TestMsg": "6.661308526992798",
+                    "TrainMsg": "17.188560724258423"
                 }
             },
             "GCP_us-central1_us-central1-b": {
@@ -222,12 +222,12 @@
         "GCP_us-central1_us-central1-a": {
             "GCP_us-central1_us-central1-a": {
                 "client-server": {
-                    "TestMsg": "1.1416804790496826",
-                    "TrainMsg": "2.117443799972534"
+                    "TestMsg": "0.5252583026885986",
+                    "TrainMsg": "1.0561082363128662"
                 },
                 "server-client": {
-                    "TestMsg": "1.1202690601348877",
-                    "TrainMsg": "2.1792802810668945"
+                    "TestMsg": "0.5272350311279297",
+                    "TrainMsg": "1.1086108684539795"
                 }
             },
             "GCP_us-central1_us-central1-b": {

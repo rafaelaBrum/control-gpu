@@ -14,7 +14,236 @@
     "job_id": 3,
     "job_name": "Job teste de RPC",
     "number_datacenters": 10,
-    "rpc": {},
+    "rpc": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {},
+                "server-client": {}
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        },
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {},
+                "server-client": {}
+            }
+        }
+    },
     "rtt": {
         "AWS_us-east-1_us-east-1a": {
             "AWS_us-east-1_us-east-1a": 0.16825294494628906,
