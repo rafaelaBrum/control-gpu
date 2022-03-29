@@ -15,7 +15,7 @@ echo " ----------------------------
  RPC tests
  ---------------------------- "
 FOLDER_TESTS=input/FederatedLearning/rpc_tests
-COUNTER=5
+COUNTER=1
 while [  $COUNTER -lt 6 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
