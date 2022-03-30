@@ -513,9 +513,9 @@ class VirtualMachine:
             zone = self.zone
 
         # print("instance_id:", self.instance_id)
-        # print("region: ", region)
+        # print("region: ", zone)
 
-        logging.info("<VirtualMachine>: Terminating instance {} ".format(self.instance_id))
+        logging.info("<VirtualMachine>: Terminating instance {} - zone {}".format(self.instance_id, zone))
 
         terminate_start = datetime.now()
 
