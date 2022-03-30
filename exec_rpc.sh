@@ -28,7 +28,7 @@ while [  $COUNTER -lt 6 ]; do
   Sleeping
  ----------------------------"
         if [  $COUNTER -lt 5 ]; then
-                sleep 4h
+                sleep 3h
         fi
         COUNTER=$((COUNTER+1))
 done
