@@ -1,0 +1,32 @@
+{
+    "locations": {
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "key_file": "rafaelabrum_key.pem",
+            "client_image_id": "ami-0888499069c5ebe05",
+            "server_image_id": "ami-0d638c42b2e92c091",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ]
+        },
+        "AWS_us-west-2": {
+            "provider": "aws",
+            "region": "us-west-2",
+            "key_file": "rafaelabrum_key_west.pem",
+            "client_image_id": "ami-0c555386f14c216a0",
+            "server_image_id": "ami-007b127fa47600ab2",
+            "zones": [
+                "us-west-2a",
+                "us-west-2b",
+                "us-west-2c",
+                "us-west-2d"
+            ]
+        }
+    }
+}

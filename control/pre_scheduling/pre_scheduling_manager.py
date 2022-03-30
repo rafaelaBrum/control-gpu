@@ -115,6 +115,7 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
+                vm_initial.region = region
                 vm_initial.zone = zone
                 if id_rtt not in self.rtt_values:
                     self.rtt_values[id_rtt] = {}
@@ -128,21 +129,22 @@ class PreSchedulingManager:
                             f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
                         return
                     vm_final.instance_type.image_id = region_copy.server_image_id
+                    vm_final.region = region_copy
                     key_file = ''
                     if region_copy.key_file != '':
                         key_file = region_copy.key_file.split('.')[0]
                     for zone_copy in region_copy.zones:
-                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
-                                     f"region {region_copy.region} of provider {region_copy.provider}")
                         id_rtt_final = region_copy.id + '_' + zone_copy
                         if id_rtt_final in self.rtt_values[id_rtt]:
                             continue
+                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
+                                     f"region {region_copy.region} of provider {region_copy.provider}")
                         if not vm_initial.failed_to_created:
-                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='')
+                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='server')
                             if not vm_initial.failed_to_created:
                                 vm_initial.update_ip(zone=zone)
                         vm_final.zone = zone_copy
-                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='')
+                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
                         if not vm_final.failed_to_created:
                             # update instance IP
                             vm_final.update_ip(zone=zone_copy)
@@ -313,7 +315,6 @@ class PreSchedulingManager:
                 self.exec_times[env_id] = {}
             vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
             for loc_id, region in loc_aws.items():
-                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                 if loc_id in self.exec_times[env_id]:
                     skip_loc = True
                     for cli in clients.values():
@@ -323,13 +324,16 @@ class PreSchedulingManager:
                         continue
                 else:
                     self.exec_times[env_id][loc_id] = {}
+                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                 key_name = region.key_file.split('.')[0]
                 vm.instance_type.image_id = region.client_image_id
+                vm.region = region
                 key_file = region.key_file
                 final_zone = ''
                 for zone in region.zones:
                     try:
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='')
+                        vm.zone = zone
+                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
                         final_zone = zone
                         break
                     except Exception as e:
@@ -339,16 +343,20 @@ class PreSchedulingManager:
                 if not vm.failed_to_created:
                     # update instance IP
                     vm.update_ip(zone=final_zone)
-                for cli in clients.values():
-                    logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                    if str(cli.client_id) in self.exec_times[env_id][loc_id]:
-                        continue
-                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                        key_file,
-                                                                                                        cli)
-                    vm.reboot()
-                status = vm.terminate(wait=False, zone=final_zone)
-                if status:
+                    for cli in clients.values():
+                        if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                            continue
+                        logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
+                        self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                            key_file,
+                                                                                                            cli)
+                        vm.reboot()
+                    print("final_zone", final_zone)
+                    status = vm.terminate(wait=False, zone=final_zone)
+                    if status:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+                else:
                     vm.instance_id = None
                     vm.failed_to_created = False
         # TODO: add multiple regions to GCP clients
@@ -361,7 +369,6 @@ class PreSchedulingManager:
                 self.exec_times[env_id] = {}
             vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
             for loc_id, region in loc_gcp.items():
-                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                 if loc_id in self.exec_times[env_id]:
                     skip_loc = True
                     for cli in clients.values():
@@ -371,12 +378,13 @@ class PreSchedulingManager:
                         continue
                 else:
                     self.exec_times[env_id][loc_id] = {}
+                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                 vm.instance_type.image_id = region.client_image_id
                 key_file = self.loader.gcp_conf.key_file
                 final_zone = ''
                 for zone in region.zones:
                     try:
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='')
+                        vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
                         final_zone = zone
                         break
                     except Exception as e:
@@ -387,9 +395,9 @@ class PreSchedulingManager:
                     # update instance IP
                     vm.update_ip(zone=final_zone)
                 for cli in clients.values():
-                    logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
                     if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                         continue
+                    logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
                     self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
                                                                                                         key_file,
                                                                                                         cli)
@@ -660,6 +668,7 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
                              f" or provider {region.provider}")
                 vm_initial.instance_type.image_id = region.server_image_id
+                vm_initial.region = region
                 vm_initial.zone = zone
                 if id_rpc not in self.rpc_times:
                     self.rpc_times[id_rpc] = {}
@@ -675,21 +684,22 @@ class PreSchedulingManager:
                             f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
                         return
                     vm_final.instance_type.image_id = region_copy.server_image_id
+                    vm_final.region = region_copy
                     key_file = ''
                     if region_copy.key_file != '':
                         key_file = region_copy.key_file.split('.')[0]
                     for zone_copy in region_copy.zones:
-                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
-                                     f"region {region_copy.region} of provider {region_copy.provider}")
                         id_rpc_final = region_copy.id + '_' + zone_copy
                         if id_rpc_final in self.rpc_times[id_rpc]:
                             continue
+                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
+                                     f"region {region_copy.region} of provider {region_copy.provider}")
                         if not vm_initial.failed_to_created:
-                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='')
+                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial, type_task='server')
                             if not vm_initial.failed_to_created:
                                 vm_initial.update_ip(zone=zone)
                         vm_final.zone = zone_copy
-                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='')
+                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
                         if not vm_final.failed_to_created:
                             # update instance IP
                             vm_final.update_ip(zone=zone_copy)
@@ -1051,8 +1061,8 @@ class PreSchedulingManager:
             dict_json['rtt'][datacenter] = rtt_value
 
         for datacenter, rpc_value in self.rpc_times.items():
-            print(datacenter)
-            print("rpc_value", rpc_value)
+            # print(datacenter)
+            # print("rpc_value", rpc_value)
             dict_json['rpc'][datacenter] = rpc_value
 
         file_output = self.loader.pre_file
