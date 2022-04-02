@@ -27,7 +27,7 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": 0.1856,
-                "preemptible": 0.0581
+                "preemptible": 0.058
             },
             "restrictions": {
                 "limits": {
