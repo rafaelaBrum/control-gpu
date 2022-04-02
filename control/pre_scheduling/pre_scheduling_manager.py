@@ -384,9 +384,12 @@ class PreSchedulingManager:
                 final_zone = ''
                 for zone in region.zones:
                     try:
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
+                        status = vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
                         final_zone = zone
-                        break
+                        if status:
+                            break
+                        else:
+                            vm.instance_id = None
                     except Exception as e:
                         logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
                         logging.error(e)
@@ -394,16 +397,19 @@ class PreSchedulingManager:
                 if not vm.failed_to_created:
                     # update instance IP
                     vm.update_ip(zone=final_zone)
-                for cli in clients.values():
-                    if str(cli.client_id) in self.exec_times[env_id][loc_id]:
-                        continue
-                    logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                    self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                        key_file,
-                                                                                                        cli)
-                    vm.reboot()
-                status = vm.terminate(wait=False, zone=final_zone)
-                if status:
+                    for cli in clients.values():
+                        if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                            continue
+                        logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
+                        self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                            key_file,
+                                                                                                            cli)
+                        vm.reboot()
+                    status = vm.terminate(wait=False, zone=final_zone)
+                    if status:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+                else:
                     vm.instance_id = None
                     vm.failed_to_created = False
 

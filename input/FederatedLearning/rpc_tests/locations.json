@@ -27,6 +27,30 @@
                 "us-central1-c",
                 "us-central1-f"
             ]
+        },
+        "GCP_us-west1": {
+            "provider": "gcp",
+            "region": "us-west1",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-gcsfuse-s3fs",
+            "server_image_id": "disk-ubuntu-flower-server",
+            "zones": [
+                "us-west1-a",
+                "us-west1-b",
+                "us-west1-c"
+            ]
+        },
+        "GCP_us-east4": {
+            "provider": "gcp",
+            "region": "us-east4",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-gcsfuse-s3fs",
+            "server_image_id": "disk-ubuntu-flower-server",
+            "zones": [
+                "us-east4-a",
+                "us-east4-b",
+                "us-east4-c"
+            ]
         }
     }
 }
