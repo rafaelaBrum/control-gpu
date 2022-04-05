@@ -62,6 +62,16 @@
                 "client-server": {},
                 "server-client": {}
             },
+            "GCP_us-east4_us-east4-a": {
+                "client-server": {
+                    "TestMsg": "21.210489988327026",
+                    "TrainMsg": "41.672207832336426"
+                },
+                "server-client": {
+                    "TestMsg": "22.364646673202515",
+                    "TrainMsg": "40.6155219078064"
+                }
+            },
             "GCP_us-east4_us-east4-b": {
                 "client-server": {},
                 "server-client": {}
@@ -69,6 +79,16 @@
             "GCP_us-east4_us-east4-c": {
                 "client-server": {},
                 "server-client": {}
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "105.94393539428711",
+                    "TrainMsg": "184.83059763908386"
+                },
+                "server-client": {
+                    "TestMsg": "72.2821626663208",
+                    "TrainMsg": "179.83315300941467"
+                }
             },
             "GCP_us-west1_us-west1-b": {
                 "client-server": {},
