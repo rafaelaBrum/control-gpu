@@ -15,10 +15,10 @@ echo " ----------------------------
  RPC tests
  ---------------------------- "
 FOLDER_TESTS=input/FederatedLearning/rpc_concurrent_tests
-COUNTER_CONC=1
-while [  $COUNTER_CONC -lt 5 ]; do
+COUNTERCONC=2
+while [  $COUNTERCONC -lt 5 ]; do
     echo " ----------------------------
-  Running test - Num. clients=$COUNTER_CONC
+  Running test - Num. clients=$COUNTERCONC
  ----------------------------"
     COUNTER=1
     while [  $COUNTER -lt 11 ]; do
@@ -26,8 +26,8 @@ while [  $COUNTER_CONC -lt 5 ]; do
   Running test - Counter=$COUNTER
  ----------------------------"
         cp $FOLDER_TESTS/presched_without_values.json $FOLDER_TESTS/presched.json
-        python client.py pre --num_clients $COUNTER_CONC
-        cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_$COUNTER_CONC_clients_$COUNTER.json
+        python client.py pre --num_clients $COUNTERCONC
+        cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_${COUNTERCONC}_clients_${COUNTER}.json
         cp $FOLDER_TESTS/presched_without_values.json $FOLDER_TESTS/presched.json
         echo " ----------------------------
   Sleeping
@@ -37,7 +37,7 @@ while [  $COUNTER_CONC -lt 5 ]; do
         fi
         COUNTER=$((COUNTER+1))
     done
-    COUNTER_CONC=$((COUNTER_CONC+1))
+    COUNTERCONC=$((COUNTERCONC+1))
 done
 echo " ----------------------------
   Stopping docker
