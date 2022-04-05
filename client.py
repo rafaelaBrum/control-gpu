@@ -48,6 +48,9 @@ def __call_pre_scheduling(loader: Loader):
 
         pre_sched.calculate_rpc_times()
 
+        if loader.num_clients_pre_sched > 1:
+            pre_sched.calculate_concurrent_rpc_times()
+
         pre_sched.write_json()
 
         # status = "SUCCESS"
@@ -102,6 +105,8 @@ def main():
     parser.add_argument('--revocation_rate',
                         help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
                         default=None)
+    parser.add_argument('--num_clients_pre_sched', help="Quantity of clients in the pre-scheduling RPC tests",
+                        type=int, default=None)
 
     # parser.add_argument('--scheduler_name',
     #                     help="Scheduler name - Currently supported Schedulers are: " + ", ".join(

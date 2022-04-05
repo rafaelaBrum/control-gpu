@@ -70,6 +70,8 @@ class Loader:
         # Client command
         self.client_command = args.command
 
+        self.num_clients_pre_sched = args.num_clients_pre_sched
+
         self.deadline_timedelta = None
 
         # instances able to be used
@@ -210,6 +212,9 @@ class Loader:
 
         if self.revocation_rate is None:
             self.revocation_rate = self.simulation_conf.revocation_rate
+
+        if self.num_clients_pre_sched is None:
+            self.num_clients_pre_sched = self.pre_sched_conf.num_clients
 
     def __load_job(self):
         """

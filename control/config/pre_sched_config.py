@@ -39,3 +39,7 @@ class PreSchedConfig(Config):
     @property
     def length_msg(self):
         return self.get_property(self._key, 'length_msg')
+
+    @property
+    def num_clients(self):
+        return int(self.get_property(self._key, 'num_clients'))

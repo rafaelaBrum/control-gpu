@@ -46,13 +46,6 @@
                 "client-server": {},
                 "server-client": {}
             },
-            "GCP_us-central1_us-central1-a": {
-                "client-server": {
-                    "TestMsg": "88.79425406455994",
-                    "TrainMsg": "138.3635127544403"
-                },
-                "server-client": {}
-            },
             "GCP_us-central1_us-central1-b": {
                 "client-server": {},
                 "server-client": {}

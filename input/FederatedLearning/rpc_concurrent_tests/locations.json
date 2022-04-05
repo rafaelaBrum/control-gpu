@@ -1,0 +1,19 @@
+{
+    "locations": {
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "key_file": "rafaelabrum_key.pem",
+            "client_image_id": "ami-0888499069c5ebe05",
+            "server_image_id": "ami-0d638c42b2e92c091",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ]
+        }
+    }
+}

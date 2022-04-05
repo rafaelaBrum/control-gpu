@@ -20,6 +20,7 @@
     "job_id": 3,
     "job_name": "Job teste de RPC",
     "number_datacenters": 16,
+    "rpc_concurrent": {},
     "rpc": {
         "AWS_us-east-1_us-east-1a": {
             "AWS_us-east-1_us-east-1a": {

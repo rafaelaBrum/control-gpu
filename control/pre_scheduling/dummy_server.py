@@ -14,6 +14,10 @@ import argparse
 
 class DummyServicer(dummy_pb2_grpc.DummyServiceServicer):
     finish = False
+    finish_msgs_received = 0
+
+    def __init__(self, num_clients):
+        self.num_clients = num_clients
 
     def TestTrain(self, request, context):
         logging.info("Received TestTrain message")
@@ -37,21 +41,24 @@ class DummyServicer(dummy_pb2_grpc.DummyServiceServicer):
 
     def Finish(self, request, context):
         logging.info("Received Finish message")
-        self.finish = True
+        self.finish_msgs_received = self.finish_msgs_received + 1
+        logging.info(f"Received {self.finish_msgs_received} Finish messages in total (Waiting {self.num_clients})")
+        if self.finish_msgs_received == self.num_clients:
+            self.finish = True
         return request
 
     def has_finished(self):
         return self.finish
 
 
-def serve(address):
+def serve(address, num_clients):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                          options=[
                              ("grpc.max_send_message_length", GRPC_MAX_MESSAGE_LENGTH),
                              ("grpc.max_receive_message_length", GRPC_MAX_MESSAGE_LENGTH),
                          ],
                          )
-    dummy_servicer = DummyServicer()
+    dummy_servicer = DummyServicer(num_clients=num_clients)
     dummy_pb2_grpc.add_DummyServiceServicer_to_server(
         dummy_servicer, server)
     server.add_insecure_port(address)
@@ -75,8 +82,10 @@ if __name__ == '__main__':
 
     parser.add_argument('--fl_port', help="Flower server address", type=int, default=None, required=True)
 
+    parser.add_argument('--num_clients', help="Number of expected clients", type=int, default=1)
+
     args = parser.parse_args()
 
     server_address = '[::]:' + str(args.fl_port)
 
-    serve(address=server_address)
+    serve(address=server_address, num_clients=args.num_clients)
