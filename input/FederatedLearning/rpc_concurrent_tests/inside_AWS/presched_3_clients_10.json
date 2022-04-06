@@ -349,6 +349,16 @@
     "rpc_concurrent": {
         "2": {
             "AWS_us-east-1_us-east-1a": {
+                "AWS_us-east-1_us-east-1a": {
+                    "0": {
+                        "TestMsg": "13.730411052703857",
+                        "TrainMsg": "18.474589347839355"
+                    },
+                    "1": {
+                        "TestMsg": "11.563487529754639",
+                        "TrainMsg": "22.767374277114868"
+                    }
+                },
                 "AWS_us-east-1_us-east-1b": {
                     "0": {},
                     "1": {}
@@ -503,6 +513,11 @@
         },
         "3": {
             "AWS_us-east-1_us-east-1a": {
+                "AWS_us-east-1_us-east-1a": {
+                    "0": {},
+                    "1": {},
+                    "2": {}
+                },
                 "AWS_us-east-1_us-east-1b": {
                     "0": {},
                     "1": {},
