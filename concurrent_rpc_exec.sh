@@ -15,8 +15,8 @@ echo " ----------------------------
  RPC tests
  ---------------------------- "
 FOLDER_TESTS=input/FederatedLearning/rpc_concurrent_tests
-COUNTERCONC=5
-while [  $COUNTERCONC -lt 11 ]; do
+COUNTERCONC=4
+while [  $COUNTERCONC -lt 5 ]; do
     echo " ----------------------------
   Running test - Num. clients=$COUNTERCONC
  ----------------------------"

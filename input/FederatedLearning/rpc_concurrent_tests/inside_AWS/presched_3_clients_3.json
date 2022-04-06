@@ -507,11 +507,6 @@
         },
         "3": {
             "AWS_us-east-1_us-east-1a": {
-                "AWS_us-east-1_us-east-1a": {
-                    "0": {},
-                    "1": {},
-                    "2": {}
-                },
                 "AWS_us-east-1_us-east-1b": {
                     "0": {},
                     "1": {},

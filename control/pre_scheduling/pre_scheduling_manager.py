@@ -44,6 +44,21 @@ instance_aws_rpc = InstanceType(
     memory=8
 )
 
+instance_aws_rpc_concurrent_server = InstanceType(
+    provider=CloudManager.EC2,
+    instance_type='t2.xlarge',
+    image_id='ami-0d638c42b2e92c091',
+    restrictions={'on-demand': 1,
+                  'preemptible': 1},
+    prices={'on-demand': 0.001,
+            'preemptible': 0.000031},
+    ebs_device_name='/dev/xvdf',
+    gpu='no',
+    count_gpu=0,
+    vcpu=2,
+    memory=8
+)
+
 instance_gcp = InstanceType(
     provider=CloudManager.GCLOUD,
     instance_type='e2-micro',
@@ -1059,7 +1074,7 @@ class PreSchedulingManager:
                 self.rpc_times_concurrent[str(num_clients)] = {}
             for region_id, region in self.loader.loc.items():
                 if region.provider in (CloudManager.EC2, CloudManager.AWS):
-                    vm_initial = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand', loader=self.loader)
+                    vm_initial = VirtualMachine(instance_type=instance_aws_rpc_concurrent_server, market='on-demand', loader=self.loader)
                 elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     vm_initial = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand', loader=self.loader)
                 else:
