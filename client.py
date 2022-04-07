@@ -116,6 +116,9 @@ def main():
     # parser.add_argument('--notify', help='Send an email to notify the end of the execution (control mode)',
     #                     action='store_true', default=False)
 
+    parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=True)
+    parser.add_argument('--server_region', help="Server region", type=str, default=None, required=True)
+
     options_map = {
         'control': __call_control,
         'pre': __call_pre_scheduling,

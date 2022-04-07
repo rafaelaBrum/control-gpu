@@ -1,4 +1,5 @@
 from control.config.ec2_config import EC2Config
+from typing import Dict
 
 
 class InstanceType:
@@ -10,8 +11,8 @@ class InstanceType:
         self.vcpu = vcpu
         self.memory = memory
         # self.gflops = gflops
-        self.price_ondemand = prices['on-demand']
-        self.price_preemptible = prices['preemptible']
+        self.price_ondemand: Dict[str, float] = {}
+        self.price_preemptible: Dict[str, float] = {}
         self.restrictions = restrictions
         self.image_id = image_id
         self.ebs_device_name = ebs_device_name
@@ -30,11 +31,13 @@ class InstanceType:
         self.zone = None
 
     def setup_ondemand_price(self, price, region):
-        self.price_ondemand = price
+        # print("price", price)
+        # print("region", region)
+        self.price_ondemand[region] = price
         self.region = region
 
     def setup_preemptible_price(self, price, region, zone):
-        self.price_preemptible = price
+        self.price_preemptible[region] = price
         self.region = region
         self.zone = zone
 

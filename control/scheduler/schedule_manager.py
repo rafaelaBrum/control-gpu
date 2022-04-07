@@ -128,7 +128,10 @@ class ScheduleManager:
 
     def __build_dispatchers(self):
 
-        instance_type, market, region, zone = self.scheduler.get_server_initial_instance()
+        instance_type, market, region, zone = self.scheduler.get_server_initial_instance(
+            provider=self.loader.server_provider,
+            region=self.loader.server_region
+        )
 
         # Create the Vm that will be used by the dispatcher
         vm = VirtualMachine(
@@ -155,7 +158,11 @@ class ScheduleManager:
         self.client_task_dispatchers = []
 
         for i in range(self.loader.job.num_clients):
-            instance_type, market, region, zone = self.scheduler.get_client_initial_instance()
+            client = self.loader.job.client_tasks[i]
+            instance_type, market, region, zone = self.scheduler.get_client_initial_instance(
+                provider=client.bucket_provider,
+                region=client.bucket_region
+            )
 
             # Create the Vm that will be used by the dispatcher
             vm = VirtualMachine(
@@ -472,7 +479,7 @@ class ScheduleManager:
 
             self.__idle_handle(affected_dispatcher, type_affected_task, affected_client_id)
 
-                # self.client_tasks_status[i] = Task.FINISHED
+            # self.client_tasks_status[i] = Task.FINISHED
         # elif event.value == CloudManager.STOPPED:
         #     # self.semaphore_count.acquire()
         #     self.n_interruptions += 1

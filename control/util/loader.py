@@ -67,6 +67,9 @@ class Loader:
         # self.scheduler_name = args.scheduler_name
         # # notify end of execution by email
         # self.notify = args.notify
+        # server provider and region
+        self.server_provider = args.server_provider
+        self.server_region = args.server_region
         # Client command
         self.client_command = args.command
 
@@ -297,62 +300,71 @@ class Loader:
         get current instances prices on EC2 and GCP and update the env dictionary and also the env.json input file
         """
 
-        ec2_zone = self.ec2_conf.zone
-        ec2_region = self.ec2_conf.region
-        gcp_zone = self.gcp_conf.zone
-        gcp_region = self.gcp_conf.region
+        # ec2_zone = self.ec2_conf.zone
+        # ec2_region = self.ec2_conf.region
+        # gcp_zone = self.gcp_conf.zone
+        # gcp_region = self.gcp_conf.region
 
         for instance in self.env.values():
 
-            print(instance.type)
+            # print(instance.type)
 
-            if instance.provider == CloudManager.EC2:
+            for loc in self.loc.values():
 
-                if instance.market_ondemand:
-                    instance.setup_ondemand_price(
-                        price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=ec2_region),
-                        region=ec2_region
-                    )
-                    print("Final On-demand price: ", instance.price_ondemand)
+                region = loc.region
+                zone = loc.zones[0]
 
-                if instance.market_preemptible:
-                    instance.setup_preemptible_price(
-                        price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=ec2_zone)[0][1],
-                        region=ec2_region,
-                        zone=ec2_zone
-                    )
-                    print("Final Preemptible price: ", instance.price_preemptible)
+                if instance.provider == CloudManager.EC2 and loc.provider in (CloudManager.EC2, CloudManager.AWS):
 
-            elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    if instance.market_ondemand:
+                        instance.setup_ondemand_price(
+                            price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=region),
+                            region=region
+                        )
+                        # print(f"Final On-demand price: ", instance.price_ondemand)
 
-                if instance.market_ondemand:
-                    cpu_price, mem_price = GCPManager.get_ondemand_price(instance_type=instance.type, region=gcp_region)
-                    gpu_price = 0.0
-                    if instance.have_gpu:
-                        print("On-demand Price without GPU: ", instance.vcpu * cpu_price + instance.memory * mem_price)
-                        gpu_price = GCPManager.get_ondemand_gpu_price(gpu_type=instance.gpu, region=gcp_region)
-                    price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
-                    print("Final On-demand price: ", price)
-                    instance.setup_ondemand_price(
-                        price=price,
-                        region=gcp_region
-                    )
+                    if instance.market_preemptible:
+                        instance.setup_preemptible_price(
+                            price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=zone,
+                                                                   region=region)[0][1],
+                            region=region,
+                            zone=zone
+                        )
+                        # print(f"Final Preemptible price: ", instance.price_preemptible)
 
-                if instance.market_preemptible:
-                    cpu_price, mem_price = GCPManager.get_preemptible_price(instance_type=instance.type,
-                                                                            region=gcp_region)
-                    gpu_price = 0.0
-                    if instance.have_gpu:
-                        print("Preemptible Price without GPU: ",
-                              instance.vcpu * cpu_price + instance.memory * mem_price)
-                        gpu_price = GCPManager.get_preemptible_gpu_price(gpu_type=instance.gpu, region=gcp_region)
-                    price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
-                    print("Final Preemptible price: ", price)
-                    instance.setup_preemptible_price(
-                        price=price,
-                        region=gcp_region,
-                        zone=gcp_zone
-                    )
+                elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP) \
+                        and loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    if instance.market_ondemand:
+                        cpu_price, mem_price = GCPManager.get_ondemand_price(instance_type=instance.type,
+                                                                             region=region)
+                        gpu_price = 0.0
+                        if instance.have_gpu:
+                            # print("On-demand Price without GPU: ", instance.vcpu * cpu_price + instance.memory *
+                            #       mem_price)
+                            gpu_price = GCPManager.get_ondemand_gpu_price(gpu_type=instance.gpu, region=region)
+                        price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
+                        # print(f"Final On-demand price: ", instance.price_ondemand)
+                        instance.setup_ondemand_price(
+                            price=price,
+                            region=region
+                        )
+
+                    if instance.market_preemptible:
+                        cpu_price, mem_price = GCPManager.get_preemptible_price(instance_type=instance.type,
+                                                                                region=region)
+                        gpu_price = 0.0
+                        if instance.have_gpu:
+                            # print("Preemptible Price without GPU: ",
+                            #       instance.vcpu * cpu_price + instance.memory * mem_price)
+                            gpu_price = GCPManager.get_preemptible_gpu_price(gpu_type=instance.gpu, region=region)
+                        price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
+                        # print(f"Final Preemptible price: ", instance.price_preemptible)
+                        instance.setup_preemptible_price(
+                            price=price,
+                            region=region,
+                            zone=zone
+                        )
 
         # Update env file
         with open(self.env_file, "r") as jsonFile:

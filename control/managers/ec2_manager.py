@@ -480,7 +480,7 @@ class EC2Manager(CloudManager):
             return instance.private_ip_address
 
     @staticmethod
-    def get_preemptible_price(instance_type, zone=None):
+    def get_preemptible_price(instance_type, zone=None, region=''):
 
         _filters = [
             {
@@ -497,7 +497,7 @@ class EC2Manager(CloudManager):
                 }
             )
 
-        client = boto3.client('ec2')
+        client = get_ec2_client(region=region)
 
         history = client.describe_spot_price_history(
             InstanceTypes=[instance_type],

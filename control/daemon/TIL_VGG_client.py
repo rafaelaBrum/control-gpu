@@ -12,6 +12,8 @@ from sklearn import metrics
 
 from pandas import DataFrame
 
+from time import time
+
 # Filter warnings
 import warnings
 
@@ -622,8 +624,14 @@ def main_exec(args):
         if not os.path.isdir(args.model_path):
             os.mkdir(args.model_path)
 
+        time_start = time()
+
         trainer = Trainer(args)
         trainer.start_execution()
+
+        time_end = time()
+
+        print("TF configuration time:", str(time_end-time_start))
 
         # Start Flower client
         client = VGG16Client(trainer)

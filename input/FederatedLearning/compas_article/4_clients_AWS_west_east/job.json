@@ -1,0 +1,80 @@
+{
+    "job_id": 1402,
+    "job_name": "4 clients - VGG16 (all AWS, 2 in Oregon and 2 in N. Virginia)",
+    "description": "4 clients executing VGG16 with dataset stored in AWS, east and west",
+    "tasks": {
+        "server": {
+            "task_name": "Task server VGG16",
+            "command": "python3 TIL_VGG16_server.py",
+            "runtime": {
+                "g4dn.xlarge": 65
+            },
+            "generic_ckpt": "False",
+            "zip_file": "TIL_VGG16_server.zip",
+            "n_rounds": 10,
+            "n_clients": 4
+        },
+        "clients": {
+            "0" : {
+                "task_name": "Task VGG16 (client 0)",
+                "command": "python3 TIL_VGG16_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_VGG16_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-0-west",
+                "trainset_dir": "data/CellRep/4_clients/0/trainset",
+                "test_dir": "data/CellRep/4_clients/0/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-west-2",
+                "net": "VGG16"
+            },
+            "1" : {
+                "task_name": "Task VGG16 (client 1)",
+                "command": "python3 TIL_VGG16_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_VGG16_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-1-west",
+                "trainset_dir": "data/CellRep/4_clients/1/trainset",
+                "test_dir": "data/CellRep/4_clients/1/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-west-2",
+                "net": "VGG16"
+            },
+            "2" : {
+                "task_name": "Task VGG16 (client 2)",
+                "command": "python3 TIL_VGG16_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_VGG16_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-2",
+                "trainset_dir": "data/CellRep/4_clients/2/trainset",
+                "test_dir": "data/CellRep/4_clients/2/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "VGG16"
+            },
+            "3" : {
+                "task_name": "Task VGG16 (client 3)",
+                "command": "python3 TIL_VGG16_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_ckpt": "False",
+                "zip_file": "TIL_VGG16_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "rafaela-fl-client-3",
+                "trainset_dir": "data/CellRep/4_clients/3/trainset",
+                "test_dir": "data/CellRep/4_clients/3/testset",
+                "train_epochs": 5,
+                "bucket_provider": "aws",
+                "bucket_region": "us-east-1",
+                "net": "VGG16"
+            }
+        }
+    }
+}
