@@ -11,6 +11,7 @@ export SETUP_PATH=$HOME/control-gpu/
 export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
+export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 echo " ----------------------------
  RPC tests
  ---------------------------- "
