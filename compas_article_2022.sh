@@ -7,7 +7,7 @@ echo " ----------------------------
   Exporting variables
  ----------------------------"
 export SETUP_FILE=setup.cfg
-export SETUP_PATH=$HOME/control-gpu_GCP/
+export SETUP_PATH=$HOME/control-gpu/
 export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
