@@ -16,7 +16,7 @@
             "region": "us-east-1",
             "key_file": "rafaelabrum_key.pem",
             "client_image_id": "ami-05ebc5d3ed24bcca1",
-            "server_image_id": "ami-0d638c42b2e92c091",
+            "server_image_id": "ami-0c20212ac4ce26a60",
             "zones": [
                 "us-east-1a",
                 "us-east-1b",

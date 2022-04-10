@@ -164,6 +164,8 @@ class ScheduleManager:
                 region=client.bucket_region
             )
 
+            print(f"Client {i} on region {region.region} and zone {zone}")
+
             # Create the Vm that will be used by the dispatcher
             vm = VirtualMachine(
                 instance_type=instance_type,
@@ -551,6 +553,7 @@ class ScheduleManager:
         # Starting working dispatcher
         for i in range(self.loader.job.num_clients):
             self.client_task_dispatchers[i].main_thread.start()
+            time.sleep(2)
 
         self.semaphore.release()
 

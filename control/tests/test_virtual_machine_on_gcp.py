@@ -11,7 +11,7 @@ def test_on_demand_virtual_machine(disk_name, loader):
     instance = InstanceType(
         provider=CloudManager.GCLOUD,
         instance_type='n1-standard-8',
-        image_id='disk-ubuntu-flower-client-test',
+        image_id='disk-ubuntu-flower-client',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,

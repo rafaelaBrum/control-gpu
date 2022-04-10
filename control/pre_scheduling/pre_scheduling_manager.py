@@ -17,7 +17,7 @@ from control.domain.app_specific.fl_client_task import FLClientTask
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
     instance_type='t2.micro',
-    image_id='ami-0d638c42b2e92c091',
+    image_id='ami-0c20212ac4ce26a60',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
     prices={'on-demand': 0.001,
@@ -32,7 +32,7 @@ instance_aws = InstanceType(
 instance_aws_rpc = InstanceType(
     provider=CloudManager.EC2,
     instance_type='t2.large',
-    image_id='ami-0d638c42b2e92c091',
+    image_id='ami-0c20212ac4ce26a60',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
     prices={'on-demand': 0.001,
@@ -47,7 +47,7 @@ instance_aws_rpc = InstanceType(
 instance_aws_rpc_concurrent_server = InstanceType(
     provider=CloudManager.EC2,
     instance_type='t2.xlarge',
-    image_id='ami-0d638c42b2e92c091',
+    image_id='ami-0c20212ac4ce26a60',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
     prices={'on-demand': 0.001,

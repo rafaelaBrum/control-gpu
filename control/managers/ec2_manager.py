@@ -166,7 +166,7 @@ class EC2Manager(CloudManager):
 
             ebs_vol = client.create_volume(
                 Size=size,
-                AvailabilityZone=self.ec2_conf.zone,
+                AvailabilityZone=zone,
                 TagSpecifications=[
                     {
                         'ResourceType': 'volume',
@@ -229,6 +229,8 @@ class EC2Manager(CloudManager):
             return False
 
     def create_on_demand_instance(self, instance_type, image_id, zone='', burstable=False, key_name=''):
+
+        print(f"Creating instance {instance_type} with image {image_id} in zone {zone}")
 
         region = ''
         if zone != '':
@@ -300,7 +302,8 @@ class EC2Manager(CloudManager):
         # echo "user-data" > $HOME/control-applications/test_user_data.txt
         # '''
 
-        zone = self.ec2_conf.zone
+        if zone == '':
+            zone = self.ec2_conf.zone
         region = zone[:-1]
         interruption_behaviour = 'stop'
 

@@ -1,4 +1,6 @@
 import json
+import calendar
+import time
 
 from control.domain.instance_type import InstanceType
 
@@ -46,6 +48,12 @@ class VirtualMachine:
         self.vm_name = vm_name
         self.zone = zone
         self.region = region
+        if self.region is not None:
+            self.key_file = self.region.key_file
+        elif instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+            self.key_file = self.loader.ec2_conf.key_file
+        elif instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.key_file = self.loader.gcp_conf.key_file
 
         self.create_file_system = False
 
@@ -56,11 +64,12 @@ class VirtualMachine:
             self.manager = GCPManager()
             if self.vm_name == '':
                 self.vm_name = f'vm-{self.instance_type.type}'
-            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}'
+            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}-' \
+                           f'{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
             if self.disk_name == '':
                 self.disk_name = f'disk-{self.instance_type.type}'
             self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
-                             f'-{self.loader.execution_id}'
+                             f'-{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
             VirtualMachine.vm_num += 1
 
         self.instance_id = None
@@ -109,6 +118,11 @@ class VirtualMachine:
         if zone == '':
             zone = self.zone
 
+        if key_name == '':
+            key_name = self.region.key_file
+            if self.instance_type.provider in (CloudManager.AWS, CloudManager.EC2):
+                key_name = key_name.split('.')[0]
+
         if self.region is not None:
             if type_task == Job.SERVER:
                 self.instance_type.image_id = self.region.server_image_id
@@ -124,8 +138,8 @@ class VirtualMachine:
         # Check if a VM was already created
         if self.instance_id is None:
 
-            logging.info("<VirtualMachine>: Deploying a new {} instance of type {} "
-                         .format(self.market, self.instance_type.type))
+            logging.info("<VirtualMachine>: Deploying a new {} instance of type {} in zone {} with AMI {}"
+                         .format(self.market, self.instance_type.type, zone, self.instance_type.image_id))
 
             try:
 
@@ -358,10 +372,10 @@ class VirtualMachine:
             # Start a new SSH Client
             if self.instance_type.provider == CloudManager.EC2:
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
-                                     self.loader.ec2_conf.key_file, self.loader.ec2_conf.vm_user)
+                                     self.key_file, self.loader.ec2_conf.vm_user)
             elif self.instance_type.provider == CloudManager.GCLOUD:
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
-                                     self.loader.gcp_conf.key_file, self.loader.gcp_conf.vm_user)
+                                     self.key_file, self.loader.gcp_conf.vm_user)
 
             # try to open the connection
             if self.ssh.open_connection():
@@ -396,7 +410,10 @@ class VirtualMachine:
                     self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
                                              output=True)
 
-                    self.__create_s3(self.loader.file_system_conf.path_storage, client)
+                    if client is not None and client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                        self.__create_cloud_storage(self.loader.file_system_conf.path_storage, client)
+                    else:
+                        self.__create_s3(self.loader.file_system_conf.path_storage, client)
 
                 if type_task == Job.SERVER:
                     item = self.loader.job.server_task.zip_file
@@ -628,16 +645,16 @@ class VirtualMachine:
     def price(self):
         if self.instance_type.provider == CloudManager.EC2:
             if self.market == CloudManager.PREEMPTIBLE:
-                return self.manager.get_preemptible_price(self.instance_type.type, self.zone, self.region)[0][1]
+                return self.manager.get_preemptible_price(self.instance_type.type, self.zone, self.region.region)[0][1]
             else:
-                return self.manager.get_ondemand_price(self.instance_type.type, self.region)
+                return self.manager.get_ondemand_price(self.instance_type.type, self.region.region)
         elif self.instance_type.provider == CloudManager.GCLOUD:
             if self.market == CloudManager.PREEMPTIBLE:
                 vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type,
-                                                                           self.region)
+                                                                           self.region.region)
             else:
                 vcpu_price, mem_price = self.manager.get_ondemand_price(self.instance_type.type,
-                                                                        self.region)
+                                                                        self.region.region)
             return self.instance_type.vcpu*vcpu_price + self.instance_type.memory*mem_price
 
     @property

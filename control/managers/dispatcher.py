@@ -532,7 +532,19 @@ class Dispatcher:
     def __execution_loop(self):
 
         # Start the VM in the cloud
+        logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
+        logging.info("Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+
         status = self.vm.deploy(type_task=self.type_task)
+
+        if not status:
+            if self.vm.zone.endswith('a'):
+                self.vm.instance_id = None
+                self.vm.zone = self.vm.zone[:-1] + 'b'
+                logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
+                logging.info(
+                    "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+                status = self.vm.deploy(type_task=self.type_task)
 
         # self.expected_makespan_timestamp = self.vm.start_time + timedelta(seconds=self.queue.makespan_seconds)
 

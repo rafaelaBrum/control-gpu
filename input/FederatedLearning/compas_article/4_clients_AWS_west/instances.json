@@ -37,8 +37,8 @@
                     "us-west-2": 0.1856
                 },
                 "preemptible": {
-                    "us-east-1": 0.058,
-                    "us-west-2": 0.0653
+                    "us-east-1": 0.0578,
+                    "us-west-2": 0.0639
                 }
             },
             "restrictions": {
@@ -63,11 +63,11 @@
             "prices": {
                 "on-demand": {
                     "us-west1": 0.7299979999999999,
-                    "us-east4": 0.79797
+                    "us-central1": 0.7299979999999999
                 },
                 "preemptible": {
                     "us-west1": 0.19,
-                    "us-east4": 0.1956
+                    "us-central1": 0.19
                 }
             },
             "restrictions": {
@@ -92,11 +92,11 @@
             "prices": {
                 "on-demand": {
                     "us-west1": 0.13402284,
-                    "us-east4": 0.15094164
+                    "us-central1": 0.13402284
                 },
                 "preemptible": {
                     "us-west1": 0.040206852,
-                    "us-east4": 0.045282492
+                    "us-central1": 0.040206852
                 }
             },
             "restrictions": {
