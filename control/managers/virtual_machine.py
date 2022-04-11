@@ -219,7 +219,6 @@ class VirtualMachine:
                         self.manager.wait_volume(volume_name=self.disk_name, zone=zone)
                         self.manager.attach_volume(
                             instance_id=self.instance_id,
-                            volume_id=self.volume_id,
                             volume_name=self.disk_name,
                             zone=zone
                         )

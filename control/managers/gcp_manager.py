@@ -130,7 +130,7 @@ class GCPManager(CloudManager):
 
             disk = self.__get_disk(volume_name, zone=zone)
 
-            return disk['id'] if disk else None
+            return disk['name'] if disk else None
 
         except Exception as e:
 
@@ -157,7 +157,7 @@ class GCPManager(CloudManager):
             if not ready:
                 disk = self.__get_disk(volume_name, zone=zone)
 
-    def attach_volume(self, instance_id, volume_id, zone='', volume_name=''):
+    def attach_volume(self, instance_id, zone='', volume_name=''):
 
         if zone == '':
             zone = self.gcp_conf.zone

@@ -50,30 +50,61 @@ def main():
 
     parser.add_argument('--log_file', help="log file name", type=str, default=None)
     parser.add_argument('--command', help='command para o client', type=str, default='')
+    parser.add_argument('--num_clients_pre_sched', help="Quantity of clients in the pre-scheduling RPC tests",
+                        type=int, default=None)
+    parser.add_argument('--server_provider', help="Server provider", type=str, default=None)
+    parser.add_argument('--server_region', help="Server region", type=str, default=None)
+
     parser.add_argument('volume_id', help="Volume id to be attached", type=str)
+    parser.add_argument('cloud_provider', help="Provider which the volume are (AWS or GCP). Default: AWS", type=str,
+                        default='aws')
+    parser.add_argument('cloud_zone', help="Zone in which the volume are", type=str, default='')
 
     args = parser.parse_args()
     loader = Loader(args=args)
     volume_id = args.volume_id
 
-    instance = InstanceType(
-        provider=CloudManager.EC2,
-        instance_type='t2.micro',
-        image_id='ami-0e2423601b8f14e2b',
-        ebs_device_name='/dev/xvdf',
-        restrictions={'on-demand': 1,
-                      'preemptible': 1},
-        prices={'on-demand': 0.001,
-                'preemptible': 0.000031},
-        count_gpu=0,
-        gpu='',
-        memory=8,
-        vcpu=4
-    )
+    if args.cloud_provider in (CloudManager.EC2, CloudManager.AWS):
+        instance = InstanceType(
+            provider=CloudManager.EC2,
+            instance_type='t2.micro',
+            image_id='ami-0e2423601b8f14e2b',
+            ebs_device_name='/dev/xvdf',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.001,
+                    'preemptible': 0.000031},
+            count_gpu=0,
+            gpu='',
+            memory=0,
+            vcpu=2
+        )
+        loc_id = 'AWS_' + args.cloud_zone[:-1]
+        region = loader.loc[loc_id]
+    elif args.cloud_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+        instance = InstanceType(
+            provider=CloudManager.GCLOUD,
+            instance_type='e2-micro',
+            image_id='disk-ubuntu-flower-server',
+            restrictions={'on-demand': 1,
+                          'preemptible': 1},
+            prices={'on-demand': 0.001,
+                    'preemptible': 0.000031},
+            vcpu=2,
+            ebs_device_name='/dev/sdb',
+            gpu='no',
+            count_gpu=0,
+            memory=4
+        )
+        loc_id = 'GCP_' + args.cloud_zone[:-2]
+        region = loader.loc[loc_id]
+    else:
+        logging.error("Cloud provider not available ({})".format(args.cloud_provider))
+        return
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible',
+        market='on-demand',
         loader=loader
     )
 
@@ -81,8 +112,10 @@ def main():
 
     if volume_id is not None:
         vm.volume_id = volume_id
+        vm.disk_name = volume_id
+    vm.region = region
 
-    vm.deploy(type_task='server')
+    vm.deploy(type_task='server', zone=args.cloud_zone)
 
     vm.prepare_vm('server')
 
