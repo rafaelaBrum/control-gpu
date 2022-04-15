@@ -108,7 +108,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 7 (3 clients in AWS east, 1 clients in GCP central - server in AWS east)
 ---------------------------- "
@@ -124,7 +124,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 8 (2 clients in AWS east, 2 clients in GCP central - server in AWS east)
 ---------------------------- "
@@ -140,7 +140,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 9 (2 clients in AWS east, 2 clients in GCP central - server in GCP central)
 ---------------------------- "
