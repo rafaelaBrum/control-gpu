@@ -412,7 +412,17 @@ class VirtualMachine:
                     if client is not None and client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
                         self.__create_cloud_storage(self.loader.file_system_conf.path_storage, client)
                     else:
-                        self.__create_s3(self.loader.file_system_conf.path_storage, client)
+                        if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                            try:
+                                with open(os.path.join(self.loader.gcp_conf.key_path,
+                                                       self.loader.gcp_conf.aws_settings)) as f:
+                                    data = f.read()
+                                credentials = json.loads(data)
+                                self.__create_s3(self.loader.file_system_conf.path_storage, client, credentials)
+                            except Exception as e:
+                                logging.error(e)
+                        else:
+                            self.__create_s3(self.loader.file_system_conf.path_storage, client)
 
                 if type_task == Job.SERVER:
                     item = self.loader.job.server_task.zip_file

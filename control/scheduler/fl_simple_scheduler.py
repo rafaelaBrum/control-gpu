@@ -69,8 +69,6 @@ class FLSimpleScheduler:
 
     def get_client_initial_instance(self, provider, region):
         logging.info("<Scheduler>: Choosing initial instance for client task from provider {}".format(provider))
-        provider = CloudManager.GCLOUD
-        region = 'us-central1'
         if provider in (CloudManager.EC2, CloudManager.AWS):
             if len(self.instances_client_aws) == 1:
                 for name, instance in self.instances_client_aws.items():

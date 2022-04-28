@@ -422,13 +422,17 @@ class Loader:
                         self.application_conf.fl_port
                         )
             for i in range(self.job.num_clients):
-                if self.job.client_tasks[i].test_dir:
+                if self.job.client_tasks[i].trainset_dir is not None and self.job.client_tasks[i].trainset_dir != "":
+                    predst = os.path.join(self.file_system_conf.path_storage,
+                                          self.job.client_tasks[i].trainset_dir)
+                else:
+                    predst = os.path.join(self.file_system_conf.path_storage)
+                if self.job.client_tasks[i].test_dir is not None and self.job.client_tasks[i].test_dir != "":
                     self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
-                                                      "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
-                                                      " -epochs {7}"\
+                                                       "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
+                                                       " -epochs {7}"\
                         .format(self.job.client_tasks[i].simple_command,
-                                os.path.join(self.file_system_conf.path_storage,
-                                             self.job.client_tasks[i].trainset_dir),
+                                predst,
                                 self.job.client_tasks[i].split,
                                 self.job.client_tasks[i].batch,
                                 os.path.join(self.file_system_conf.path, 'logs'),
@@ -442,8 +446,7 @@ class Loader:
                                                       "-model_dir {5} -logdir {5} -cache {5} -epochs {6} " \
                                                       " > {7} 2> {8}" \
                         .format(self.job.client_tasks[i].simple_command,
-                                os.path.join(self.file_system_conf.path_storage,
-                                             self.job.client_tasks[i].trainset_dir),
+                                predst,
                                 self.job.client_tasks[i].split,
                                 self.job.client_tasks[i].batch,
                                 os.path.join(self.file_system_conf.path, 'logs'),
