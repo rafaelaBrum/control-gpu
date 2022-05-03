@@ -73,6 +73,7 @@ venv_hads/
 venv_novo/
 venv_gcp/
 venv_idea/
+venv*
 
 # dataset folder
 data_torch/
