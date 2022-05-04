@@ -370,7 +370,7 @@ class PreSchedulingManager:
                                                                                                             cli)
                         vm.reboot()
                     print("final_zone", final_zone)
-                    status = vm.terminate(wait=False, zone=final_zone)
+                    status = vm.terminate(wait=True, zone=final_zone)
                     if status:
                         vm.instance_id = None
                         vm.failed_to_created = False
@@ -423,7 +423,8 @@ class PreSchedulingManager:
                                                                                                             key_file,
                                                                                                             cli)
                         vm.reboot()
-                    status = vm.terminate(wait=False, zone=final_zone)
+                    print("final_zone", final_zone)
+                    status = vm.terminate(wait=True, zone=final_zone)
                     if status:
                         vm.instance_id = None
                         vm.failed_to_created = False

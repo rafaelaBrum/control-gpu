@@ -63,7 +63,7 @@ class VirtualMachine:
         elif instance_type.provider == CloudManager.GCLOUD:
             self.manager = GCPManager()
             if self.vm_name == '':
-                self.vm_name = f'vm-{self.instance_type.type}'
+                self.vm_name = f'vm-{self.instance_type.type.replace("_", "-")}'
             self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}-' \
                            f'{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
             if self.disk_name == '':
@@ -151,7 +151,7 @@ class VirtualMachine:
                                                                               zone=zone,
                                                                               key_name=key_name)
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
-                    self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
+                    self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
                                                                               image_id=self.instance_type.image_id,
                                                                               vm_name=self.vm_name,
                                                                               zone=zone,
@@ -222,6 +222,8 @@ class VirtualMachine:
                             volume_name=self.disk_name,
                             zone=zone
                         )
+
+                self.failed_to_created = False
 
                 return True
 
@@ -537,6 +539,7 @@ class VirtualMachine:
 
         if zone == '':
             zone = self.zone
+        self.zone = zone
 
         # print("instance_id:", self.instance_id)
         # print("region: ", zone)
@@ -546,6 +549,8 @@ class VirtualMachine:
         terminate_start = datetime.now()
 
         status = False
+
+        print("state", self.state)
 
         if self.state not in (CloudManager.TERMINATED, None):
             self.__end_time = datetime.now()
