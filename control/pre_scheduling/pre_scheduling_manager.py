@@ -319,118 +319,122 @@ class PreSchedulingManager:
             raise Exception("<PreScheduler> VirtualMachine {}:: SSH Exception ERROR".format(vm_final.instance_id))
 
     def get_first_rounds_times(self):
-        logging.info("<PreSchedulerManager>: Computing training times")
-        clients = self.loader.job.client_tasks
-        env_aws, env_gcp = self.separate_env_per_cloud()
-        loc_aws, loc_gcp = self.separate_loc_per_cloud()
-        logging.info("<PreSchedulerManager>: Calculating AWS training times")
-        # TODO: parallelize
-        for env_id, env in env_aws.items():
-            if not env.have_gpu:
-                continue
-            logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
-            if env_id not in self.exec_times:
-                self.exec_times[env_id] = {}
-            vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
-            for loc_id, region in loc_aws.items():
-                if loc_id in self.exec_times[env_id]:
-                    skip_loc = True
-                    for cli in clients.values():
-                        if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
-                            skip_loc = False
-                    if skip_loc:
-                        continue
-                else:
-                    self.exec_times[env_id][loc_id] = {}
-                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
-                key_name = region.key_file.split('.')[0]
-                vm.instance_type.image_id = region.client_image_id
-                vm.region = region
-                key_file = region.key_file
-                final_zone = ''
-                for zone in region.zones:
-                    try:
-                        vm.zone = zone
-                        vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
-                        final_zone = zone
-                        break
-                    except Exception as e:
-                        logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
-                        logging.error(e)
-                        vm.instance_id = None
-                if not vm.failed_to_created:
-                    # update instance IP
-                    vm.update_ip(zone=final_zone)
-                    for cli in clients.values():
-                        if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+        try:
+            logging.info("<PreSchedulerManager>: Computing training times")
+            clients = self.loader.job.client_tasks
+            env_aws, env_gcp = self.separate_env_per_cloud()
+            loc_aws, loc_gcp = self.separate_loc_per_cloud()
+            logging.info("<PreSchedulerManager>: Calculating AWS training times")
+            # TODO: parallelize
+            for env_id, env in env_aws.items():
+                if not env.have_gpu:
+                    continue
+                logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+                if env_id not in self.exec_times:
+                    self.exec_times[env_id] = {}
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                for loc_id, region in loc_aws.items():
+                    if loc_id in self.exec_times[env_id]:
+                        skip_loc = True
+                        for cli in clients.values():
+                            if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
+                                skip_loc = False
+                        if skip_loc:
                             continue
-                        logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                        self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                            key_file,
-                                                                                                            cli)
-                        vm.reboot()
-                    print("final_zone", final_zone)
-                    status = vm.terminate(wait=True, zone=final_zone)
-                    if status:
-                        vm.instance_id = None
-                        vm.failed_to_created = False
-                else:
-                    vm.instance_id = None
-                    vm.failed_to_created = False
-        # TODO: add multiple regions to GCP clients
-        logging.info("<PreSchedulerManager>: Calculating GCP training times")
-        for env_id, env in env_gcp.items():
-            if not env.have_gpu:
-                continue
-            logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
-            if env_id not in self.exec_times:
-                self.exec_times[env_id] = {}
-            vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
-            for loc_id, region in loc_gcp.items():
-                if loc_id in self.exec_times[env_id]:
-                    skip_loc = True
-                    for cli in clients.values():
-                        if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
-                            skip_loc = False
-                    if skip_loc:
-                        continue
-                else:
-                    self.exec_times[env_id][loc_id] = {}
-                logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
-                vm.instance_type.image_id = region.client_image_id
-                key_file = self.loader.gcp_conf.key_file
-                final_zone = ''
-                for zone in region.zones:
-                    try:
-                        status = vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
-                        final_zone = zone
-                        if status:
+                    else:
+                        self.exec_times[env_id][loc_id] = {}
+                    logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                    key_name = region.key_file.split('.')[0]
+                    vm.instance_type.image_id = region.client_image_id
+                    vm.region = region
+                    key_file = region.key_file
+                    final_zone = ''
+                    for zone in region.zones:
+                        try:
+                            vm.zone = zone
+                            vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
+                            final_zone = zone
                             break
-                        else:
+                        except Exception as e:
+                            logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
+                            logging.error(e)
                             vm.instance_id = None
-                    except Exception as e:
-                        logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
-                        logging.error(e)
-                        vm.instance_id = None
-                if not vm.failed_to_created:
-                    # update instance IP
-                    vm.update_ip(zone=final_zone)
-                    for cli in clients.values():
-                        if str(cli.client_id) in self.exec_times[env_id][loc_id]:
-                            continue
-                        logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                        self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                            key_file,
-                                                                                                            cli)
-                        vm.reboot()
-                    print("final_zone", final_zone)
-                    status = vm.terminate(wait=True, zone=final_zone)
-                    if status:
+                    if not vm.failed_to_created:
+                        # update instance IP
+                        vm.update_ip(zone=final_zone)
+                        for cli in clients.values():
+                            if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                                continue
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                                key_file,
+                                                                                                                cli)
+                            vm.reboot()
+                        print("final_zone", final_zone)
+                        status = vm.terminate(wait=True, zone=final_zone)
+                        if status:
+                            vm.instance_id = None
+                            vm.failed_to_created = False
+                    else:
                         vm.instance_id = None
                         vm.failed_to_created = False
-                else:
-                    vm.instance_id = None
-                    vm.failed_to_created = False
+            # TODO: add multiple regions to GCP clients
+            logging.info("<PreSchedulerManager>: Calculating GCP training times")
+            for env_id, env in env_gcp.items():
+                if not env.have_gpu:
+                    continue
+                logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+                if env_id not in self.exec_times:
+                    self.exec_times[env_id] = {}
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                for loc_id, region in loc_gcp.items():
+                    if loc_id in self.exec_times[env_id]:
+                        skip_loc = True
+                        for cli in clients.values():
+                            if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
+                                skip_loc = False
+                        if skip_loc:
+                            continue
+                    else:
+                        self.exec_times[env_id][loc_id] = {}
+                    logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                    vm.instance_type.image_id = region.client_image_id
+                    key_file = self.loader.gcp_conf.key_file
+                    final_zone = ''
+                    for zone in region.zones:
+                        try:
+                            status = vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
+                            final_zone = zone
+                            if status:
+                                break
+                            else:
+                                vm.instance_id = None
+                        except Exception as e:
+                            logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
+                            logging.error(e)
+                            vm.instance_id = None
+                    if not vm.failed_to_created:
+                        # update instance IP
+                        vm.update_ip(zone=final_zone)
+                        for cli in clients.values():
+                            if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                                continue
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
+                                                                                                                key_file,
+                                                                                                                cli)
+                            vm.reboot()
+                        print("final_zone", final_zone)
+                        status = vm.terminate(wait=True, zone=final_zone)
+                        if status:
+                            vm.instance_id = None
+                            vm.failed_to_created = False
+                    else:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+        except Exception as e:
+            logging.error(f'<PreSchedulerManager>: Error inside get_first_rounds_times')
+            logging.error(e)
 
     def separate_env_per_cloud(self):
         env_aws = {}
