@@ -33,12 +33,12 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752,
-                    "us-west-2": 0.752
+                    "us-east-1": 0.9,
+                    "us-west-2": 0.9
                 },
                 "preemptible": {
-                    "us-east-1": 0.2256,
-                    "us-west-2": 0.2256
+                    "us-east-1": 0.27,
+                    "us-west-2": 0.27
                 }
             },
             "restrictions": {
@@ -62,12 +62,12 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752,
-                    "us-west-2": 0.752
+                    "us-east-1": 1.14,
+                    "us-west-2": 1.14
                 },
                 "preemptible": {
-                    "us-east-1": 0.2256,
-                    "us-west-2": 0.2256
+                    "us-east-1": 0.342,
+                    "us-west-2": 0.342
                 }
             },
             "restrictions": {
@@ -91,12 +91,12 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752,
-                    "us-west-2": 0.752
+                    "us-east-1": 1.212,
+                    "us-west-2": 1.212
                 },
                 "preemptible": {
-                    "us-east-1": 0.2256,
-                    "us-west-2": 0.2256
+                    "us-east-1": 0.3636,
+                    "us-west-2": 0.3636
                 }
             },
             "restrictions": {
@@ -120,12 +120,12 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752,
-                    "us-west-2": 0.752
+                    "us-east-1": 3.06,
+                    "us-west-2": 3.06
                 },
                 "preemptible": {
-                    "us-east-1": 0.2256,
-                    "us-west-2": 0.2256
+                    "us-east-1": 0.918,
+                    "us-west-2": 0.918
                 }
             },
             "restrictions": {
@@ -149,12 +149,12 @@
             "provider": "ec2",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752,
-                    "us-west-2": 0.752
+                    "us-east-1": 2.6,
+                    "us-west-2": 2.6
                 },
                 "preemptible": {
-                    "us-east-1": 0.2256,
-                    "us-west-2": 0.2256
+                    "us-east-1": 0.78,
+                    "us-west-2": 0.9027
                 }
             },
             "restrictions": {
@@ -182,8 +182,8 @@
                     "us-west-2": 0.1856
                 },
                 "preemptible": {
-                    "us-east-1": 0.0588,
-                    "us-west-2": 0.063
+                    "us-east-1": 0.0586,
+                    "us-west-2": 0.0635
                 }
             },
             "restrictions": {
