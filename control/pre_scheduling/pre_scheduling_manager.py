@@ -641,11 +641,38 @@ class PreSchedulingManager:
                 print(stdout)
 
                 if "g5" in vm.instance_type.type:
-                    time.sleep(300)
+                    time.sleep(600)
                     cmd_kill_screen = 'screen -X -S test quit'
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_kill_screen))
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_kill_screen, output=True)
                     print(stdout)
+                    cmd_daemon = "python3 {} " \
+                                 "-i -v -predst {} " \
+                                 "-split 0.9 0.10 0.00 " \
+                                 "-net {} -data CellRep -d " \
+                                 "-e {} -b {} -tdim 240 240 " \
+                                 "-out logs/ -cpu {} -gpu {} " \
+                                 "-tn -wpath results " \
+                                 "-model_dir results " \
+                                 "-logdir results " \
+                                 "-cache results " \
+                                 "-test_dir {} " \
+                                 "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                 self.loader.pre_sched_conf.train_file),
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.trainset_dir),
+                                                    cli.net,
+                                                    cli.train_epochs,
+                                                    cli.batch,
+                                                    vm.instance_type.vcpu,
+                                                    vm.instance_type.count_gpu,
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.test_dir),
+                                                    self.loader.pre_sched_conf.results_temp_file
+                                                    )
+                    cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                    logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                                 vm.instance_id))
 
                 while not has_command_finished(vm):
                     continue
