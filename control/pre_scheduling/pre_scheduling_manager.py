@@ -325,7 +325,6 @@ class PreSchedulingManager:
             env_aws, env_gcp = self.separate_env_per_cloud()
             loc_aws, loc_gcp = self.separate_loc_per_cloud()
             logging.info("<PreSchedulerManager>: Calculating AWS training times")
-            # TODO: parallelize
             for env_id, env in env_aws.items():
                 if not env.have_gpu:
                     continue
@@ -353,6 +352,20 @@ class PreSchedulingManager:
                         try:
                             vm.zone = zone
                             vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
+                            # TODO: remove this from pre_scheduling
+                            if "g5" in vm.instance_type.type:
+                                cmd = 'pip uninstall tensorflow-gpu -y'
+                                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id,
+                                                                                                 cmd))
+                                stdout, stderr, code_return = vm.ssh.execute_command(cmd,
+                                                                                     output=True)
+                                print(stdout)
+                                cmd = 'pip install -r requirements_client_flower.txt'
+                                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id,
+                                                                                                 cmd))
+                                stdout, stderr, code_return = vm.ssh.execute_command(cmd,
+                                                                                     output=True)
+                                print(stdout)
                             final_zone = zone
                             break
                         except Exception as e:
@@ -365,10 +378,10 @@ class PreSchedulingManager:
                         for cli in clients.values():
                             if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                                 continue
-                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                            self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                                key_file,
-                                                                                                                cli)
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
+                                         f"in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
                             vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
@@ -378,7 +391,6 @@ class PreSchedulingManager:
                     else:
                         vm.instance_id = None
                         vm.failed_to_created = False
-            # TODO: add multiple regions to GCP clients
             logging.info("<PreSchedulerManager>: Calculating GCP training times")
             for env_id, env in env_gcp.items():
                 if not env.have_gpu:
@@ -419,10 +431,10 @@ class PreSchedulingManager:
                         for cli in clients.values():
                             if str(cli.client_id) in self.exec_times[env_id][loc_id]:
                                 continue
-                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} in region {region.region}")
-                            self.exec_times[env_id][loc_id][str(cli.client_id)] = self.__compute_training_times(vm,
-                                                                                                                key_file,
-                                                                                                                cli)
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
+                                         f"in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
                             vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
@@ -1079,7 +1091,8 @@ class PreSchedulingManager:
                 self.rpc_times_concurrent[str(num_clients)] = {}
             for region_id, region in self.loader.loc.items():
                 if region.provider in (CloudManager.EC2, CloudManager.AWS):
-                    vm_initial = VirtualMachine(instance_type=instance_aws_rpc_concurrent_server, market='on-demand', loader=self.loader)
+                    vm_initial = VirtualMachine(instance_type=instance_aws_rpc_concurrent_server, market='on-demand',
+                                                loader=self.loader)
                 elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     vm_initial = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand', loader=self.loader)
                 else:
