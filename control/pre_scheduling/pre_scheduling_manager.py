@@ -352,20 +352,6 @@ class PreSchedulingManager:
                         try:
                             vm.zone = zone
                             vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
-                            # TODO: remove this from pre_scheduling
-                            if "g5" in vm.instance_type.type:
-                                cmd = 'pip uninstall tensorflow-gpu -y'
-                                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id,
-                                                                                                 cmd))
-                                stdout, stderr, code_return = vm.ssh.execute_command(cmd,
-                                                                                     output=True)
-                                print(stdout)
-                                cmd = 'pip install -r requirements_client_flower.txt'
-                                logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id,
-                                                                                                 cmd))
-                                stdout, stderr, code_return = vm.ssh.execute_command(cmd,
-                                                                                     output=True)
-                                print(stdout)
                             final_zone = zone
                             break
                         except Exception as e:
@@ -510,6 +496,17 @@ class PreSchedulingManager:
             train_item = self.loader.pre_sched_conf.train_file
 
             try:
+                # TODO: remove this from pre_scheduling
+                if "g5" in vm.instance_type.type:
+                    cmd_g5_1 = 'pip uninstall tensorflow-gpu -y'
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_1))
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_1, output=True)
+                    print(stdout)
+                    cmd_g5_2 = 'pip install -r requirements_client_flower.txt'
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_2))
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_2, output=True)
+                    print(stdout)
+
                 logging.info("<VirtualMachine {}>: "
                              "- Creating directory {} ".format(vm.instance_id,
                                                                self.loader.file_system_conf.path_storage))
