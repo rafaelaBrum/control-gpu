@@ -498,11 +498,11 @@ class PreSchedulingManager:
             try:
                 # TODO: remove this from pre_scheduling
                 if "g5" in vm.instance_type.type:
-                    cmd_g5_1 = 'pip uninstall tensorflow-gpu -y'
+                    cmd_g5_1 = 'python3 -m pip uninstall tensorflow-gpu -y'
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_1))
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_1, output=True)
                     print(stdout)
-                    cmd_g5_2 = 'pip install -r requirements_client_flower.txt'
+                    cmd_g5_2 = 'python3 -m pip install -r requirements_client_flower.txt'
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_2))
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_2, output=True)
                     print(stdout)
@@ -639,6 +639,13 @@ class PreSchedulingManager:
 
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
                 print(stdout)
+
+                if "g5" in vm.instance_type.type:
+                    time.sleep(300)
+                    cmd_kill_screen = 'screen -X -S test quit'
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_kill_screen))
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_kill_screen, output=True)
+                    print(stdout)
 
                 while not has_command_finished(vm):
                     continue
