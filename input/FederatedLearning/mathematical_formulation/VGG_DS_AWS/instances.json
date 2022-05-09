@@ -29,35 +29,6 @@
             "gpu": "yes",
             "gpu_count": 1
         },
-        "p2.xlarge": {
-            "provider": "ec2",
-            "prices": {
-                "on-demand": {
-                    "us-east-1": 0.9,
-                    "us-west-2": 0.9
-                },
-                "preemptible": {
-                    "us-east-1": 0.27,
-                    "us-west-2": 0.27
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/xvdf",
-            "vcpu": 4,
-            "memory": 61,
-            "gpu": "yes",
-            "gpu_count": 1
-        },
         "g3.4xlarge": {
             "provider": "ec2",
             "prices": {
@@ -145,35 +116,6 @@
             "gpu": "yes",
             "gpu_count": 1
         },
-        "g2.8xlarge": {
-            "provider": "ec2",
-            "prices": {
-                "on-demand": {
-                    "us-east-1": 2.6,
-                    "us-west-2": 2.6
-                },
-                "preemptible": {
-                    "us-east-1": 0.78,
-                    "us-west-2": 0.9027
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/xvdf",
-            "vcpu": 32,
-            "memory": 60,
-            "gpu": "yes",
-            "gpu_count": 4
-        },
         "t2.xlarge": {
             "provider": "ec2",
             "prices": {
@@ -260,35 +202,6 @@
             "memory": 16,
             "gpu": "",
             "gpu_count": 0
-        },
-        "n1-standard-8_k80": {
-            "provider": "gcloud",
-            "prices": {
-                "on-demand": {
-                    "us-west1": 0.829998,
-                    "us-central1": 0.829998
-                },
-                "preemptible": {
-                    "us-west1": 0.1175,
-                    "us-central1": 0.1175
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/sdb",
-            "vcpu": 8,
-            "memory": 30,
-            "gpu": "nvidia-tesla-k80",
-            "gpu_count": 1
         },
         "n1-standard-8_v100": {
             "provider": "gcloud",

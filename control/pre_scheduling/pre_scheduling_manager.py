@@ -640,7 +640,7 @@ class PreSchedulingManager:
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
                 print(stdout)
 
-                if "g5" in vm.instance_type.type:
+                if "g5" in vm.instance_type.type or "a2" in vm.instance_type.type:
                     time.sleep(600)
                     cmd_kill_screen = 'screen -X -S test quit'
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_kill_screen))
@@ -673,6 +673,9 @@ class PreSchedulingManager:
                     cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
                     logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                                  vm.instance_id))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
+                    print(stdout)
 
                 while not has_command_finished(vm):
                     continue
