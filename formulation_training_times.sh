@@ -13,8 +13,8 @@ export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 FOLDER_TESTS=input/FederatedLearning/mathematical_formulation/VGG_DS_AWS
-COUNTER=7
-while [  $COUNTER -lt 8 ]; do
+COUNTER=8
+while [  $COUNTER -lt 9 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
   ----------------------------"
@@ -23,12 +23,10 @@ while [  $COUNTER -lt 8 ]; do
   python3 client.py pre --server_provider None --server_region None
   cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_${COUNTER}.json
   cp $FOLDER_TESTS/presched_without_training_times.json $FOLDER_TESTS/presched.json
-  if [ $COUNTER -ne 3 ]; then
-    echo " ----------------------------
+  echo " ----------------------------
    Sleeping
   ----------------------------"
-    sleep 5m
-  fi
+  sleep 5m
   COUNTER=$((COUNTER+1))
 done
 echo " ----------------------------
