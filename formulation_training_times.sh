@@ -13,8 +13,8 @@ export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 FOLDER_TESTS=input/FederatedLearning/mathematical_formulation/VGG_DS_AWS
-COUNTER=8
-while [  $COUNTER -lt 9 ]; do
+COUNTER=9
+while [  $COUNTER -lt 10 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
   ----------------------------"

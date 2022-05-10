@@ -14,6 +14,11 @@ from control.util.ssh_client import SSHClient
 
 from control.domain.app_specific.fl_client_task import FLClientTask
 
+# TODO: remove this from pre_scheduling
+g5_ami_east = 'ami-0972924320c5d4885'
+
+g5_ami_west = 'ami-066b4ea8f94d5fc07'
+
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
     instance_type='t2.micro',
@@ -345,13 +350,20 @@ class PreSchedulingManager:
                     logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
                     key_name = region.key_file.split('.')[0]
                     vm.instance_type.image_id = region.client_image_id
+                    new_ami = ''
+                    if "g5" in vm.instance_type.type:
+                        if region.region == "us-east-1":
+                            new_ami = g5_ami_east
+                        elif region.region == "us-west-2":
+                            new_ami = g5_ami_west
                     vm.region = region
                     key_file = region.key_file
                     final_zone = ''
                     for zone in region.zones:
                         try:
                             vm.zone = zone
-                            vm.deploy(zone=zone, needs_volume=False, key_name=key_name, type_task='client')
+                            vm.deploy(zone=zone, needs_volume=False,
+                                      key_name=key_name, type_task='client', ami_id=new_ami)
                             final_zone = zone
                             break
                         except Exception as e:
@@ -496,16 +508,16 @@ class PreSchedulingManager:
             train_item = self.loader.pre_sched_conf.train_file
 
             try:
-                # TODO: remove this from pre_scheduling
-                if "g5" in vm.instance_type.type:
-                    cmd_g5_1 = 'python3 -m pip uninstall tensorflow-gpu -y'
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_1))
-                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_1, output=True)
-                    print(stdout)
-                    cmd_g5_2 = 'python3 -m pip install -r requirements_client_flower.txt'
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_2))
-                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_2, output=True)
-                    print(stdout)
+                # # TODO: remove this from pre_scheduling
+                # if "g5" in vm.instance_type.type:
+                #     cmd_g5_1 = 'python3 -m pip uninstall tensorflow-gpu -y'
+                #     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_1))
+                #     stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_1, output=True)
+                #     print(stdout)
+                #     cmd_g5_2 = 'python3 -m pip install -r requirements_client_flower.txt'
+                #     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_g5_2))
+                #     stdout, stderr, code_return = vm.ssh.execute_command(cmd_g5_2, output=True)
+                #     print(stdout)
 
                 logging.info("<VirtualMachine {}>: "
                              "- Creating directory {} ".format(vm.instance_id,
@@ -640,42 +652,43 @@ class PreSchedulingManager:
                 stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
                 print(stdout)
 
-                if "g5" in vm.instance_type.type or "a2" in vm.instance_type.type:
-                    time.sleep(600)
-                    cmd_kill_screen = 'screen -X -S test quit'
-                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_kill_screen))
-                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_kill_screen, output=True)
-                    print(stdout)
-                    cmd_daemon = "python3 {} " \
-                                 "-i -v -predst {} " \
-                                 "-split 0.9 0.10 0.00 " \
-                                 "-net {} -data CellRep -d " \
-                                 "-e {} -b {} -tdim 240 240 " \
-                                 "-out logs/ -cpu {} -gpu {} " \
-                                 "-tn -wpath results " \
-                                 "-model_dir results " \
-                                 "-logdir results " \
-                                 "-cache results " \
-                                 "-test_dir {} " \
-                                 "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                 self.loader.pre_sched_conf.train_file),
-                                                    os.path.join(self.loader.file_system_conf.path_storage,
-                                                                 cli.trainset_dir),
-                                                    cli.net,
-                                                    cli.train_epochs,
-                                                    cli.batch,
-                                                    vm.instance_type.vcpu,
-                                                    vm.instance_type.count_gpu,
-                                                    os.path.join(self.loader.file_system_conf.path_storage,
-                                                                 cli.test_dir),
-                                                    self.loader.pre_sched_conf.results_temp_file
-                                                    )
-                    cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
-                    logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
-                                                                                                 vm.instance_id))
-
-                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
-                    print(stdout)
+                # # TODO: remove this from pre_scheduling
+                # if "g5" in vm.instance_type.type or "a2" in vm.instance_type.type:
+                #     time.sleep(600)
+                #     cmd_kill_screen = 'screen -X -S test quit'
+                #     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_kill_screen))
+                #     stdout, stderr, code_return = vm.ssh.execute_command(cmd_kill_screen, output=True)
+                #     print(stdout)
+                #     cmd_daemon = "python3 {} " \
+                #                  "-i -v -predst {} " \
+                #                  "-split 0.9 0.10 0.00 " \
+                #                  "-net {} -data CellRep -d " \
+                #                  "-e {} -b {} -tdim 240 240 " \
+                #                  "-out logs/ -cpu {} -gpu {} " \
+                #                  "-tn -wpath results " \
+                #                  "-model_dir results " \
+                #                  "-logdir results " \
+                #                  "-cache results " \
+                #                  "-test_dir {} " \
+                #                  "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                #                                                  self.loader.pre_sched_conf.train_file),
+                #                                     os.path.join(self.loader.file_system_conf.path_storage,
+                #                                                  cli.trainset_dir),
+                #                                     cli.net,
+                #                                     cli.train_epochs,
+                #                                     cli.batch,
+                #                                     vm.instance_type.vcpu,
+                #                                     vm.instance_type.count_gpu,
+                #                                     os.path.join(self.loader.file_system_conf.path_storage,
+                #                                                  cli.test_dir),
+                #                                     self.loader.pre_sched_conf.results_temp_file
+                #                                     )
+                #     cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                #     logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                #                                                                                  vm.instance_id))
+                #
+                #     stdout, stderr, code_return = vm.ssh.execute_command(cmd_screen, output=True)
+                #     print(stdout)
 
                 while not has_command_finished(vm):
                     continue

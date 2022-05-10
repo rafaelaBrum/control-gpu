@@ -113,7 +113,9 @@ class VirtualMachine:
 
     # Start the virtual machine
     # Return (boolean) True if success otherwise return False
-    def deploy(self, type_task, zone='', needs_volume=True, key_name=''):
+    def deploy(self, type_task, zone='', needs_volume=True, key_name='', ami_id=''):
+
+        print("ami_id", ami_id)
 
         if zone == '':
             zone = self.zone
@@ -123,7 +125,7 @@ class VirtualMachine:
             if self.instance_type.provider in (CloudManager.AWS, CloudManager.EC2):
                 key_name = key_name.split('.')[0]
 
-        if self.region is not None:
+        if self.region is not None and ami_id == '':
             if type_task == Job.SERVER:
                 self.instance_type.image_id = self.region.server_image_id
             elif type_task == Job.CLIENT:
@@ -132,6 +134,8 @@ class VirtualMachine:
                 item = ""
                 logging.info(f"<VirtualMachine {self.instance_id}>: Not updating image_id"
                              f" (type_task {type_task})")
+        elif ami_id != '':
+            self.instance_type.image_id = ami_id
 
         self.start_deploy = datetime.now()
 
