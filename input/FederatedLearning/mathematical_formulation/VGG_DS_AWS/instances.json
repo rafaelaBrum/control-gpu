@@ -125,7 +125,7 @@
                 },
                 "preemptible": {
                     "us-east-1": 0.0589,
-                    "us-west-2": 0.0642
+                    "us-west-2": 0.0644
                 }
             },
             "restrictions": {
