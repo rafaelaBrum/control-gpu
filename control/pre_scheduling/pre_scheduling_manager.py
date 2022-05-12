@@ -744,82 +744,86 @@ class PreSchedulingManager:
     def calculate_rpc_times(self):
         logging.info("<PreSchedulerManager>: Calculating RPC times")
         loc_copy = deepcopy(self.loader.loc)
-        for region_id, region in self.loader.loc.items():
-            if region.provider in (CloudManager.EC2, CloudManager.AWS):
-                vm_initial = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand', loader=self.loader)
-            elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-                vm_initial = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand', loader=self.loader)
-            else:
-                logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
-                return
-            key_file_initial = ''
-            if region.key_file != '':
-                key_file_initial = region.key_file.split('.')[0]
-            for zone in region.zones:
-                id_rpc = region_id + '_' + zone
-                logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
-                             f" or provider {region.provider}")
-                vm_initial.instance_type.image_id = region.server_image_id
-                vm_initial.region = region
-                vm_initial.zone = zone
-                if id_rpc not in self.rpc_times:
-                    self.rpc_times[id_rpc] = {}
-                for region_copy in loc_copy.values():
-                    if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
-                        vm_final = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand',
-                                                  loader=self.loader)
-                    elif region_copy.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-                        vm_final = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand',
-                                                  loader=self.loader)
-                    else:
-                        logging.error(
-                            f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
-                        return
-                    vm_final.instance_type.image_id = region_copy.server_image_id
-                    vm_final.region = region_copy
-                    key_file = ''
-                    if region_copy.key_file != '':
-                        key_file = region_copy.key_file.split('.')[0]
-                    for zone_copy in region_copy.zones:
-                        id_rpc_final = region_copy.id + '_' + zone_copy
-                        if id_rpc_final in self.rpc_times[id_rpc]:
-                            continue
-                        logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
-                                     f"region {region_copy.region} of provider {region_copy.provider}")
-                        if not vm_initial.failed_to_created:
-                            vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial,
-                                              type_task='server')
+        try:
+            for region_id, region in self.loader.loc.items():
+                if region.provider in (CloudManager.EC2, CloudManager.AWS):
+                    vm_initial = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand', loader=self.loader)
+                elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    vm_initial = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand', loader=self.loader)
+                else:
+                    logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
+                    return
+                key_file_initial = ''
+                if region.key_file != '':
+                    key_file_initial = region.key_file.split('.')[0]
+                for zone in region.zones:
+                    id_rpc = region_id + '_' + zone
+                    logging.info(f"<PreSchedulerManager>: Initialing zone {zone} of region {region.region}"
+                                 f" or provider {region.provider}")
+                    vm_initial.instance_type.image_id = region.server_image_id
+                    vm_initial.region = region
+                    vm_initial.zone = zone
+                    if id_rpc not in self.rpc_times:
+                        self.rpc_times[id_rpc] = {}
+                    for region_copy in loc_copy.values():
+                        if region_copy.provider in (CloudManager.EC2, CloudManager.AWS):
+                            vm_final = VirtualMachine(instance_type=instance_aws_rpc, market='on-demand',
+                                                      loader=self.loader)
+                        elif region_copy.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                            vm_final = VirtualMachine(instance_type=instance_gcp_rpc, market='on-demand',
+                                                      loader=self.loader)
+                        else:
+                            logging.error(
+                                f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
+                            return
+                        vm_final.instance_type.image_id = region_copy.server_image_id
+                        vm_final.region = region_copy
+                        key_file = ''
+                        if region_copy.key_file != '':
+                            key_file = region_copy.key_file.split('.')[0]
+                        for zone_copy in region_copy.zones:
+                            id_rpc_final = region_copy.id + '_' + zone_copy
+                            if id_rpc_final in self.rpc_times[id_rpc]:
+                                continue
+                            logging.info(f"<PreSchedulerManager>: Testing with zone {zone_copy} of "
+                                         f"region {region_copy.region} of provider {region_copy.provider}")
                             if not vm_initial.failed_to_created:
-                                vm_initial.update_ip(zone=zone)
-                        vm_final.zone = zone_copy
-                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
-                        if not vm_final.failed_to_created:
-                            # update instance IP
-                            vm_final.update_ip(zone=zone_copy)
-                            self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
-                                                                                       region.key_file,
-                                                                                       region_copy.key_file)
-                            status = vm_final.terminate(wait=True, zone=zone_copy)
-                            if status:
+                                vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial,
+                                                  type_task='server')
+                                if not vm_initial.failed_to_created:
+                                    vm_initial.update_ip(zone=zone)
+                            vm_final.zone = zone_copy
+                            vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
+                            if not vm_final.failed_to_created:
+                                # update instance IP
+                                vm_final.update_ip(zone=zone_copy)
+                                self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
+                                                                                           region.key_file,
+                                                                                           region_copy.key_file)
+                                status = vm_final.terminate(wait=True, zone=zone_copy)
+                                if status:
+                                    vm_final.instance_id = None
+                                    vm_final.failed_to_created = False
+                                    vm_final.ssh = None
+                            else:
                                 vm_final.instance_id = None
                                 vm_final.failed_to_created = False
                                 vm_final.ssh = None
-                        else:
-                            vm_final.instance_id = None
-                            vm_final.failed_to_created = False
-                            vm_final.ssh = None
-                loc_copy[region_id].zones.remove(zone)
-                if not vm_initial.failed_to_created:
-                    status = vm_initial.terminate(wait=True, zone=zone)
-                    if status:
+                    loc_copy[region_id].zones.remove(zone)
+                    if not vm_initial.failed_to_created:
+                        status = vm_initial.terminate(wait=True, zone=zone)
+                        if status:
+                            vm_initial.instance_id = None
+                            vm_initial.failed_to_created = False
+                            vm_initial.ssh = None
+                    else:
                         vm_initial.instance_id = None
                         vm_initial.failed_to_created = False
                         vm_initial.ssh = None
-                else:
-                    vm_initial.instance_id = None
-                    vm_initial.failed_to_created = False
-                    vm_initial.ssh = None
-            loc_copy.pop(region_id, None)
+                loc_copy.pop(region_id, None)
+        except Exception as e:
+            logging.error(f'<PreSchedulerManager>: Error inside calculate_rpc_times')
+            logging.error(e)
 
     def __exec_rpc_vms(self, vm_server, vm_client, key_server, key_client):
 
