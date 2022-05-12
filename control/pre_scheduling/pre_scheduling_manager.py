@@ -15,9 +15,11 @@ from control.util.ssh_client import SSHClient
 from control.domain.app_specific.fl_client_task import FLClientTask
 
 # TODO: remove this from pre_scheduling
-g5_ami_east = 'ami-0972924320c5d4885'
+aws_g5_ami_east = 'ami-04a48a1810b5f47b3'
 
-g5_ami_west = 'ami-066b4ea8f94d5fc07'
+aws_g5_ami_west = 'ami-066b4ea8f94d5fc07'
+
+gcp_a2_ami = 'disk-ubuntu-flower-client-a2-instances'
 
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
@@ -353,9 +355,11 @@ class PreSchedulingManager:
                     new_ami = ''
                     if "g5" in vm.instance_type.type:
                         if region.region == "us-east-1":
-                            new_ami = g5_ami_east
+                            new_ami = aws_g5_ami_east
                         elif region.region == "us-west-2":
-                            new_ami = g5_ami_west
+                            new_ami = aws_g5_ami_west
+                    elif "a2" in vm.instance_type.type:
+                        new_ami = gcp_a2_ami
                     vm.region = region
                     key_file = region.key_file
                     final_zone = ''

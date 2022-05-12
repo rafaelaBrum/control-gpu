@@ -17,8 +17,8 @@ echo "Python 3.6 installed"
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
 sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
 sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/3bf863cc.pub
-sudo apt-get update
-sudo apt-get install cuda-10-0 -y
+sudo apt update
+sudo apt install cuda-10-0 -y
 echo "CUDA 10.0 installed"
 
 wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
@@ -46,8 +46,8 @@ echo "Flower client requirements installed"
 export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
 echo "deb http://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install gcsfuse -y
+sudo apt update
+sudo apt install gcsfuse -y
 echo "GCSFuse installed"
 
 # Installing s3fs for AWS
