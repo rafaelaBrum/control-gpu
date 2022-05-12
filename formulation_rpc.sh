@@ -21,7 +21,8 @@ while [  $COUNTER -lt 6 ]; do
   Running test - Counter=$COUNTER
  ----------------------------"
         cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
-        python client.py pre
+        echo python client.py pre --server_provider None --server_region None
+        python client.py pre --server_provider None --server_region None
         cp $FOLDER_TESTS/presched.json $FOLDER_TESTS/presched_$COUNTER.json
         cp $FOLDER_TESTS/presched_sem_rpc.json $FOLDER_TESTS/presched.json
         echo " ----------------------------
