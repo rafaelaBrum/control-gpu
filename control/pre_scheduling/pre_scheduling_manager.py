@@ -17,7 +17,7 @@ from control.domain.app_specific.fl_client_task import FLClientTask
 # TODO: remove this from pre_scheduling
 aws_g5_ami_east = 'ami-04a48a1810b5f47b3'
 
-aws_g5_ami_west = 'ami-066b4ea8f94d5fc07'
+aws_g5_ami_west = 'ami-00c4927f4e41cef7c'
 
 gcp_a2_ami = 'disk-ubuntu-flower-client-a2-instances'
 
