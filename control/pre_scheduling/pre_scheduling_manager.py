@@ -799,7 +799,7 @@ class PreSchedulingManager:
                             self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
                                                                                        region.key_file,
                                                                                        region_copy.key_file)
-                            status = vm_final.terminate(wait=False, zone=zone_copy)
+                            status = vm_final.terminate(wait=True, zone=zone_copy)
                             if status:
                                 vm_final.instance_id = None
                                 vm_final.failed_to_created = False
@@ -810,7 +810,7 @@ class PreSchedulingManager:
                             vm_final.ssh = None
                 loc_copy[region_id].zones.remove(zone)
                 if not vm_initial.failed_to_created:
-                    status = vm_initial.terminate(wait=False, zone=zone)
+                    status = vm_initial.terminate(wait=True, zone=zone)
                     if status:
                         vm_initial.instance_id = None
                         vm_initial.failed_to_created = False
