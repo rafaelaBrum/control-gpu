@@ -152,6 +152,7 @@
             "AWS_us-east-1_us-east-1d": {},
             "AWS_us-east-1_us-east-1e": {},
             "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
             "AWS_us-west-2_us-west-2b": {},
             "AWS_us-west-2_us-west-2c": {},
             "AWS_us-west-2_us-west-2d": {},
@@ -243,12 +244,14 @@
             "GCP_us-west1_us-west1-c": {}
         },
         "AWS_us-west-2_us-west-2a": {
+            "AWS_us-west-2_us-west-2a": {},
             "AWS_us-west-2_us-west-2b": {},
             "AWS_us-west-2_us-west-2c": {},
             "AWS_us-west-2_us-west-2d": {},
             "GCP_us-central1_us-central1-b": {},
             "GCP_us-central1_us-central1-c": {},
             "GCP_us-central1_us-central1-f": {},
+            "GCP_us-west1_us-west1-a": {},
             "GCP_us-west1_us-west1-b": {},
             "GCP_us-west1_us-west1-c": {}
         },
@@ -304,9 +307,11 @@
             "GCP_us-central1_us-central1-f": {}
         },
         "GCP_us-west1_us-west1-a": {
+            "GCP_us-central1_us-central1-a": {},
             "GCP_us-central1_us-central1-b": {},
             "GCP_us-central1_us-central1-c": {},
             "GCP_us-central1_us-central1-f": {},
+            "GCP_us-west1_us-west1-a": {},
             "GCP_us-west1_us-west1-b": {},
             "GCP_us-west1_us-west1-c": {}
         },

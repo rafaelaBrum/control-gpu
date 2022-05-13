@@ -103,3 +103,6 @@ screen*
 
 # temp pre_sched files
 control/pre_scheduling/*.json
+
+# trash files
+*~
