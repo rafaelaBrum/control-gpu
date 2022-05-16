@@ -74,7 +74,7 @@
         }
     },
     "job_id": 1403,
-    "job_name": "4 clients - VGG16 (all AWS)",
+    "job_name": "4 clients - VGG16 (all GCP in Oregon)",
     "number_datacenters": 17,
     "rpc": {
         "AWS_us-east-1_us-east-1a": {
