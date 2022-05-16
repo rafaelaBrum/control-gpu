@@ -44,11 +44,11 @@ class FLSimpleScheduler:
                 else:
                     logging.error(f"<PreSchedulingManager>: {instance.provider} does not have support ({name})")
 
-    def get_server_initial_instance(self, provider, region):
+    def get_server_initial_instance(self, provider, region, vm_name):
         logging.info("<Scheduler>: Choosing initial instance for server task from provider {}".format(provider))
-        if provider in (CloudManager.EC2, CloudManager.AWS):
-            if len(self.instances_server_aws) == 1:
-                for name, instance in self.instances_server_aws.items():
+        if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
+            for name, instance in self.instances_server_aws.items():
+                if name == vm_name:
                     for loc in self.loc_aws.values():
                         if loc.region == region:
                             for zone in loc.zones:
@@ -56,9 +56,10 @@ class FLSimpleScheduler:
                                                                                                              region))
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
-        elif provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            if len(self.instances_server_gcp) == 1:
-                for name, instance in self.instances_server_gcp.items():
+            logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
+        elif provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
+            for name, instance in self.instances_server_gcp.items():
+                if name == vm_name:
                     for loc in self.loc_gcp.values():
                         if loc.region == region:
                             for zone in loc.zones:
@@ -66,12 +67,13 @@ class FLSimpleScheduler:
                                                                                                              region))
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
+            logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
-    def get_client_initial_instance(self, provider, region):
+    def get_client_initial_instance(self, provider, region, vm_name):
         logging.info("<Scheduler>: Choosing initial instance for client task from provider {}".format(provider))
-        if provider in (CloudManager.EC2, CloudManager.AWS):
-            if len(self.instances_client_aws) == 1:
-                for name, instance in self.instances_client_aws.items():
+        if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
+            for name, instance in self.instances_client_aws.items():
+                if name == vm_name:
                     for loc in self.loc_aws.values():
                         if loc.region == region:
                             for zone in loc.zones:
@@ -79,9 +81,10 @@ class FLSimpleScheduler:
                                                                                                              region))
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
-        elif provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            if len(self.instances_client_gcp) == 1:
-                for name, instance in self.instances_client_gcp.items():
+            logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
+        elif provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
+            for name, instance in self.instances_client_gcp.items():
+                if name == vm_name:
                     for loc in self.loc_gcp.values():
                         if loc.region == region:
                             for zone in loc.zones:
@@ -89,6 +92,7 @@ class FLSimpleScheduler:
                                                                                                              region))
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
+            logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
     def __separate_location_by_cloud(self, locations):
         for loc_id, loc in locations.items():

@@ -46,6 +46,14 @@ class Loader:
 
     def __init__(self, args):
 
+        # print("Clients provider", args.clients_provider)
+        # print("Clients region", args.clients_region)
+        # print("Clients VM name", args.clients_vm_name)
+        #
+        # print("Server provider", args.server_provider)
+        # print("Server region", args.server_region)
+        # print("Server VM name", args.server_vm_name)
+
         """Command line args"""
         # input files parameters
         self.input_path = args.input_path
@@ -70,6 +78,11 @@ class Loader:
         # server provider and region
         self.server_provider = args.server_provider
         self.server_region = args.server_region
+        self.server_vm_name = args.server_vm_name
+        # clients provider and region
+        self.clients_provider = args.clients_provider
+        self.clients_region = args.clients_region
+        self.clients_vm_name = args.clients_vm_name
         # Client command
         self.client_command = args.command
 
