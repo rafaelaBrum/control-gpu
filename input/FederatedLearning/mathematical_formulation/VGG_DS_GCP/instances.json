@@ -58,35 +58,6 @@
             "gpu": "yes",
             "gpu_count": 1
         },
-        "g5.2xlarge": {
-            "provider": "ec2",
-            "prices": {
-                "on-demand": {
-                    "us-east-1": 1.212,
-                    "us-west-2": 1.212
-                },
-                "preemptible": {
-                    "us-east-1": 0.3636,
-                    "us-west-2": 0.3636
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/nvme2n1",
-            "vcpu": 8,
-            "memory": 32,
-            "gpu": "yes",
-            "gpu_count": 1
-        },
         "p3.2xlarge": {
             "provider": "ec2",
             "prices": {
@@ -259,64 +230,6 @@
             "vcpu": 16,
             "memory": 60,
             "gpu": "nvidia-tesla-p4",
-            "gpu_count": 1
-        },
-        "n1-standard-16_p100": {
-            "provider": "gcloud",
-            "prices": {
-                "on-demand": {
-                    "us-west1": 2.219996,
-                    "us-central1": 2.219996
-                },
-                "preemptible": {
-                    "us-west1": 0.59,
-                    "us-central1": 0.59
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/sdb",
-            "vcpu": 16,
-            "memory": 60,
-            "gpu": "nvidia-tesla-p100",
-            "gpu_count": 1
-        },
-        "a2-highgpu-1g": {
-            "provider": "gcloud",
-            "prices": {
-                "on-demand": {
-                    "us-west1": 3.6733849999999997,
-                    "us-central1": 3.6733849999999997
-                },
-                "preemptible": {
-                    "us-west1": 1.1020155,
-                    "us-central1": 1.1020155
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "/dev/sdb",
-            "vcpu": 12,
-            "memory": 85,
-            "gpu": "nvidia-tesla-a100",
             "gpu_count": 1
         }
     }
