@@ -15,6 +15,25 @@ import argparse
 
 def __call_control(loader: Loader):
     try:
+        if loader.server_provider is None:
+            logging.error("<Loader>: Server provider cannot be None")
+            return
+        if loader.server_region is None:
+            logging.error("<Loader>: Server region cannot be None")
+            return
+        if loader.server_vm_name is None:
+            logging.error("<Loader>: Server VM name cannot be None")
+            return
+        if loader.clients_provider is None:
+            logging.error("<Loader>: Clients provider cannot be None")
+            return
+        if loader.clients_region is None:
+            logging.error("<Loader>: Clients region cannot be None")
+            return
+        if loader.clients_vm_name is None:
+            logging.error("<Loader>: Clients VM name cannot be None")
+            return
+
         loader.print_execution_info()
 
         manager = ScheduleManager(loader=loader)
@@ -116,8 +135,13 @@ def main():
     # parser.add_argument('--notify', help='Send an email to notify the end of the execution (control mode)',
     #                     action='store_true', default=False)
 
-    parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=True)
-    parser.add_argument('--server_region', help="Server region", type=str, default=None, required=True)
+    parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=False)
+    parser.add_argument('--server_region', help="Server region", type=str, default=None, required=False)
+    parser.add_argument('--server_vm_name', help="Server VM name", type=str, default=None, required=False)
+
+    parser.add_argument('--clients_provider', help="Each client provider", type=str, nargs='+', required=False)
+    parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
+    parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
 
     options_map = {
         'control': __call_control,

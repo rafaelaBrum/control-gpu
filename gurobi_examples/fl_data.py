@@ -1,5 +1,6 @@
 import flmodel
 import gurobipy as gp
+from math import inf
 
 # Base data
 clients = [0, 1, 2, 3]

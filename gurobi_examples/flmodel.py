@@ -5,20 +5,20 @@ from gurobipy import GRB
 from math import inf
 
 
-def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, server_msg_train, server_msg_test,
+def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, server_msg_train, server_msg_test,
           client_msg_train, client_msg_test, T_round, clients, B_round, alpha_1, alpha_2,
-          providers, gpu_vms, global_gpu_limits, cpu_vms, global_cpu_limits, regional_gpu_limits, regions_prov,
+          providers, gpu_vms, global_gpu_limits, cpu_vms, global_cpu_limits, regional_gpu_limits, prov_regions,
           regional_cpu_limits, time_exec, time_comm, time_aggreg):
     try:
         # Create optimization model
         model = gp.Model('FL in clouds')
 
-        model.setParam("LogToConsole", 0)
+        # model.setParam("LogToConsole", 0)
 
         # Create variables
         x_client_vars = model.addVars(client_prov_regions_vms, vtype=GRB.BINARY, name='x')
 
-        y_server_vars = model.addVars(vms_region_prov, vtype=GRB.BINARY, name='y')
+        y_server_vars = model.addVars(prov_regions_vms, vtype=GRB.BINARY, name='y')
 
         t_m = model.addVar(name="t_m", vtype=GRB.CONTINUOUS, lb=0, ub=inf)
 
@@ -37,7 +37,7 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                         cost_vms[j, k, l] *
                         t_m for i, j, k, l in client_prov_regions_vms) + gp.quicksum(y_server_vars[j, k, l] *
                                                                                      cost_vms[j, k, l] *
-                                                                                     t_m for j, k, l in vms_region_prov)
+                                                                                     t_m for j, k, l in prov_regions_vms)
 
         # comm_costs = gp.quicksum(x_client_vars[i, j, k, l] *
         #                          y_server_vars[m, n, o] *
@@ -53,7 +53,7 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                                   * cost_transfer[j] +
                                   (client_msg_train + client_msg_test)
                                   * cost_transfer[m]) for i, j, k, l in client_prov_regions_vms
-                                 for m, n, o in vms_region_prov)
+                                 for m, n, o in prov_regions_vms)
 
         total_costs = vm_costs + comm_costs
 
@@ -99,7 +99,7 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                         gp.quicksum(x_client_vars[i, j, k, l] *
                                     gpu_vms[j, k, l] for i, j, k, l in client_prov_regions_vms if j == p)
                         + gp.quicksum(y_server_vars[j, k, l] *
-                                      gpu_vms[j, k, l] for j, k, l in vms_region_prov if j == p)
+                                      gpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p)
                         <= global_gpu_limits[p]
                 ),
                 "constraint_global_gpu"
@@ -110,20 +110,20 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                         gp.quicksum(x_client_vars[i, j, k, l] *
                                     cpu_vms[j, k, l] for i, j, k, l in client_prov_regions_vms if j == p)
                         + gp.quicksum(y_server_vars[j, k, l] *
-                                      cpu_vms[j, k, l] for j, k, l in vms_region_prov if j == p)
+                                      cpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p)
                         <= global_cpu_limits[p]
                 ),
                 "constraint_global_cpu"
             )
 
         # Regional limits
-        for p, r in regions_prov:
+        for p, r in prov_regions:
             model.addConstr(
                 (
                         gp.quicksum(x_client_vars[i, j, k, l] *
                                     gpu_vms[j, k, l] for i, j, k, l in client_prov_regions_vms if j == p and k == r)
                         + gp.quicksum(y_server_vars[j, k, l] *
-                                      gpu_vms[j, k, l] for j, k, l in vms_region_prov if j == p and k == r)
+                                      gpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p and k == r)
                         <= regional_gpu_limits[p, r]
                 ),
                 "constraint_regional_gpu"
@@ -134,7 +134,7 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                         gp.quicksum(x_client_vars[i, j, k, l] *
                                     cpu_vms[j, k, l] for i, j, k, l in client_prov_regions_vms if j == p and k == r)
                         + gp.quicksum(y_server_vars[j, k, l] *
-                                      cpu_vms[j, k, l] for j, k, l in vms_region_prov if j == p and k == r)
+                                      cpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p and k == r)
                         <= regional_cpu_limits[p, r]
                 ),
                 "constraint_regional_cpu"
@@ -148,7 +148,7 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
                             time_exec[i, j, k, l] +
                             time_comm[j, k, m, n] +
                             time_aggreg[m, n, o]
-                    ) <= t_m for i, j, k, l in client_prov_regions_vms for m, n, o in vms_region_prov
+                    ) <= t_m for i, j, k, l in client_prov_regions_vms for m, n, o in prov_regions_vms
             ),
             "constraint_slowest_client"
         )
@@ -160,7 +160,8 @@ def solve(client_prov_regions_vms, cost_transfer, vms_region_prov, cost_vms, ser
         if model.Status == GRB.OPTIMAL:
             print("Objective Function Value = {0}".format(objective_function.getValue()))
             for v in model.getVars():
-                print("{0} = {1}".format(v.varName, v.x))
+                if v.x == 1 or v.varName == "t_m":
+                    print("{0} = {1}".format(v.varName, v.x))
     except gp.GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
 

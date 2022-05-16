@@ -127,10 +127,10 @@ class ScheduleManager:
     #                                                           self.loader.scheduler_name))
 
     def __build_dispatchers(self):
-
         instance_type, market, region, zone = self.scheduler.get_server_initial_instance(
             provider=self.loader.server_provider,
-            region=self.loader.server_region
+            region=self.loader.server_region,
+            vm_name=self.loader.server_vm_name
         )
 
         # Create the Vm that will be used by the dispatcher
@@ -160,8 +160,9 @@ class ScheduleManager:
         for i in range(self.loader.job.num_clients):
             client = self.loader.job.client_tasks[i]
             instance_type, market, region, zone = self.scheduler.get_client_initial_instance(
-                provider=client.bucket_provider,
-                region=client.bucket_region
+                provider=self.loader.clients_provider[i],
+                region=self.loader.clients_region[i],
+                vm_name=self.loader.clients_vm_name[i]
             )
 
             print(f"Client {i} on region {region.region} and zone {zone}")
