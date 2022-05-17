@@ -5,9 +5,9 @@ import fl_data_model
 # Base data
 clients, baseline_exec, location = gp.multidict({
     0: [608.40, 'us-east-1'],
-    1: [582.70, 'us-east-1'],
-    2: [568.79, 'us-east-1'],
-    3: [505.07, 'us-east-1']
+    1: [608.40, 'us-east-1'],
+    2: [608.40, 'us-east-1'],
+    3: [608.40, 'us-east-1']
 })
 
 B_round = 3000
