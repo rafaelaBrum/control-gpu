@@ -156,7 +156,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 10 (1 client in AWS east, 3 clients in GCP central - server in GCP central)
 ---------------------------- "

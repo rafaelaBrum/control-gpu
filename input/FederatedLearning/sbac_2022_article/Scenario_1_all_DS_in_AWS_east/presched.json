@@ -1,40 +1,13 @@
 {
     "exec_times": {
-        "n1-standard-8_t4": {
-            "GCP_us-central1": {
+        "g3.4xlarge": {
+            "AWS_us-east-1": {
                 "0": {},
                 "1": {},
                 "2": {},
                 "3": {}
             },
-            "GCP_us-west1": {
-                "1": {},
-                "2": {},
-                "3": {}
-            }
-        },
-        "n1-standard-8_v100": {
-            "GCP_us-central1": {
-                "0": {},
-                "1": {},
-                "2": {},
-                "3": {}
-            },
-            "GCP_us-west1": {
-                "0": {},
-                "1": {},
-                "2": {},
-                "3": {}
-            }
-        },
-        "n1-standard-16_p4": {
-            "GCP_us-central1": {
-                "0": {},
-                "1": {},
-                "2": {},
-                "3": {}
-            },
-            "GCP_us-west1": {
+            "AWS_us-west-2": {
                 "0": {},
                 "1": {},
                 "2": {},
@@ -55,28 +28,42 @@
                 "3": {}
             }
         },
-        "g3.4xlarge": {
-            "AWS_us-east-1": {
+        "n1-standard-16_p4": {
+            "GCP_us-central1": {
                 "0": {},
                 "1": {},
                 "2": {},
                 "3": {}
             },
-            "AWS_us-west-2": {
+            "GCP_us-west1": {
                 "0": {},
                 "1": {},
                 "2": {},
                 "3": {}
             }
         },
-        "p3.2xlarge": {
-            "AWS_us-east-1": {
+        "n1-standard-8_t4": {
+            "GCP_us-central1": {
                 "0": {},
                 "1": {},
                 "2": {},
                 "3": {}
             },
-            "AWS_us-west-2": {
+            "GCP_us-west1": {
+                "0": {},
+                "1": {},
+                "2": {},
+                "3": {}
+            }
+        },
+        "n1-standard-8_v100": {
+            "GCP_us-central1": {
+                "0": {},
+                "1": {},
+                "2": {},
+                "3": {}
+            },
+            "GCP_us-west1": {
                 "0": {},
                 "1": {},
                 "2": {},
@@ -84,8 +71,8 @@
             }
         }
     },
-    "job_id": 1403,
-    "job_name": "4 clients - VGG16 (all GCP in Oregon)",
+    "job_id": 2401,
+    "job_name": "4 clients - VGG16 (all AWS in N. Virginia)",
     "number_datacenters": 17,
     "rpc": {
         "AWS_us-east-1_us-east-1a": {

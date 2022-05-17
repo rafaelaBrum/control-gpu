@@ -1,19 +1,19 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Tests_after_COMPAS'
-test_case = "Test case 10 (DSs in GCP, clients in AWS)"
+test_folder = 'Testes_SBAC_2022'
+test_case = "Sc1"
 current_exec = 1
 
-first_server_message_date_string = "2022-04-21 17:38:28,072"
-last_server_message_date_string = "2022-04-21 18:26:54,700"
+first_server_message_date_string = "2022-05-17 07:02:06,419"
+last_server_message_date_string = "2022-05-17 08:34:43,798"
 
 current_round = -1
 
 # Server times
-initial_sync_initial_date_string = "2022-04-21 18:25:54,699"
+initial_sync_initial_date_string = "2022-05-17 08:32:04,618"
 
-test_sync_final_date_string = "2022-04-21 18:26:54,700"
+test_sync_final_date_string = "2022-05-17 08:34:43,798"
 
 
 def get_client_times_one_round(current_client):
