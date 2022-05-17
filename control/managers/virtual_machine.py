@@ -67,7 +67,7 @@ class VirtualMachine:
             self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}-' \
                            f'{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
             if self.disk_name == '':
-                self.disk_name = f'disk-{self.instance_type.type}'
+                self.disk_name = f'disk-{self.instance_type.type.replace("_", "-")}'
             self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
                              f'-{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
             VirtualMachine.vm_num += 1
