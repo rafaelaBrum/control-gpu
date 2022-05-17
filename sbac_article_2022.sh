@@ -64,7 +64,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=2
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -86,7 +86,7 @@ SERVER_REGION="us-central1"
 SERVER_VM_NAME="e2-standard-4"
 CLIENTS_PROVIDER="gcp gcp gcp gcp"
 CLIENTS_REGION="us-central1 us-central1 us-central1 us-central1"
-CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
+CLIENTS_VM_NAME="n1-standard-8_t4 n1-standard-8_t4 n1-standard-8_t4 n1-standard-8_t4"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -375,7 +375,7 @@ Random test #2
 SERVER_PROVIDER="aws"
 SERVER_REGION="us-east-1"
 SERVER_VM_NAME="t2.xlarge"
-CLIENTS_PROVIDER="aws aws aws gcp"
+CLIENTS_PROVIDER="aws aws aws aws"
 CLIENTS_REGION="us-east-1 us-east-1 us-east-1 us-east-1"
 CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
 echo " ----------------------------
