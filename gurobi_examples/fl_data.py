@@ -1,4 +1,4 @@
-import flmodel
+from gurobi_examples.fl_model import flmodel
 import gurobipy as gp
 from math import inf
 
