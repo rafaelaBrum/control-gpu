@@ -43,6 +43,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -74,6 +77,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -105,6 +111,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -140,6 +149,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -171,6 +183,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -202,6 +217,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -237,6 +255,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -268,6 +289,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -299,6 +323,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -334,6 +361,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -365,6 +395,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -396,6 +429,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -431,6 +467,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -462,6 +501,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
@@ -493,6 +535,9 @@ while [  $COUNTER -lt 4 ]; do
   python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME
   if [ $COUNTER -ne 3 ]; then
+    echo " ----------------------------
+   Sleeping
+  ----------------------------"
     sleep 30m
   fi
   COUNTER=$((COUNTER+1))
