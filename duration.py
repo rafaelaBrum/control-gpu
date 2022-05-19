@@ -1,19 +1,19 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Testes_SBAC_2022'
-test_case = "Sc1"
-current_exec = 1
+test_folder = 'Testes_SBAC_2022/Sc1'
+test_case = "Random #1"
+current_exec = 3
 
-first_server_message_date_string = "2022-05-17 07:02:06,419"
-last_server_message_date_string = "2022-05-17 08:34:43,798"
+first_server_message_date_string = "2022-05-17 17:56:11,030"
+last_server_message_date_string = "2022-05-17 19:25:34,910"
 
 current_round = -1
 
 # Server times
-initial_sync_initial_date_string = "2022-05-17 08:32:04,618"
+initial_sync_initial_date_string = "2022-05-17 19:22:40,600"
 
-test_sync_final_date_string = "2022-05-17 08:34:43,798"
+test_sync_final_date_string = "2022-05-17 19:25:34,910"
 
 
 def get_client_times_one_round(current_client):

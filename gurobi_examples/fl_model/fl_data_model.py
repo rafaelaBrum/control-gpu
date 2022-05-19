@@ -26,13 +26,13 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         ('AWS', 'us-west-2', 'g4dn.2xlarge'): [8, 1,  0.752/3600, 0.3, 0.85, 0, 0, 0],
         ('AWS', 'us-west-2', 'g3.4xlarge'): [16, 1,  1.14/3600, 0.3, 4.35, 0, 0, 0],
         ('AWS', 'us-west-2', 't2.xlarge'): [4, 0,  0.1856/3600, 0.3, 10, 10, 10, 10],
-        ('GCP', 'us-central1', 'n1-standard-8_t4'): [8, 1,  0.730/3600, 0.3, 1.01, 0, 0, 0],
-        ('GCP', 'us-central1', 'n1-standard-8_p4'): [8, 1,  1.360/3600, 0.3, 1.25, 0, 0, 0],
-        ('GCP', 'us-central1', 'n1-standard-8_v100'): [8, 1,  2.860/3600, 0.3, 1.01, 0, 0, 0],
-        ('GCP', 'us-central1', 'e2-standard-4'): [4, 0,  0.134/3600, 0.3, 10, 10, 10, 10],
-        ('GCP', 'us-west1', 'n1-standard-8_t4'): [8, 1,  0.730/3600, 0.3, 1.04, 0, 0, 0],
-        ('GCP', 'us-west1', 'n1-standard-8_v100'): [8, 1,  2.860/3600, 0.3, 1.08, 0, 0, 0],
-        ('GCP', 'us-west1', 'e2-standard-4'): [4, 0,  0.134/3600, 0.3, 10, 10, 10, 10]
+        ('GCP', 'us-central1', 'n1-standard-8_t4'): [8, 1,  0.730/3600, 0.2, 1.01, 0, 0, 0],
+        ('GCP', 'us-central1', 'n1-standard-8_p4'): [8, 1,  1.360/3600, 0.2, 1.25, 0, 0, 0],
+        ('GCP', 'us-central1', 'n1-standard-8_v100'): [8, 1,  2.860/3600, 0.2, 1.01, 0, 0, 0],
+        ('GCP', 'us-central1', 'e2-standard-4'): [4, 0,  0.134/3600, 0.2, 10, 10, 10, 10],
+        ('GCP', 'us-west1', 'n1-standard-8_t4'): [8, 1,  0.730/3600, 0.2, 1.04, 0, 0, 0],
+        ('GCP', 'us-west1', 'n1-standard-8_v100'): [8, 1,  2.860/3600, 0.2, 1.08, 0, 0, 0],
+        ('GCP', 'us-west1', 'e2-standard-4'): [4, 0,  0.134/3600, 0.2, 10, 10, 10, 10]
     })
 
     client_prov_regions_vms = []

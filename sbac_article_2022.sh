@@ -101,7 +101,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=2
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

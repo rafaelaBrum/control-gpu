@@ -11,8 +11,7 @@ server_msg_train = 1.07
 server_msg_test = 0.54
 client_msg_train = 1.07
 client_msg_test = 0.54
-alpha_1 = 0.5
-alpha_2 = 0.5
+alpha = 0.5
 
 providers, global_cpu_limits, global_gpu_limits, cost_transfer = gp.multidict({
     'AWS': [inf, inf, 0.090],
@@ -50,9 +49,9 @@ pair_regions, time_comm = gp.multidict({
 })
 
 flmodel.solve(client_prov_regions_vms=client_prov_regions_vms, cost_transfer=cost_transfer,
-              vms_region_prov=vms_region_prov, cost_vms=cost_vms, server_msg_train=server_msg_train,
+              prov_regions_vms=vms_region_prov, cost_vms=cost_vms, server_msg_train=server_msg_train,
               server_msg_test=server_msg_test, client_msg_train=client_msg_train, client_msg_test=client_msg_test,
-              T_round=T_round, clients=clients, B_round=B_round, alpha_1=alpha_1, alpha_2=alpha_2, providers=providers,
+              T_round=T_round, clients=clients, B_round=B_round, alpha=alpha, providers=providers,
               gpu_vms=gpu_vms, global_gpu_limits=global_gpu_limits, cpu_vms=cpu_vms,
-              global_cpu_limits=global_cpu_limits, regional_gpu_limits=regional_gpu_limits, regions_prov=regions_prov,
+              global_cpu_limits=global_cpu_limits, regional_gpu_limits=regional_gpu_limits, prov_regions=regions_prov,
               regional_cpu_limits=regional_cpu_limits, time_exec=time_exec, time_comm=time_comm, time_aggreg=time_aggreg)

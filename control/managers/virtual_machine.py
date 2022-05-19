@@ -51,9 +51,21 @@ class VirtualMachine:
         if self.region is not None:
             self.key_file = self.region.key_file
         elif instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
-            self.key_file = self.loader.ec2_conf.key_file
+            if self.zone != '':
+                for region in self.loader.loc.values():
+                    if region.provider in (CloudManager.EC2, CloudManager.AWS):
+                        if self.zone in region.zones:
+                            self.key_file = region.key_file
+            else:
+                self.key_file = self.loader.ec2_conf.key_file
         elif instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            self.key_file = self.loader.gcp_conf.key_file
+            if self.zone != '':
+                for region in self.loader.loc.values():
+                    if region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                        if self.zone in region.zones:
+                            self.key_file = region.key_file
+            else:
+                self.key_file = self.loader.gcp_conf.key_file
 
         self.create_file_system = False
 

@@ -52,8 +52,15 @@ def main():
     parser.add_argument('--command', help='command para o client', type=str, default='')
     parser.add_argument('--num_clients_pre_sched', help="Quantity of clients in the pre-scheduling RPC tests",
                         type=int, default=None)
-    parser.add_argument('--server_provider', help="Server provider", type=str, default=None)
-    parser.add_argument('--server_region', help="Server region", type=str, default=None)
+
+    parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=False)
+    parser.add_argument('--server_region', help="Server region", type=str, default=None, required=False)
+    parser.add_argument('--server_vm_name', help="Server VM name", type=str, default=None, required=False)
+
+    parser.add_argument('--clients_provider', help="Each client provider", type=str, nargs='+', required=False)
+    parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
+    parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
+
 
     parser.add_argument('volume_id', help="Volume id to be attached", type=str)
     parser.add_argument('cloud_provider', help="Provider which the volume are (AWS or GCP). Default: AWS", type=str,
@@ -105,7 +112,8 @@ def main():
     vm = VirtualMachine(
         instance_type=instance,
         market='on-demand',
-        loader=loader
+        loader=loader,
+        zone=args.cloud_zone
     )
 
     __prepare_logging()
