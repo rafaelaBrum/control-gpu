@@ -111,3 +111,6 @@ git+https://www.github.com/keras-team/keras-contrib.git
 tensorflow == 1.15.5
 tqdm >= 4.56.2
 scikit-image >= 0.17.2
+
+
+gurobipy

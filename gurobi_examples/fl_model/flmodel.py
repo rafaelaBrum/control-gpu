@@ -173,16 +173,15 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
             print("Objective Function Value = {0}".format(obj_value))
             var_tm = 0
             for v in model.getVars():
-                if v.x == 1:
+                if v.x > 0:
                     print("{0} = {1}".format(v.varName, v.x))
                 if v.varName == "t_m":
-                    print("{0} = {1}".format(v.varName, v.x))
                     var_tm = v.x
 
             cost = ((obj_value*1/alpha) - (var_tm / max_total_exec))*max_cost
 
-            print("max_cost", max_cost)
-            print("max_total_exec", max_total_exec)
+            # print("max_cost", max_cost)
+            # print("max_total_exec", max_total_exec)
 
             print("Computed cost = ", cost)
     except gp.GurobiError as e:
