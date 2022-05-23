@@ -12,8 +12,8 @@ export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
-FOLDER_TESTS=input/FederatedLearning/mathematical_formulation/VGG_DS_AWS
-COUNTER=16
+FOLDER_TESTS=input/FederatedLearning/mathematical_formulation/VGG_DS_GCP
+COUNTER=7
 while [  $COUNTER -lt 19 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

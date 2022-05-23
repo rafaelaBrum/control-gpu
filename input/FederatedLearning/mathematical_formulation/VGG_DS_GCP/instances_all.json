@@ -319,6 +319,35 @@
             "gpu": "nvidia-tesla-v100",
             "gpu_count": 1
         },
+        "n1-standard-4_v100": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 2.859998,
+                    "us-central1": 2.859998
+                },
+                "preemptible": {
+                    "us-west1": 0.82,
+                    "us-central1": 0.82
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 4,
+            "memory": 15,
+            "gpu": "nvidia-tesla-v100",
+            "gpu_count": 1
+        },
         "n1-standard-16_p4": {
             "provider": "gcloud",
             "prices": {
