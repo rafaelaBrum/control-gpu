@@ -1,8 +1,9 @@
 import gurobipy as gp
 import fl_data_model
+from math import inf
 
-B_round = 30000
-T_round = 10000
+B_round = inf
+T_round = inf
 server_msg_train = 0.537082008
 server_msg_test = 0.537082008
 client_msg_train = 0.537082008
