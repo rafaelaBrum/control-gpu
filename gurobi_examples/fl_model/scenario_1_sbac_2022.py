@@ -5,10 +5,10 @@ import fl_data_model
 # Base data
 
 clients, baseline_exec, location = gp.multidict({
-    0: [608.40, 'us-east-1'],
-    1: [608.40, 'us-east-1'],
-    2: [608.40, 'us-east-1'],
-    3: [608.40, 'us-east-1']
+    0: [595.71, 'us-east-1'],
+    1: [595.71, 'us-east-1'],
+    2: [595.71, 'us-east-1'],
+    3: [595.71, 'us-east-1']
 })
 
 B_round = 3000
@@ -18,7 +18,7 @@ server_msg_test = 0.537082008
 client_msg_train = 0.537082008
 client_msg_test = 0.000001808
 alpha = 0.5
-comm_baseline = 46.37
+comm_baseline = 27.26
 
 elapsed_time = fl_data_model.pre_process_model_vgg(clients=clients, location=location, baseline_exec=baseline_exec,
                                                    comm_baseline=comm_baseline, server_msg_train=server_msg_train,

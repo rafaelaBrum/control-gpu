@@ -7,33 +7,34 @@ from datetime import datetime
 
 def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, server_msg_train, server_msg_test,
                           client_msg_train, client_msg_test, T_round, B_round, alpha):
+
     providers, global_cpu_limits, global_gpu_limits, cost_transfer = gp.multidict({
         'AWS': [inf, inf, 0.090],
-        'GCP': [4, 40, 0.120]
+        'GCP': [40, 4, 0.120]
     })
 
     prov_regions, regional_cpu_limits, regional_gpu_limits = gp.multidict({
-        ('AWS', 'us-east-1'): [48, inf],
-        ('AWS', 'us-west-2'): [36, inf], # 32 vCPUs da família G e 4 para a família T
-        ('GCP', 'us-central1'): [24, 4],
-        ('GCP', 'us-west1'): [24, 4]
+        ('AWS', 'us-east-1'): [52, inf], # 48 vCPUs of G family and 4 for T family
+        ('AWS', 'us-west-2'): [36, inf], # 32 vCPUs of G family and 4 for T family
+        ('GCP', 'us-central1'): [40, 4],
+        ('GCP', 'us-west1'): [40, 4]
     })
 
     prov_regions_vms, cpu_vms, gpu_vms, cost_vms, \
     time_aggreg, slowdown_us_east_1, slowdown_us_west_2, slowdown_us_central1, slowdown_us_west1 = gp.multidict({
         ('AWS', 'us-east-1', 'g4dn.2xlarge'):           [8, 1,  0.752/3600, 0.3, 1.00, 0, 1.00, 0],
-        ('AWS', 'us-east-1', 'g3.4xlarge'):             [16, 1,  1.14/3600, 0.3, 4.98, 0, 1.52, 0],
-        # ('AWS', 'us-east-1', 'p3.2xlarge'):           [16, 1,  3.06/60, 0.3, 4.82, 0, 0, 0],
+        ('AWS', 'us-east-1', 'g3.4xlarge'):            [16, 1,  1.14/3600, 0.3, 5.09, 0, 1.52, 0],
+        # ('AWS', 'us-east-1', 'p3.2xlarge'):          [16, 1,  3.06/3600, 0.3, 4.82, 0, 0, 0],
         ('AWS', 'us-east-1', 't2.xlarge'):              [4, 0,  0.1856/3600, 0.3, 10, 10, 10, 10],
-        ('AWS', 'us-west-2', 'g4dn.2xlarge'):           [8, 1,  0.752/3600, 0.3, 0.85, 0, 1.36, 0],
-        ('AWS', 'us-west-2', 'g3.4xlarge'):             [16, 1,  1.14/3600, 0.3, 4.35, 0, 1.92, 0],
+        ('AWS', 'us-west-2', 'g4dn.2xlarge'):           [8, 1,  0.752/3600, 0.3, 0.99, 0, 1.36, 0],
+        ('AWS', 'us-west-2', 'g3.4xlarge'):            [16, 1,  1.14/3600, 0.3, 4.44, 0, 1.92, 0],
         ('AWS', 'us-west-2', 't2.xlarge'):              [4, 0,  0.1856/3600, 0.3, 10, 10, 10, 10],
-        ('GCP', 'us-central1', 'n1-standard-8_t4'):     [8, 1,  0.730/3600, 0.2, 1.01, 0, 0.84, 0],
-        ('GCP', 'us-central1', 'n1-standard-8_p4'):     [8, 1,  1.360/3600, 0.2, 1.25, 0, 0.89, 0],
-        ('GCP', 'us-central1', 'n1-standard-8_v100'):   [8, 1,  2.860/3600, 0.2, 1.01, 0, 0.41, 0],
+        ('GCP', 'us-central1', 'n1-standard-8_t4'):     [8, 1,  0.730/3600, 0.2, 1.03, 0, 0.84, 0],
+        ('GCP', 'us-central1', 'n1-standard-16_p4'):   [16, 1,  1.360/3600, 0.2, 1.28, 0, 0.89, 0],
+        ('GCP', 'us-central1', 'n1-standard-8_v100'):   [8, 1,  2.860/3600, 0.2, 1.04, 0, 0.41, 0],
         ('GCP', 'us-central1', 'e2-standard-4'):        [4, 0,  0.134/3600, 0.2, 10, 10, 10, 10],
-        ('GCP', 'us-west1', 'n1-standard-8_t4'):        [8, 1,  0.730/3600, 0.2, 1.04, 0, 0.99, 0],
-        ('GCP', 'us-west1', 'n1-standard-8_v100'):      [8, 1,  2.860/3600, 0.2, 1.08, 0, 0.90, 0],
+        ('GCP', 'us-west1', 'n1-standard-8_t4'):        [8, 1,  0.730/3600, 0.2, 1.07, 0, 0.99, 0],
+        ('GCP', 'us-west1', 'n1-standard-8_v100'):      [8, 1,  2.860/3600, 0.2, 1.10, 0, 0.90, 0],
         ('GCP', 'us-west1', 'e2-standard-4'):           [4, 0,  0.134/3600, 0.2, 10, 10, 10, 10]
     })
 
@@ -49,7 +50,7 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
             if location[client] == 'us-east-1':
                 time_exec[aux] = baseline_exec[client]*slowdown_us_east_1[prov, region, vm]
                 # if vm in 'g4dn.2xlarge':
-                #     print(f"time_exec{aux}]", time_exec[aux])
+                # print(f"time_exec{aux}]", time_exec[aux])
             elif location[client] == 'us-west-2':
                 time_exec[aux] = baseline_exec[client] * slowdown_us_west_2[prov, region, vm]
             elif location[client] == 'us-central1':
@@ -63,6 +64,9 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
                 print(f"We do not support the location of client {client}: {location[client]}")
                 exit()
     client_prov_regions_vms = gp.tuplelist(client_prov_regions_vms)
+
+    # print("tempo_aggreg")
+    # print(time_aggreg)
 
     # print("client_prov_regions_vms", client_prov_regions_vms)
     # print("time_exec", time_exec)
@@ -92,7 +96,7 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
 
     for pair in pair_regions:
         time_comm[pair] = comm_baseline*comm_slowdown[pair]
-        # print(f"time_comm´[{}]")
+        # print(f"time_comm[{pair}] = {time_comm[pair]}")
 
     start_timestamp = datetime.now()
 

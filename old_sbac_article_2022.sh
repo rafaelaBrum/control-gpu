@@ -20,10 +20,10 @@ echo " ----------------------------
 Optimal solution
 ---------------------------- "
 SERVER_PROVIDER="aws"
-SERVER_REGION="us-west-2"
+SERVER_REGION="us-east-1"
 SERVER_VM_NAME="t2.xlarge"
 CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-west-2"
+CLIENTS_REGION="us-east-1 us-east-1 us-east-1 us-east-1"
 CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
@@ -33,7 +33,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -53,11 +53,11 @@ done
 echo " ----------------------------
 Random test #1
 ---------------------------- "
-SERVER_PROVIDER="aws"
-SERVER_REGION="us-east-1"
-SERVER_VM_NAME="t2.xlarge"
+SERVER_PROVIDER="gcp"
+SERVER_REGION="us-west1"
+SERVER_VM_NAME="e2-standard-4"
 CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-east-1 us-east-1 us-east-1 us-east-1"
+CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-west-2"
 CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
@@ -67,7 +67,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -125,12 +125,12 @@ cp setup_sbac_2022/test_case_2_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
-SERVER_PROVIDER="gcp"
-SERVER_REGION="us-central1"
-SERVER_VM_NAME="e2-standard-4"
-CLIENTS_PROVIDER="gcp gcp gcp gcp"
-CLIENTS_REGION="us-central1 us-central1 us-central1 us-central1"
-CLIENTS_VM_NAME="n1-standard-8_v100 n1-standard-8_v100 n1-standard-8_v100 n1-standard-8_v100"
+SERVER_PROVIDER="aws"
+SERVER_REGION="us-east-1"
+SERVER_VM_NAME="t2.xlarge"
+CLIENTS_PROVIDER="aws aws aws aws"
+CLIENTS_REGION="us-east-1 us-east-1 us-east-1 us-east-1"
+CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -139,7 +139,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -194,11 +194,11 @@ echo " ----------------------------
 Random test #2
 ---------------------------- "
 SERVER_PROVIDER="aws"
-SERVER_REGION="us-east-1"
+SERVER_REGION="us-west-2"
 SERVER_VM_NAME="t2.xlarge"
-CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-east-1 us-east-1 us-east-1 us-east-1"
-CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
+CLIENTS_PROVIDER="gcp gcp gcp gcp"
+CLIENTS_REGION="us-west1 us-west1 us-west1 us-west1"
+CLIENTS_VM_NAME="n1-standard-8_t4 n1-standard-8_t4 n1-standard-8_t4 n1-standard-8_t4"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -208,7 +208,7 @@ echo " ----------------------------
    in $CLIENTS_VM_NAME
   ----------------------------"
 COUNTER=4
-while [  $COUNTER -lt 4 ]; do
+while [  $COUNTER -lt 5 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
   ----------------------------"
@@ -231,12 +231,12 @@ cp setup_sbac_2022/test_case_3_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
-SERVER_PROVIDER="aws"
-SERVER_REGION="us-west-2"
-SERVER_VM_NAME="t2.xlarge"
-CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-east-1"
-CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
+SERVER_PROVIDER=""
+SERVER_REGION=""
+SERVER_VM_NAME=""
+CLIENTS_PROVIDER=""
+CLIENTS_REGION=""
+CLIENTS_VM_NAME=""
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -245,7 +245,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -337,12 +337,12 @@ cp setup_sbac_2022/test_case_4_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
-SERVER_PROVIDER="aws"
-SERVER_REGION="us-west-2"
-SERVER_VM_NAME="t2.xlarge"
-CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-east-1"
-CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
+SERVER_PROVIDER=""
+SERVER_REGION=""
+SERVER_VM_NAME=""
+CLIENTS_PROVIDER=""
+CLIENTS_REGION=""
+CLIENTS_VM_NAME=""
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -351,7 +351,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -443,12 +443,12 @@ cp setup_sbac_2022/test_case_5_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
-SERVER_PROVIDER="aws"
-SERVER_REGION="us-west-2"
-SERVER_VM_NAME="t2.xlarge"
-CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-east-1"
-CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
+SERVER_PROVIDER=""
+SERVER_REGION=""
+SERVER_VM_NAME=""
+CLIENTS_PROVIDER=""
+CLIENTS_REGION=""
+CLIENTS_VM_NAME=""
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
   ----------------------------"
@@ -457,7 +457,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

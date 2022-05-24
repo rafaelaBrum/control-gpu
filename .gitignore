@@ -106,3 +106,6 @@ control/pre_scheduling/*.json
 
 # trash files
 *~
+
+# gurobi file
+*.lp

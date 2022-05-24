@@ -61,6 +61,10 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                 # print(f"time_aggreg ({m}, {n}, {o})", time_aggreg[m, n, o])
                 max_time_aggreg = time_aggreg[m, n, o]
 
+        # print("max_time_exec", max_time_exec)
+        # print("max_time_aggreg", max_time_aggreg)
+        # print("max_time_comm", max_time_comm)
+
         max_total_exec = max_time_exec + max_time_aggreg + max_time_comm
 
         max_vm_cost = 0
@@ -113,7 +117,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                                       gpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p)
                         <= global_gpu_limits[p]
                 ),
-                "constraint_global_gpu"
+                f"constraint_global_gpu_{p}"
             )
 
             model.addConstr(
@@ -124,7 +128,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                                       cpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p)
                         <= global_cpu_limits[p]
                 ),
-                "constraint_global_cpu"
+                f"constraint_global_cpu_{p}"
             )
 
         # Regional limits
@@ -137,7 +141,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                                       gpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p and k == r)
                         <= regional_gpu_limits[p, r]
                 ),
-                "constraint_regional_gpu"
+                f"constraint_regional_gpu_{p}_{r}"
             )
 
             model.addConstr(
@@ -148,7 +152,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                                       cpu_vms[j, k, l] for j, k, l in prov_regions_vms if j == p and k == r)
                         <= regional_cpu_limits[p, r]
                 ),
-                "constraint_regional_cpu"
+                f"constraint_regional_cpu_{p}_{r}"
             )
 
         model.addConstrs(
@@ -167,23 +171,29 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # Compute optimal solution
         model.optimize()
 
+        # print(model.display())
+
+        # model.write("file.lp")
+
         # Print solution
         if model.Status == GRB.OPTIMAL:
             obj_value = objective_function.getValue()
             print("Objective Function Value = {0}".format(obj_value))
             var_tm = 0
             for v in model.getVars():
-                if v.x > 0:
+                if v.x == 1:
                     print("{0} = {1}".format(v.varName, v.x))
                 if v.varName == "t_m":
+                    print("{0} = {1}".format(v.varName, v.x))
                     var_tm = v.x
 
-            cost = ((obj_value*1/alpha) - (var_tm / max_total_exec))*max_cost
+            if alpha > 0:
+                cost = ((obj_value*1/alpha) - (var_tm / max_total_exec))*max_cost
 
             # print("max_cost", max_cost)
             # print("max_total_exec", max_total_exec)
 
-            print("Computed cost = ", cost)
+                print("Computed cost = ", cost)
     except gp.GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
 
