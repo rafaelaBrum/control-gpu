@@ -538,13 +538,16 @@ class Dispatcher:
         status = self.vm.deploy(type_task=self.type_task)
 
         if not status:
-            if self.vm.zone.endswith('a'):
+            for zone in self.vm.region.zones:
                 self.vm.instance_id = None
-                self.vm.zone = self.vm.zone[:-1] + 'b'
+                self.vm.zone = zone
+                self.vm.instance_type.zone = zone
                 logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
                 logging.info(
                     "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
                 status = self.vm.deploy(type_task=self.type_task)
+                if status:
+                    break
 
         # self.expected_makespan_timestamp = self.vm.start_time + timedelta(seconds=self.queue.makespan_seconds)
 
