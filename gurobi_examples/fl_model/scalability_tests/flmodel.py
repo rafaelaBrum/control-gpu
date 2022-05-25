@@ -13,7 +13,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # Create optimization model
         model = gp.Model('FL in clouds')
 
-        model.setParam("LogToConsole", 0)
+        # model.setParam("LogToConsole", 0)
 
         # Create variables
         x_client_vars = model.addVars(client_prov_regions_vms, vtype=GRB.BINARY, name='x')
