@@ -70,8 +70,12 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
 
     # print("client_prov_regions_vms", client_prov_regions_vms)
     # print("time_exec", time_exec)
+
+    # print("cost_vms")
+    # print(cost_vms)
     #
-    # exit()
+    # print("cost_transfer")
+    # print(cost_transfer)
 
     pair_regions, comm_slowdown = gp.multidict({
         ('AWS', 'us-east-1', 'AWS', 'us-east-1'): 1.0,

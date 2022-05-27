@@ -1,12 +1,13 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Testes_SBAC_2022/Sc2'
-test_case = "Random #2"
-current_exec = 3
+test_folder = 'Testes_SBAC_2022/Sc1'
+test_case = "Optimal"
+current_exec = 1
 
-first_server_message_date_string = "2022-05-19 11:08:30,712"
-last_server_message_date_string = "2022-05-19 12:00:42,800"
+first_server_message_date_string = "2022-05-24 13:53:42,846"
+last_server_message_date_string = "2022-05-24 15:24:52,818"
+
 
 def get_server_times_one_round(n_clients, current_round):
     file_path = f'{Path.home()}/{test_folder}/' \
@@ -105,31 +106,31 @@ def put_times_by_hand():
 
 if __name__ == "__main__":
 
-    for current_round in range(1, 11):
-        results = get_server_times_one_round(n_clients=4, current_round=current_round)
+    for round in range(1, 11):
+        results = get_server_times_one_round(n_clients=4, current_round=round)
         initial_sync_initial_date_string = results[0]
         test_sync_final_date_string = results[1]
 
         client = 0
-        results = get_client_times_one_round(client, current_round)
+        results = get_client_times_one_round(client, round)
         initial_sync_final_client_0_date_string = results[0]
         aggregation_sync_initial_client_0_date_string = results[1]
         aggregation_sync_final_client_0_date_string = results[2]
         test_sync_initial_client_0_date_string = results[3]
         client = 1
-        results = get_client_times_one_round(client, current_round)
+        results = get_client_times_one_round(client, round)
         initial_sync_final_client_1_date_string = results[0]
         aggregation_sync_initial_client_1_date_string = results[1]
         aggregation_sync_final_client_1_date_string = results[2]
         test_sync_initial_client_1_date_string = results[3]
         client = 2
-        results = get_client_times_one_round(client, current_round)
+        results = get_client_times_one_round(client, round)
         initial_sync_final_client_2_date_string = results[0]
         aggregation_sync_initial_client_2_date_string = results[1]
         aggregation_sync_final_client_2_date_string = results[2]
         test_sync_initial_client_2_date_string = results[3]
         client = 3
-        results = get_client_times_one_round(client, current_round)
+        results = get_client_times_one_round(client, round)
         initial_sync_final_client_3_date_string = results[0]
         aggregation_sync_initial_client_3_date_string = results[1]
         aggregation_sync_final_client_3_date_string = results[2]
@@ -244,8 +245,8 @@ if __name__ == "__main__":
         #
         # print("FL total execution: ", total_fl_execution_duration)
 
-        if current_round > 0:
-            print(f'----------\n Round {current_round}\n----------')
+        if round > 0:
+            print(f'----------\n Round {round}\n----------')
         else:
             print(f'----------\n Final\n----------')
 
@@ -254,32 +255,32 @@ if __name__ == "__main__":
               f"{test_client_0_duration}, {test_client_1_duration}, {test_client_2_duration}, "
               f"{test_client_3_duration}, {test_sync_duration}, {total_fl_execution_duration}")
 
-    current_round = -1
+    round = -1
 
-    results = get_server_times_one_round(n_clients=4, current_round=current_round)
+    results = get_server_times_one_round(n_clients=4, current_round=round)
     initial_sync_initial_date_string = results[0]
     test_sync_final_date_string = results[1]
 
     client = 0
-    results = get_client_times_one_round(client, current_round)
+    results = get_client_times_one_round(client, round)
     initial_sync_final_client_0_date_string = results[0]
     aggregation_sync_initial_client_0_date_string = results[1]
     aggregation_sync_final_client_0_date_string = results[2]
     test_sync_initial_client_0_date_string = results[3]
     client = 1
-    results = get_client_times_one_round(client, current_round)
+    results = get_client_times_one_round(client, round)
     initial_sync_final_client_1_date_string = results[0]
     aggregation_sync_initial_client_1_date_string = results[1]
     aggregation_sync_final_client_1_date_string = results[2]
     test_sync_initial_client_1_date_string = results[3]
     client = 2
-    results = get_client_times_one_round(client, current_round)
+    results = get_client_times_one_round(client, round)
     initial_sync_final_client_2_date_string = results[0]
     aggregation_sync_initial_client_2_date_string = results[1]
     aggregation_sync_final_client_2_date_string = results[2]
     test_sync_initial_client_2_date_string = results[3]
     client = 3
-    results = get_client_times_one_round(client, current_round)
+    results = get_client_times_one_round(client, round)
     initial_sync_final_client_3_date_string = results[0]
     aggregation_sync_initial_client_3_date_string = results[1]
     aggregation_sync_final_client_3_date_string = results[2]
@@ -394,8 +395,8 @@ if __name__ == "__main__":
     #
     # print("FL total execution: ", total_fl_execution_duration)
 
-    if current_round > 0:
-        print(f'----------\n Round {current_round}\n----------')
+    if round > 0:
+        print(f'----------\n Round {round}\n----------')
     else:
         print(f'----------\n Final\n----------')
 

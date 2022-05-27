@@ -65,6 +65,9 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # print("max_time_aggreg", max_time_aggreg)
         # print("max_time_comm", max_time_comm)
 
+        # print("server_msg_train + server_msg_test", server_msg_train+server_msg_test)
+        # print("client_msg_train + client_msg_train", client_msg_train+client_msg_test)
+
         max_total_exec = max_time_exec + max_time_aggreg + max_time_comm
 
         max_vm_cost = 0

@@ -2,8 +2,8 @@ import gurobipy as gp
 import fl_data_model
 from math import inf
 
-B_round = inf
-T_round = inf
+B_round = 3000
+T_round = 1000
 server_msg_train = 0.537082008
 server_msg_test = 0.537082008
 client_msg_train = 0.537082008
@@ -19,7 +19,7 @@ clients, baseline_exec, location = gp.multidict({
 
 print(f"2 clients")
 
-for _ in range(1, 11):
+for _ in range(1, 2):
     elapsed_time = fl_data_model.pre_process_model_vgg(clients=clients, location=location, baseline_exec=baseline_exec,
                                                        comm_baseline=comm_baseline, server_msg_train=server_msg_train,
                                                        server_msg_test=server_msg_test,
@@ -37,7 +37,7 @@ for client in range(2, 50):
     baseline_exec[client] = 608.40
     location[client] = 'us-east-1'
 
-    for _ in range(1, 11):
+    for _ in range(1, 2):
 
         elapsed_time = fl_data_model.pre_process_model_vgg(clients=clients, location=location,
                                                            baseline_exec=baseline_exec, comm_baseline=comm_baseline,
