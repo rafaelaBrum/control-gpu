@@ -245,7 +245,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=3
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -313,7 +313,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=2
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -351,7 +351,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -385,7 +385,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -419,7 +419,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -457,7 +457,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -491,7 +491,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -525,7 +525,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=3
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
