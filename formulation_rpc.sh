@@ -16,7 +16,7 @@ echo " ----------------------------
  ---------------------------- "
 FOLDER_TESTS=input/FederatedLearning/mathematical_formulation/rpc_tests
 COUNTER=1
-while [  $COUNTER -lt 6 ]; do
+while [  $COUNTER -lt 11 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
  ----------------------------"

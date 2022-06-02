@@ -1,12 +1,12 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Testes_SBAC_2022/Sc1'
-test_case = "Optimal"
+test_folder = 'Testes_SBAC_2022/Sc5'
+test_case = "Random 2"
 current_exec = 1
 
-first_server_message_date_string = "2022-05-24 13:53:42,846"
-last_server_message_date_string = "2022-05-24 15:24:52,818"
+first_server_message_date_string = "2022-05-30 21:16:58,150"
+last_server_message_date_string = "2022-05-30 23:09:03,459"
 
 
 def get_server_times_one_round(n_clients, current_round):
@@ -105,6 +105,8 @@ def put_times_by_hand():
 
 
 if __name__ == "__main__":
+
+    print(f'{Path.home()}/{test_folder}/{test_case}/Exec {current_exec}')
 
     for round in range(1, 11):
         results = get_server_times_one_round(n_clients=4, current_round=round)

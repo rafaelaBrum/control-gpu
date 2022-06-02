@@ -38,7 +38,7 @@ instance_aws = InstanceType(
 
 instance_aws_rpc = InstanceType(
     provider=CloudManager.EC2,
-    instance_type='t2.large',
+    instance_type='t2.xlarge',
     image_id='ami-0c20212ac4ce26a60',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
@@ -83,17 +83,17 @@ instance_gcp = InstanceType(
 
 instance_gcp_rpc = InstanceType(
     provider=CloudManager.GCLOUD,
-    instance_type='e2-standard-2',
+    instance_type='e2-standard-4',
     image_id='disk-ubuntu-flower-server',
     restrictions={'on-demand': 1,
                   'preemptible': 1},
     prices={'on-demand': 0.001,
             'preemptible': 0.000031},
-    vcpu=2,
+    vcpu=4,
     ebs_device_name='/dev/sdb',
     gpu='no',
     count_gpu=0,
-    memory=8
+    memory=16
 )
 
 
