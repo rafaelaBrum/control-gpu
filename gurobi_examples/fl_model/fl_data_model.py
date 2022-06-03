@@ -44,6 +44,10 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         for prov, region, vm in prov_regions_vms:
             if gpu_vms[prov, region, vm] == 0:
                 continue
+            # if client in (-1, 0) and vm in "n1-standard-8_t4":
+            #     continue
+            # if client in (1, 2, 3, 4) and vm in "g4dn.2xlarge":
+            #     continue
             aux = (client, prov, region, vm)
             # print(aux)
             client_prov_regions_vms.append(aux)
@@ -76,24 +80,23 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
     #
     # print("cost_transfer")
     # print(cost_transfer)
-
     pair_regions, comm_slowdown = gp.multidict({
         ('AWS', 'us-east-1', 'AWS', 'us-east-1'): 1.0,
-        ('AWS', 'us-east-1', 'AWS', 'us-west-2'): 6.74,
-        ('AWS', 'us-east-1', 'GCP', 'us-central1'): 4.97,
-        ('AWS', 'us-east-1', 'GCP', 'us-west1'): 5.41,
-        ('AWS', 'us-west-2', 'AWS', 'us-west-2'): 1.12,
-        ('AWS', 'us-west-2', 'GCP', 'us-central1'): 5.74,
-        ('AWS', 'us-west-2', 'GCP', 'us-west1'): 3.51,
-        ('GCP', 'us-central1', 'GCP', 'us-central1'): 0.39,
-        ('GCP', 'us-central1', 'GCP', 'us-west1'): 1.26,
-        ('GCP', 'us-west1', 'GCP', 'us-west1'): 0.72,
-        ('AWS', 'us-west-2', 'AWS', 'us-east-1'): 6.74,
-        ('GCP', 'us-central1', 'AWS', 'us-east-1'): 4.97,
-        ('GCP', 'us-west1', 'AWS', 'us-east-1'): 5.41,
-        ('GCP', 'us-central1', 'AWS', 'us-west-2'): 5.74,
-        ('GCP', 'us-west1', 'AWS', 'us-west-2'): 3.51,
-        ('GCP', 'us-west1', 'GCP', 'us-central1'): 1.26
+        ('AWS', 'us-east-1', 'AWS', 'us-west-2'): 5.84,
+        ('AWS', 'us-east-1', 'GCP', 'us-central1'): 3.40,
+        ('AWS', 'us-east-1', 'GCP', 'us-west1'): 4.78,
+        ('AWS', 'us-west-2', 'AWS', 'us-west-2'): 0.97,
+        ('AWS', 'us-west-2', 'GCP', 'us-central1'): 4.65,
+        ('AWS', 'us-west-2', 'GCP', 'us-west1'): 3.04,
+        ('GCP', 'us-central1', 'GCP', 'us-central1'): 0.34,
+        ('GCP', 'us-central1', 'GCP', 'us-west1'): 1.09,
+        ('GCP', 'us-west1', 'GCP', 'us-west1'): 0.62,
+        ('AWS', 'us-west-2', 'AWS', 'us-east-1'): 5.84,
+        ('GCP', 'us-central1', 'AWS', 'us-east-1'): 3.40,
+        ('GCP', 'us-west1', 'AWS', 'us-east-1'): 4.78,
+        ('GCP', 'us-central1', 'AWS', 'us-west-2'): 4.65,
+        ('GCP', 'us-west1', 'AWS', 'us-west-2'): 3.04,
+        ('GCP', 'us-west1', 'GCP', 'us-central1'): 1.09
     })
 
     time_comm = {}

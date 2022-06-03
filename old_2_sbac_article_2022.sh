@@ -447,7 +447,7 @@ SERVER_PROVIDER="aws"
 SERVER_REGION="us-west-2"
 SERVER_VM_NAME="t2.xlarge"
 CLIENTS_PROVIDER="aws aws aws aws"
-CLIENTS_REGION="us-west-2 us-west-2 us-east-1 us-west-2"
+CLIENTS_REGION="us-west-2 us-west-2 us-west-2 us-east-1"
 CLIENTS_VM_NAME="g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge g4dn.2xlarge"
 echo " ----------------------------
    Server in $SERVER_PROVIDER, $SERVER_REGION in $SERVER_VM_NAME
@@ -457,7 +457,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -525,7 +525,7 @@ echo " ----------------------------
    $CLIENTS_REGION
    in $CLIENTS_VM_NAME
   ----------------------------"
-COUNTER=4
+COUNTER=3
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
