@@ -2,11 +2,11 @@ from datetime import datetime
 from pathlib import Path
 
 test_folder = 'Testes_SBAC_2022/Sc5'
-test_case = "Random 2"
-current_exec = 1
+test_case = "Optimal"
+current_exec = 3
 
-first_server_message_date_string = "2022-05-30 21:16:58,150"
-last_server_message_date_string = "2022-05-30 23:09:03,459"
+first_server_message_date_string = "2022-06-03 21:00:03,794"
+last_server_message_date_string = "2022-06-03 22:29:52,348"
 
 
 def get_server_times_one_round(n_clients, current_round):

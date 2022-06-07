@@ -94,6 +94,8 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # Objective function
 
         objective_function = alpha * (total_costs / max_cost) + (1-alpha) * (t_m / max_total_exec)
+        # objective_function = total_costs
+        # objective_function = t_m
         model.setObjective(objective_function, GRB.MINIMIZE)
 
         # Add constraints
@@ -160,13 +162,13 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
 
         model.addConstrs(
             (
-                    x_client_vars[i, j, k, l] *
-                    y_server_vars[m, n, o] *
-                    (
-                            time_exec[i, j, k, l] +
-                            time_comm[j, k, m, n] +
-                            time_aggreg[m, n, o]
-                    ) <= t_m for i, j, k, l in client_prov_regions_vms for m, n, o in prov_regions_vms
+                t_m >= x_client_vars[i, j, k, l] *
+                y_server_vars[m, n, o] *
+                (
+                        time_exec[i, j, k, l] +
+                        time_comm[j, k, m, n] +
+                        time_aggreg[m, n, o]
+                ) for i, j, k, l in client_prov_regions_vms for m, n, o in prov_regions_vms
             ),
             "constraint_slowest_client"
         )

@@ -13,7 +13,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # Create optimization model
         model = gp.Model('FL in clouds')
 
-        # model.setParam("LogToConsole", 0)
+        model.setParam("LogToConsole", 0)
 
         # Create variables
         x_client_vars = model.addVars(client_prov_regions_vms, vtype=GRB.BINARY, name='x')
@@ -170,13 +170,13 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
         # Print solution
         if model.Status == GRB.OPTIMAL:
             obj_value = objective_function.getValue()
-            # print("Objective Function Value = {0}".format(obj_value))
+            print("Objective Function Value = {0}".format(obj_value))
             var_tm = 0
             for v in model.getVars():
-                # if v.x == 1:
-                    # print("{0} = {1}".format(v.varName, v.x))
+                if v.x == 1:
+                    print("{0} = {1}".format(v.varName, v.x))
                 if v.varName == "t_m":
-                    # print("{0} = {1}".format(v.varName, v.x))
+                    print("{0} = {1}".format(v.varName, v.x))
                     var_tm = v.x
 
             # print('type obj', type(obj_value))
@@ -186,7 +186,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
             # print("max_cost", max_cost)
             # print("max_total_exec", max_total_exec)
             #
-            # print("Computed cost = ", cost)
+            print("Computed cost = ", cost)
     except gp.GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
 
