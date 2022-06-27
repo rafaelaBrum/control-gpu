@@ -8,6 +8,53 @@ clients, baseline_exec, location = gp.multidict({
     1: [595.71, 'us-east-1'],
     2: [233.01, 'us-central1'],
     3: [233.01, 'us-central1']
+    # ,
+    # 4: [595.71, 'us-east-1'],
+    # 5: [595.71, 'us-east-1'],
+    # 6: [233.01, 'us-central1'],
+    # 7: [233.01, 'us-central1'],
+    # 8: [595.71, 'us-east-1'],
+    # 9: [595.71, 'us-east-1'],
+    # 10: [233.01, 'us-central1'],
+    # 11: [233.01, 'us-central1'],
+    # 12: [595.71, 'us-east-1'],
+    # 13: [595.71, 'us-east-1'],
+    # 14: [233.01, 'us-central1'],
+    # 15: [233.01, 'us-central1'],
+    # 16: [595.71, 'us-east-1'],
+    # 17: [595.71, 'us-east-1'],
+    # 18: [233.01, 'us-central1'],
+    # 19: [233.01, 'us-central1'],
+    # 20: [595.71, 'us-east-1'],
+    # 21: [595.71, 'us-east-1'],
+    # 22: [233.01, 'us-central1'],
+    # 23: [233.01, 'us-central1'],
+    # 24: [595.71, 'us-east-1'],
+    # 25: [595.71, 'us-east-1'],
+    # 26: [233.01, 'us-central1'],
+    # 27: [233.01, 'us-central1'],
+    # 28: [595.71, 'us-east-1'],
+    # 29: [595.71, 'us-east-1'],
+    # 30: [233.01, 'us-central1'],
+    # 31: [233.01, 'us-central1'],
+    # 32: [595.71, 'us-east-1'],
+    # 33: [595.71, 'us-east-1'],
+    # 34: [233.01, 'us-central1'],
+    # 35: [233.01, 'us-central1'],
+    # 36: [595.71, 'us-east-1'],
+    # 37: [595.71, 'us-east-1'],
+    # 38: [233.01, 'us-central1'],
+    # 39: [233.01, 'us-central1'],
+    # 40: [595.71, 'us-east-1'],
+    # 41: [595.71, 'us-east-1'],
+    # 42: [233.01, 'us-central1'],
+    # 43: [233.01, 'us-central1'],
+    # 44: [595.71, 'us-east-1'],
+    # 45: [595.71, 'us-east-1'],
+    # 46: [233.01, 'us-central1'],
+    # 47: [233.01, 'us-central1'],
+    # 48: [595.71, 'us-east-1'],
+    # 49: [233.01, 'us-central1']
 })
 
 B_round = 3000
@@ -18,6 +65,8 @@ client_msg_train = 0.537082008
 client_msg_test = 0.000001808
 alpha = 0.5
 comm_baseline = 27.26
+
+print(f"alpha = {alpha}")
 
 elapsed_time = fl_data_model.pre_process_model_vgg(clients=clients, location=location, baseline_exec=baseline_exec,
                                                    comm_baseline=comm_baseline, server_msg_train=server_msg_train,

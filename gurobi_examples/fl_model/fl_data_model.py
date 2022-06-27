@@ -12,6 +12,10 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         'AWS': [inf, inf, 0.090],
         'GCP': [40, 4, 0.120]
     })
+    # providers, global_cpu_limits, global_gpu_limits, cost_transfer = gp.multidict({
+    #     'AWS': [inf, inf, 0.090],
+    #     'GCP': [inf, inf, 0.120]
+    # })
 
     prov_regions, regional_cpu_limits, regional_gpu_limits = gp.multidict({
         ('AWS', 'us-east-1'): [52, inf], # 48 vCPUs of G family and 4 for T family
@@ -19,10 +23,16 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         ('GCP', 'us-central1'): [40, 4],
         ('GCP', 'us-west1'): [40, 4]
     })
+    # prov_regions, regional_cpu_limits, regional_gpu_limits = gp.multidict({
+    #     ('AWS', 'us-east-1'): [inf, inf],  # 48 vCPUs of G family and 4 for T family
+    #     ('AWS', 'us-west-2'): [inf, inf],  # 32 vCPUs of G family and 4 for T family
+    #     ('GCP', 'us-central1'): [inf, inf],
+    #     ('GCP', 'us-west1'): [inf, inf]
+    # })
 
     prov_regions_vms, cpu_vms, gpu_vms, cost_vms, \
     time_aggreg, slowdown_us_east_1, slowdown_us_west_2, slowdown_us_central1, slowdown_us_west1 = gp.multidict({
-        ('AWS', 'us-east-1', 'g4dn.2xlarge'):           [8, 1,  0.752/3600, 0.3, 1.00, 0, 1.00, 0],
+        ('AWS', 'us-east-1', 'g4dn.2xlarge'):           [8, 1,  0.752/3600, 100000.3, 1.00, 0, 1.00, 0],
         ('AWS', 'us-east-1', 'g3.4xlarge'):            [16, 1,  1.14/3600, 0.3, 5.09, 0, 1.52, 0],
         # ('AWS', 'us-east-1', 'p3.2xlarge'):          [16, 1,  3.06/3600, 0.3, 4.82, 0, 0, 0],
         ('AWS', 'us-east-1', 't2.xlarge'):              [4, 0,  0.1856/3600, 0.3, 10, 10, 10, 10],
@@ -44,9 +54,13 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         for prov, region, vm in prov_regions_vms:
             if gpu_vms[prov, region, vm] == 0:
                 continue
-            # if client in (-1, 0) and vm in "n1-standard-8_t4":
+            # if client % 2 == 0 and vm in "n1-standard-8_t4":
             #     continue
-            # if client in (1, 2, 3, 4) and vm in "g4dn.2xlarge":
+            # if client % 2 != 0 and vm in "n1-standard-8_v100":
+            #     continue
+            # if location[client] == 'us-east-1' and vm in "n1-standard-8_t4":
+            #     continue
+            # if location[client] == 'us-central1' and vm in "g4dn.2xlarge":
             #     continue
             aux = (client, prov, region, vm)
             # print(aux)

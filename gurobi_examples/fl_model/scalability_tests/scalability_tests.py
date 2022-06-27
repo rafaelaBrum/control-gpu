@@ -12,9 +12,13 @@ alpha = 0.5
 comm_baseline = 27.26
 
 # Base data
+# clients, baseline_exec, location = gp.multidict({
+#     0: [233.01, 'us-central1'],
+#     1: [233.01, 'us-central1']
+# })
 clients, baseline_exec, location = gp.multidict({
-    0: [233.01, 'us-central1'],
-    1: [233.01, 'us-central1']
+    0: [595.71, 'us-east-1'],
+    1: [595.71, 'us-east-1']
 })
 
 print(f"2 clients")
@@ -34,8 +38,10 @@ print("\n----------------------------------------")
 for client in range(2, 50):
     print(f"{client+1} clients")
     clients.append(client)
-    baseline_exec[client] = 233.01
-    location[client] = 'us-central1'
+    # baseline_exec[client] = 233.01
+    baseline_exec[client] = 595.71
+    # location[client] = 'us-central1'
+    location[client] = 'us-east-1'
     for _ in range(1, 2):
 
         elapsed_time = fl_data_model.pre_process_model_vgg(clients=clients, location=location,

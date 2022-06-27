@@ -78,9 +78,12 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
 
         max_cost_transfer = 0
         for j in cost_transfer:
-            if cost_transfer[j] > max_cost_transfer:
-                # print(f"max_cost_transfer ({j})", cost_transfer[j])
-                max_cost_transfer = cost_transfer[j]
+            for k in cost_transfer:
+                comp = (server_msg_train + server_msg_test) * cost_transfer[j] +\
+                       (client_msg_train + client_msg_test) * cost_transfer[k]
+                if comp > max_cost_transfer:
+                    # print(f"max_cost_transfer ({j})", cost_transfer[j])
+                    max_cost_transfer = comp
 
         max_cost = max_vm_cost * max_total_exec * (len(clients) + 1) \
                    + max_cost_transfer * (server_msg_train +
@@ -193,7 +196,7 @@ def solve(client_prov_regions_vms, cost_transfer, prov_regions_vms, cost_vms, se
                     var_tm = v.x
 
             if alpha > 0:
-                cost = ((obj_value*1/alpha) - (var_tm / max_total_exec))*max_cost
+                cost = ((obj_value - (1 - alpha) * (var_tm / max_total_exec))/alpha)*max_cost
 
             # print("max_cost", max_cost)
             # print("max_total_exec", max_total_exec)
