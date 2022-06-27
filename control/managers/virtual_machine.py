@@ -5,7 +5,7 @@ import time
 from control.domain.instance_type import InstanceType
 
 from control.managers.cloud_manager import CloudManager
-from control.managers.ec2_manager import EC2Manager
+# from control.managers.ec2_manager import EC2Manager
 from control.managers.gcp_manager import GCPManager
 
 from control.util.ssh_client import SSHClient
@@ -71,7 +71,8 @@ class VirtualMachine:
 
         # Start cloud manager
         if instance_type.provider == CloudManager.EC2:
-            self.manager = EC2Manager()
+            # self.manager = EC2Manager()
+            self.manager = None
         elif instance_type.provider == CloudManager.GCLOUD:
             self.manager = GCPManager()
             if self.vm_name == '':
