@@ -41,7 +41,7 @@ def pre_process_model_vgg(clients, location, baseline_exec, comm_baseline, serve
         ('AWS', 'us-west-2', 't2.xlarge'):              [4, 0,  0.1856/3600, 0.3, 10, 10, 10, 10],
         ('GCP', 'us-central1', 'n1-standard-8_t4'):     [8, 1,  0.730/3600, 0.2, 1.03, 0, 0.84, 0],
         ('GCP', 'us-central1', 'n1-standard-16_p4'):   [16, 1,  1.360/3600, 0.2, 1.28, 0, 0.89, 0],
-        ('GCP', 'us-central1', 'n1-standard-8_v100'):   [8, 1,  2.860/3600, 0.2, 1.04, 0, 0.41, 0],
+        ('GCP', 'us-central1', 'n1-standard-8_v100'):   [8, 1,  2.860/3600, 0.2, 1.04, 0, 0.42, 0],
         ('GCP', 'us-central1', 'e2-standard-4'):        [4, 0,  0.134/3600, 0.2, 10, 10, 10, 10],
         ('GCP', 'us-west1', 'n1-standard-8_t4'):        [8, 1,  0.730/3600, 0.2, 1.07, 0, 0.99, 0],
         ('GCP', 'us-west1', 'n1-standard-8_v100'):      [8, 1,  2.860/3600, 0.2, 1.10, 0, 0.90, 0],
