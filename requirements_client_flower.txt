@@ -12,6 +12,8 @@ python-dateutil==2.8.1
 #flwr==0.15.0
 git+https://github.com/rafaelaBrum/flower.git@update_version
 
+pympler
+
 h5py == 2.9.0
 imageio == 2.9.0
 imagesize == 1.2.0
