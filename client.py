@@ -143,6 +143,8 @@ def main():
     parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
     parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
 
+    parser.add_argument('--strategy', help="Each client VM name", type=str, default=None, required=False)
+
     options_map = {
         'control': __call_control,
         'pre': __call_pre_scheduling,

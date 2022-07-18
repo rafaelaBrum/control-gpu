@@ -7,7 +7,7 @@ echo " ----------------------------
   Exporting variables
  ----------------------------"
 export SETUP_FILE=setup.cfg
-export SETUP_PATH=$HOME/control-gpu_GCP/
+export SETUP_PATH=$HOME/control-gpu/
 export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
@@ -33,8 +33,8 @@ do
     ----------------------------"
   echo python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
    --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME --strategy $strategy
-#  python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
-#   --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME --strategy $strategy
+  python client.py control --server_provider $SERVER_PROVIDER --server_region $SERVER_REGION --server_vm_name $SERVER_VM_NAME \
+   --clients_provider $CLIENTS_PROVIDER --clients_region $CLIENTS_REGION --clients_vm_name $CLIENTS_VM_NAME --strategy $strategy
 done
 echo " ----------------------------
   Stopping docker

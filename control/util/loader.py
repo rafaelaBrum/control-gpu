@@ -156,7 +156,7 @@ class Loader:
         self.__update_prices()
         self.__update_zones()
 
-        self.__update_command()
+        self.__update_command(args.strategy)
 
     def __prepare_logging(self):
         """
@@ -427,15 +427,26 @@ class Loader:
             json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
 
     # update Federated Learning command
-    def __update_command(self):
+    def __update_command(self, strategy):
         if self.application_conf.fl_framework == 'flower':
-            self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
-                                          " --min_num_clients {2} --server_address [::]:{3}"\
-                .format(self.job.server_task.simple_command,
-                        self.job.server_task.n_rounds,
-                        self.job.server_task.n_clients,
-                        self.application_conf.fl_port
-                        )
+            if strategy is not None:
+                self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
+                                              " --min_num_clients {2} --server_address [::]:{3} --strategy {4}"\
+                    .format(self.job.server_task.simple_command,
+                            self.job.server_task.n_rounds,
+                            self.job.server_task.n_clients,
+                            self.application_conf.fl_port,
+                            strategy
+                            )
+            else:
+                self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
+                                              " --min_num_clients {2} --server_address [::]:{3}"\
+                    .format(self.job.server_task.simple_command,
+                            self.job.server_task.n_rounds,
+                            self.job.server_task.n_clients,
+                            self.application_conf.fl_port
+                            )
+            print("server command", self.job.server_task.command)
             for i in range(self.job.num_clients):
                 if self.job.client_tasks[i].trainset_dir is not None and self.job.client_tasks[i].trainset_dir != "":
                     predst = os.path.join(self.file_system_conf.path_storage,
