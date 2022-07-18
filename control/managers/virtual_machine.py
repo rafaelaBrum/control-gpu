@@ -470,7 +470,7 @@ class VirtualMachine:
                                       target=self.loader.ec2_conf.home_path,
                                       item=self.loader.application_conf.daemon_aws_file)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--vm_user {} " \
                                  "--root_path {} " \
                                  "--job_id {} " \
@@ -504,7 +504,7 @@ class VirtualMachine:
                                       target=self.loader.gcp_conf.home_path,
                                       item=self.loader.application_conf.daemon_gcp_file)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--vm_user {} " \
                                  "--root_path {} " \
                                  "--job_id {} " \

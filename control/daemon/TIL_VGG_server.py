@@ -5,6 +5,8 @@ import argparse
 # import numpy as np
 import pickle
 
+from google.cloud import storage
+
 from fedavg_strategy import FedAvg
 from fast_and_slow_strategy import FastAndSlow
 from ft_fedavg_strategy import FaultTolerantFedAvg
@@ -32,6 +34,41 @@ strategy_print = "Strategy needs to be one of the following:\n" \
                  "--> FedOpt\n" \
                  "--> FedYogi\n" \
                  "--> QFedAvg\n"
+
+
+def download_blob(file_name):
+    """Downloads a blob from the bucket."""
+    # The ID of your GCS bucket
+    bucket_name = "fl_server_weights"
+
+    # The ID of your GCS object
+    source_blob_name = "vgg16_weights.bin"
+
+    # The path to which the file should be downloaded
+    destination_file_name = file_name
+
+    print(
+        "Start to download storage object {} from bucket {} to local file {}.".format(
+            source_blob_name, bucket_name, destination_file_name
+        )
+    )
+
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+
+    # Construct a client side representation of a blob.
+    # Note `Bucket.blob` differs from `Bucket.get_blob` as it doesn't retrieve
+    # any content from Google Cloud Storage. As we don't need additional data,
+    # using `Bucket.blob` is preferred here.
+    blob = bucket.blob(source_blob_name)
+    blob.download_to_filename(destination_file_name)
+
+    print(
+        "Downloaded storage object {} from bucket {} to local file {}.".format(
+            source_blob_name, bucket_name, destination_file_name
+        )
+    )
 
 
 def get_args():
@@ -71,7 +108,7 @@ def get_args():
     )
     parser.add_argument(
         "--file_weights", type=str,
-        default='weights.bin',
+        default='vgg16_weights.bin',
         help="File where initial weights are stored (default: weights.bin)",
     )
     args = parser.parse_args()
@@ -115,6 +152,7 @@ def main():
             on_fit_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDADAGRAD":
+        download_blob(args.file_weights)
         # Read list to memory
         # for reading also binary mode is important
         with open(args.file_weights, 'rb') as fp:
@@ -130,6 +168,7 @@ def main():
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "FEDADAM":
+        download_blob(args.file_weights)
         # Read list to memory
         # for reading also binary mode is important
         with open(args.file_weights, 'rb') as fp:
@@ -172,6 +211,7 @@ def main():
             on_fit_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDOPT":
+        download_blob(args.file_weights)
         # Read list to memory
         # for reading also binary mode is important
         with open(args.file_weights, 'rb') as fp:
@@ -187,6 +227,7 @@ def main():
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "FEDYOGI":
+        download_blob(args.file_weights)
         # Read list to memory
         # for reading also binary mode is important
         with open(args.file_weights, 'rb') as fp:

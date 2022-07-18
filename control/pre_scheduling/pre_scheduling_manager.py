@@ -255,7 +255,7 @@ class PreSchedulingManager:
                                       target=self.loader.ec2_conf.home_path,
                                       item=item_key)
 
-                cmd_daemon = "python3 {} " \
+                cmd_daemon = "python3.7 {} " \
                              "--ip {} " \
                              "--path {} " \
                              "--file {} " \
@@ -276,7 +276,7 @@ class PreSchedulingManager:
                                       target=self.loader.gcp_conf.home_path,
                                       item=item_key)
 
-                cmd_daemon = "python3 {} " \
+                cmd_daemon = "python3.7 {} " \
                              "--ip {} " \
                              "--path {} " \
                              "--file {} " \
@@ -566,7 +566,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "-i -v -predst {} " \
                                  "-split 0.9 0.10 0.00 " \
                                  "-net {} -data CellRep -d " \
@@ -622,7 +622,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "-i -v -predst {} " \
                                  "-split 0.9 0.10 0.00 " \
                                  "-net {} -data CellRep -d " \
@@ -891,7 +891,7 @@ class PreSchedulingManager:
                         stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_json, output=True)
                         print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
                                                                      self.loader.pre_sched_conf.server_file),
                                                         self.loader.application_conf.fl_port
@@ -924,7 +924,7 @@ class PreSchedulingManager:
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
                                                                                          cmd_json))
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                      self.loader.pre_sched_conf.server_file),
                                                         self.loader.application_conf.fl_port
@@ -967,7 +967,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
@@ -998,7 +998,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
@@ -1042,7 +1042,7 @@ class PreSchedulingManager:
 
                 if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
                                                                      self.loader.pre_sched_conf.server_file),
                                                         self.loader.application_conf.fl_port
@@ -1050,7 +1050,7 @@ class PreSchedulingManager:
 
                 elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                      self.loader.pre_sched_conf.server_file),
                                                         self.loader.application_conf.fl_port
@@ -1071,7 +1071,7 @@ class PreSchedulingManager:
 
                 if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
@@ -1083,7 +1083,7 @@ class PreSchedulingManager:
 
                 elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
@@ -1246,7 +1246,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} " \
                                  "--num_clients {}".format(os.path.join(self.loader.ec2_conf.home_path,
                                                                         self.loader.pre_sched_conf.server_file),
@@ -1272,7 +1272,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} " \
                                  "--num_clients {} ".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                          self.loader.pre_sched_conf.server_file),
@@ -1379,7 +1379,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
@@ -1406,7 +1406,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_client.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    cmd_daemon = "python3 {} " \
+                    cmd_daemon = "python3.7 {} " \
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
