@@ -2,10 +2,36 @@ from typing import Dict
 
 import flwr as fl
 import argparse
+# import numpy as np
+import pickle
 
 from fedavg_strategy import FedAvg
+from fast_and_slow_strategy import FastAndSlow
+from ft_fedavg_strategy import FaultTolerantFedAvg
+from fedadagrad_strategy import FedAdagrad
+from fedadam_strategy import FedAdam
+from fedavg_m_strategy import FedAvgM
+from fedfs_v0_strategy import FedFSv0
+from fedfs_v1_strategy import FedFSv1
+from fedopt_strategy import FedOpt
+from fedyogi_strategy import FedYogi
+from qfedavg_strategy import QFedAvg
+
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
+
+strategy_print = "Strategy needs to be one of the following:\n" \
+                 "--> FedAvg\n" \
+                 "--> Fast_Slow\n" \
+                 "--> FTFedAvg\n" \
+                 "--> FedAdagrad\n" \
+                 "--> FedAdam\n" \
+                 "--> FedAvgM\n" \
+                 "--> FedFSv0\n" \
+                 "--> FedFSv1\n" \
+                 "--> FedOpt\n" \
+                 "--> FedYogi\n" \
+                 "--> QFedAvg\n"
 
 
 def get_args():
@@ -35,8 +61,18 @@ def get_args():
         help="Minimum number of available clients required for sampling (default: 2)",
     )
     parser.add_argument(
+        "--strategy", type=str,
+        default='FedAvg',
+        help="Type of used strategy",
+    )
+    parser.add_argument(
         "--log_host", type=str,
         help="Logserver address (no default)",
+    )
+    parser.add_argument(
+        "--file_weights", type=str,
+        default='weights.bin',
+        help="File where initial weights are stored (default: weights.bin)",
     )
     args = parser.parse_args()
     return args
@@ -47,15 +83,136 @@ def main():
     args = get_args()
 
     # Create strategy
-    # strategy = fl.server.server.FedAvg(
-    strategy = FedAvg(
-        fraction_fit=args.sample_fraction,
-        fraction_eval=args.sample_fraction,
-        min_fit_clients=args.min_sample_size,
-        min_eval_clients=args.min_sample_size,
-        min_available_clients=args.min_num_clients,
-        on_fit_config_fn=fit_config
-    )
+    strategy = None
+
+    print("strategy:", args.strategy)
+
+    if args.strategy.upper() == "FEDAVG":
+        strategy = FedAvg(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FAST_SLOW":
+        strategy = FastAndSlow(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FTFEDAVG":
+        strategy = FaultTolerantFedAvg(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FEDADAGRAD":
+        # Read list to memory
+        # for reading also binary mode is important
+        with open(args.file_weights, 'rb') as fp:
+            initial_weights = pickle.load(fp)
+        initial_parameters = fl.common.weights_to_parameters(initial_weights)
+        strategy = FedAdagrad(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config,
+            initial_parameters=initial_parameters
+        )
+    elif args.strategy.upper() == "FEDADAM":
+        # Read list to memory
+        # for reading also binary mode is important
+        with open(args.file_weights, 'rb') as fp:
+            initial_weights = pickle.load(fp)
+        initial_parameters = fl.common.weights_to_parameters(initial_weights)
+        strategy = FedAdam(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config,
+            initial_parameters=initial_parameters
+        )
+    elif args.strategy.upper() == "FEDAVGM":
+        strategy = FedAvgM(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FEDFSV0":
+        strategy = FedFSv0(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FEDFSV1":
+        strategy = FedFSv1(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FEDOPT":
+        # Read list to memory
+        # for reading also binary mode is important
+        with open(args.file_weights, 'rb') as fp:
+            initial_weights = pickle.load(fp)
+        initial_parameters = fl.common.weights_to_parameters(initial_weights)
+        strategy = FedOpt(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config,
+            initial_parameters=initial_parameters
+        )
+    elif args.strategy.upper() == "FEDYOGI":
+        # Read list to memory
+        # for reading also binary mode is important
+        with open(args.file_weights, 'rb') as fp:
+            initial_weights = pickle.load(fp)
+        initial_parameters = fl.common.weights_to_parameters(initial_weights)
+        strategy = FedYogi(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config,
+            initial_parameters=initial_parameters
+        )
+    elif args.strategy.upper() == "QFEDAVG":
+        strategy = QFedAvg(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    else:
+        print(strategy_print)
+        exit(1)
 
     # Configure logger and start server
     fl.common.logger.configure("server", host=args.log_host)

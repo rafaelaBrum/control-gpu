@@ -10,8 +10,8 @@ echo '''
 # Instaling python and dev tools
 sudo apt update
 sudo apt upgrade -y
-sudo apt install python3 python3-dev python3-pip -y
-echo "Python 3.6 installed"
+sudo apt install python3.7 python3.7-dev python3-pip -y
+echo "Python 3.7 installed"
 
 # Installing CUDA 10.0 and cuDNN 7
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
@@ -36,9 +36,9 @@ echo "cuDNN 7 installed"
 
 # Installing Python dependencies
 sudo apt install wget -y
-wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/master/requirements_client_flower.txt
-pip3 install -U pip setuptools
-pip3 install -r requirements_client_flower.txt
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_gcp/requirements_client_flower.txt
+python3.7 -m pip install -U pip setuptools
+python3.7 -m pip install -r requirements_client_flower.txt
 sudo apt install unzip -y
 echo "Flower client requirements installed"
 

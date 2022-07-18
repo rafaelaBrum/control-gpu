@@ -757,6 +757,14 @@ class VGG16Client(fl.client.NumPyClient):
         self.model = model
 
     def get_parameters(self):
+        # print("tipo weights", type(self.model.get_model_weights()))
+        # weights = self.model.get_model_weights()
+        # import pickle
+        #
+        # # store list in binary file so 'wb' mode
+        # with open('weights.bin', 'wb') as fp:
+        #     pickle.dump(weights, fp)
+        #     print('Done writing list into a binary file')
         return self.model.get_model_weights()
 
     def fit(self, parameters, config):

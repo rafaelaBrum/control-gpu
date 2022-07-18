@@ -10,14 +10,14 @@ echo '''
 # Instaling python and dev tools
 sudo apt update
 sudo apt upgrade -y
-sudo apt install python3 python3-dev python3-pip -y
-echo "Python 3.6 installed"
+sudo apt install python3.7 python3.7-dev python3-pip -y
+echo "Python 3.7 installed"
 
 # Installing Python dependencies
 sudo apt install wget -y
-wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/master/requirements_server_flower.txt
-pip3 install -U pip setuptools
-pip3 install -r requirements_server_flower.txt
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_gcp/requirements_server_flower.txt
+python3.7 -m pip install -U pip setuptools
+python3.7 -m pip install -r requirements_server_flower.txt
 sudo apt install unzip -y
 echo "Flower server requirements installed"
 

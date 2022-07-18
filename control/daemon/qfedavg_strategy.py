@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
+"""FAIR RESOURCE ALLOCATION IN FEDERATED LEARNING [Li et al., 2020] strategy.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: https://openreview.net/pdf?id=ByexElSYDr
 """
 
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple
+
+import numpy as np
 
 from flwr.common import (
     EvaluateIns,
@@ -37,49 +39,24 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-from flwr.server.strategy.strategy import Strategy
-
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_eval_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_eval_clients`.
-"""
+from flwr.server.strategy.aggregate import aggregate_qffl, weighted_loss_avg
+from fedavg_strategy import FedAvg, weighted_metrics_avg
 
 
-def weighted_metrics_avg(results: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
-    """Aggregate evaluation results obtained from multiple clients."""
-    # num_total_clients = len(results)
-    num_total_evaluation_examples = sum(
-        [num_examples for num_examples, _ in results]
-    )
-    weighted_results_list = {}
-    weighted_results = {}
-    # print("results[0][1]", results[0][1])
-    # for num_examples, metrics in results:
-    #     print("num_examples", num_examples)
-    #     print("metrics", metrics)
-    for key in results[0][1].keys():
-        # print("key", key)
-        # print("type(key)", type(key))
-        # print("value", results[0][1].get(key))
-        weighted_results_list[key] = [num_examples * metrics.get(key) for num_examples, metrics in results]
-        weighted_results[key] = sum(weighted_results_list.get(key)) / num_total_evaluation_examples
-    return weighted_results
-
-
-class FedAvg(Strategy):
-    """Configurable FedAvg strategy implementation."""
+# pylint: disable=too-many-locals
+class QFedAvg(FedAvg):
+    """Configurable QFedAvg strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
+        q_param: float = 0.2,
+        qffl_learning_rate: float = 0.1,
         fraction_fit: float = 0.1,
         fraction_eval: float = 0.1,
-        min_fit_clients: int = 2,
-        min_eval_clients: int = 2,
-        min_available_clients: int = 2,
+        min_fit_clients: int = 1,
+        min_eval_clients: int = 1,
+        min_available_clients: int = 1,
         eval_fn: Optional[
             Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
@@ -90,55 +67,32 @@ class FedAvg(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Federated Averaging strategy.
-
-        Implementation based on https://arxiv.org/abs/1602.05629
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
-        fraction_eval : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_eval_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        eval_fn : Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        """
-        super().__init__()
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_eval_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
-
-        self.fraction_fit = fraction_fit
-        self.fraction_eval = fraction_eval
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_eval=fraction_eval,
+            min_fit_clients=min_fit_clients,
+            min_eval_clients=min_eval_clients,
+            min_available_clients=min_available_clients,
+            eval_fn=eval_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
+        )
         self.min_fit_clients = min_fit_clients
         self.min_eval_clients = min_eval_clients
+        self.fraction_fit = fraction_fit
+        self.fraction_eval = fraction_eval
         self.min_available_clients = min_available_clients
         self.eval_fn = eval_fn
         self.on_fit_config_fn = on_fit_config_fn
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
-        self.initial_parameters = initial_parameters
+        self.learning_rate = qffl_learning_rate
+        self.q_param = q_param
+        self.pre_weights: Optional[Weights] = None
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -149,7 +103,9 @@ class FedAvg(Strategy):
             self.evaluate_metrics_aggregation_fn = weighted_metrics_avg
 
     def __repr__(self) -> str:
-        rep = f"FedAvg(accept_failures={self.accept_failures})"
+        # pylint: disable=line-too-long
+        rep = f"QffedAvg(learning_rate={self.learning_rate}, "
+        rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
@@ -163,32 +119,13 @@ class FedAvg(Strategy):
         num_clients = int(num_available_clients * self.fraction_eval)
         return max(num_clients, self.min_eval_clients), self.min_available_clients
 
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        return initial_parameters
-
-    def evaluate(
-        self, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function."""
-        if self.eval_fn is None:
-            # No evaluation function provided
-            return None
-        weights = parameters_to_weights(parameters)
-        eval_res = self.eval_fn(weights)
-        if eval_res is None:
-            return None
-        loss, metrics = eval_res
-        return loss, metrics
-
     def configure_fit(
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        weights = parameters_to_weights(parameters)
+        self.pre_weights = weights
+        parameters = weights_to_parameters(weights)
         config = {}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -210,7 +147,7 @@ class FedAvg(Strategy):
         self, rnd: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction eval is 0.
+        # Do not configure federated evaluation if fraction_eval is 0
         if self.fraction_eval == 0.0:
             return []
 
@@ -222,15 +159,12 @@ class FedAvg(Strategy):
         evaluate_ins = EvaluateIns(parameters, config)
 
         # Sample clients
-        if rnd >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
-            clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
-            )
-        else:
-            clients = list(client_manager.all().values())
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
@@ -247,20 +181,59 @@ class FedAvg(Strategy):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-
         # Convert results
-        weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
-        ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+
+        def norm_grad(grad_list: List[Weights]) -> float:
+            # input: nested gradients
+            # output: square of the L-2 norm
+            client_grads = grad_list[0]
+            for i in range(1, len(grad_list)):
+                client_grads = np.append(
+                    client_grads, grad_list[i]
+                )  # output a flattened array
+            squared = np.square(client_grads)  # type: ignore
+            summed = np.sum(squared)
+            return float(summed)
+
+        deltas = []
+        hs_ffl = []
+
+        if self.pre_weights is None:
+            raise Exception("QffedAvg pre_weights are None in aggregate_fit")
+
+        weights_before = self.pre_weights
+        eval_result = self.evaluate(weights_to_parameters(weights_before))
+        if eval_result is not None:
+            loss, _ = eval_result
+
+        for _, fit_res in results:
+            new_weights = parameters_to_weights(fit_res.parameters)
+            # plug in the weight updates into the gradient
+            grads = [
+                (u - v) * 1.0 / self.learning_rate
+                for u, v in zip(weights_before, new_weights)
+            ]
+            deltas.append(
+                [np.float_power(loss + 1e-10, self.q_param) * grad for grad in grads]
+            )
+            # estimation of the local Lipschitz constant
+            hs_ffl.append(
+                self.q_param
+                * np.float_power(loss + 1e-10, (self.q_param - 1))
+                * norm_grad(grads)
+                + (1.0 / self.learning_rate)
+                * np.float_power(loss + 1e-10, self.q_param)
+            )
+
+        weights_aggregated: Weights = aggregate_qffl(weights_before, deltas, hs_ffl)
+        parameters_aggregated = weights_to_parameters(weights_aggregated)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif rnd == 1:
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
@@ -272,7 +245,6 @@ class FedAvg(Strategy):
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
-        print("results", results)
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -292,10 +264,7 @@ class FedAvg(Strategy):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:  # Only log this warning once
+        elif rnd == 1:
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
-
-        print("loss_aggregated", loss_aggregated)
-        print("metrics_aggregated", metrics_aggregated)
 
         return loss_aggregated, metrics_aggregated
