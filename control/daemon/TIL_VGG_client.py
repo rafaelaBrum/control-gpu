@@ -781,6 +781,8 @@ class VGG16Client(fl.client.NumPyClient):
         results = {
             "loss": history.history["loss"][0],
             "accuracy": history.history["acc"][0],
+            "num_examples_ceil": num_examples_train*epochs,
+            "num_examples": num_examples_train*epochs
         }
         print("num_examples fit:", num_examples_train)
         print("fit results: ", results)
