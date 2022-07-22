@@ -61,6 +61,7 @@ def main():
     parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
     parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
 
+    parser.add_argument('--strategy', help="Each client VM name", type=str, default=None, required=False)
 
     parser.add_argument('volume_id', help="Volume id to be attached", type=str)
     parser.add_argument('cloud_provider', help="Provider which the volume are (AWS or GCP). Default: AWS", type=str,

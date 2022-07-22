@@ -1,0 +1,29 @@
+{
+    "locations": {
+        "GCP_us-west1": {
+            "provider": "gcp",
+            "region": "us-west1",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-v-0-19-0",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
+            "zones": [
+                "us-west1-a",
+                "us-west1-b",
+                "us-west1-c"
+            ]
+        },
+        "GCP_us-central1": {
+            "provider": "gcp",
+            "region": "us-central1",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-v-0-19-0",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
+            "zones": [
+                "us-central1-a",
+                "us-central1-b",
+                "us-central1-c",
+                "us-central1-f"
+            ]
+        }
+    }
+}

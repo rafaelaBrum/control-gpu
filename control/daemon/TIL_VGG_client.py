@@ -768,6 +768,11 @@ class VGG16Client(fl.client.NumPyClient):
         return self.model.get_model_weights()
 
     def fit(self, parameters, config):
+        timeout = int(config["timeout"]) if "timeout" in config else None
+        # partial_updates = bool(int(config["partial_updates"]))
+
+        time_start = time()
+
         self.model.set_model_weights(parameters)
 
         # Get hyperparameters for this round
@@ -778,11 +783,20 @@ class VGG16Client(fl.client.NumPyClient):
         # Return updated model parameters and results
         parameters_prime = self.model.get_model_weights()
         num_examples_train = self.model.get_train_data_length()
+
+        time_end = time()
+
+        fit_duration = time_end - time_start
+        if timeout is not None:
+            if fit_duration > timeout:
+                parameters_prime = []
+
         results = {
             "loss": history.history["loss"][0],
             "accuracy": history.history["acc"][0],
             "num_examples_ceil": num_examples_train*epochs,
-            "num_examples": num_examples_train*epochs
+            "num_examples": num_examples_train*epochs,
+            "fit_duration": fit_duration
         }
         print("num_examples fit:", num_examples_train)
         print("fit results: ", results)
