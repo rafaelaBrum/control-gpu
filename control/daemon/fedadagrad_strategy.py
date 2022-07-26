@@ -18,8 +18,6 @@
 Paper: https://arxiv.org/abs/2003.00295
 """
 
-# 10.100.12.102
-
 
 from typing import Callable, Dict, List, Optional, Tuple
 

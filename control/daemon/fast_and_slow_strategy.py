@@ -413,6 +413,9 @@ class FastAndSlow(FedAvg):
         elif rnd == 1:
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
+        print("loss_aggregated", loss_aggregated)
+        print("metrics_aggregated", metrics_aggregated)
+
         return loss_aggregated, metrics_aggregated
 
 
