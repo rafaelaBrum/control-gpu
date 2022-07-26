@@ -111,6 +111,7 @@ class CellRep:
         self._verbose = config.verbose if config is not None else 0
         self._config = config
         self.nclasses = 2
+        random.seed(0)
 
     def _load_metadata_from_dir(self, d):
         """
@@ -279,7 +280,7 @@ class CellRep:
     def _shuffle(self, X, Y):
         # Shuffle samples and labels maintaining relative order
         combined = list(zip(X, Y))
-        # random.shuffle(combined)
+        random.shuffle(combined)
         X[:], Y[:] = zip(*combined)
 
         return X, Y
