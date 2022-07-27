@@ -156,7 +156,7 @@ class Loader:
         self.__update_prices()
         self.__update_zones()
 
-        self.__update_command(args.strategy)
+        self.__update_command(args.strategy, args.num_seed)
 
     def __prepare_logging(self):
         """
@@ -427,7 +427,7 @@ class Loader:
             json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
 
     # update Federated Learning command
-    def __update_command(self, strategy):
+    def __update_command(self, strategy, num_seed):
         if self.application_conf.fl_framework == 'flower':
             if strategy is not None:
                 self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
@@ -454,19 +454,35 @@ class Loader:
                 else:
                     predst = os.path.join(self.file_system_conf.path_storage)
                 if self.job.client_tasks[i].test_dir is not None and self.job.client_tasks[i].test_dir != "":
-                    self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
-                                                       "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
-                                                       " -epochs {7}"\
-                        .format(self.job.client_tasks[i].simple_command,
-                                predst,
-                                self.job.client_tasks[i].split,
-                                self.job.client_tasks[i].batch,
-                                os.path.join(self.file_system_conf.path, 'logs'),
-                                os.path.join(self.file_system_conf.path, 'results'),
-                                os.path.join(self.file_system_conf.path_storage,
-                                             self.job.client_tasks[i].test_dir),
-                                self.job.client_tasks[i].train_epochs
-                                )
+                    if num_seed is not None:
+                        self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
+                                                           "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
+                                                           " -epochs {7} -num_seed {8}"\
+                            .format(self.job.client_tasks[i].simple_command,
+                                    predst,
+                                    self.job.client_tasks[i].split,
+                                    self.job.client_tasks[i].batch,
+                                    os.path.join(self.file_system_conf.path, 'logs'),
+                                    os.path.join(self.file_system_conf.path, 'results'),
+                                    os.path.join(self.file_system_conf.path_storage,
+                                                 self.job.client_tasks[i].test_dir),
+                                    self.job.client_tasks[i].train_epochs,
+                                    num_seed
+                                    )
+                    else:
+                        self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
+                                                           "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
+                                                           " -epochs {7}" \
+                            .format(self.job.client_tasks[i].simple_command,
+                                    predst,
+                                    self.job.client_tasks[i].split,
+                                    self.job.client_tasks[i].batch,
+                                    os.path.join(self.file_system_conf.path, 'logs'),
+                                    os.path.join(self.file_system_conf.path, 'results'),
+                                    os.path.join(self.file_system_conf.path_storage,
+                                                 self.job.client_tasks[i].test_dir),
+                                    self.job.client_tasks[i].train_epochs
+                                    )
                 else:
                     self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
                                                       "-model_dir {5} -logdir {5} -cache {5} -epochs {6} " \

@@ -143,7 +143,11 @@ def main():
     parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
     parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
 
-    parser.add_argument('--strategy', help="Each client VM name", type=str, default=None, required=False)
+    parser.add_argument('--strategy', help="Strategy to use in server aggregation", type=str, default=None,
+                        required=False)
+
+    parser.add_argument('--num_seed', help="Seed to be used by the clients to randomly shuffle their dataset",
+                        default=None, required=False)
 
     options_map = {
         'control': __call_control,

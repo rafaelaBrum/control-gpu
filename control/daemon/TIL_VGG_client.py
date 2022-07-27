@@ -191,6 +191,8 @@ def get_args():
     parser.add_argument('-d', action='store_true', dest='delay_load', default=False,
                         help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
+    parser.add_argument('-num_seed', dest='num_seed', type=int, help='Seed number to shuffle dataset.')
+
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)
     parser.add_argument('-test_dir', dest='testdir', type=str, default=None,
@@ -244,9 +246,9 @@ class Trainer(object):
         self._rex = r'{0}-t(?P<try>[0-9]+)e(?P<epoch>[0-9]+).h5'
 
     def load_modules(self):
-        self._ds = CellRep(self._args.predst, self._args.keepimg, self._args)
+        self._ds = CellRep(self._args.predst, self._args.keepimg, self._args, self._args.num_seed)
 
-        self._ds_test = CellRep(self._args.testdir, self._args.keepimg, self._args)
+        self._ds_test = CellRep(self._args.testdir, self._args.keepimg, self._args, self._args.num_seed)
 
         net_model = VGG16(self._args, self._ds)
 
