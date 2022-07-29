@@ -63,6 +63,9 @@ def main():
 
     parser.add_argument('--strategy', help="Each client VM name", type=str, default=None, required=False)
 
+    parser.add_argument('--num_seed', help="Seed to be used by the clients to randomly shuffle their dataset",
+                        default=None, required=False)
+
     parser.add_argument('volume_id', help="Volume id to be attached", type=str)
     parser.add_argument('cloud_provider', help="Provider which the volume are (AWS or GCP). Default: AWS", type=str,
                         default='aws')

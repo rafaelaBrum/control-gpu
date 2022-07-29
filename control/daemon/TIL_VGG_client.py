@@ -571,7 +571,7 @@ class Trainer(object):
             pos_accuracy = m_conf[4][1]
             precision = m_conf[1][1] / m_conf[2][1]
             recall = m_conf[1][1] / m_conf[1][2]
-            f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
+            f1_score = (2 * precision * recall) / (precision+recall)
 
             # print("False positive rates: {0}".format(fpr))
             # print("True positive rates: {0}".format(tpr))
