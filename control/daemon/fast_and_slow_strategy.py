@@ -388,6 +388,7 @@ class FastAndSlow(FedAvg):
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
+        print("results", results)
         if not results:
             return None, {}
 
