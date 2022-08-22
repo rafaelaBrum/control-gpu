@@ -9,7 +9,7 @@ echo '''
 
 # Instaling python and dev tools
 sudo apt update
-sudo apt upgrade -y
+# sudo apt upgrade -y
 sudo apt install python3.7 python3.7-dev python3-pip -y
 echo "Python 3.7 installed"
 
@@ -37,8 +37,8 @@ echo "cuDNN 7 installed"
 # Installing Python dependencies
 sudo apt install wget -y
 wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_gcp/requirements_client_flower.txt
-python3.7 -m pip install -U pip setuptools
-python3.7 -m pip install -r requirements_client_flower.txt
+sudo python3.7 -m pip install -U pip setuptools
+sudo python3.7 -m pip install -r requirements_client_flower.txt
 sudo apt install unzip -y
 echo "Flower client requirements installed"
 
