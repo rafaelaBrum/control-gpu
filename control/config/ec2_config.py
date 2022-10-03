@@ -67,4 +67,3 @@ class EC2Config(Config):
     @property
     def key_file(self):
         return self.get_property(self._key, 'key_file')
-

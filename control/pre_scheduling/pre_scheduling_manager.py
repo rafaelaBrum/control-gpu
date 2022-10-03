@@ -530,7 +530,7 @@ class PreSchedulingManager:
                 vm.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
                                        output=True)
 
-                vm.create_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
+                vm.create_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
 
                 logging.info(f"<VirtualMachine {vm.instance_id}>: - Sending Files Training test")
 
@@ -706,7 +706,7 @@ class PreSchedulingManager:
                                     target=self.loader.pre_sched_conf.path,
                                     item=self.loader.pre_sched_conf.results_temp_file)
 
-                vm.remove_bucket_pre_sched(self.loader.file_system_conf.path_storage, cli)
+                vm.remove_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
 
                 cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
 

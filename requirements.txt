@@ -114,3 +114,4 @@ scikit-image >= 0.17.2
 
 
 gurobipy
+xmltodict~=0.13.0

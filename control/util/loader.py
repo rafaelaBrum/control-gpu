@@ -19,6 +19,7 @@ from control.config.notify_config import NotifyConfig
 # from control.config.scheduler_config import SchedulerConfig
 from control.config.simulation_config import SimulationConfig
 from control.config.pre_sched_config import PreSchedConfig
+from control.config.cloudlab_config import CloudLabConfig
 
 from control.domain.instance_type import InstanceType
 from control.domain.job import Job
@@ -115,6 +116,7 @@ class Loader:
         # self.scheduler_conf = SchedulerConfig()
         self.simulation_conf = SimulationConfig()
         self.pre_sched_conf = PreSchedConfig()
+        self.cloudlab_conf = CloudLabConfig()
 
         # local path where the daemon file is
         self.daemon_aws_file = None

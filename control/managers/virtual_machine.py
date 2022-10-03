@@ -7,6 +7,7 @@ from control.domain.instance_type import InstanceType
 from control.managers.cloud_manager import CloudManager
 # from control.managers.ec2_manager import EC2Manager
 from control.managers.gcp_manager import GCPManager
+from control.managers.experiment_cloudlab import Experiment
 
 from control.util.ssh_client import SSHClient
 from control.util.loader import Loader
@@ -27,7 +28,7 @@ import os
 # Parameters: Instance_type (InstanceType), market (str), primary (boolean)
 
 # If primary flag is True, it indicates that the VM is a primary resource, i.e,
-# the VM was launched to executed a primary task.
+# the VM was launched to execute a primary task.
 # Otherwise, if primary flag is False, the VM is a backup resource launched due to spot interruption/hibernation
 
 
@@ -37,7 +38,7 @@ class VirtualMachine:
     vm_num = 1
 
     def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name='',
-                 region: CloudRegion=None, zone=''):
+                 region: CloudRegion = None, zone='', emulated=False):
 
         self.loader = loader
 
@@ -77,8 +78,9 @@ class VirtualMachine:
             self.manager = GCPManager()
             if self.vm_name == '':
                 self.vm_name = f'vm-{self.instance_type.type.replace("_", "-")}'
-            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-{self.loader.execution_id}-' \
-                           f'{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
+            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-' \
+                           f'{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-' \
+                           f'{int(time.time() * 1000)}'
             if self.disk_name == '':
                 self.disk_name = f'disk-{self.instance_type.type.replace("_", "-")}'
             self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
@@ -144,7 +146,6 @@ class VirtualMachine:
             elif type_task == Job.CLIENT:
                 self.instance_type.image_id = self.region.client_image_id
             else:
-                item = ""
                 logging.info(f"<VirtualMachine {self.instance_id}>: Not updating image_id"
                              f" (type_task {type_task})")
         elif ami_id != '':
@@ -160,7 +161,7 @@ class VirtualMachine:
 
             try:
 
-                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
+                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE, Experiment.MARKET):
                     raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
@@ -168,12 +169,13 @@ class VirtualMachine:
                                                                               zone=zone,
                                                                               key_name=key_name)
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
-                    self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
-                                                                              image_id=self.instance_type.image_id,
-                                                                              vm_name=self.vm_name,
-                                                                              zone=zone,
-                                                                              gpu_type=self.instance_type.gpu,
-                                                                              gpu_count=self.instance_type.count_gpu)
+                    self.instance_id = \
+                        self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
+                                                               image_id=self.instance_type.image_id,
+                                                               vm_name=self.vm_name,
+                                                               zone=zone,
+                                                               gpu_type=self.instance_type.gpu,
+                                                               gpu_count=self.instance_type.count_gpu)
                 elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = \
                         self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
@@ -314,10 +316,10 @@ class VirtualMachine:
                    '-o use_cache=/tmp -o uid={} -o gid={} ' \
                    '-o mp_umask=002 -o multireq_max=5 ' \
                    '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
-                                                                   self.manager.bucket_config.vm_uid,
-                                                                   self.manager.bucket_config.vm_gid,
-                                                                   region_bucket.region,
-                                                                   path)
+                                                                  self.manager.bucket_config.vm_uid,
+                                                                  self.manager.bucket_config.vm_gid,
+                                                                  region_bucket.region,
+                                                                  path)
 
         elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             # Mount the bucket in GCP
@@ -325,10 +327,10 @@ class VirtualMachine:
                    '-o use_cache=/tmp -o uid={} -o gid={} ' \
                    '-o mp_umask=002 -o multireq_max=5 ' \
                    '-o url=https://s3.{}.amazonaws.com {}'.format(bucket_name,
-                                                                   self.loader.gcp_conf.uid,
-                                                                   self.loader.gcp_conf.gid,
-                                                                   region_bucket.region,
-                                                                   path)
+                                                                  self.loader.gcp_conf.uid,
+                                                                  self.loader.gcp_conf.gid,
+                                                                  region_bucket.region,
+                                                                  path)
             # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
             # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
         else:
@@ -589,7 +591,7 @@ class VirtualMachine:
         self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
         self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
-    # return the a IP's list of all running instance on the cloud provider
+    # return the IP list of all running instance on the cloud provider
     def get_instances_ip(self):
 
         if self.instance_type.provider == CloudManager.EC2:
@@ -692,11 +694,11 @@ class VirtualMachine:
     def type(self):
         return self.instance_type.type
 
-    def create_bucket_pre_sched(self, path, client: FLClientTask):
+    def create_bucket_pre_scheduling(self, path, client: FLClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 self.__create_s3(path, client)
-            elif  self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 try:
                     with open(os.path.join(self.loader.gcp_conf.key_path,
                                            self.loader.gcp_conf.aws_settings)) as f:
@@ -708,7 +710,7 @@ class VirtualMachine:
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
             self.__create_cloud_storage(path, client)
 
-    def remove_bucket_pre_sched(self, path, client: FLClientTask):
+    def remove_bucket_pre_scheduling(self, path, client: FLClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             self.__detach_s3(path)
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
