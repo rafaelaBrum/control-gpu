@@ -38,7 +38,7 @@ class VirtualMachine:
     vm_num = 1
 
     def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name='',
-                 region: CloudRegion = None, zone='', emulated=False):
+                 region: CloudRegion = None, zone=''):
 
         self.loader = loader
 
@@ -161,7 +161,7 @@ class VirtualMachine:
 
             try:
 
-                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE, Experiment.MARKET):
+                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
                     raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
                 elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
                     self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
