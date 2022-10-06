@@ -101,14 +101,14 @@ class ScheduleManager:
                 Build the initial dispatchers
                 The class Dispatcher is responsible to manager the execution steps
                 '''
-        self.__build_dispatchers()
-
-        # Prepare the control database and the folders structure in S3
-        try:
-            self.__prepare_execution()
-        except Exception as e:
-            logging.error(e)
-            raise e
+        # self.__build_dispatchers()
+        #
+        # # Prepare the control database and the folders structure in S3
+        # try:
+        #     self.__prepare_execution()
+        # except Exception as e:
+        #     logging.error(e)
+        #     raise e
 
     # # PRE-EXECUTION FUNCTIONS
 

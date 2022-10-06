@@ -89,7 +89,7 @@ class Loader:
 
         self.emulated = args.emulated
 
-        self.num_clients_pre_sched = args.num_clients_pre_sched
+        self.num_clients_pre_scheduling = args.num_clients_pre_scheduling
 
         self.deadline_timedelta = None
 
@@ -233,8 +233,8 @@ class Loader:
         if self.revocation_rate is None:
             self.revocation_rate = self.simulation_conf.revocation_rate
 
-        if self.num_clients_pre_sched is None:
-            self.num_clients_pre_sched = self.pre_sched_conf.num_clients
+        if self.num_clients_pre_scheduling is None:
+            self.num_clients_pre_scheduling = self.pre_sched_conf.num_clients
 
     def __load_job(self):
         """
@@ -272,6 +272,8 @@ class Loader:
             # start global count list
             self.count_list[instance.type] = 0
 
+            logging.info(f"instance_type:{instance}")
+
             self.env[instance.type] = instance
 
             self.instances_list.append(instance)
@@ -291,6 +293,7 @@ class Loader:
         self.loc = {}
 
         for region in CloudRegion.from_dict(loc_json):
+            logging.info(f"region:{region}")
             self.loc[region.id] = region
 
     def __get_execution_id(self):
@@ -327,6 +330,10 @@ class Loader:
             # print(instance.type)
 
             for loc in self.loc.values():
+
+                # TODO: change this to test in the instance type
+                if loc.provider == CloudManager.CLOUDLAB:
+                    continue
 
                 region = loc.region
                 zone = loc.zones[0]

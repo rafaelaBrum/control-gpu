@@ -1,0 +1,58 @@
+{
+    "locations": {
+        "CloudLab_Utah": {
+            "provider": "CloudLab",
+            "region": "Utah",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+utah.cloudlab.us+authority+cm",
+            "zones": []
+        },
+        "CloudLab_Wisconsin": {
+            "provider": "CloudLab",
+            "region": "Wisconsin",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+wisc.cloudlab.us+authority+cm",
+            "zones": []
+        },
+        "CloudLab_Clemson": {
+            "provider": "CloudLab",
+            "region": "Clemson",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+clemson.cloudlab.us+authority+cm",
+            "zones": []
+        },
+        "CloudLab_APT": {
+            "provider": "CloudLab",
+            "region": "APT_Utah",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+apt.emulab.net+authority+cm",
+            "zones": []
+        },
+        "CloudLab_Emulab": {
+            "provider": "CloudLab",
+            "region": "Emulab",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+emulab.net+authority+cm",
+            "zones": []
+        },
+        "CloudLab_Massachusetts": {
+            "provider": "CloudLab",
+            "region": "Massachusetts",
+            "key_file": "cloudlab_ssh_without_pass",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+cloudlab.umass.edu+authority+cm",
+            "zones": []
+        }
+    }
+}

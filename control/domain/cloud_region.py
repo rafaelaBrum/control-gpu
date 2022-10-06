@@ -1,6 +1,6 @@
 class CloudRegion:
 
-    def __init__(self, region_id, provider, region, zones, client_image_id, server_image_id, key_file):
+    def __init__(self, region_id, provider, region, zones, client_image_id, server_image_id, key_file, cluster_urn):
         self.id = region_id
 
         self.provider = provider
@@ -9,6 +9,8 @@ class CloudRegion:
         self.client_image_id = client_image_id
         self.server_image_id = server_image_id
         self.key_file = key_file
+
+        self.cluster_urn = cluster_urn
 
     def setup_zones(self, zones):
         self.zones = zones
@@ -23,7 +25,8 @@ class CloudRegion:
                 client_image_id=adict['locations'][key]['client_image_id'],
                 server_image_id=adict['locations'][key]['server_image_id'],
                 zones=adict['locations'][key]['zones'],
-                key_file=adict['locations'][key]['key_file']
+                key_file=adict['locations'][key]['key_file'],
+                cluster_urn=adict['locations'][key]['cluster_urn']
             )
             for key in adict['locations']
         ]

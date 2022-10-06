@@ -1140,7 +1140,7 @@ class PreSchedulingManager:
                             "SSH Exception ERROR".format(vm_server.instance_id, vm_client.instance_id))
 
     def calculate_concurrent_rpc_times(self):
-        for num_clients in range(2, self.loader.num_clients_pre_sched+1):
+        for num_clients in range(2, self.loader.num_clients_pre_scheduling + 1):
             logging.info("<PreSchedulerManager>: Calculating concurrent RPC times with {} clients".format(num_clients))
             if str(num_clients) not in self.rpc_times_concurrent:
                 self.rpc_times_concurrent[str(num_clients)] = {}

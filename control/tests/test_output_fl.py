@@ -50,7 +50,7 @@ def main():
 
     parser.add_argument('--log_file', help="log file name", type=str, default=None)
     parser.add_argument('--command', help='command para o client', type=str, default='')
-    parser.add_argument('--num_clients_pre_sched', help="Quantity of clients in the pre-scheduling RPC tests",
+    parser.add_argument('--num_clients_pre_scheduling', help="Quantity of clients in the pre-scheduling RPC tests",
                         type=int, default=None)
 
     parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=False)

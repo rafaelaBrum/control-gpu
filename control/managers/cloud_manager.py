@@ -1,4 +1,4 @@
-# Each supported cloud have to implemented the follows methods
+# Each supported cloud have to implement the follows methods
 
 
 class CloudManager:
@@ -31,6 +31,7 @@ class CloudManager:
     EC2 = 'ec2'
     GCLOUD = 'gcloud'
     GCP = 'gcp'
+    CLOUDLAB = 'CloudLab'
 
     # FILE SYSTEM
 
@@ -115,6 +116,6 @@ class CloudManager:
 
     # Return the current CPU credit of a burstable instance
     # InputConfig: Instance_id(str)
-    # Ouput: cpu_credits (int) or None if the instance is not burstable
+    # Output: cpu_credits (int) or None if the instance is not burstable
     # def get_cpu_credits(self, instance_id, zone=''):
     #     pass

@@ -38,8 +38,8 @@ def __call_control(loader: Loader):
 
         loader.print_execution_info()
 
-        # manager = ScheduleManager(loader=loader)
-        #
+        manager = ScheduleManager(loader=loader)
+
         # manager.start_execution()
 
         # status = "SUCCESS"
@@ -69,7 +69,7 @@ def __call_pre_scheduling(loader: Loader):
 
         pre_sched.calculate_rpc_times()
 
-        if loader.num_clients_pre_sched > 1:
+        if loader.num_clients_pre_scheduling > 1:
             pre_sched.calculate_concurrent_rpc_times()
 
         pre_sched.write_json()
@@ -126,7 +126,7 @@ def main():
     parser.add_argument('--revocation_rate',
                         help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
                         default=None)
-    parser.add_argument('--num_clients_pre_sched', help="Quantity of clients in the pre-scheduling RPC tests",
+    parser.add_argument('--num_clients_pre_scheduling', help="Quantity of clients in the pre-scheduling RPC tests",
                         type=int, default=None)
 
     # parser.add_argument('--scheduler_name',
