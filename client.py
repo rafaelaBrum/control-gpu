@@ -14,7 +14,7 @@ import argparse
 
 
 def __call_control(loader: Loader):
-    try:
+    if not loader.emulated:
         if loader.server_provider is None:
             logging.error("<Loader>: Server provider cannot be None")
             return
@@ -34,11 +34,13 @@ def __call_control(loader: Loader):
             logging.error("<Loader>: Clients VM name cannot be None")
             return
 
+    try:
+
         loader.print_execution_info()
 
-        manager = ScheduleManager(loader=loader)
-
-        manager.start_execution()
+        # manager = ScheduleManager(loader=loader)
+        #
+        # manager.start_execution()
 
         # status = "SUCCESS"
 
@@ -148,6 +150,9 @@ def main():
 
     parser.add_argument('--num_seed', help="Seed to be used by the clients to randomly shuffle their dataset",
                         default=None, required=False)
+
+    parser.add_argument('--emulated', action='store_true', dest='emulated',
+                        help='Using CloudLab to execute experiments', default=False)
 
     options_map = {
         'control': __call_control,

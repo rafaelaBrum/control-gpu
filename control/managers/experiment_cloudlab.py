@@ -4,18 +4,24 @@ import time
 
 import xmltodict
 
-import cloudlab_rpc as prpc
+import control.managers.cloudlab_rpc as prpc
 
 from control.util.loader import Loader
-
-from virtual_machine import VirtualMachine
 
 from control.domain.instance_type import InstanceType
 
 from typing import List
 
+import string
+import random
 
-class Node(VirtualMachine):
+
+def _random_string(str_len):
+    characters = string.ascii_lowercase + string.digits
+    return ''.join(random.choice(characters) for _ in range(str_len))
+
+
+class Node:
     """Represents a node on the Powder platform. Holds an SSHConnection instance for
     interacting with the node.
 
@@ -35,8 +41,7 @@ class Node(VirtualMachine):
 class Experiment:
     """Represents a single experiment. Can be used to start, interact with,
     and terminate the experiment. After an experiment is ready, this object
-    holds references to the nodes in the experiment, which can be interacted
-    with via ssh.
+    holds references to the nodes in the experiment.
 
     Args:
         experiment_name (str): A name for the experiment. Must be less than 16 characters.
@@ -67,10 +72,14 @@ class Experiment:
     PROVISION_TIMEOUT_S = 1800
     MAX_NAME_LENGTH = 16
 
+    EXPERIMENT_RANDOM = _random_string(2)
+
     CLUSTER_URN_DEFAULT = 'urn:publicid:IDN+utah.cloudlab.us+authority+cm'
 
     def __init__(self, experiment_name, loader: Loader, profile_name, cluster=None, bindings=None,
                  instances_types: List[InstanceType] = None):
+
+        experiment_name = experiment_name + self.EXPERIMENT_RANDOM
         if len(experiment_name) > 16:
             logging.error('<Experiment CloudLab Manager> Experiment name {} is too long '
                           '(cannot exceed {} characters)'.format(experiment_name,
@@ -101,7 +110,7 @@ class Experiment:
     def start_and_wait(self):
         """Start the experiment and wait for READY or FAILED status."""
         logging.info('<Experiment CloudLab Manager> starting experiment {} in cluster {}'.format(self.experiment_name,
-                                                                                      self.cluster_urn))
+                                                                                                 self.cluster_urn))
         return_val, response = prpc.start_experiment(self.experiment_name,
                                                      self.project_name,
                                                      self.profile_name, self.cluster_urn,
@@ -126,8 +135,10 @@ class Experiment:
         if return_val == prpc.RESPONSE_SUCCESS:
             self.status = self.EXPERIMENT_NULL
         else:
-            logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: failed to terminate experiment')
-            logging.error('<Experiment CloudLab Manager> output {}'.format(response['output']))
+            logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
+                          f'failed to terminate experiment')
+            logging.error('<Experiment CloudLab Manager> Experiment {}: output {}'.format(self.experiment_name,
+                                                                                          response['output']))
 
         return self.status
 
@@ -138,9 +149,9 @@ class Experiment:
         if return_val == prpc.RESPONSE_SUCCESS:
             response_json = json.loads(response['output'])
             self._manifests = [xmltodict.parse(response_json[key]) for key in response_json.keys()]
-            logging.info('<Experiment CloudLab Manager> got manifests')
+            logging.info(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: got manifests')
         else:
-            logging.error('<Experiment CloudLab Manager> failed to get manifests')
+            logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: failed to get manifests')
 
         return self
 
@@ -168,10 +179,12 @@ class Experiment:
                     self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
                                                  instance_type=self.instance_types[index], loader=self.loader,
                                                  market=self.MARKET)
-                    logging.info('<Experiment CloudLab Manager> parsed manifests for node {}'.format(client_id))
+                    logging.info('<Experiment CloudLab Manager> Experiment {}: '
+                                 'parsed manifests for node {}'.format(self.experiment_name, client_id))
                     index = index+1
                 except Exception as e:
-                    logging.error(f"<Experiment CloudLab Manager> Error trying to parse manifests for node {node['@client_id']}")
+                    logging.error(f"<Experiment CloudLab Manager> Experiment {self.experiment_name}: "
+                                  f"Error trying to parse manifests for node {node['@client_id']}")
                     logging.error(e)
                     pass
             if single_node:
@@ -182,9 +195,11 @@ class Experiment:
                     self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
                                                  instance_type=self.instance_types[0], loader=self.loader,
                                                  market=self.MARKET)
-                    logging.info('<Experiment CloudLab Manager> parsed manifests for node {}'.format(client_id))
+                    logging.info('<Experiment CloudLab Manager> Experiment {}: '
+                                 'parsed manifests for node {}'.format(self.experiment_name, client_id))
                 except Exception as e:
-                    logging.error(f"<Experiment CloudLab Manager> Error trying to parse manifests for node {nodes['@client_id']}")
+                    logging.error(f"<Experiment CloudLab Manager> Experiment {self.experiment_name}: "
+                                  f"Error trying to parse manifests for node {nodes['@client_id']}")
                     logging.error(e)
                     pass
 
@@ -214,8 +229,12 @@ class Experiment:
             self.still_provisioning = self.status in [self.EXPERIMENT_PROVISIONING,
                                                       self.EXPERIMENT_PROVISIONED,
                                                       self.EXPERIMENT_STARTED]
-            logging.info('<Experiment CloudLab Manager> experiment status is {} in cluster {}'.format(output.split('\n')[0], self.cluster_urn))
+            logging.info('<Experiment CloudLab Manager> Experiment {}: '
+                         'experiment status is {} in cluster {}'.format(self.experiment_name,
+                                                                        output.split('\n')[0],
+                                                                        self.cluster_urn))
         else:
-            logging.error('<Experiment CloudLab Manager> failed to get experiment status')
+            logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
+                          f'failed to get experiment status')
 
         return self

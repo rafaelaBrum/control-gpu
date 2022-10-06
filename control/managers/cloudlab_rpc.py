@@ -23,10 +23,13 @@
 #
 
 import logging
-import os
 import ssl
 import sys
 import xmlrpc.client as xmlrpc_client
+
+import json
+
+from pathlib import Path
 
 PACKAGE_VERSION = 0.1
 DEBUG = 0
@@ -47,13 +50,19 @@ RESPONSE_TOO_BIG = 6
 RESPONSE_REFUSED = 7  # Emulab is down, try again later.
 RESPONSE_TIMED_OUT = 8
 
+JSON_FILE_CRED = Path(Path.home(), "cloudlab_entry_fields.json")
+
 # User supplied login ID, password, and certificate
 try:
-    LOGIN_ID = os.environ['USER']
-    PEM_PWORD = os.environ['PWORD']
-    CERT_PATH = os.environ['CERT']
+    with open(JSON_FILE_CRED) as jsonFile:
+        jsonObject = json.load(jsonFile)
+        jsonFile.close()
+
+    LOGIN_ID = jsonObject['USER']
+    PEM_PWORD = jsonObject['PWORD']
+    CERT_PATH = jsonObject['CERT']
 except KeyError:
-    logging.error('<CloudLab RPC> Missing Powder credential environment variable(s)')
+    logging.error('<CloudLab RPC> Missing CloudLab credential environment variable(s)')
     sys.exit(1)
 
 

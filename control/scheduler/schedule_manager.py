@@ -26,6 +26,7 @@ from control.repository.postgres_objects import InstanceType as InstanceTypeRepo
 from control.repository.postgres_objects import Statistic as StatisticRepo
 
 from control.scheduler.fl_simple_scheduler import FLSimpleScheduler
+from control.scheduler.fl_simple_emulation_scheduler import FLSimpleEmulationScheduler
 
 from control.util.loader import Loader
 
@@ -45,7 +46,10 @@ class ScheduleManager:
         self.loader = loader
 
         # load the Scheduler that will be used
-        self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
+        if self.loader.emulated:
+            self.scheduler = FLSimpleEmulationScheduler(instance_types=self.loader.env, locations=self.loader.loc)
+        else:
+            self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
         # self.__load_scheduler()
 
         # read expected_makespan on build_dispatcher()
@@ -127,6 +131,7 @@ class ScheduleManager:
     #                                                           self.loader.scheduler_name))
 
     def __build_dispatchers(self):
+        # logging.info("Starts building dispatchers")
         instance_type, market, region, zone = self.scheduler.get_server_initial_instance(
             provider=self.loader.server_provider,
             region=self.loader.server_region,
@@ -142,12 +147,12 @@ class ScheduleManager:
             zone=zone
         )
 
-        # than a dispatcher, that will execute the tasks, is create
+        # Then a dispatcher, that will execute the tasks, is created
 
         server_dispatcher = Dispatcher(vm=vm, loader=self.loader,
                                        type_task=Job.SERVER, client_id=self.loader.job.num_clients)
 
-        # check if the VM need to be register on the simulator
+        # check if the VM need to be registered on the simulator
         if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
             self.simulator.register_vm(vm)
 
@@ -158,7 +163,7 @@ class ScheduleManager:
         self.client_task_dispatchers = []
 
         for i in range(self.loader.job.num_clients):
-            client = self.loader.job.client_tasks[i]
+            # client = self.loader.job.client_tasks[i]
             instance_type, market, region, zone = self.scheduler.get_client_initial_instance(
                 provider=self.loader.clients_provider[i],
                 region=self.loader.clients_region[i],
@@ -176,11 +181,11 @@ class ScheduleManager:
                 zone=zone
             )
 
-            # than a dispatcher, that will execute the tasks, is create
+            # Then a dispatcher, that will execute the tasks, is created
             client_dispatcher = Dispatcher(vm=vm, loader=self.loader,
                                            type_task=Job.CLIENT, client_id=i)
 
-            # check if the VM need to be register on the simulator
+            # check if the VM need to be registered on the simulator
             if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
                 self.simulator.register_vm(vm)
 
@@ -351,15 +356,15 @@ class ScheduleManager:
         # if not self.loader.cudalign_task.has_task_finished():
         #     self.loader.cudalign_task.stop_execution()
         #
-        # # logging.info("Entrou no interruption_handle")
+        # # logging.info("Entered interruption_handle")
         #
         # # getting volume-id
         # if self.loader.file_system_conf.type == EC2Manager.EBS:
         #     self.ebs_volume_id = self.task_dispatcher.vm.volume_id
         #
-        # # logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
+        # # logging.info("Got EBS id: {}".format(self.ebs_volume_id))
         #
-        # # See in which VM we wiil restart
+        # # See in which VM we will restart
         # current_time = self.start_timestamp - datetime.now()
         #
         # instance_type, market = self.scheduler.choose_restart_best_instance_type(
@@ -368,7 +373,7 @@ class ScheduleManager:
         #     current_time=current_time.total_seconds()
         # )
         #
-        # # logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
+        # # logging.info("Chose instance {} of type {}".format(instance_type.type, market))
         #
         # if self.loader.cudalign_task.has_task_finished():
         #     new_vm = VirtualMachine(
@@ -378,11 +383,11 @@ class ScheduleManager:
         #         volume_id=self.ebs_volume_id
         #     )
         #
-        #     # logging.info("Criou a nova vm!")
+        #     # logging.info("Created new VM!")
         #
         #     dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
         #
-        #     # check if the VM need to be register on the simulator
+        #     # check if the VM need to be registered on the simulator
         #     if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
         #         self.simulator.register_vm(new_vm)
         #
@@ -415,13 +420,13 @@ class ScheduleManager:
         # if not self.loader.cudalign_task.has_task_finished():
         #     self.loader.cudalign_task.stop_execution()
         #
-        # # logging.info("Entrou no terminated_handle")
+        # # logging.info("Entered terminated_handle")
         #
         # # getting volume-id
         # if self.loader.file_system_conf.type == EC2Manager.EBS:
         #     self.ebs_volume_id = self.task_dispatcher.vm.volume_id
         #
-        # # logging.info("Pegou o id do EBS: {}".format(self.ebs_volume_id))
+        # # logging.info("Got EBS id: {}".format(self.ebs_volume_id))
         #
         # # See in which VM will restart
         # current_time = self.start_timestamp - datetime.now()
@@ -432,7 +437,7 @@ class ScheduleManager:
         #     current_time=current_time.total_seconds()
         # )
         #
-        # # logging.info("Escolheu instancia {} do tipo {}".format(instance_type.type, market))
+        # # logging.info("Chose instance {} of type {}".format(instance_type.type, market))
         #
         # if not self.loader.cudalign_task.has_task_finished():
         #     new_vm = VirtualMachine(
@@ -442,11 +447,11 @@ class ScheduleManager:
         #         volume_id=self.ebs_volume_id
         #     )
         #
-        #     # logging.info("Criou a nova vm!")
+        #     # logging.info("Created new VM!")
         #
         #     dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
         #
-        #     # check if the VM need to be register on the simulator
+        #     # check if the VM need to be registered on the simulator
         #     if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
         #         self.simulator.register_vm(new_vm)
         #
@@ -676,7 +681,7 @@ class ScheduleManager:
         logging.info("")
 
         if self.loader.file_system_conf.type == CloudManager.EBS and not self.loader.file_system_conf.ebs_delete:
-            logging.warning("The following EBS VOLUMES will not be deleted by HADS: ")
+            logging.warning("The following EBS VOLUMES will not be deleted by Multi-FedLS: ")
             for volume_id in self.ebs_volumes:
                 logging.warning("\t-> {}".format(volume_id))
 

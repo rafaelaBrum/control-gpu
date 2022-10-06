@@ -69,23 +69,30 @@ class VirtualMachine:
                 self.key_file = self.loader.gcp_conf.key_file
 
         self.create_file_system = False
+        self.emulated = (self.market == Experiment.MARKET)
+        self.experiment_emulation = None
 
-        # Start cloud manager
-        if instance_type.provider == CloudManager.EC2:
-            # self.manager = EC2Manager()
-            self.manager = None
-        elif instance_type.provider == CloudManager.GCLOUD:
-            self.manager = GCPManager()
-            if self.vm_name == '':
-                self.vm_name = f'vm-{self.instance_type.type.replace("_", "-")}'
-            self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-' \
-                           f'{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-' \
-                           f'{int(time.time() * 1000)}'
-            if self.disk_name == '':
-                self.disk_name = f'disk-{self.instance_type.type.replace("_", "-")}'
-            self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
-                             f'-{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-{int(time.time() * 1000)}'
-            VirtualMachine.vm_num += 1
+        # Start cloud manager (if not emulated)
+        if not self.emulated:
+            if instance_type.provider == CloudManager.EC2:
+                # self.manager = EC2Manager()
+                self.manager = None
+            elif instance_type.provider == CloudManager.GCLOUD:
+                self.manager = GCPManager()
+                if self.vm_name == '':
+                    self.vm_name = f'vm-{self.instance_type.type.replace("_", "-")}'
+                self.vm_name = f'{self.vm_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}-' \
+                               f'{self.loader.execution_id}-{calendar.timegm(time.gmtime())}-' \
+                               f'{int(time.time() * 1000)}'
+                if self.disk_name == '':
+                    self.disk_name = f'disk-{self.instance_type.type.replace("_", "-")}'
+                self.disk_name = f'{self.disk_name}-{VirtualMachine.vm_num}-{self.loader.job.job_id}' \
+                                 f'-{self.loader.execution_id}-{calendar.timegm(time.gmtime())}' \
+                                 f'-{int(time.time() * 1000)}'
+                VirtualMachine.vm_num += 1
+
+        else:
+            self.zone = self.region.region
 
         self.instance_id = None
         self.instance_public_ip = None
@@ -130,134 +137,193 @@ class VirtualMachine:
     # Return (boolean) True if success otherwise return False
     def deploy(self, type_task, zone='', needs_volume=True, key_name='', ami_id=''):
 
-        print("ami_id", ami_id)
-
         if zone == '':
             zone = self.zone
 
-        if key_name == '':
-            key_name = self.region.key_file
-            if self.instance_type.provider in (CloudManager.AWS, CloudManager.EC2):
-                key_name = key_name.split('.')[0]
+        if self.emulated:
+            # for each emulated VM, there will be a connection to a experiment
+            if self.experiment_emulation is None:
+                self.start_deploy = datetime.now()
+                try:
+                    logging.info("<VirtualMachine>: Deploying a new {} instance of type {} in CloudLab "
+                                 "in cluster {} with AMI {}".format(self.market, self.instance_type.type, zone,
+                                                                    self.instance_type.image_id))
+                    if type_task == Job.SERVER:
+                        self.experiment_emulation = \
+                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name,
+                                       profile_name=self.region.server_image_id, cluster='',
+                                       loader=self.loader)
+                    elif type_task == Job.CLIENT:
+                        self.experiment_emulation = \
+                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name,
+                                       profile_name=self.region.server_image_id, cluster='',
+                                       loader=self.loader)
+                    self.instance_id = self.experiment_emulation.experiment_name
+                    exp_status = self.experiment_emulation.start_and_wait()
+                    if exp_status != self.experiment_emulation.EXPERIMENT_READY:
+                        logging.error(f"<VirtualMachine {self.instance_id}>: Failed to start experiment.")
+                        return False
+                except Exception as e:
+                    logging.error("<VirtualMachine>: "
+                                  "Error to create  {} instance of type {} ".format(self.market,
+                                                                                    self.instance_type.type))
+                    self.instance_id = None
+                    logging.error(e)
+                    return False
+                    # check if instance was create with success
+                if self.instance_id is not None:
+                    logging.info("<VirtualMachine {}>: Market: {} Type: {} Provider: {}"
+                                 " Create with Success".format(self.instance_id,
+                                                               self.market,
+                                                               self.instance_type.type,
+                                                               self.instance_type.provider))
 
-        if self.region is not None and ami_id == '':
-            if type_task == Job.SERVER:
-                self.instance_type.image_id = self.region.server_image_id
-            elif type_task == Job.CLIENT:
-                self.instance_type.image_id = self.region.client_image_id
-            else:
-                logging.info(f"<VirtualMachine {self.instance_id}>: Not updating image_id"
-                             f" (type_task {type_task})")
-        elif ami_id != '':
-            self.instance_type.image_id = ami_id
+                    # update start_times
+                    self.__start_time = datetime.now()
+                    self.__start_time_utc = datetime.utcnow()
 
-        self.start_deploy = datetime.now()
+                    self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+                    self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
-        # Check if a VM was already created
-        if self.instance_id is None:
+                    self.failed_to_created = False
 
-            logging.info("<VirtualMachine>: Deploying a new {} instance of type {} in zone {} with AMI {}"
-                         .format(self.market, self.instance_type.type, zone, self.instance_type.image_id))
+                    return True
 
-            try:
-
-                if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
-                    raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
-                elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
-                    self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
-                                                                              image_id=self.instance_type.image_id,
-                                                                              zone=zone,
-                                                                              key_name=key_name)
-                elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
-                    self.instance_id = \
-                        self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
-                                                               image_id=self.instance_type.image_id,
-                                                               vm_name=self.vm_name,
-                                                               zone=zone,
-                                                               gpu_type=self.instance_type.gpu,
-                                                               gpu_count=self.instance_type.count_gpu)
-                elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
-                    self.instance_id = \
-                        self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
-                                                                 image_id=self.instance_type.image_id,
-                                                                 max_price=self.instance_type.price_preemptible + 0.1)
                 else:
-                    raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
-                                    f"{self.instance_type.provider} cloud provider yet")
 
-            except Exception as e:
-                logging.error("<VirtualMachine>: "
-                              "Error to create  {} instance of type {} ".format(self.market,
-                                                                                self.instance_type.type))
-                self.instance_id = None
-                logging.error(e)
+                    self.instance_id = 'f-{}'.format(str(uuid.uuid4())[:8])
+                    self.failed_to_created = True
 
-            # check if instance was create with success
-            if self.instance_id is not None:
-                logging.info("<VirtualMachine {}>: Market: {} Type: {} Provider: {}"
-                             " Create with Success".format(self.instance_id,
-                                                           self.market,
-                                                           self.instance_type.type,
-                                                           self.instance_type.provider))
+                    return False
 
-                # update start_times
-                self.__start_time = datetime.now()
-                self.__start_time_utc = datetime.utcnow()
+            # Instance was already started
+            return False
+        else:
+            print("ami_id", ami_id)
 
+            if key_name == '':
+                key_name = self.region.key_file
+                if self.instance_type.provider in (CloudManager.AWS, CloudManager.EC2):
+                    key_name = key_name.split('.')[0]
+
+            if self.region is not None and ami_id == '':
+                if type_task == Job.SERVER:
+                    self.instance_type.image_id = self.region.server_image_id
+                elif type_task == Job.CLIENT:
+                    self.instance_type.image_id = self.region.client_image_id
+                else:
+                    logging.info(f"<VirtualMachine {self.instance_id}>: Not updating image_id"
+                                 f" (type_task {type_task})")
+            elif ami_id != '':
+                self.instance_type.image_id = ami_id
+
+            self.start_deploy = datetime.now()
+
+            # Check if a VM was already created
+            if self.instance_id is None:
+
+                logging.info("<VirtualMachine>: Deploying a new {} instance of type {} in zone {} with AMI {}"
+                             .format(self.market, self.instance_type.type, zone, self.instance_type.image_id))
+
+                try:
+
+                    if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
+                        raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
+                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
+                        self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
+                                                                                  image_id=self.instance_type.image_id,
+                                                                                  zone=zone,
+                                                                                  key_name=key_name)
+                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
+                        self.instance_id = \
+                            self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
+                                                                   image_id=self.instance_type.image_id,
+                                                                   vm_name=self.vm_name,
+                                                                   zone=zone,
+                                                                   gpu_type=self.instance_type.gpu,
+                                                                   gpu_count=self.instance_type.count_gpu)
+                    elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
+                        self.instance_id = \
+                            self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
+                                                                     image_id=self.instance_type.image_id,
+                                                                     max_price=self.instance_type.price_preemptible + 0.1)
+                    else:
+                        raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
+                                        f"{self.instance_type.provider} cloud provider yet")
+
+                except Exception as e:
+                    logging.error("<VirtualMachine>: "
+                                  "Error to create  {} instance of type {} ".format(self.market,
+                                                                                    self.instance_type.type))
+                    self.instance_id = None
+                    logging.error(e)
+
+                # check if instance was create with success
+                if self.instance_id is not None:
+                    logging.info("<VirtualMachine {}>: Market: {} Type: {} Provider: {}"
+                                 " Create with Success".format(self.instance_id,
+                                                               self.market,
+                                                               self.instance_type.type,
+                                                               self.instance_type.provider))
+
+                    # update start_times
+                    self.__start_time = datetime.now()
+                    self.__start_time_utc = datetime.utcnow()
+
+                    self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+                    self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
+
+                    if needs_volume and self.loader.file_system_conf.type == CloudManager.EBS:
+                        # if there is not a volume create a new volume
+                        if self.volume_id is None:
+                            self.volume_id = self.manager.create_volume(
+                                size=self.loader.file_system_conf.size,
+                                volume_name=self.disk_name,
+                                zone=zone
+                            )
+                            self.create_file_system = True
+
+                            if self.volume_id is None:
+                                raise Exception(
+                                    "<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
+
+                        logging.info(
+                            "<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
+                        if self.instance_type.provider == CloudManager.EC2:
+                            # attached new volume
+                            # waiting until volume available
+                            self.manager.wait_volume(volume_id=self.volume_id, zone=zone)
+                            self.manager.attach_volume(
+                                instance_id=self.instance_id,
+                                volume_id=self.volume_id,
+                                zone=zone
+                            )
+                        elif self.instance_type.provider == CloudManager.GCLOUD:
+                            # attached new volume
+                            # waiting until volume available
+                            self.manager.wait_volume(volume_name=self.disk_name, zone=zone)
+                            self.manager.attach_volume(
+                                instance_id=self.instance_id,
+                                volume_name=self.disk_name,
+                                zone=zone
+                            )
+
+                    self.failed_to_created = False
+
+                    return True
+
+                else:
+
+                    self.instance_id = 'f-{}'.format(str(uuid.uuid4())[:8])
+                    self.failed_to_created = True
+
+                    return False
+            else:
                 self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
                 self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
-                if needs_volume and self.loader.file_system_conf.type == CloudManager.EBS:
-                    # if there is not a volume create a new volume
-                    if self.volume_id is None:
-                        self.volume_id = self.manager.create_volume(
-                            size=self.loader.file_system_conf.size,
-                            volume_name=self.disk_name,
-                            zone=zone
-                        )
-                        self.create_file_system = True
-
-                        if self.volume_id is None:
-                            raise Exception(
-                                "<VirtualMachine {}>: :Error to create new volume".format(self.instance_id))
-
-                    logging.info(
-                        "<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
-                    if self.instance_type.provider == CloudManager.EC2:
-                        # attached new volume
-                        # waiting until volume available
-                        self.manager.wait_volume(volume_id=self.volume_id, zone=zone)
-                        self.manager.attach_volume(
-                            instance_id=self.instance_id,
-                            volume_id=self.volume_id,
-                            zone=zone
-                        )
-                    elif self.instance_type.provider == CloudManager.GCLOUD:
-                        # attached new volume
-                        # waiting until volume available
-                        self.manager.wait_volume(volume_name=self.disk_name, zone=zone)
-                        self.manager.attach_volume(
-                            instance_id=self.instance_id,
-                            volume_name=self.disk_name,
-                            zone=zone
-                        )
-
-                self.failed_to_created = False
-
-                return True
-
-            else:
-
-                self.instance_id = 'f-{}'.format(str(uuid.uuid4())[:8])
-                self.failed_to_created = True
-
-                return False
-        else:
-            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
-            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
-
-        # Instance was already started
-        return False
+            # Instance was already started
+            return False
 
     def __create_ebs(self, path):
 

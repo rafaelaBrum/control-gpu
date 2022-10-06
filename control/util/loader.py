@@ -87,6 +87,8 @@ class Loader:
         # Client command
         self.client_command = args.command
 
+        self.emulated = args.emulated
+
         self.num_clients_pre_sched = args.num_clients_pre_sched
 
         self.deadline_timedelta = None
