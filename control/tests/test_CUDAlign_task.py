@@ -41,7 +41,9 @@ def test_cudalign_task_creation():
             disk_size='1G',
             tam_seq0=3147090,
             tam_seq1=3282708,
-            similar_seqs=False
+            seq1='',
+            seq0='',
+            task_name=''
         )
         logging.info("Created task with success. Task info: {}".format(task))
         logging.info("Runtimes CUDAlign Task {}:\n{}".format(task.task_id, task.print_all_runtimes()))

@@ -150,7 +150,7 @@ def __create_s3(vm: VirtualMachine, path, client_id):
 
 
 def __call_control():
-    print("aqui")
+    print("control dummy")
 
 
 def __send_zip_file(vm: VirtualMachine, file):
@@ -222,7 +222,8 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties, rounds):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -292,7 +293,12 @@ def create_server_on_demand(loader: Loader, n_parties, n_rounds):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
     vm = VirtualMachine(
@@ -301,7 +307,7 @@ def create_server_on_demand(loader: Loader, n_parties, n_rounds):
         loader=loader
     )
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     __prepare_vm_server(vm, n_parties, n_rounds)
 
@@ -315,7 +321,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -360,16 +367,16 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -tn " \
                          "-out {2} -cpu 4 -gpu 1 -wpath {3} -model_dir {3} -logdir {3} " \
                          "-server_address {4} -tdim 240 240 -f1 10 " \
-                         "-cache {3} -test_dir {5}  -epochs {6}".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                                         vm.loader.application_conf.client_flower_file.
-                                                                         replace('.zip', '.py')),
-                                                            os.path.join(vm.loader.ec2_conf.input_path, train_folder),
-                                                            os.path.join(vm.loader.file_system_conf.path_disk, 'logs'),
-                                                            os.path.join(vm.loader.file_system_conf.path_disk,
-                                                                         'results'),
-                                                            server_ip,
-                                                            os.path.join(vm.loader.ec2_conf.input_path, test_folder),
-                                                            epochs)
+                         "-cache {3} -test_dir {5} " \
+                         " -epochs {6}".format(os.path.join(vm.loader.ec2_conf.home_path,
+                                                            vm.loader.application_conf.client_flower_file.
+                                                            replace('.zip', '.py')),
+                                               os.path.join(vm.loader.ec2_conf.input_path, train_folder),
+                                               os.path.join(vm.loader.file_system_conf.path_disk, 'logs'),
+                                               os.path.join(vm.loader.file_system_conf.path_disk, 'results'),
+                                               server_ip,
+                                               os.path.join(vm.loader.ec2_conf.input_path, test_folder),
+                                               epochs)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -398,7 +405,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.752,
-                        'preemptible': 0.2256}
+                        'preemptible': 0.2256},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
         elif instance_type == 'p2.xlarge':
             instance = InstanceType(
@@ -409,7 +421,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.9,
-                        'preemptible': 0.27}
+                        'preemptible': 0.27},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
         else:
             return
@@ -423,7 +440,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.752,
-                        'preemptible': 0.2256}
+                        'preemptible': 0.2256},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
         elif instance_type == 'p2.xlarge':
             instance = InstanceType(
@@ -434,7 +456,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.9,
-                        'preemptible': 0.27}
+                        'preemptible': 0.27},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
         else:
             return
@@ -448,7 +475,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.9,
-                        'preemptible': 0.27}
+                        'preemptible': 0.27},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
         else:
             instance = InstanceType(
@@ -459,7 +491,12 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
                 restrictions={'on-demand': 1,
                               'preemptible': 1},
                 prices={'on-demand': 0.752,
-                        'preemptible': 0.2256}
+                        'preemptible': 0.2256},
+                count_gpu=1,
+                gpu='yes',
+                locations='',
+                memory=0,
+                vcpu=0
             )
     else:
         return
@@ -470,7 +507,7 @@ def create_client(loader: Loader, server_ip, client_id, instance_type, n_parties
         loader=loader,
     )
 
-    vm.deploy()
+    vm.deploy(type_task='client')
 
     train_folder = f'{data_folder}/CellRep/{n_parties}_clients/{client_id}/trainset'
     test_folder = f'{data_folder}/CellRep/{n_parties}_clients/{client_id}/testset'

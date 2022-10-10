@@ -46,7 +46,9 @@ def create_cudalign_task():
             disk_size='1G',
             tam_seq0=3147090,
             tam_seq1=3282708,
-            similar_seqs=False
+            seq0="",
+            seq1="",
+            task_name=""
         )
         logging.info("Created task with success. Task info: {}".format(task))
         # logging.info("Runtimes CUDAlign Task {}:\n{}".format(task.task_id, task.print_all_runtimes()))
@@ -135,13 +137,13 @@ def test_simple_scheduler():
     cudalign_task.start_execution(instance)
     logging.info("Instance {} stopped with 10 seconds of execution".format(instance))
     cudalign_task.update_execution_time(10)
-    instance, type_market = scheduler.choose_restart_best_instance_type(cudalign_task, deadline)
+    current_time = 10
+    instance, type_market = scheduler.choose_restart_best_instance_type(cudalign_task, deadline, current_time)
     logging.info("Restarting CUDAlignTask {} in {} instance {}".format(cudalign_task.task_id, type_market, instance))
     cudalign_task.start_execution(instance)
     logging.info("Instance {} stopped with 10 seconds of execution".format(instance))
     cudalign_task.update_execution_time(10)
-    instance, type_market = scheduler.choose_restart_best_instance_type(cudalign_task, deadline)
+    current_time = current_time + 10
+    instance, type_market = scheduler.choose_restart_best_instance_type(cudalign_task, deadline, current_time)
     logging.info("Restarting CUDAlignTask {} in {} instance {}".format(cudalign_task.task_id, type_market, instance))
     cudalign_task.start_execution(instance)
-
-

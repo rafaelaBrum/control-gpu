@@ -104,7 +104,7 @@ def __create_ebs(vm, path):
 
 
 def __call_control():
-    print("aqui")
+    print("dummy control")
 
 
 def __prepare_logging():
@@ -164,7 +164,8 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -242,7 +243,12 @@ def create_server_on_demand(loader: Loader, n_parties):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        locations='',
+        vcpu=0,
+        memory=0,
+        gpu='no',
+        count_gpu=0
     )
 
     vm = VirtualMachine(
@@ -251,7 +257,7 @@ def create_server_on_demand(loader: Loader, n_parties):
         loader=loader
     )
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     __prepare_vm_server(vm, n_parties)
 
@@ -265,7 +271,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -351,7 +358,12 @@ def create_client_on_demand(loader: Loader, server_ip, client_id):
             restrictions={'on-demand': 1,
                           'preemptible': 1},
             prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
+                    'preemptible': 0.000031},
+            locations='',
+            gpu='no',
+            memory=0,
+            vcpu=0,
+            count_gpu=0
         )
     else:
         instance = InstanceType(
@@ -362,7 +374,12 @@ def create_client_on_demand(loader: Loader, server_ip, client_id):
             restrictions={'on-demand': 1,
                           'preemptible': 1},
             prices={'on-demand': 0.001,
-                    'preemptible': 0.000031}
+                    'preemptible': 0.000031},
+            gpu='no',
+            locations='',
+            memory=0,
+            vcpu=0,
+            count_gpu=0
         )
     vm = VirtualMachine(
         instance_type=instance,
@@ -370,7 +387,7 @@ def create_client_on_demand(loader: Loader, server_ip, client_id):
         loader=loader,
     )
 
-    vm.deploy()
+    vm.deploy(type_task="client")
 
     __prepare_vm_client(vm, server_ip, client_id)
 

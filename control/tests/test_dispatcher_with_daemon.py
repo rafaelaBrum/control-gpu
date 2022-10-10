@@ -40,7 +40,9 @@ def __prepare_daemon(vm: VirtualMachine):
     communication_conf = CommunicationConfig()
 
     try:
-        print('host={} | port={} | action={}'.format(vm.instance_public_ip, communication_conf.socket_port, Daemon.TEST))
+        print('host={} | port={} | action={}'.format(vm.instance_public_ip,
+                                                     communication_conf.socket_port,
+                                                     Daemon.TEST))
         communicator = Communicator(host=vm.instance_public_ip, port=communication_conf.socket_port)
         print("Created communicator")
         communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
@@ -56,13 +58,13 @@ def __prepare_daemon(vm: VirtualMachine):
 def __execution_loop(vm: VirtualMachine, task: Task):
 
     # Start the VM in the cloud
-    status = vm.deploy()
+    status = vm.deploy(type_task='server')
 
     logging.info("<Executor {}-{}>: Instance-id {} - Status {}".format(task.task_id, vm.instance_id,
                                                                        vm.instance_id, status))
     if status:
         try:
-            vm.prepare_vm()
+            vm.prepare_vm(type_task='server')
         except Exception as e:
             logging.error(e)
 
@@ -80,7 +82,8 @@ def __execution_loop(vm: VirtualMachine, task: Task):
         # create a executor and start task
         executor = Executor(
             task=task,
-            vm=vm
+            vm=vm,
+            loader=vm.loader
         )
         # start the executor loop to execute the task
         executor.thread.start()
@@ -109,19 +112,26 @@ def test_dispatcher_with_daemon():
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
     task = Task(
         task_id=2,
         command="ls",
         runtime={'t2.micro': 100},
-        generic_ckpt=False
+        generic_ckpt=False,
+        task_name=''
     )
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand'
+        market='on-demand',
+        loader=None
     )
 
     vm.instance_id = 'i-0dd21b2167699e7dd'

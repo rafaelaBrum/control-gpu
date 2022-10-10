@@ -18,7 +18,7 @@ from control.config.logging_config import LoggingConfig
 from control.config.notify_config import NotifyConfig
 # from control.config.scheduler_config import SchedulerConfig
 from control.config.simulation_config import SimulationConfig
-from control.config.pre_sched_config import PreSchedConfig
+from control.config.pre_scheduling_config import PreSchedConfig
 from control.config.cloudlab_config import CloudLabConfig
 
 from control.domain.instance_type import InstanceType
@@ -117,7 +117,7 @@ class Loader:
         self.notify_conf = NotifyConfig()
         # self.scheduler_conf = SchedulerConfig()
         self.simulation_conf = SimulationConfig()
-        self.pre_sched_conf = PreSchedConfig()
+        self.pre_scheduling_conf = PreSchedConfig()
         self.cloudlab_conf = CloudLabConfig()
 
         # local path where the daemon file is
@@ -234,7 +234,7 @@ class Loader:
             self.revocation_rate = self.simulation_conf.revocation_rate
 
         if self.num_clients_pre_scheduling is None:
-            self.num_clients_pre_scheduling = self.pre_sched_conf.num_clients
+            self.num_clients_pre_scheduling = self.pre_scheduling_conf.num_clients
 
     def __load_job(self):
         """
@@ -339,7 +339,7 @@ class Loader:
                 zone = loc.zones[0]
 
                 if instance.provider == CloudManager.EC2 and loc.provider in (CloudManager.EC2, CloudManager.AWS):
-                    test = 1
+                    logging.error("Without account of EC2 configured")
 
                     # if instance.market_ondemand:
                     #     instance.setup_ondemand_price(
@@ -415,8 +415,8 @@ class Loader:
         for region in self.loc.values():
 
             if region.provider == CloudManager.EC2 or region.provider == CloudManager.AWS:
+                logging.error("Without account of EC2 configured")
                 # region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
-                test = 1
 
             elif region.provider == CloudManager.GCLOUD or region.provider == CloudManager.GCP:
                 region.setup_zones(zones=gcp_manager.get_availability_zones(region.region))

@@ -49,7 +49,8 @@ def __prepare_vm_server(vm: VirtualMachine):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -147,7 +148,12 @@ def test_server_on_demand(loader: Loader):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
     vm = VirtualMachine(
@@ -158,7 +164,7 @@ def test_server_on_demand(loader: Loader):
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
     __prepare_vm_server(vm)
 
@@ -228,4 +234,4 @@ def main():
 
 
 def __call_control():
-    print("aqui")
+    print("dummy control")

@@ -5,7 +5,7 @@ from typing import Dict
 class InstanceType:
 
     def __init__(self, provider, instance_type, image_id, prices, restrictions,
-                 vcpu, gpu, count_gpu, memory, ebs_device_name=''):
+                 vcpu, gpu, count_gpu, memory, locations, ebs_device_name=''):
         self.provider = provider
         self.type = instance_type
         self.vcpu = vcpu
@@ -18,6 +18,8 @@ class InstanceType:
         self.ebs_device_name = ebs_device_name
         self.gpu = gpu
         self.count_gpu = count_gpu
+
+        self.locations = locations
 
         self.id = None
 
@@ -54,7 +56,8 @@ class InstanceType:
                 restrictions=adict['instances'][key]['restrictions'],
                 gpu=adict['instances'][key]['gpu'],
                 memory=adict['instances'][key]['memory'],
-                count_gpu=adict['instances'][key]['gpu_count']
+                count_gpu=adict['instances'][key]['gpu_count'],
+                locations=adict['instances'][key]['locations']
             )
             for key in adict['instances']
         ]

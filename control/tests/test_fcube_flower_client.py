@@ -49,7 +49,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -76,12 +77,13 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
                             target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.client_flower_file)
 
-
             # Send dataset files
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, str(client_id)),
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset,
+                                        str(client_id)),
                             target=vm.loader.ec2_conf.input_path,
                             item='X_train.npy')
-            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, str(client_id)),
+            vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset,
+                                        str(client_id)),
                             target=vm.loader.ec2_conf.input_path,
                             item='X_test.npy')
             vm.ssh.put_file(source=Path(vm.loader.application_conf.data_path, vm.loader.application_conf.dataset, '0'),
@@ -106,10 +108,10 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id):
                          "--server_address {} " \
                          "--path_dataset {} " \
                          "--batch-size {} ".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                              vm.loader.application_conf.client_flower_file),
-                                                 server_ip,
-                                                 vm.loader.ec2_conf.input_path,
-                                                 64)
+                                                                vm.loader.application_conf.client_flower_file),
+                                                   server_ip,
+                                                   vm.loader.ec2_conf.input_path,
+                                                   64)
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log_{} -S test -dm bash -c "{}"'.format(client_id, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -156,10 +158,15 @@ def test_client_on_demand(loader: Loader, server_ip, n_parties):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
-    vms=[]
+    vms = []
 
     __prepare_logging()
 
@@ -170,7 +177,7 @@ def test_client_on_demand(loader: Loader, server_ip, n_parties):
             loader=loader,
         )
 
-        vm.deploy()
+        vm.deploy(type_task='client')
 
         __prepare_vm_client(vm, server_ip, i)
 

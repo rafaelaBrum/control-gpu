@@ -25,11 +25,11 @@ class SSHClient:
         self.retry_interval = ssh_conf.retry_interval
 
         self.client = None
-        self.ssh_transp = None
+        self.ssh_transport = None
         self.chan = None
 
     """
-    This will check if the connection is still availlable.
+    This will check if the connection is still available.
 
     Return (bool) : True if it's still alive, False otherwise.
     """
@@ -80,7 +80,7 @@ class SSHClient:
                 except (paramiko.BadHostKeyException, paramiko.AuthenticationException,
                         paramiko.SSHException, socket.error) as e:
 
-                    # logging.info("<SSH Client>:" + str(x) + "> " + str(e))
+                    logging.info("<SSH Client>:" + str(x) + "> " + str(e))
 
                     sleep(self.retry_interval)
         else:
@@ -103,8 +103,8 @@ class SSHClient:
             return False
 
     def execute_command(self, command, output=False):
-        self.ssh_transp = self.client.get_transport()
-        self.chan = self.ssh_transp.open_session()
+        self.ssh_transport = self.client.get_transport()
+        self.chan = self.ssh_transport.open_session()
 
         self.chan.setblocking(0)
 
@@ -157,24 +157,24 @@ class SSHClient:
 
     def get_output(self):
 
-        outdata = bytes()
-        errdata = bytes()
+        out_data = bytes()
+        err_data = bytes()
 
         try:
             while True:
                 while self.chan.recv_ready():
-                    outdata += self.chan.recv(1000)
+                    out_data += self.chan.recv(1000)
                 while self.chan.recv_stderr_ready():
-                    errdata += self.chan.recv_stderr(1000)
+                    err_data += self.chan.recv_stderr(1000)
                 if self.chan.exit_status_ready():
                     break
 
-            retcode = self.chan.recv_exit_status()
-            # self.ssh_transp.close()
+            ret_code = self.chan.recv_exit_status()
+            # self.ssh_transport.close()
 
             # logging.info("ApplicationConfig on instance {} return code: {} ".format(
             #     self.ip_address,
-            #     retcode
+            #     ret_code
             # ))
 
         except Exception as e:
@@ -182,7 +182,7 @@ class SSHClient:
             logging.error(e)
             raise
 
-        return outdata.decode('utf-8'), errdata.decode('utf-8'), retcode
+        return out_data.decode('utf-8'), err_data.decode('utf-8'), ret_code
 
     def get_file(self, source, target, item=None):
 

@@ -49,7 +49,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip):
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -137,7 +138,12 @@ def test_client_on_demand(loader: Loader, server_ip):
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
     vm = VirtualMachine(
@@ -148,7 +154,7 @@ def test_client_on_demand(loader: Loader, server_ip):
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='client')
 
     __prepare_vm_client(vm, server_ip)
 
@@ -163,6 +169,7 @@ def test_client_on_demand(loader: Loader, server_ip):
 
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
+
 
 def main():
     parser = argparse.ArgumentParser(description='Control GPU - v. 0.0.1')
@@ -207,4 +214,4 @@ def main():
 
 
 def __call_control():
-    print("aqui")
+    print("dummy control")

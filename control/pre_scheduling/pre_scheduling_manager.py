@@ -33,7 +33,8 @@ instance_aws = InstanceType(
     gpu='no',
     count_gpu=0,
     vcpu='2',
-    memory=0
+    memory=0,
+    locations=''
 )
 
 instance_aws_rpc = InstanceType(
@@ -48,7 +49,8 @@ instance_aws_rpc = InstanceType(
     gpu='no',
     count_gpu=0,
     vcpu=2,
-    memory=8
+    memory=8,
+    locations=''
 )
 
 instance_aws_rpc_concurrent_server = InstanceType(
@@ -63,7 +65,8 @@ instance_aws_rpc_concurrent_server = InstanceType(
     gpu='no',
     count_gpu=0,
     vcpu=2,
-    memory=8
+    memory=8,
+    locations=''
 )
 
 instance_gcp = InstanceType(
@@ -78,7 +81,8 @@ instance_gcp = InstanceType(
     ebs_device_name='/dev/sdb',
     gpu='no',
     count_gpu=0,
-    memory=4
+    memory=4,
+    locations=''
 )
 
 instance_gcp_rpc = InstanceType(
@@ -93,7 +97,8 @@ instance_gcp_rpc = InstanceType(
     ebs_device_name='/dev/sdb',
     gpu='no',
     count_gpu=0,
-    memory=16
+    memory=16,
+    locations=''
 )
 
 
@@ -229,7 +234,7 @@ class PreSchedulingManager:
             logging.info("<VirtualMachine {}>: - Sending RTT test".format(vm_final.instance_id,
                                                                           self.loader.file_system_conf.path))
 
-            item = self.loader.pre_sched_conf.rtt_file
+            item = self.loader.pre_scheduling_conf.rtt_file
 
             if vm_initial.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 key_path = self.loader.ec2_conf.key_path
@@ -247,7 +252,7 @@ class PreSchedulingManager:
             # Send files
             if vm_final.instance_type.provider == CloudManager.EC2:
 
-                vm_final.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                vm_final.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                       target=self.loader.ec2_conf.home_path,
                                       item=item)
 
@@ -260,7 +265,7 @@ class PreSchedulingManager:
                              "--path {} " \
                              "--file {} " \
                              "--user {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                              self.loader.pre_sched_conf.rtt_file),
+                                                              self.loader.pre_scheduling_conf.rtt_file),
                                                  vm_initial.instance_public_ip,
                                                  self.loader.ec2_conf.home_path,
                                                  item_key,
@@ -268,7 +273,7 @@ class PreSchedulingManager:
 
             elif vm_final.instance_type.provider == CloudManager.GCLOUD:
 
-                vm_final.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                vm_final.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                       target=self.loader.gcp_conf.home_path,
                                       item=item)
 
@@ -508,8 +513,8 @@ class PreSchedulingManager:
         # try to open the connection
         if vm.ssh.open_connection():
 
-            app_item = self.loader.pre_sched_conf.app_file
-            train_item = self.loader.pre_sched_conf.train_file
+            app_item = self.loader.pre_scheduling_conf.app_file
+            train_item = self.loader.pre_scheduling_conf.train_file
 
             try:
                 # # TODO: remove this from pre_scheduling
@@ -537,11 +542,11 @@ class PreSchedulingManager:
                 # Send files
                 if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                     target=self.loader.ec2_conf.home_path,
                                     item=app_item)
 
-                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                     target=self.loader.ec2_conf.home_path,
                                     item=train_item)
 
@@ -578,7 +583,7 @@ class PreSchedulingManager:
                                  "-cache results " \
                                  "-test_dir {} " \
                                  "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                 self.loader.pre_sched_conf.train_file),
+                                                                 self.loader.pre_scheduling_conf.train_file),
                                                     os.path.join(self.loader.file_system_conf.path_storage,
                                                                  cli.trainset_dir),
                                                     cli.net,
@@ -588,16 +593,16 @@ class PreSchedulingManager:
                                                     vm.instance_type.count_gpu,
                                                     os.path.join(self.loader.file_system_conf.path_storage,
                                                                  cli.test_dir),
-                                                    self.loader.pre_sched_conf.results_temp_file
+                                                    self.loader.pre_scheduling_conf.results_temp_file
                                                     )
 
                 elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                     target=self.loader.gcp_conf.home_path,
                                     item=app_item)
 
-                    vm.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                     target=self.loader.gcp_conf.home_path,
                                     item=train_item)
 
@@ -634,7 +639,7 @@ class PreSchedulingManager:
                                  "-cache results " \
                                  "-test_dir {} " \
                                  "-file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                 self.loader.pre_sched_conf.train_file),
+                                                                 self.loader.pre_scheduling_conf.train_file),
                                                     os.path.join(self.loader.file_system_conf.path_storage,
                                                                  cli.trainset_dir),
                                                     cli.net,
@@ -644,7 +649,7 @@ class PreSchedulingManager:
                                                     vm.instance_type.count_gpu,
                                                     os.path.join(self.loader.file_system_conf.path_storage,
                                                                  cli.test_dir),
-                                                    self.loader.pre_sched_conf.results_temp_file
+                                                    self.loader.pre_scheduling_conf.results_temp_file
                                                     )
                 else:
                     cmd_daemon = ""
@@ -675,7 +680,7 @@ class PreSchedulingManager:
                 #                  "-cache results " \
                 #                  "-test_dir {} " \
                 #                  "-file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                #                                                  self.loader.pre_sched_conf.train_file),
+                #                                                  self.loader.pre_scheduling_conf.train_file),
                 #                                     os.path.join(self.loader.file_system_conf.path_storage,
                 #                                                  cli.trainset_dir),
                 #                                     cli.net,
@@ -685,7 +690,7 @@ class PreSchedulingManager:
                 #                                     vm.instance_type.count_gpu,
                 #                                     os.path.join(self.loader.file_system_conf.path_storage,
                 #                                                  cli.test_dir),
-                #                                     self.loader.pre_sched_conf.results_temp_file
+                #                                     self.loader.pre_scheduling_conf.results_temp_file
                 #                                     )
                 #     cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
                 #     logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
@@ -699,16 +704,16 @@ class PreSchedulingManager:
 
                 if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                     vm.ssh.get_file(source=vm.loader.ec2_conf.home_path,
-                                    target=self.loader.pre_sched_conf.path,
-                                    item=self.loader.pre_sched_conf.results_temp_file)
+                                    target=self.loader.pre_scheduling_conf.path,
+                                    item=self.loader.pre_scheduling_conf.results_temp_file)
                 elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     vm.ssh.get_file(source=vm.loader.gcp_conf.home_path,
-                                    target=self.loader.pre_sched_conf.path,
-                                    item=self.loader.pre_sched_conf.results_temp_file)
+                                    target=self.loader.pre_scheduling_conf.path,
+                                    item=self.loader.pre_scheduling_conf.results_temp_file)
 
                 vm.remove_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
 
-                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
+                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_scheduling_conf.results_temp_file} -r"
 
                 logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
@@ -716,8 +721,8 @@ class PreSchedulingManager:
                 print(stdout)
 
                 try:
-                    with open(os.path.join(self.loader.pre_sched_conf.path,
-                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                    with open(os.path.join(self.loader.pre_scheduling_conf.path,
+                                           self.loader.pre_scheduling_conf.results_temp_file)) as f:
                         data = f.read()
                     times = json.loads(data)
                 except Exception as e:
@@ -727,7 +732,7 @@ class PreSchedulingManager:
                 return times
             except Exception as e:
 
-                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_sched_conf.results_temp_file} -r"
+                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_scheduling_conf.results_temp_file} -r"
 
                 logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
@@ -774,7 +779,8 @@ class PreSchedulingManager:
                                                       loader=self.loader)
                         else:
                             logging.error(
-                                f"<PreSchedulingManager>: {region_copy.provider} does not have support ({region_copy.id})")
+                                f"<PreSchedulingManager>: {region_copy.provider} does not have support "
+                                f"({region_copy.id})")
                             return
                         vm_final.instance_type.image_id = region_copy.server_image_id
                         vm_final.region = region_copy
@@ -853,9 +859,9 @@ class PreSchedulingManager:
         # try to open the connection
         if vm_server.ssh.open_connection() and vm_client.ssh.open_connection():
 
-            rpc_app_item = self.loader.pre_sched_conf.rpc_file
-            rpc_client_item = self.loader.pre_sched_conf.client_file
-            rpc_server_item = self.loader.pre_sched_conf.server_file
+            rpc_app_item = self.loader.pre_scheduling_conf.rpc_file
+            rpc_client_item = self.loader.pre_scheduling_conf.client_file
+            rpc_server_item = self.loader.pre_scheduling_conf.server_file
 
             try:
                 logging.info(f"<VirtualMachine {vm_server.instance_id}>: - Sending RPC Files test")
@@ -864,15 +870,15 @@ class PreSchedulingManager:
                 if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
                     if not server_configured:
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.ec2_conf.home_path,
                                                item=rpc_app_item)
 
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.ec2_conf.home_path,
                                                item=rpc_client_item)
 
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.ec2_conf.home_path,
                                                item=rpc_server_item)
 
@@ -883,7 +889,7 @@ class PreSchedulingManager:
                         stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
                         print(stdout)
                     else:
-                        cmd_json = f'rm {self.loader.pre_sched_conf.results_temp_file}'
+                        cmd_json = f'rm {self.loader.pre_scheduling_conf.results_temp_file}'
 
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
                                                                                          cmd_json))
@@ -893,22 +899,22 @@ class PreSchedulingManager:
 
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                     self.loader.pre_sched_conf.server_file),
+                                                                     self.loader.pre_scheduling_conf.server_file),
                                                         self.loader.application_conf.fl_port
                                                         )
 
                 elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
                     if not server_configured:
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.gcp_conf.home_path,
                                                item=rpc_app_item)
 
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.gcp_conf.home_path,
                                                item=rpc_client_item)
 
-                        vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                                target=self.loader.gcp_conf.home_path,
                                                item=rpc_server_item)
 
@@ -919,14 +925,14 @@ class PreSchedulingManager:
                         stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
                         print(stdout)
                     else:
-                        cmd_json = f'rm {self.loader.pre_sched_conf.results_temp_file}'
+                        cmd_json = f'rm {self.loader.pre_scheduling_conf.results_temp_file}'
 
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
                                                                                          cmd_json))
 
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                     self.loader.pre_sched_conf.server_file),
+                                                                     self.loader.pre_scheduling_conf.server_file),
                                                         self.loader.application_conf.fl_port
                                                         )
                 else:
@@ -948,15 +954,15 @@ class PreSchedulingManager:
                 # Send files
                 if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_client_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_server_item)
 
@@ -971,23 +977,23 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
-                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          self.loader.pre_scheduling_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.results_temp_file
                                                           )
 
                 elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_client_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_server_item)
 
@@ -1002,10 +1008,10 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
-                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          self.loader.pre_scheduling_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.results_temp_file
                                                           )
                 else:
                     cmd_daemon = ""
@@ -1023,15 +1029,15 @@ class PreSchedulingManager:
                 try:
                     if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                         vm_client.ssh.get_file(source=vm_client.loader.ec2_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
-                                               item=self.loader.pre_sched_conf.results_temp_file)
+                                               target=self.loader.pre_scheduling_conf.path,
+                                               item=self.loader.pre_scheduling_conf.results_temp_file)
                     elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                         vm_client.ssh.get_file(source=vm_client.loader.gcp_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
-                                               item=self.loader.pre_sched_conf.results_temp_file)
+                                               target=self.loader.pre_scheduling_conf.path,
+                                               item=self.loader.pre_scheduling_conf.results_temp_file)
 
-                    with open(os.path.join(self.loader.pre_sched_conf.path,
-                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                    with open(os.path.join(self.loader.pre_scheduling_conf.path,
+                                           self.loader.pre_scheduling_conf.results_temp_file)) as f:
                         data = f.read()
                     times['server-client'] = json.loads(data)
                 except Exception as e:
@@ -1044,7 +1050,7 @@ class PreSchedulingManager:
 
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                     self.loader.pre_sched_conf.server_file),
+                                                                     self.loader.pre_scheduling_conf.server_file),
                                                         self.loader.application_conf.fl_port
                                                         )
 
@@ -1052,7 +1058,7 @@ class PreSchedulingManager:
 
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                     self.loader.pre_sched_conf.server_file),
+                                                                     self.loader.pre_scheduling_conf.server_file),
                                                         self.loader.application_conf.fl_port
                                                         )
                 else:
@@ -1075,10 +1081,10 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
-                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          self.loader.pre_scheduling_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.results_temp_file
                                                           )
 
                 elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
@@ -1087,10 +1093,10 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
-                                                          self.loader.pre_sched_conf.results_temp_file
+                                                          self.loader.pre_scheduling_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.results_temp_file
                                                           )
                 else:
                     cmd_daemon = ""
@@ -1108,15 +1114,15 @@ class PreSchedulingManager:
                 try:
                     if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                         vm_server.ssh.get_file(source=vm_server.loader.ec2_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
-                                               item=self.loader.pre_sched_conf.results_temp_file)
+                                               target=self.loader.pre_scheduling_conf.path,
+                                               item=self.loader.pre_scheduling_conf.results_temp_file)
                     elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                         vm_server.ssh.get_file(source=vm_server.loader.gcp_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
-                                               item=self.loader.pre_sched_conf.results_temp_file)
+                                               target=self.loader.pre_scheduling_conf.path,
+                                               item=self.loader.pre_scheduling_conf.results_temp_file)
 
-                    with open(os.path.join(self.loader.pre_sched_conf.path,
-                                           self.loader.pre_sched_conf.results_temp_file)) as f:
+                    with open(os.path.join(self.loader.pre_scheduling_conf.path,
+                                           self.loader.pre_scheduling_conf.results_temp_file)) as f:
                         data = f.read()
                     times['client-server'] = json.loads(data)
                 except Exception as e:
@@ -1221,8 +1227,8 @@ class PreSchedulingManager:
 
         if vm_server.ssh.open_connection():
 
-            rpc_app_item = self.loader.pre_sched_conf.rpc_file
-            rpc_server_item = self.loader.pre_sched_conf.server_file
+            rpc_app_item = self.loader.pre_scheduling_conf.rpc_file
+            rpc_server_item = self.loader.pre_scheduling_conf.server_file
 
             try:
                 logging.info(f"<VirtualMachine {vm_server.instance_id}>: - Sending RPC Files test")
@@ -1230,11 +1236,11 @@ class PreSchedulingManager:
                 # Send files
                 if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_server_item)
 
@@ -1249,18 +1255,18 @@ class PreSchedulingManager:
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} " \
                                  "--num_clients {}".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                        self.loader.pre_sched_conf.server_file),
+                                                                        self.loader.pre_scheduling_conf.server_file),
                                                            self.loader.application_conf.fl_port,
                                                            num_clients
                                                            )
 
                 elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_server.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_server_item)
 
@@ -1275,7 +1281,7 @@ class PreSchedulingManager:
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} " \
                                  "--num_clients {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                         self.loader.pre_sched_conf.server_file),
+                                                                         self.loader.pre_scheduling_conf.server_file),
                                                             self.loader.application_conf.fl_port,
                                                             num_clients
                                                             )
@@ -1354,21 +1360,21 @@ class PreSchedulingManager:
 
             # try to open the connection
             if vm_client.ssh.open_connection():
-                rpc_app_item = self.loader.pre_sched_conf.rpc_file
-                rpc_client_item = self.loader.pre_sched_conf.client_file
+                rpc_app_item = self.loader.pre_scheduling_conf.rpc_file
+                rpc_client_item = self.loader.pre_scheduling_conf.client_file
 
-                temp_file = str(num_client) + "_" + self.loader.pre_sched_conf.results_temp_file
+                temp_file = str(num_client) + "_" + self.loader.pre_scheduling_conf.results_temp_file
 
                 logging.info(f"<VirtualMachine {vm_client.instance_id}>: - Sending RPC Files test")
 
                 # Send files
                 if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.ec2_conf.home_path,
                                            item=rpc_client_item)
 
@@ -1383,19 +1389,19 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.ec2_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.length_msg,
                                                           temp_file
                                                           )
 
                 elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_app_item)
 
-                    vm_client.ssh.put_file(source=self.loader.pre_sched_conf.path,
+                    vm_client.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                            target=self.loader.gcp_conf.home_path,
                                            item=rpc_client_item)
 
@@ -1410,9 +1416,9 @@ class PreSchedulingManager:
                                  "--server_address {} " \
                                  "--length_parameters {} " \
                                  "--save_file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                       self.loader.pre_sched_conf.client_file),
+                                                                       self.loader.pre_scheduling_conf.client_file),
                                                           server_ip,
-                                                          self.loader.pre_sched_conf.length_msg,
+                                                          self.loader.pre_scheduling_conf.length_msg,
                                                           temp_file
                                                           )
                 else:
@@ -1431,14 +1437,14 @@ class PreSchedulingManager:
                 try:
                     if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                         vm_client.ssh.get_file(source=vm_client.loader.ec2_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
+                                               target=self.loader.pre_scheduling_conf.path,
                                                item=temp_file)
                     elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                         vm_client.ssh.get_file(source=vm_client.loader.gcp_conf.home_path,
-                                               target=self.loader.pre_sched_conf.path,
+                                               target=self.loader.pre_scheduling_conf.path,
                                                item=temp_file)
 
-                    with open(os.path.join(self.loader.pre_sched_conf.path,
+                    with open(os.path.join(self.loader.pre_scheduling_conf.path,
                                            temp_file)) as f:
                         data = f.read()
                     results[num_client] = json.loads(data)

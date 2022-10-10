@@ -15,18 +15,18 @@ class RecreateDatabase:
 
         logging.info('Recreating database {}...'.format(conf.database_name))
 
-        DATABASE_URI = 'postgres+psycopg2://postgres:{}@{}:5432/{}'.format(
+        database_uri = 'postgres+psycopg2://postgres:{}@{}:5432/{}'.format(
             conf.password,
             conf.host,
             conf.database_name
         )
 
-        print(DATABASE_URI)
+        print(database_uri)
 
-        engine = create_engine(DATABASE_URI)
+        engine = create_engine(database_uri)
 
-        Session = sessionmaker(bind=engine)
-        s = Session()
+        session = sessionmaker(bind=engine)
+        s = session()
         s.close_all()
 
         s.commit()

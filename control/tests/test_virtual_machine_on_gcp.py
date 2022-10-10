@@ -20,7 +20,8 @@ def test_on_demand_virtual_machine(disk_name, loader):
         vcpu=8,
         ebs_device_name='/dev/sdb',
         count_gpu=1,
-        gpu='nvidia-tesla-t4'
+        gpu='nvidia-tesla-t4',
+        locations=''
     )
 
     vm = VirtualMachine(

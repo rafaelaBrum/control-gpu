@@ -44,7 +44,8 @@ def test_on_demand_virtual_machine(loader):
         count_gpu=0,
         gpu='',
         memory=0,
-        vcpu=2
+        vcpu=2,
+        locations=''
     )
 
     # task = Task(
@@ -87,7 +88,8 @@ def test_preemptible_virtual_machine(loader):
         count_gpu=0,
         gpu='',
         memory=0,
-        vcpu=2
+        vcpu=2,
+        locations=''
     )
 
     # task = Task(
@@ -116,7 +118,7 @@ def test_preemptible_virtual_machine(loader):
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
 
-def test_vm_with_EBS(volume_id='', loader=None):
+def test_vm_with_ebs(volume_id='', loader=None):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
@@ -129,7 +131,8 @@ def test_vm_with_EBS(volume_id='', loader=None):
         count_gpu=0,
         gpu='',
         memory=0,
-        vcpu=2
+        vcpu=2,
+        locations=''
     )
 
     # task = Task(
