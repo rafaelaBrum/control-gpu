@@ -255,4 +255,4 @@ def main():
 
 
 def __call_control():
-    print("aqui")
+    print("dummy control")

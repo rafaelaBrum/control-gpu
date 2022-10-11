@@ -246,7 +246,8 @@ class VirtualMachine:
                         self.instance_id = \
                             self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
                                                                      image_id=self.instance_type.image_id,
-                                                                     max_price=self.instance_type.price_preemptible + 0.1)
+                                                                     max_price=self.instance_type.price_preemptible +
+                                                                     0.1)
                     else:
                         raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
                                         f"{self.instance_type.provider} cloud provider yet")
@@ -397,8 +398,6 @@ class VirtualMachine:
                                                                   self.loader.gcp_conf.gid,
                                                                   region_bucket.region,
                                                                   path)
-            # s3fs teste-rafaela-region -o use_path_request_style -o use_cache=/tmp -o uid=290035855 -o gid=290035855
-            # -o mp_umask=002 -o multireq_max=5 -o url=https://s3.us-east-2.amazonaws.com data_s3/
         else:
             cmd3 = ""
 

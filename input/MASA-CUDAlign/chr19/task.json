@@ -5,7 +5,7 @@
     "runtime": {
         "g4dn.xlarge": 18115.438
     },
-    "generic_ckpt": "False",
+    "generic_checkpoint": "False",
     "mcups": {
         "g4dn.xlarge": 198382.6723935481
     },

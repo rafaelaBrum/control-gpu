@@ -124,7 +124,7 @@ def test_dispatcher_with_daemon():
         task_id=2,
         command="ls",
         runtime={'t2.micro': 100},
-        generic_ckpt=False,
+        generic_checkpoint=False,
         task_name=''
     )
 

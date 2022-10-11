@@ -88,7 +88,8 @@ def main():
             count_gpu=0,
             gpu='',
             memory=0,
-            vcpu=2
+            vcpu=2,
+            locations=''
         )
         loc_id = 'AWS_' + args.cloud_zone[:-1]
         region = loader.loc[loc_id]
@@ -105,7 +106,8 @@ def main():
             ebs_device_name='/dev/sdb',
             gpu='no',
             count_gpu=0,
-            memory=4
+            memory=4,
+            locations=''
         )
         loc_id = 'GCP_' + args.cloud_zone[:-2]
         region = loader.loc[loc_id]

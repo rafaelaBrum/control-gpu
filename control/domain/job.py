@@ -32,10 +32,10 @@ class Job:
         return len(self.client_tasks)+1
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         return cls(
-            job_id=adict['job_id'],
-            job_name=adict['job_name'],
-            job_dict=adict,
-            description=adict['description']
+            job_id=a_dict['job_id'],
+            job_name=a_dict['job_name'],
+            job_dict=a_dict,
+            description=a_dict['description']
         )

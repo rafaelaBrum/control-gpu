@@ -308,7 +308,7 @@ class Loader:
         """
 
         repo = PostgresRepo()
-        row = repo.get_execution(filter={'job_id': self.job.job_id, 'limit': 1, 'order': 'desc'})
+        row = repo.get_execution(current_filter={'job_id': self.job.job_id, 'limit': 1, 'order': 'desc'})
         if len(row) == 0:
             self.execution_id = 0
         else:

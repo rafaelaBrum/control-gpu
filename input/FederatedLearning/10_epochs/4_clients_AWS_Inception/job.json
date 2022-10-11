@@ -9,7 +9,7 @@
             "runtime": {
                 "g4dn.xlarge": 65
             },
-            "generic_ckpt": "False",
+            "generic_checkpoint": "False",
             "zip_file": "TIL_Inception_server.zip",
             "n_rounds": 5,
             "n_clients": 4
@@ -18,7 +18,7 @@
             "0" : {
                 "task_name": "Task Inception (client 0)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
-                "generic_ckpt": "False",
+                "generic_checkpoint": "False",
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
@@ -33,7 +33,7 @@
             "1" : {
                 "task_name": "Task Inception (client 1)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
-                "generic_ckpt": "False",
+                "generic_checkpoint": "False",
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
@@ -48,7 +48,7 @@
             "2" : {
                 "task_name": "Task Inception (client 2)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
-                "generic_ckpt": "False",
+                "generic_checkpoint": "False",
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
@@ -63,7 +63,7 @@
             "3" : {
                 "task_name": "Task Inception (client 3)",
                 "command": "python3 TIL_Inception_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
-                "generic_ckpt": "False",
+                "generic_checkpoint": "False",
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,

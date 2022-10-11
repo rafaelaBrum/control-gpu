@@ -11,8 +11,8 @@ class InstanceType:
         self.vcpu = vcpu
         self.memory = memory
         # self.gflops = gflops
-        self.price_ondemand: Dict[str, float] = {}
-        self.price_preemptible: Dict[str, float] = {}
+        self.price_ondemand: Dict[str, float] = prices["on-demand"]
+        self.price_preemptible: Dict[str, float] = prices["preemptible"]
         self.restrictions = restrictions
         self.image_id = image_id
         self.ebs_device_name = ebs_device_name
@@ -44,22 +44,22 @@ class InstanceType:
         self.zone = zone
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         return [
             cls(
-                provider=adict['instances'][key]['provider'],
+                provider=a_dict['instances'][key]['provider'],
                 instance_type=key,
-                image_id=adict['instances'][key]['image_id'],
-                ebs_device_name=adict['instances'][key]['ebs_device_name'],
-                prices=adict['instances'][key]['prices'],
-                vcpu=adict['instances'][key]['vcpu'],
-                restrictions=adict['instances'][key]['restrictions'],
-                gpu=adict['instances'][key]['gpu'],
-                memory=adict['instances'][key]['memory'],
-                count_gpu=adict['instances'][key]['gpu_count'],
-                locations=adict['instances'][key]['locations']
+                image_id=a_dict['instances'][key]['image_id'],
+                ebs_device_name=a_dict['instances'][key]['ebs_device_name'],
+                prices=a_dict['instances'][key]['prices'],
+                vcpu=a_dict['instances'][key]['vcpu'],
+                restrictions=a_dict['instances'][key]['restrictions'],
+                gpu=a_dict['instances'][key]['gpu'],
+                memory=a_dict['instances'][key]['memory'],
+                count_gpu=a_dict['instances'][key]['gpu_count'],
+                locations=a_dict['instances'][key]['locations']
             )
-            for key in adict['instances']
+            for key in a_dict['instances']
         ]
 
     # @property
@@ -88,11 +88,13 @@ class InstanceType:
 
     def __str__(self):
         return "'{}' on-demand price: '{}' preemptible price: '{}' " \
-               "region: '{}' zone: '{}' provider: {} GPU? {}".format(self.type,
-                                                                     self.price_ondemand,
-                                                                     self.price_preemptible,
-                                                                     self.region,
-                                                                     self.zone,
-                                                                     self.provider,
-                                                                     self.gpu
-                                                                     )
+               "region: '{}' zone: '{}' provider: {} GPU? {} " \
+               "locations: {}".format(self.type,
+                                      self.price_ondemand,
+                                      self.price_preemptible,
+                                      self.region,
+                                      self.zone,
+                                      self.provider,
+                                      self.gpu,
+                                      self.locations
+                                      )

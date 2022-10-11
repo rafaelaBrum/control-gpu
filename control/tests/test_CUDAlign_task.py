@@ -36,7 +36,7 @@ def test_cudalign_task_creation():
             task_id=2,
             command="ls",
             runtime={'g4dn.xlarge': 64.25},
-            generic_ckpt=True,
+            generic_checkpoint=True,
             mcups={'g4dn.xlarge': 160808.882},
             disk_size='1G',
             tam_seq0=3147090,

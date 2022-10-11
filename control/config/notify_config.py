@@ -10,7 +10,7 @@ class NotifyConfig(Config):
         self.pwd = None
         try:
             self.pwd = os.environ['NOTIFY_PWD']
-        except Exception as e:
+        except Exception:
             print("NotifyConfig: env var NOTIFY_PWD not found.")
 
         super().__init__(path, file_name)

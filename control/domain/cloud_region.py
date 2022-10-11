@@ -16,19 +16,19 @@ class CloudRegion:
         self.zones = zones
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         return [
             cls(
                 region_id=key,
-                provider=adict['locations'][key]['provider'],
-                region=adict['locations'][key]['region'],
-                client_image_id=adict['locations'][key]['client_image_id'],
-                server_image_id=adict['locations'][key]['server_image_id'],
-                zones=adict['locations'][key]['zones'],
-                key_file=adict['locations'][key]['key_file'],
-                cluster_urn=adict['locations'][key]['cluster_urn']
+                provider=a_dict['locations'][key]['provider'],
+                region=a_dict['locations'][key]['region'],
+                client_image_id=a_dict['locations'][key]['client_image_id'],
+                server_image_id=a_dict['locations'][key]['server_image_id'],
+                zones=a_dict['locations'][key]['zones'],
+                key_file=a_dict['locations'][key]['key_file'],
+                cluster_urn=a_dict['locations'][key]['cluster_urn']
             )
-            for key in adict['locations']
+            for key in a_dict['locations']
         ]
 
     @property

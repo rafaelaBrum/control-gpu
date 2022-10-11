@@ -63,7 +63,12 @@ def main():
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
-                'preemptible': 0.000031}
+                'preemptible': 0.000031},
+        count_gpu=0,
+        gpu='no',
+        locations='',
+        memory=0,
+        vcpu=0
     )
 
     vm = VirtualMachine(
@@ -77,9 +82,9 @@ def main():
     if volume_id is not None:
         vm.volume_id = volume_id
 
-    vm.deploy()
+    vm.deploy(type_task='')
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='')
 
 
 if __name__ == "__main__":

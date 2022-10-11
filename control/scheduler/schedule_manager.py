@@ -202,7 +202,7 @@ class ScheduleManager:
         """
         # get job from control database
         jobs_repo = self.repo.get_jobs(
-            filter={
+            current_filter={
                 'job_id': self.loader.job.job_id
             }
         )

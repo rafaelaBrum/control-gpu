@@ -3,8 +3,8 @@ from control.domain.task import Task
 
 class FLServerTask(Task):
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, n_clients, n_rounds, zip_file):
-        super().__init__(task_id, task_name, command, generic_ckpt, runtime)
+    def __init__(self, task_id, task_name, command, generic_checkpoint, runtime, n_clients, n_rounds, zip_file):
+        super().__init__(task_id, task_name, command, generic_checkpoint, runtime)
 
         self.simple_command = command
 
@@ -37,24 +37,24 @@ class FLServerTask(Task):
         return self.running_instance
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         """return a list of tasks created from a dict"""
 
         return cls(
-            task_id=int(adict['tasks']['server']['n_clients']),
-            task_name=adict['tasks']['server']['task_name'],
-            command=adict['tasks']['server']['command'],
-            runtime=adict['tasks']['server']['runtime'],
-            generic_ckpt=adict['tasks']['server']['generic_ckpt'],
-            n_clients=adict['tasks']['server']['n_clients'],
-            n_rounds=adict['tasks']['server']['n_rounds'],
-            zip_file=adict['tasks']['server']['zip_file']
+            task_id=int(a_dict['tasks']['server']['n_clients']),
+            task_name=a_dict['tasks']['server']['task_name'],
+            command=a_dict['tasks']['server']['command'],
+            runtime=a_dict['tasks']['server']['runtime'],
+            generic_checkpoint=a_dict['tasks']['server']['generic_checkpoint'],
+            n_clients=a_dict['tasks']['server']['n_clients'],
+            n_rounds=a_dict['tasks']['server']['n_rounds'],
+            zip_file=a_dict['tasks']['server']['zip_file']
         )
 
     def __str__(self):
         return "FLServerTask_id: {}, command: {}, generic_checkpoint: {}".format(self.task_id,
                                                                                  self.command,
-                                                                                 self.generic_ckpt)
+                                                                                 self.generic_checkpoint)
 
     def print_all_runtimes(self):
         screen = ""

@@ -7,8 +7,3 @@ class CheckPointConfig(Config):
     @property
     def with_checkpoint(self):
         return self.get_boolean(self._key, 'with_checkpoint')
-
-
-
-
-

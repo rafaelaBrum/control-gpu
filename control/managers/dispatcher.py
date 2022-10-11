@@ -257,9 +257,9 @@ class Executor:
     #             if self.communicator.response['status'] == 'success':
     #                 end_ckp = datetime.now()
     #
-    #                 logging.info("<Executor {}-{}>: Checkpointed with success. Time: {}".format(self.task.task_id,
-    #                                                                                             self.vm.instance_id,
-    #                                                                                             end_ckp - start_ckp))
+    #                 logging.info("<Executor {}-{}>: Checkpoint with success. Time: {}".format(self.task.task_id,
+    #                                                                                           self.vm.instance_id,
+    #                                                                                           end_ckp - start_ckp))
     #                 self.task.has_checkpoint = True
     #                 self.task.update_task_time()
     #

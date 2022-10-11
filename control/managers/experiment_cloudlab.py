@@ -4,7 +4,7 @@ import time
 
 import xmltodict
 
-import control.managers.cloudlab_rpc as prpc
+import control.managers.cloudlab_rpc as p_rpc
 
 from control.util.loader import Loader
 
@@ -111,11 +111,11 @@ class Experiment:
         """Start the experiment and wait for READY or FAILED status."""
         logging.info('<Experiment CloudLab Manager> starting experiment {} in cluster {}'.format(self.experiment_name,
                                                                                                  self.cluster_urn))
-        return_val, response = prpc.start_experiment(self.experiment_name,
-                                                     self.project_name,
-                                                     self.profile_name, self.cluster_urn,
-                                                     self.bindings)
-        if return_val == prpc.RESPONSE_SUCCESS:
+        return_val, response = p_rpc.start_experiment(self.experiment_name,
+                                                      self.project_name,
+                                                      self.profile_name, self.cluster_urn,
+                                                      self.bindings)
+        if return_val == p_rpc.RESPONSE_SUCCESS:
             self._get_status()
 
             poll_count = 0
@@ -131,8 +131,8 @@ class Experiment:
     def terminate(self):
         """Terminate the experiment. All allocated resources will be released."""
         logging.info('<Experiment CloudLab Manager> terminating experiment {}'.format(self.experiment_name))
-        return_val, response = prpc.terminate_experiment(self.project_name, self.experiment_name)
-        if return_val == prpc.RESPONSE_SUCCESS:
+        return_val, response = p_rpc.terminate_experiment(self.project_name, self.experiment_name)
+        if return_val == p_rpc.RESPONSE_SUCCESS:
             self.status = self.EXPERIMENT_NULL
         else:
             logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
@@ -144,9 +144,9 @@ class Experiment:
 
     def _get_manifests(self):
         """Get experiment manifests, translate to list of dicts."""
-        return_val, response = prpc.get_experiment_manifests(self.project_name,
-                                                             self.experiment_name)
-        if return_val == prpc.RESPONSE_SUCCESS:
+        return_val, response = p_rpc.get_experiment_manifests(self.project_name,
+                                                              self.experiment_name)
+        if return_val == p_rpc.RESPONSE_SUCCESS:
             response_json = json.loads(response['output'])
             self._manifests = [xmltodict.parse(response_json[key]) for key in response_json.keys()]
             logging.info(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: got manifests')
@@ -210,9 +210,9 @@ class Experiment:
         and parse the associated manifests.
 
         """
-        return_val, response = prpc.get_experiment_status(self.project_name,
-                                                          self.experiment_name)
-        if return_val == prpc.RESPONSE_SUCCESS:
+        return_val, response = p_rpc.get_experiment_status(self.project_name,
+                                                           self.experiment_name)
+        if return_val == p_rpc.RESPONSE_SUCCESS:
             output = response['output']
             if 'Status: ready\n' in output:
                 self.status = self.EXPERIMENT_READY

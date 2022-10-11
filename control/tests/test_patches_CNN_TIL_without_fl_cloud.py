@@ -126,7 +126,7 @@ def __create_s3(vm: VirtualMachine, path):
 
 
 def __call_control():
-    print("aqui")
+    print("dummy control")
 
 
 def __send_zip_file(vm: VirtualMachine, file):
@@ -198,7 +198,8 @@ def __prepare_vm(vm: VirtualMachine, dataset_folder, n_epochs, split, neural_net
         # update instance IP
         vm.update_ip()
         # Start a new SSH Client
-        vm.ssh = SSHClient(vm.instance_public_ip)
+        vm.ssh = SSHClient(vm.instance_public_ip, vm.loader.ec2_conf.key_path,
+                           vm.loader.ec2_conf.key_file, vm.loader.ec2_conf.vm_user)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -248,8 +249,8 @@ def __prepare_vm(vm: VirtualMachine, dataset_folder, n_epochs, split, neural_net
                          "-data CellRep -out {4} -e {5} -cpu 2 -gpu 1 -wpath {6} -model_dir {6} -logdir {6} " \
                          "-tdim 240 240 -f1 10 -met 30 " \
                          "-cache {6} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
-                                                                         vm.loader.application_conf.
-                                                                         centralized_app_file),
+                                                                  vm.loader.application_conf.
+                                                                  centralized_app_file),
                                                      os.path.join(vm.loader.ec2_conf.input_path, dataset_folder),
                                                      f'{split[0]} {split[1]} {split[2]}',
                                                      neural_network,
@@ -284,7 +285,12 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type, dataset_folder,
             restrictions={'on-demand': 1,
                           'preemptible': 1},
             prices={'on-demand': 0.752,
-                    'preemptible': 0.2256}
+                    'preemptible': 0.2256},
+            count_gpu=1,
+            gpu='yes',
+            locations='',
+            memory=0,
+            vcpu=0
         )
     elif instance_type == 'p2.xlarge':
         instance = InstanceType(
@@ -295,7 +301,12 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type, dataset_folder,
             restrictions={'on-demand': 1,
                           'preemptible': 1},
             prices={'on-demand': 0.9,
-                    'preemptible': 0.27}
+                    'preemptible': 0.27},
+            count_gpu=1,
+            gpu='yes',
+            locations='',
+            memory=0,
+            vcpu=0
         )
     else:
         return
@@ -306,7 +317,7 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type, dataset_folder,
         loader=loader,
     )
 
-    vm.deploy()
+    vm.deploy(type_task='client')
 
     __prepare_vm(vm, dataset_folder, n_epochs, split, neural_network)
 

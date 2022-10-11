@@ -3,9 +3,9 @@ from control.domain.task import Task
 
 class FLClientTask(Task):
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, bucket_name, trainset_dir, client_id,
+    def __init__(self, task_id, task_name, command, generic_checkpoint, bucket_name, trainset_dir, client_id,
                  zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net):
-        super().__init__(task_id, task_name, command, generic_ckpt)
+        super().__init__(task_id, task_name, command, generic_checkpoint)
 
         self.simple_command = command
 
@@ -46,35 +46,35 @@ class FLClientTask(Task):
         return self.running_instance
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         """return a list of tasks created from a dict"""
 
         return [
             cls(
                 task_id=int(key),
-                task_name=adict['tasks']['clients'][key]['task_name'],
+                task_name=a_dict['tasks']['clients'][key]['task_name'],
                 client_id=int(key),
-                command=adict['tasks']['clients'][key]['command'],
-                generic_ckpt=adict['tasks']['clients'][key]['generic_ckpt'],
-                bucket_name=adict['tasks']['clients'][key]['bucket_name'],
-                trainset_dir=adict['tasks']['clients'][key]['trainset_dir'],
-                zip_file=adict['tasks']['clients'][key]['zip_file'],
-                split=adict['tasks']['clients'][key]['split'],
-                batch=adict['tasks']['clients'][key]['batch'],
-                test_dir=adict['tasks']['clients'][key]['test_dir'],
-                train_epochs=adict['tasks']['clients'][key]['train_epochs'],
-                bucket_provider=adict['tasks']['clients'][key]['bucket_provider'],
-                bucket_region=adict['tasks']['clients'][key]['bucket_region'],
-                net=adict['tasks']['clients'][key]['net']
+                command=a_dict['tasks']['clients'][key]['command'],
+                generic_checkpoint=a_dict['tasks']['clients'][key]['generic_checkpoint'],
+                bucket_name=a_dict['tasks']['clients'][key]['bucket_name'],
+                trainset_dir=a_dict['tasks']['clients'][key]['trainset_dir'],
+                zip_file=a_dict['tasks']['clients'][key]['zip_file'],
+                split=a_dict['tasks']['clients'][key]['split'],
+                batch=a_dict['tasks']['clients'][key]['batch'],
+                test_dir=a_dict['tasks']['clients'][key]['test_dir'],
+                train_epochs=a_dict['tasks']['clients'][key]['train_epochs'],
+                bucket_provider=a_dict['tasks']['clients'][key]['bucket_provider'],
+                bucket_region=a_dict['tasks']['clients'][key]['bucket_region'],
+                net=a_dict['tasks']['clients'][key]['net']
             )
-            for key in adict['tasks']['clients']
+            for key in a_dict['tasks']['clients']
         ]
 
     def __str__(self):
         return "FLClientTask_id: {}, command: {}, generic_checkpoint: {}, " \
                "client_id: {}".format(self.task_id,
                                       self.command,
-                                      self.generic_ckpt,
+                                      self.generic_checkpoint,
                                       self.client_id)
 
     def print_all_runtimes(self):

@@ -47,7 +47,7 @@ class RevocationSim:
 
     def register_vm(self, vm: VirtualMachine):
         # create a new Models
-        model = Poisson(plambda=self.rate)
+        model = Poisson(p_lambda=self.rate)
 
         # create a thread to simulate the states of the new VM type
         thread = threading.Thread(target=self.__run, args=[vm, model])

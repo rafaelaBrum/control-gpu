@@ -18,7 +18,7 @@ class Task:
 
     # RESTARTED = 'restarted'
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime=None):
+    def __init__(self, task_id, task_name, command, generic_checkpoint, runtime=None):
         self.task_id = task_id
         self.task_name = task_name
         # self.memory = memory
@@ -34,9 +34,9 @@ class Task:
         self.checkpoint_dump = 0.0
         self.checkpoint_overhead = 0.0
 
-        self.generic_ckpt = generic_ckpt
+        self.generic_checkpoint = generic_checkpoint
 
-        if self.checkpoint_config.with_checkpoint and self.generic_ckpt:
+        if self.checkpoint_config.with_checkpoint and self.generic_checkpoint:
             self.__compute_checkpoint_values()
 
         self.has_checkpoint = False
@@ -74,27 +74,27 @@ class Task:
         #     self.checkpoint_overhead = 0.0
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         """return a list of tasks created from a dict"""
 
         return [
             cls(
                 task_id=int(task_id),
-                task_name=adict['tasks'][task_id]['task_name'],
-                # memory=adict['tasks'][task_id]['memory'],
-                # io=adict['tasks'][task_id]['io'],
-                command=adict['tasks'][task_id]['command'],
-                runtime=adict['tasks'][task_id]['runtime'],
-                generic_ckpt=adict['tasks'][task_id]['generic_ckpt']
+                task_name=a_dict['tasks'][task_id]['task_name'],
+                # memory=a_dict['tasks'][task_id]['memory'],
+                # io=a_dict['tasks'][task_id]['io'],
+                command=a_dict['tasks'][task_id]['command'],
+                runtime=a_dict['tasks'][task_id]['runtime'],
+                generic_checkpoint=a_dict['tasks'][task_id]['generic_checkpoint']
             )
-            for task_id in adict['tasks']
+            for task_id in a_dict['tasks']
         ]
 
     def __str__(self):
         return "Task_id: {}, command:{}, generic_checkpoint:{}".format(
             self.task_id,
             self.command,
-            self.generic_ckpt
+            self.generic_checkpoint
         )
 
     def get_runtime(self, instance_type):

@@ -39,7 +39,7 @@ class SimpleScheduler:
             runtime = cudalign_task.get_runtime(name_instance_type)
             # logging.info("<Scheduler>: Runtime in spot instance {}: {} s".format(name_instance_type, runtime))
             if runtime < self.deadline_spot:
-                possible_vms[name_instance_type] = runtime*(instance.price_preemptible/3600)
+                possible_vms[name_instance_type] = runtime*(instance.price_preemptible[instance.region]/3600)
                 # logging.info("<Scheduler>: Spot instance {} can be chosen "
                 #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
 
@@ -59,7 +59,7 @@ class SimpleScheduler:
                 runtime = cudalign_task.get_runtime(name_instance_type)
                 # logging.info("<Scheduler>: Runtime in on-demand instance {}: {}".format(name_instance_type, runtime))
                 if runtime < deadline:
-                    possible_vms[name_instance_type] = runtime * (instance.price_ondemand / 3600)
+                    possible_vms[name_instance_type] = runtime * (instance.price_ondemand[instance.region] / 3600)
                     # logging.info("<Scheduler>: On-demand instance {} can be chosen "
                     #              "and will cost US${}".format(instance.type, possible_vms[name_instance_type]))
 
@@ -130,7 +130,7 @@ class SimpleScheduler:
                 runtime = cudalign_task.get_remaining_execution_time_with_restart(name_instance_type)
                 # logging.info("<Scheduler>: Runtime in on-demand instance {}: {}".format(name_instance_type, runtime))
                 if runtime < remaining_deadline:
-                    possible_vms[name_instance_type] = runtime * (instance.price_ondemand / 3600)
+                    possible_vms[name_instance_type] = runtime * (instance.price_ondemand[instance.region] / 3600)
                     # logging.info("<Scheduler>: On-demand instance {} can be chosen "
                     #              "and will cost US${}".format(name_instance_type, possible_vms[name_instance_type]))
 

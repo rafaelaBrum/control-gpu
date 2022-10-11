@@ -9,7 +9,7 @@
             "runtime": {
                 "g4dn.xlarge": 65
             },
-            "generic_ckpt": "False",
+            "generic_checkpoint": "False",
             "zip_file": "TIL_Inception_server.zip",
             "n_rounds": 1,
             "n_clients": 1
@@ -23,7 +23,7 @@
                 },
                 "bucket_provider": "aws",
                 "bucket_region": "us-east-1",
-                "generic_ckpt": "False",
+                "generic_checkpoint": "False",
                 "zip_file": "TIL_Inception_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,

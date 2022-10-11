@@ -192,9 +192,8 @@ class GCPManager(CloudManager):
             else:
                 return False
         except Exception as e:
-            logging.error("<GCPManager>: Error to attach volume {} ({}} to instance {}".format(volume_id,
-                                                                                               volume_name,
-                                                                                               instance_id))
+            logging.error("<GCPManager>: Error to attach volume {} to instance {}".format(volume_name,
+                                                                                          instance_id))
             logging.error(e)
             if self.mutex.locked():
                 self.mutex.release()

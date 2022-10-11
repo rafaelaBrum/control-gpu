@@ -71,7 +71,7 @@ class EC2Manager(CloudManager):
             if status == 'start':
                 try:
                     i.load()
-                except:
+                except Exception:
                     pass
 
                 self.instances_history = {

@@ -19,9 +19,9 @@ class CUDAlignTask(Task):
         "p2.xlarge": 3.33
     }
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime, mcups, seq0, seq1, tam_seq0,
+    def __init__(self, task_id, task_name, command, generic_checkpoint, runtime, mcups, seq0, seq1, tam_seq0,
                  tam_seq1, disk_size, work_dir=""):
-        super().__init__(task_id, task_name, command, generic_ckpt, runtime)
+        super().__init__(task_id, task_name, command, generic_checkpoint, runtime)
 
         if self.baseline_instance not in self.runtime:
             raise Exception("CUDAlignTask Error: CUDAlignTask '{}' don't have run time "
@@ -117,21 +117,21 @@ class CUDAlignTask(Task):
         return self.running_instance
 
     @classmethod
-    def from_dict(cls, adict):
+    def from_dict(cls, a_dict):
         """return a list of tasks created from a dict"""
 
         return cls(
-                task_id=adict['task_id'],
-                task_name=adict['task_name'],
-                command=adict['command'],
-                runtime=adict['runtime'],
-                generic_ckpt=adict['generic_ckpt'],
-                disk_size=adict['disk_size'],
-                mcups=adict['mcups'],
-                seq0=adict['seq0'],
-                seq1=adict['seq1'],
-                tam_seq0=adict['tam_seq0'],
-                tam_seq1=adict['tam_seq1']
+                task_id=a_dict['task_id'],
+                task_name=a_dict['task_name'],
+                command=a_dict['command'],
+                runtime=a_dict['runtime'],
+                generic_checkpoint=a_dict['generic_checkpoint'],
+                disk_size=a_dict['disk_size'],
+                mcups=a_dict['mcups'],
+                seq0=a_dict['seq0'],
+                seq1=a_dict['seq1'],
+                tam_seq0=a_dict['tam_seq0'],
+                tam_seq1=a_dict['tam_seq1']
             )
 
     def __str__(self):
@@ -139,7 +139,7 @@ class CUDAlignTask(Task):
                "tam_seq0:{}, tam_seq1:{}, disk_limit:{}, flush_interval:{}".format(
                                                                 self.task_id,
                                                                 self.command,
-                                                                self.generic_ckpt,
+                                                                self.generic_checkpoint,
                                                                 self.tam_seq0,
                                                                 self.tam_seq1,
                                                                 self.disk_limit,

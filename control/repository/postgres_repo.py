@@ -69,138 +69,138 @@ class PostgresRepo:
     # def add_task_statistic(self, new):
     #     self.__add(new)
 
-    def __check_filter(self, filter):
-        if filter is not None:
-            for key in filter:
+    def __check_filter(self, current_filter):
+        if current_filter is not None:
+            for key in current_filter:
                 if key not in self.accepted_filters:
                     raise Exception('Postgres Repo ERROR:  Filter "{}" is Invalid'.format(key))
 
-    def get_jobs(self, filter=None):
+    def get_jobs(self, current_filter=None):
 
-        self.__check_filter(filter)
+        self.__check_filter(current_filter)
 
         query = self.session.query(Job)
 
-        if filter is None:
+        if current_filter is None:
             return query.all()
 
-        if 'job_id' in filter:
-            query = query.filter(Job.id == filter['job_id'])
+        if 'job_id' in current_filter:
+            query = query.filter(Job.id == current_filter['job_id'])
 
         return query.all()
 
-    def get_tasks(self, filter=None):
+    def get_tasks(self, current_filter=None):
 
-        self.__check_filter(filter)
+        self.__check_filter(current_filter)
 
         query = self.session.query(Task)
 
-        if filter is None:
+        if current_filter is None:
             return query.all()
 
-        if 'job_id' in filter:
-            query = query.filter(Task.job_id == filter['job_id'])
+        if 'job_id' in current_filter:
+            query = query.filter(Task.job_id == current_filter['job_id'])
 
-        if 'task_id' in filter:
-            query = query.filter(Task.task_id == filter['task_id'])
+        if 'task_id' in current_filter:
+            query = query.filter(Task.task_id == current_filter['task_id'])
 
-        # if 'memory__lt' in filter:
-        #     query = query.filter(Task.memory < filter['memory__lt'])
+        # if 'memory__lt' in current_filter:
+        #     query = query.filter(Task.memory < current_filter['memory__lt'])
         #
-        # if 'memory__gt' in filter:
-        #     query = query.filter(Task.memory > filter['memory__gt'])
+        # if 'memory__gt' in current_filter:
+        #     query = query.filter(Task.memory > current_filter['memory__gt'])
         #
-        # if 'memory__eq' in filter:
-        #     query = query.filter(Task.memory == filter['memory__eq'])
+        # if 'memory__eq' in current_filter:
+        #     query = query.filter(Task.memory == current_filter['memory__eq'])
 
-        if 'cmd' in filter:
-            query = query.filter(Task.command == filter['cmd'])
+        if 'cmd' in current_filter:
+            query = query.filter(Task.command == current_filter['cmd'])
 
         return query.all()
 
-    def get_instance_type(self, filter=None):
+    def get_instance_type(self, current_filter=None):
 
-        self.__check_filter(filter)
+        self.__check_filter(current_filter)
 
         session = sessionmaker(bind=self.engine)()
 
         query = session.query(InstanceType)
 
-        if filter is None:
+        if current_filter is None:
             return query.all()
 
-        if "instance_type" in filter:
-            query = query.filter(InstanceType.type == filter["instance_type"])
+        if "instance_type" in current_filter:
+            query = query.filter(InstanceType.type == current_filter["instance_type"])
 
         return query.all()
 
-    def get_instances(self, filter=None):
-        self.__check_filter(filter)
+    def get_instances(self, current_filter=None):
+        self.__check_filter(current_filter)
 
         query = self.session.query(Instance)
 
-        if filter is None:
+        if current_filter is None:
             return query.all()
 
-        if 'instance_id' in filter:
-            query = query.filter(Instance.id == filter['instance_id'])
+        if 'instance_id' in current_filter:
+            query = query.filter(Instance.id == current_filter['instance_id'])
 
-        if 'instance_type' in filter:
-            query = query.filter(Instance.type == filter['instance_type'])
+        if 'instance_type' in current_filter:
+            query = query.filter(Instance.type == current_filter['instance_type'])
 
-        if 'region' in filter:
-            query = query.filter(Instance.region == filter['region'])
+        if 'region' in current_filter:
+            query = query.filter(Instance.region == current_filter['region'])
 
-        if 'zone' in filter:
-            query = query.filter(Instance.zone == filter['zone'])
+        if 'zone' in current_filter:
+            query = query.filter(Instance.zone == current_filter['zone'])
 
-        if 'market' in filter:
-            query = query.filter(Instance.market == filter['market'])
+        if 'market' in current_filter:
+            query = query.filter(Instance.market == current_filter['market'])
 
-        if 'price__lt' in filter:
-            query = query.filter(Instance.price < filter['price__lt'])
+        if 'price__lt' in current_filter:
+            query = query.filter(Instance.price < current_filter['price__lt'])
 
-        if 'price__gt' in filter:
-            query = query.filter(Instance.price > filter['price__gt'])
+        if 'price__gt' in current_filter:
+            query = query.filter(Instance.price > current_filter['price__gt'])
 
-        if 'status' in filter:
-            query = query.filter(Instance.status == filter['status'])
+        if 'status' in current_filter:
+            query = query.filter(Instance.status == current_filter['status'])
 
-        # TODO add time lt and gt comparation
+        # TODO add time lt and gt comparison
         elements = query.all()
         return elements
 
-    def get_execution(self, filter=None):
-        self.__check_filter(filter)
+    def get_execution(self, current_filter=None):
+        self.__check_filter(current_filter)
 
         query = self.session.query(Execution)
 
-        if filter is None:
+        if current_filter is None:
             return query.all()
 
-        if 'execution_id' in filter:
-            query = query.filter(Execution.execution_id == filter['execution_id'])
+        if 'execution_id' in current_filter:
+            query = query.filter(Execution.execution_id == current_filter['execution_id'])
 
-        if 'job_id' in filter:
-            query = query.filter(Execution.job_id == filter['job_id'])
+        if 'job_id' in current_filter:
+            query = query.filter(Execution.job_id == current_filter['job_id'])
 
-        if 'task_id' in filter:
-            query = query.filter(Execution.task_id == filter['task_id'])
+        if 'task_id' in current_filter:
+            query = query.filter(Execution.task_id == current_filter['task_id'])
 
-        if 'instance_id' in filter:
-            query = query.filter(Execution.instance_id == filter['instance_id'])
+        if 'instance_id' in current_filter:
+            query = query.filter(Execution.instance_id == current_filter['instance_id'])
 
-        if 'status' in filter:
-            query = query.filter(Execution.status == filter['status'])
+        if 'status' in current_filter:
+            query = query.filter(Execution.status == current_filter['status'])
 
-        if 'order' in filter:
-            if filter['order'] == 'desc':
+        if 'order' in current_filter:
+            if current_filter['order'] == 'desc':
                 query = query.order_by(Execution.execution_id.desc())
             else:
                 query = query.order_by(Execution.execution_id.asc())
 
-        if 'limit' in filter:
-            query = query.limit(filter['limit'])
+        if 'limit' in current_filter:
+            query = query.limit(current_filter['limit'])
 
         return query.all()
 
@@ -265,7 +265,7 @@ class PostgresRepo:
     #                 print(task.task_id, task.command, fin.timestamp - exec.timestamp)
     #
     # def get_number_of_tasks_by_status(self, execution_id, job_id, status):
-    #     execution_list = self.get_execution(filter=
+    #     execution_list = self.get_execution(current_filter=
     #     {
     #         'job_id': job_id,
     #         'execution_id': execution_id,
@@ -277,6 +277,7 @@ class PostgresRepo:
     def get_tasks_runtime(self, job_id, execution_id):
         """
         :type job_id: int
+        :type execution_id: int
         :return:
         """
 
@@ -286,16 +287,16 @@ class PostgresRepo:
 
             executing = task.executions.filter_by(execution_id=execution_id, status='executing').all()
 
-            exec: Execution
-            for exec in executing:
+            execution: Execution
+            for execution in executing:
                 fin = task.executions.filter_by(execution_id=execution_id, status='finished',
-                                                task_id=exec.task_id).first()
+                                                task_id=execution.task_id).first()
 
                 if fin is not None:
-                    print(task.task_id, task.command, fin.timestamp - exec.timestamp)
+                    print(task.task_id, task.command, fin.timestamp - execution.timestamp)
 
     def get_number_of_tasks_by_status(self, execution_id, job_id, status):
-        execution_list = self.get_execution(filter={
+        execution_list = self.get_execution(current_filter={
             'job_id': job_id,
             'execution_id': execution_id,
             'status': status
