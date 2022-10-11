@@ -8,18 +8,12 @@ from copy import deepcopy
 
 from control.domain.instance_type import InstanceType
 from control.managers.cloud_manager import CloudManager
+from control.managers.experiment_cloudlab import Experiment
 from control.managers.virtual_machine import VirtualMachine
 from control.util.loader import Loader
 from control.util.ssh_client import SSHClient
 
 from control.domain.app_specific.fl_client_task import FLClientTask
-
-# TODO: remove this from pre_scheduling
-aws_g5_ami_east = 'ami-04a48a1810b5f47b3'
-
-aws_g5_ami_west = 'ami-00c4927f4e41cef7c'
-
-gcp_a2_ami = 'disk-ubuntu-flower-client-a2-instances'
 
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
@@ -133,6 +127,9 @@ class PreSchedulingManager:
                 vm_initial = VirtualMachine(instance_type=instance_aws, market='on-demand', loader=self.loader)
             elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 vm_initial = VirtualMachine(instance_type=instance_gcp, market='on-demand', loader=self.loader)
+            # elif region.provider in CloudManager.CLOUDLAB and self.loader.emulated:
+            #     instance_cloudlab = self.find_instance_cloudlab(region_id)
+            #     vm_initial = VirtualMachine(instance_type=instance_cloudlab, market=Experiment.MARKET, loader=self.loader)
             else:
                 logging.error(f"<PreSchedulingManager>: {region.provider} does not have support ({region_id})")
                 return
@@ -358,13 +355,6 @@ class PreSchedulingManager:
                     key_name = region.key_file.split('.')[0]
                     vm.instance_type.image_id = region.client_image_id
                     new_ami = ''
-                    if "g5" in vm.instance_type.type:
-                        if region.region == "us-east-1":
-                            new_ami = aws_g5_ami_east
-                        elif region.region == "us-west-2":
-                            new_ami = aws_g5_ami_west
-                    elif "a2" in vm.instance_type.type:
-                        new_ami = gcp_a2_ami
                     vm.region = region
                     key_file = region.key_file
                     final_zone = ''
@@ -1537,3 +1527,9 @@ class PreSchedulingManager:
                 logging.error(e)
 
         return False
+
+    def find_instance_cloudlab(self, id_region):
+        for instance_type in self.loader.env.keys():
+            instance = self.loader.env[instance_type]
+            if id_region in instance.locations:
+                return instance
