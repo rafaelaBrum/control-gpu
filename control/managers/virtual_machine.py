@@ -70,7 +70,7 @@ class VirtualMachine:
 
         self.create_file_system = False
         self.emulated = (self.market == Experiment.MARKET)
-        self.experiment_emulation = None
+        self.experiment_emulation: Experiment = None
 
         # Start cloud manager (if not emulated)
         if not self.emulated:
@@ -150,14 +150,17 @@ class VirtualMachine:
                                                                     self.instance_type.image_id))
                     if type_task == Job.SERVER:
                         self.experiment_emulation = \
-                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name,
-                                       profile_name=self.region.server_image_id, cluster='',
-                                       loader=self.loader)
+                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name
+                                       + str(VirtualMachine.vm_num), profile_name=self.region.server_image_id,
+                                       cluster=self.region.cluster_urn, loader=self.loader,
+                                       instances_types=self.instance_type)
                     elif type_task == Job.CLIENT:
                         self.experiment_emulation = \
-                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name,
-                                       profile_name=self.region.server_image_id, cluster='',
-                                       loader=self.loader)
+                            Experiment(experiment_name=self.loader.cloudlab_conf.client_experiment_name
+                                       + str(VirtualMachine.vm_num), profile_name=self.region.server_image_id,
+                                       cluster=self.region.cluster_urn, loader=self.loader,
+                                       instances_types=self.instance_type)
+                    VirtualMachine.vm_num = VirtualMachine.vm_num + 1
                     self.instance_id = self.experiment_emulation.experiment_name
                     exp_status = self.experiment_emulation.start_and_wait()
                     if exp_status != self.experiment_emulation.EXPERIMENT_READY:
@@ -165,8 +168,8 @@ class VirtualMachine:
                         return False
                 except Exception as e:
                     logging.error("<VirtualMachine>: "
-                                  "Error to create  {} instance of type {} ".format(self.market,
-                                                                                    self.instance_type.type))
+                                  "Error to create {} instance of type {} ".format(self.market,
+                                                                                   self.instance_type.type))
                     self.instance_id = None
                     logging.error(e)
                     return False
@@ -182,8 +185,8 @@ class VirtualMachine:
                     self.__start_time = datetime.now()
                     self.__start_time_utc = datetime.utcnow()
 
-                    self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
-                    self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
+                    for node in self.experiment_emulation.nodes.values():
+                        self.instance_public_ip = node.ip_address
 
                     self.failed_to_created = False
 
@@ -199,7 +202,7 @@ class VirtualMachine:
             # Instance was already started
             return False
         else:
-            print("ami_id", ami_id)
+            # print("ami_id", ami_id)
 
             if key_name == '':
                 key_name = self.region.key_file
@@ -366,7 +369,7 @@ class VirtualMachine:
                                                             self.manager.credentials.secret_key)
         else:
             cmd1 = 'echo {}:{} > $HOME/.passwd-s3fs'.format(credentials['access_key'], credentials['secret_key'])
-            print("cmd1", cmd1)
+            # print("cmd1", cmd1)
 
         cmd2 = 'sudo chmod 600 $HOME/.passwd-s3fs'
 
@@ -636,6 +639,13 @@ class VirtualMachine:
 
         print("state", self.state)
 
+        if self.emulated:
+            status = self.experiment_emulation.terminate()
+            if status == Experiment.EXPERIMENT_NULL:
+                return True
+            else:
+                return False
+
         if self.state not in (CloudManager.TERMINATED, None):
             self.__end_time = datetime.now()
             status = self.manager.terminate_instance(self.instance_id, wait=wait, zone=zone)
@@ -653,8 +663,12 @@ class VirtualMachine:
     def update_ip(self, zone=''):
         if zone == '':
             zone = self.zone
-        self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
-        self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
+        if self.emulated:
+            for node in self.experiment_emulation.nodes.values():
+                self.instance_public_ip = node.ip_address
+        else:
+            self.instance_public_ip = self.manager.get_public_instance_ip(self.instance_id, zone)
+            self.instance_private_ip = self.manager.get_private_instance_ip(self.instance_id, zone)
 
     # return the IP list of all running instance on the cloud provider
     def get_instances_ip(self):
@@ -684,6 +698,8 @@ class VirtualMachine:
     # Return the current state of the virtual machine
     @property
     def state(self):
+        if self.emulated:
+            return self.experiment_emulation.status
         if self.marked_to_interrupt:
             self.current_state = CloudManager.STOPPING
         elif not self.in_simulation:

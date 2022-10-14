@@ -12,12 +12,15 @@ import os
 
 class SSHClient:
 
-    def __init__(self, ip_address, key_path, key_file, user):
+    def __init__(self, ip_address, key_path, key_file, user, emulated=False):
         ssh_conf = CommunicationConfig()
 
         self.ip_address = ip_address
 
-        self.key = paramiko.RSAKey.from_private_key_file(key_path + key_file)
+        if emulated:
+            self.key = paramiko.Ed25519Key.from_private_key_file(key_path + key_file)
+        else:
+            self.key = paramiko.RSAKey.from_private_key_file(key_path + key_file)
         self.user = user
         self.port = ssh_conf.ssh_port
         self.repeat = ssh_conf.repeat

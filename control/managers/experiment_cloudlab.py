@@ -10,7 +10,7 @@ from control.util.loader import Loader
 
 from control.domain.instance_type import InstanceType
 
-from typing import List
+# from typing import List
 
 import string
 import random
@@ -32,7 +32,7 @@ class Node:
 
     """
     def __init__(self, client_id, ip_address, hostname, instance_type, loader, market):
-        super().__init__(instance_type, market, loader)
+        super().__init__()
         self.client_id = client_id
         self.ip_address = ip_address
         self.hostname = hostname
@@ -77,7 +77,8 @@ class Experiment:
     CLUSTER_URN_DEFAULT = 'urn:publicid:IDN+utah.cloudlab.us+authority+cm'
 
     def __init__(self, experiment_name, loader: Loader, profile_name, cluster=None, bindings=None,
-                 instances_types: List[InstanceType] = None):
+                 # instances_types: List[InstanceType] = None):
+                 instances_types: InstanceType = None):
 
         experiment_name = experiment_name + self.EXPERIMENT_RANDOM
         if len(experiment_name) > 16:
@@ -115,6 +116,7 @@ class Experiment:
                                                       self.project_name,
                                                       self.profile_name, self.cluster_urn,
                                                       self.bindings)
+        logging.info(f"<Experiment Cloudlab Manager>: Started experiment {self.experiment_name}")
         if return_val == p_rpc.RESPONSE_SUCCESS:
             self._get_status()
 
@@ -177,8 +179,9 @@ class Experiment:
                     ipv4 = node['host']['@ipv4']
                     client_id = node['@client_id']
                     self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
-                                                 instance_type=self.instance_types[index], loader=self.loader,
+                                                 instance_type=self.instance_types, loader=self.loader,
                                                  market=self.MARKET)
+                    #                             instance_type=self.instance_types[index], loader=self.loader,
                     logging.info('<Experiment CloudLab Manager> Experiment {}: '
                                  'parsed manifests for node {}'.format(self.experiment_name, client_id))
                     index = index+1
@@ -192,9 +195,11 @@ class Experiment:
                     hostname = nodes['host']['@name']
                     ipv4 = nodes['host']['@ipv4']
                     client_id = nodes['@client_id']
+                    # print(f"hostname={hostname} ipv4={ipv4} client_id={client_id}")
                     self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
-                                                 instance_type=self.instance_types[0], loader=self.loader,
+                                                 instance_type=self.instance_types, loader=self.loader,
                                                  market=self.MARKET)
+                    #                              instance_type=self.instance_types[0], loader=self.loader,
                     logging.info('<Experiment CloudLab Manager> Experiment {}: '
                                  'parsed manifests for node {}'.format(self.experiment_name, client_id))
                 except Exception as e:

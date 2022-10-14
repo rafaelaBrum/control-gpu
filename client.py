@@ -63,14 +63,21 @@ def __call_pre_scheduling(loader: Loader):
         if pre_sched.stop_execution:
             return
 
-        pre_sched.calculate_rtt_values()
+        if loader.emulated:
+            pre_sched.calculate_rpc_times_emulated()
 
-        pre_sched.get_first_rounds_times()
+            # pre_sched.get_first_rounds_times_emulated()
+            # if loader.num_clients_pre_scheduling > 1:
+            #     pre_sched.calculate_concurrent_rpc_times_emulated()
+        else:
+            pre_sched.calculate_rtt_values()
 
-        pre_sched.calculate_rpc_times()
+            pre_sched.get_first_rounds_times()
 
-        if loader.num_clients_pre_scheduling > 1:
-            pre_sched.calculate_concurrent_rpc_times()
+            pre_sched.calculate_rpc_times()
+
+            if loader.num_clients_pre_scheduling > 1:
+                pre_sched.calculate_concurrent_rpc_times()
 
         pre_sched.write_json()
 

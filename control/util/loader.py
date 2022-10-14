@@ -272,7 +272,7 @@ class Loader:
             # start global count list
             self.count_list[instance.type] = 0
 
-            logging.info(f"instance_type:{instance}")
+            # logging.info(f"instance_type:{instance}")
 
             self.env[instance.type] = instance
 
@@ -293,7 +293,7 @@ class Loader:
         self.loc = {}
 
         for region in CloudRegion.from_dict(loc_json):
-            logging.info(f"region:{region}")
+            # logging.info(f"region:{region}")
             self.loc[region.id] = region
 
     def __get_execution_id(self):
