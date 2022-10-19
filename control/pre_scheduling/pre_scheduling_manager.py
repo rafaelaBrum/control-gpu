@@ -328,8 +328,8 @@ class PreSchedulingManager:
         try:
             logging.info("<PreSchedulerManager>: Computing training times")
             clients = self.loader.job.client_tasks
-            env_aws, env_gcp = self.separate_env_per_cloud()
-            loc_aws, loc_gcp = self.separate_loc_per_cloud()
+            env_aws, env_gcp, env_cloudlab = self.separate_env_per_cloud()
+            loc_aws, loc_gcp, loc_cloudlab = self.separate_loc_per_cloud()
             logging.info("<PreSchedulerManager>: Calculating AWS training times")
             for env_id, env in env_aws.items():
                 if not env.have_gpu:
@@ -438,6 +438,8 @@ class PreSchedulingManager:
                     else:
                         vm.instance_id = None
                         vm.failed_to_created = False
+            for env_id, env in env_cloudlab.items():
+                logging.info(f"<PreSchedulerManager>: Missing getting times in CloudLab with instance {env_id} ({env})")
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside get_first_rounds_times')
             logging.error(e)
@@ -445,26 +447,32 @@ class PreSchedulingManager:
     def separate_env_per_cloud(self):
         env_aws = {}
         env_gcp = {}
+        env_cloudlab = {}
         for env_id, env in self.loader.env.items():
             if env.provider in (CloudManager.EC2, CloudManager.AWS):
                 env_aws[env_id] = env
             elif env.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 env_gcp[env_id] = env
+            elif env.provider in CloudManager.CLOUDLAB:
+                env_cloudlab[env_id] = env
             else:
                 logging.error(f"<PreSchedulingManager>: {env.provider} does not have support ({env_id})")
-        return env_aws, env_gcp
+        return env_aws, env_gcp, env_cloudlab
 
     def separate_loc_per_cloud(self):
         loc_aws = {}
         loc_gcp = {}
+        loc_cloudlab = {}
         for loc_id, loc in self.loader.loc.items():
             if loc.provider in (CloudManager.EC2, CloudManager.AWS):
                 loc_aws[loc_id] = loc
             elif loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 loc_gcp[loc_id] = loc
+            elif loc.provider in CloudManager.CLOUDLAB:
+                loc_cloudlab[loc_id] = loc
             else:
                 logging.error(f"<PreSchedulingManager>: {loc.provider} does not have support ({loc_id})")
-        return loc_aws, loc_gcp
+        return loc_aws, loc_gcp, loc_cloudlab
 
     def separate_cli_per_cloud(self):
         cli_aws = {}
@@ -485,6 +493,8 @@ class PreSchedulingManager:
                 key = self.loader.ec2_conf.key_file
             elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 key = self.loader.gcp_conf.key_file
+            elif vm.instance_type.provider in CloudManager.CLOUDLAB:
+                key = vm.region.key_file
             else:
                 logging.error(f"PreSchedulerManager>: "
                               f"{vm.instance_type.provider} does not have support")
@@ -496,6 +506,9 @@ class PreSchedulingManager:
         elif vm.instance_type.provider == CloudManager.GCLOUD:
             vm.ssh = SSHClient(vm.instance_public_ip, self.loader.gcp_conf.key_path,
                                key, self.loader.gcp_conf.vm_user)
+        elif vm.instance_type.provider == CloudManager.CLOUDLAB:
+            vm.ssh = SSHClient(vm.instance_public_ip, self.loader.cloudlab_conf.key_path,
+                               key, self.loader.cloudlab_conf.vm_user, emulated=True)
 
         # try to open the connection
         if vm.ssh.open_connection():
@@ -628,6 +641,62 @@ class PreSchedulingManager:
                                                                  cli.test_dir),
                                                     self.loader.pre_scheduling_conf.results_temp_file
                                                     )
+
+                elif vm.instance_type.provider in CloudManager.CLOUDLAB:
+
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
+                                    target=self.loader.cloudlab_conf.home_path,
+                                    item=app_item)
+
+                    vm.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
+                                    target=self.loader.cloudlab_conf.home_path,
+                                    item=train_item)
+
+                    cmd_before_daemon = "mkdir results/"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_before_daemon))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
+                    print(stdout)
+
+                    cmd_remove = "rm results/*"
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd_remove, output=True)
+                    print(stdout)
+
+                    cmd1 = f'unzip {app_item} -d .'
+
+                    logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd1))
+
+                    stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
+                    print(stdout)
+
+                    cmd_daemon = "python3.7 {} " \
+                                 "-i -v -predst {} " \
+                                 "-split 0.9 0.10 0.00 " \
+                                 "-net {} -data CellRep -d " \
+                                 "-e {} -b {} -tdim 240 240 " \
+                                 "-out logs/ -cpu {} -gpu {} " \
+                                 "-tn -wpath results " \
+                                 "-model_dir results " \
+                                 "-logdir results " \
+                                 "-cache results " \
+                                 "-test_dir {} " \
+                                 "-file {} ".format(os.path.join(self.loader.cloudlab_conf.home_path,
+                                                                 self.loader.pre_scheduling_conf.train_file),
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.trainset_dir),
+                                                    cli.net,
+                                                    cli.train_epochs,
+                                                    cli.batch,
+                                                    vm.instance_type.vcpu,
+                                                    vm.instance_type.count_gpu,
+                                                    os.path.join(self.loader.file_system_conf.path_storage,
+                                                                 cli.test_dir),
+                                                    self.loader.pre_scheduling_conf.results_temp_file
+                                                    )
                 else:
                     cmd_daemon = ""
 
@@ -647,6 +716,10 @@ class PreSchedulingManager:
                                     item=self.loader.pre_scheduling_conf.results_temp_file)
                 elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     vm.ssh.get_file(source=vm.loader.gcp_conf.home_path,
+                                    target=self.loader.pre_scheduling_conf.path,
+                                    item=self.loader.pre_scheduling_conf.results_temp_file)
+                elif vm.instance_type.provider in CloudManager.CLOUDLAB:
+                    vm.ssh.get_file(source=vm.loader.cloudlab_conf.home_path,
                                     target=self.loader.pre_scheduling_conf.path,
                                     item=self.loader.pre_scheduling_conf.results_temp_file)
 
@@ -1648,7 +1721,7 @@ class PreSchedulingManager:
                         vm_final.instance_id = None
                         vm_final.failed_to_created = False
                         vm_final.ssh = None
-                if not vm_initial.failed_to_created:
+                if vm_initial.instance_id is not None and not vm_initial.failed_to_created:
                     status = vm_initial.terminate(wait=True)
                     if status:
                         vm_initial.instance_id = None
@@ -1661,4 +1734,170 @@ class PreSchedulingManager:
                 loc_copy.pop(region_id, None)
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside calculate_rpc_times_emulated')
+            logging.error(e)
+
+    def get_first_rounds_times_emulated(self):
+        try:
+            logging.info("<PreSchedulerManager>: Computing training times (emulated)")
+            clients = self.loader.job.client_tasks
+            env_aws, env_gcp, env_cloudlab = self.separate_env_per_cloud()
+            loc_aws, loc_gcp, loc_cloudlab = self.separate_loc_per_cloud()
+            logging.info("<PreSchedulerManager>: Calculating AWS training times")
+            for env_id, env in env_aws.items():
+                if not env.have_gpu:
+                    continue
+                logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+                if env_id not in self.exec_times:
+                    self.exec_times[env_id] = {}
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                for loc_id, region in loc_aws.items():
+                    if loc_id in self.exec_times[env_id]:
+                        skip_loc = True
+                        for cli in clients.values():
+                            if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
+                                skip_loc = False
+                        if skip_loc:
+                            continue
+                    else:
+                        self.exec_times[env_id][loc_id] = {}
+                    logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                    key_name = region.key_file.split('.')[0]
+                    vm.instance_type.image_id = region.client_image_id
+                    new_ami = ''
+                    vm.region = region
+                    key_file = region.key_file
+                    final_zone = ''
+                    for zone in region.zones:
+                        try:
+                            vm.zone = zone
+                            vm.deploy(zone=zone, needs_volume=False,
+                                      key_name=key_name, type_task='client', ami_id=new_ami)
+                            final_zone = zone
+                            break
+                        except Exception as e:
+                            logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
+                            logging.error(e)
+                            vm.instance_id = None
+                    if not vm.failed_to_created:
+                        # update instance IP
+                        vm.update_ip(zone=final_zone)
+                        for cli in clients.values():
+                            if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                                continue
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
+                                         f"in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
+                            vm.reboot()
+                        print("final_zone", final_zone)
+                        status = vm.terminate(wait=True, zone=final_zone)
+                        if status:
+                            vm.instance_id = None
+                            vm.failed_to_created = False
+                    else:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+            logging.info("<PreSchedulerManager>: Calculating GCP training times")
+            for env_id, env in env_gcp.items():
+                if not env.have_gpu:
+                    continue
+                logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+                if env_id not in self.exec_times:
+                    self.exec_times[env_id] = {}
+                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                for loc_id, region in loc_gcp.items():
+                    if loc_id in self.exec_times[env_id]:
+                        skip_loc = True
+                        for cli in clients.values():
+                            if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
+                                skip_loc = False
+                        if skip_loc:
+                            continue
+                    else:
+                        self.exec_times[env_id][loc_id] = {}
+                    logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                    vm.instance_type.image_id = region.client_image_id
+                    key_file = self.loader.gcp_conf.key_file
+                    final_zone = ''
+                    for zone in region.zones:
+                        try:
+                            status = vm.deploy(zone=zone, needs_volume=False, key_name=key_file, type_task='client')
+                            final_zone = zone
+                            if status:
+                                break
+                            else:
+                                vm.instance_id = None
+                        except Exception as e:
+                            logging.error(f'<PreSchedulerManager>: Error with zone {zone}')
+                            logging.error(e)
+                            vm.instance_id = None
+                    if not vm.failed_to_created:
+                        # update instance IP
+                        vm.update_ip(zone=final_zone)
+                        for cli in clients.values():
+                            if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                                continue
+                            logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
+                                         f"in region {region.region}")
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
+                            vm.reboot()
+                        print("final_zone", final_zone)
+                        status = vm.terminate(wait=True, zone=final_zone)
+                        if status:
+                            vm.instance_id = None
+                            vm.failed_to_created = False
+                    else:
+                        vm.instance_id = None
+                        vm.failed_to_created = False
+            logging.info("<PreSchedulerManager>: Calculating CloudLab training times")
+            for env_id, env in env_cloudlab.items():
+                logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
+                if env_id not in self.exec_times:
+                    self.exec_times[env_id] = {}
+                for loc_id in env.locations:
+                    region = loc_cloudlab[loc_id]
+                    if loc_id in self.exec_times[env_id]:
+                        skip_loc = True
+                        # There is no need to get exec times to all clients
+                        # for cli in clients.values():
+                        #     if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
+                        #         skip_loc = False
+                        if skip_loc:
+                            continue
+                    else:
+                        self.exec_times[env_id][loc_id] = {}
+                    logging.info(f"<PreSchedulerManager>: Testing in region {region.region}")
+                    vm = VirtualMachine(instance_type=env, market=Experiment.MARKET, loader=self.loader, region=region)
+                    vm.instance_type.image_id = region.client_image_id
+                    key_file = region.key_file
+                    try:
+                        status = vm.deploy(needs_volume=False, key_name=key_file, type_task='client')
+                        if not status:
+                            vm.instance_id = None
+                        if not vm.failed_to_created:
+                            # update instance IP
+                            vm.update_ip()
+                            for cli in clients.values():
+                                # if str(cli.client_id) in self.exec_times[env_id][loc_id]:
+                                if cli.client_id > 0:
+                                    continue
+                                logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
+                                             f"in region {region.region}")
+                                self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                    self.__compute_training_times(vm, key_file, cli)
+                                vm.reboot()
+                            status = vm.terminate(wait=True)
+                            if status:
+                                vm.instance_id = None
+                                vm.failed_to_created = False
+                        else:
+                            vm.instance_id = None
+                            vm.failed_to_created = False
+                    except Exception as e:
+                        logging.error(f'<PreSchedulerManager>: Error with instance {env_id} in cluster {loc_id}')
+                        logging.error(e)
+                        vm.instance_id = None
+        except Exception as e:
+            logging.error(f'<PreSchedulerManager>: Error inside get_first_rounds_times')
             logging.error(e)

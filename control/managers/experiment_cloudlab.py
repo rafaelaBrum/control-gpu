@@ -31,8 +31,7 @@ class Node:
         hostname (str): The hostname of the node.
 
     """
-    def __init__(self, client_id, ip_address, hostname, instance_type, loader, market):
-        super().__init__()
+    def __init__(self, client_id, ip_address, hostname):
         self.client_id = client_id
         self.ip_address = ip_address
         self.hostname = hostname
@@ -96,7 +95,9 @@ class Experiment:
             self.cluster_urn = self.CLUSTER_URN_DEFAULT
         else:
             self.cluster_urn = cluster
-        self.bindings = bindings
+        if bindings is None:
+            bindings = {'hostType': instances_types.type}
+        self.bindings = json.dumps(bindings, indent=4)
         self.status = self.EXPERIMENT_NOT_STARTED
         self.nodes = dict()
         self._manifests = None
@@ -178,10 +179,7 @@ class Experiment:
                     hostname = node['host']['@name']
                     ipv4 = node['host']['@ipv4']
                     client_id = node['@client_id']
-                    self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
-                                                 instance_type=self.instance_types, loader=self.loader,
-                                                 market=self.MARKET)
-                    #                             instance_type=self.instance_types[index], loader=self.loader,
+                    self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname)
                     logging.info('<Experiment CloudLab Manager> Experiment {}: '
                                  'parsed manifests for node {}'.format(self.experiment_name, client_id))
                     index = index+1
@@ -196,10 +194,7 @@ class Experiment:
                     ipv4 = nodes['host']['@ipv4']
                     client_id = nodes['@client_id']
                     # print(f"hostname={hostname} ipv4={ipv4} client_id={client_id}")
-                    self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname,
-                                                 instance_type=self.instance_types, loader=self.loader,
-                                                 market=self.MARKET)
-                    #                              instance_type=self.instance_types[0], loader=self.loader,
+                    self.nodes[client_id] = Node(client_id=client_id, ip_address=ipv4, hostname=hostname)
                     logging.info('<Experiment CloudLab Manager> Experiment {}: '
                                  'parsed manifests for node {}'.format(self.experiment_name, client_id))
                 except Exception as e:
@@ -241,5 +236,6 @@ class Experiment:
         else:
             logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
                           f'failed to get experiment status')
+            self.still_provisioning = False
 
         return self

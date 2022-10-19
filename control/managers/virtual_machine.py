@@ -157,7 +157,7 @@ class VirtualMachine:
                     elif type_task == Job.CLIENT:
                         self.experiment_emulation = \
                             Experiment(experiment_name=self.loader.cloudlab_conf.client_experiment_name
-                                       + str(VirtualMachine.vm_num), profile_name=self.region.server_image_id,
+                                       + str(VirtualMachine.vm_num), profile_name=self.region.client_image_id,
                                        cluster=self.region.cluster_urn, loader=self.loader,
                                        instances_types=self.instance_type)
                     VirtualMachine.vm_num = VirtualMachine.vm_num + 1
@@ -171,6 +171,7 @@ class VirtualMachine:
                                   "Error to create {} instance of type {} ".format(self.market,
                                                                                    self.instance_type.type))
                     self.instance_id = None
+                    self.failed_to_created = True
                     logging.error(e)
                     return False
                     # check if instance was create with success
@@ -790,12 +791,16 @@ class VirtualMachine:
                     logging.error(e)
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
             self.__create_cloud_storage(path, client)
+        elif client.bucket_provider in CloudManager.CLOUDLAB:
+            self.__link_cloudlab_folder(path, client)
 
     def remove_bucket_pre_scheduling(self, path, client: FLClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             self.__detach_s3(path)
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
             self.__detach_cloud_storage(path)
+        elif client.bucket_provider in CloudManager.CLOUDLAB:
+            self.__detach_volume_cloudlab(path)
 
     def __detach_s3(self, path):
         cmd = 'sudo umount {}'.format(path)
@@ -825,3 +830,30 @@ class VirtualMachine:
         reboot_overhead = datetime.now() - start_reboot
 
         logging.info("<VirtualMachine {}>: - Reboot overhead: {}".format(self.instance_id, reboot_overhead))
+
+    def __link_cloudlab_folder(self, path, client):
+
+        logging.info("<VirtualMachine {}>: - Linking volume CloudLab".format(self.instance_id))
+
+        cmd = 'rm {} -r'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+        if path[-1] == '/':
+            path = path[:-1]
+
+        # ln -s /home/user/project /var/www/html
+        cmd = f"ln -s {client.bucket_name} {path}"
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+    def __detach_volume_cloudlab(self, path):
+        if path[-1] == '/':
+            path = path[:-1]
+
+        cmd = 'rm {}'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)

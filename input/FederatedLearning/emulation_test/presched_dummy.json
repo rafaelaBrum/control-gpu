@@ -1,0 +1,28 @@
+{
+    "exec_times": {},
+    "job_id": 2000,
+    "job_name": "4 clients - VGG16 (dataset in CloudLab)",
+    "number_datacenters": 0,
+    "rpc": {
+        "CloudLab_Clemson_Emulated": {
+            "CloudLab_Clemson_Emulated": {}
+        },
+        "CloudLab_Utah_Emulated": {
+            "CloudLab_APT_Emulated": {},
+            "CloudLab_Clemson_Emulated": {},
+            "CloudLab_Emulab_Emulated": {},
+            "CloudLab_Massachusetts_Emulated": {},
+            "CloudLab_Utah_Emulated": {},
+            "CloudLab_Wisconsin_Emulated": {}
+        },
+        "CloudLab_Wisconsin_Emulated": {
+            "CloudLab_APT_Emulated": {},
+            "CloudLab_Clemson_Emulated": {},
+            "CloudLab_Emulab_Emulated": {},
+            "CloudLab_Massachusetts_Emulated": {},
+            "CloudLab_Wisconsin_Emulated": {}
+        }
+    },
+    "rpc_concurrent": {},
+    "rtt": {}
+}
