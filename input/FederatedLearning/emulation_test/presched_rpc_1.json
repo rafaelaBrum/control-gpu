@@ -1,0 +1,52 @@
+{
+    "exec_times": {},
+    "job_id": 2000,
+    "job_name": "4 clients - VGG16 (dataset in CloudLab)",
+    "number_datacenters": 0,
+    "rpc": {
+        "CloudLab_Utah_Emulated": {
+            "CloudLab_APT_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.539158582687378",
+                    "TrainMsg": "4.849917650222778"
+                },
+                "server-client": {
+                    "TestMsg": "2.62121844291687",
+                    "TrainMsg": "4.838391304016113"
+                }
+            },
+            "CloudLab_Clemson_Emulated": {
+                "client-server": {
+                    "TestMsg": "5.34741735458374",
+                    "TrainMsg": "10.493001937866211"
+                },
+                "server-client": {
+                    "TestMsg": "5.335709810256958",
+                    "TrainMsg": "12.283066511154175"
+                }
+            },
+            "CloudLab_Utah_Emulated": {
+                "client-server": {
+                    "TestMsg": "1.3109755516052246",
+                    "TrainMsg": "1.9664928913116455"
+                },
+                "server-client": {
+                    "TestMsg": "0.9907193183898926",
+                    "TrainMsg": "2.182666063308716"
+                }
+            },
+            "CloudLab_Wisconsin_Emulated": {
+                "client-server": {
+                    "TestMsg": "17.007620811462402",
+                    "TrainMsg": "21.685514211654663"
+                },
+                "server-client": {
+                    "TestMsg": "4.123046159744263",
+                    "TrainMsg": "21.928953409194946"
+                }
+            }
+        }
+    },
+    "rpc_concurrent": {},
+    "rtt": {}
+}
