@@ -29,9 +29,9 @@ from flwr.common import (
     MetricsAggregationFn,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -81,7 +81,7 @@ class FedAvg(Strategy):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -178,7 +178,7 @@ class FedAvg(Strategy):
         if self.eval_fn is None:
             # No evaluation function provided
             return None
-        weights = parameters_to_weights(parameters)
+        weights = parameters_to_ndarrays(parameters)
         eval_res = self.eval_fn(weights)
         if eval_res is None:
             return None
@@ -250,10 +250,10 @@ class FedAvg(Strategy):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = weights_to_parameters(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

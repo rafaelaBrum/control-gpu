@@ -25,8 +25,8 @@ from flwr.common import (
     MetricsAggregationFn,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
+    NDArrays,
+    parameters_to_ndarrays,
 )
 
 from fedavg_strategy import FedAvg
@@ -45,7 +45,7 @@ class FedOpt(FedAvg):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -109,14 +109,14 @@ class FedOpt(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.current_weights = parameters_to_weights(initial_parameters)
+        self.current_weights = parameters_to_ndarrays(initial_parameters)
         self.eta = eta
         self.eta_l = eta_l
         self.tau = tau
         self.beta_1 = beta_1
         self.beta_2 = beta_2
-        self.m_t: Optional[Weights] = None
-        self.v_t: Optional[Weights] = None
+        self.m_t: Optional[NDArrays] = None
+        self.v_t: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
         rep = f"FedOpt(accept_failures={self.accept_failures})"

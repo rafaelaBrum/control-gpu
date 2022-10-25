@@ -18,6 +18,7 @@ from fedfs_v1_strategy import FedFSv1
 from fedopt_strategy import FedOpt
 from fedyogi_strategy import FedYogi
 from qfedavg_strategy import QFedAvg
+from fedavg_saving_strategy import FedAvgSave
 
 
 DEFAULT_SERVER_ADDRESS = "[::]:8080"
@@ -33,7 +34,8 @@ strategy_print = "Strategy needs to be one of the following:\n" \
                  "--> FedFSv1\n" \
                  "--> FedOpt\n" \
                  "--> FedYogi\n" \
-                 "--> QFedAvg\n"
+                 "--> QFedAvg\n" \
+                 "--> FedAvgSave\n"
 
 
 def download_blob(file_name):
@@ -244,6 +246,15 @@ def main():
         )
     elif args.strategy.upper() == "QFEDAVG":
         strategy = QFedAvg(
+            fraction_fit=args.sample_fraction,
+            fraction_eval=args.sample_fraction,
+            min_fit_clients=args.min_sample_size,
+            min_eval_clients=args.min_sample_size,
+            min_available_clients=args.min_num_clients,
+            on_fit_config_fn=fit_config
+        )
+    elif args.strategy.upper() == "FEDAVGSAVE":
+        strategy = FedAvgSave(
             fraction_fit=args.sample_fraction,
             fraction_eval=args.sample_fraction,
             min_fit_clients=args.min_sample_size,

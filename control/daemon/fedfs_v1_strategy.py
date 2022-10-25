@@ -27,9 +27,9 @@ from flwr.common import (
     MetricsAggregationFn,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -62,7 +62,7 @@ class FedFSv1(FedAvg):
         min_eval_clients: int = 1,
         min_available_clients: int = 1,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         min_completion_rate_fit: float = 0.5,
         min_completion_rate_evaluate: float = 0.5,
@@ -271,7 +271,7 @@ class FedFSv1(FedAvg):
 
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
         weights_prime = aggregate(weights_results)
@@ -309,7 +309,7 @@ class FedFSv1(FedAvg):
             )
             self.durations.append(cid_duration)
 
-        parameters_aggregated = weights_to_parameters(weights_prime)
+        parameters_aggregated = ndarrays_to_parameters(weights_prime)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

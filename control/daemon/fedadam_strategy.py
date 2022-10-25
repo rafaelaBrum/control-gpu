@@ -28,9 +28,9 @@ from flwr.common import (
     MetricsAggregationFn,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -54,7 +54,7 @@ class FedAdam(FedOpt):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -140,7 +140,7 @@ class FedAdam(FedOpt):
         if fedavg_parameters_aggregated is None:
             return None, {}
 
-        fedavg_weights_aggregate = parameters_to_weights(fedavg_parameters_aggregated)
+        fedavg_weights_aggregate = parameters_to_ndarrays(fedavg_parameters_aggregated)
 
         # Adam
         delta_t = [
@@ -169,4 +169,4 @@ class FedAdam(FedOpt):
 
         self.current_weights = new_weights
 
-        return weights_to_parameters(self.current_weights), metrics_aggregated
+        return ndarrays_to_parameters(self.current_weights), metrics_aggregated

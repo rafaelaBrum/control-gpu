@@ -26,9 +26,9 @@ from flwr.common import (
     MetricsAggregationFn,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
 )
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
@@ -58,7 +58,7 @@ class FedAvgM(FedAvg):
         min_eval_clients: int = 2,
         min_available_clients: int = 2,
         eval_fn: Optional[
-            Callable[[Weights], Optional[Tuple[float, Dict[str, Scalar]]]]
+            Callable[[NDArrays], Optional[Tuple[float, Dict[str, Scalar]]]]
         ] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
@@ -127,7 +127,7 @@ class FedAvgM(FedAvg):
         self.server_opt: bool = (self.server_momentum != 0.0) or (
             self.server_learning_rate != 1.0
         )
-        self.momentum_vector: Optional[Weights] = None
+        self.momentum_vector: Optional[NDArrays] = None
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
@@ -161,7 +161,7 @@ class FedAvgM(FedAvg):
             return None, {}
         # Convert results
         weights_results = [
-            (parameters_to_weights(fit_res.parameters), fit_res.num_examples)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
 
@@ -173,13 +173,13 @@ class FedAvgM(FedAvg):
             assert (
                 self.initial_parameters is not None
             ), "When using server-side optimization, model needs to be initialized."
-            initial_weights = parameters_to_weights(self.initial_parameters)
+            initial_weights = parameters_to_ndarrays(self.initial_parameters)
 
             # remember that updates are the opposite of gradients
             pseudo_gradient = [
                 x - y
                 for x, y in zip(
-                    parameters_to_weights(self.initial_parameters), fedavg_result
+                    parameters_to_ndarrays(self.initial_parameters), fedavg_result
                 )
             ]
             if self.server_momentum > 0.0:
@@ -203,9 +203,9 @@ class FedAvgM(FedAvg):
                 for x, y in zip(initial_weights, pseudo_gradient)
             ]
             # Update current weights
-            self.initial_parameters = weights_to_parameters(fedavg_result)
+            self.initial_parameters = ndarrays_to_parameters(fedavg_result)
 
-        parameters_aggregated = weights_to_parameters(fedavg_result)
+        parameters_aggregated = ndarrays_to_parameters(fedavg_result)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
