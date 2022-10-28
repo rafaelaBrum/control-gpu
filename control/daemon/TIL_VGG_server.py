@@ -2,7 +2,7 @@ from typing import Dict
 
 import flwr as fl
 import argparse
-# import numpy as np
+import numpy as np
 import pickle
 
 from google.cloud import storage
@@ -74,7 +74,7 @@ def download_blob(file_name):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Testando criar o servidor para FCUBE automaticamente")
+    parser = argparse.ArgumentParser(description="Creating Flower server")
     parser.add_argument(
         "--server_address", type=str,
         default=DEFAULT_SERVER_ADDRESS,
@@ -106,7 +106,7 @@ def get_args():
     )
     parser.add_argument(
         "--log_host", type=str,
-        help="Logserver address (no default)",
+        help="Log server address (no default)",
     )
     parser.add_argument(
         "--file_weights", type=str,
@@ -117,12 +117,30 @@ def get_args():
     return args
 
 
+def get_initial_weights():
+    try:
+        file = 'weights.npz'
+        aux_data = np.load(file)
+        aux_list: fl.common.NDArrays = []
+        for file in aux_data.files:
+            aux_list.append(aux_data[file])
+        weights = fl.common.ndarrays_to_parameters(aux_list)
+        return weights
+    except Exception:
+        return None
+
+
 def main():
     """Start server and train five rounds."""
     args = get_args()
 
     # Create strategy
     strategy = None
+
+    initial_weights = get_initial_weights()
+
+    if initial_weights is not None:
+        args.strategy = "FedAvgSave"
 
     print("strategy:", args.strategy)
 
@@ -254,14 +272,25 @@ def main():
             on_fit_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDAVGSAVE":
-        strategy = FedAvgSave(
-            fraction_fit=args.sample_fraction,
-            fraction_eval=args.sample_fraction,
-            min_fit_clients=args.min_sample_size,
-            min_eval_clients=args.min_sample_size,
-            min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
-        )
+        if initial_weights is not None:
+            strategy = FedAvgSave(
+                fraction_fit=args.sample_fraction,
+                fraction_eval=args.sample_fraction,
+                min_fit_clients=args.min_sample_size,
+                min_eval_clients=args.min_sample_size,
+                min_available_clients=args.min_num_clients,
+                on_fit_config_fn=fit_config,
+                initial_parameters=initial_weights
+            )
+        else:
+            strategy = FedAvgSave(
+                fraction_fit=args.sample_fraction,
+                fraction_eval=args.sample_fraction,
+                min_fit_clients=args.min_sample_size,
+                min_eval_clients=args.min_sample_size,
+                min_available_clients=args.min_num_clients,
+                on_fit_config_fn=fit_config
+            )
     else:
         print(strategy_print)
         exit(1)
