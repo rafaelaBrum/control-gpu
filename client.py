@@ -14,7 +14,11 @@ import argparse
 
 
 def __call_control(loader: Loader):
-    if not loader.emulated:
+    if loader.emulated:
+        if not loader.has_input_metrics()
+            __call_pre_scheduling(loader=loader)
+
+    else:
         if loader.server_provider is None:
             logging.error("<Loader>: Server provider cannot be None")
             return
@@ -34,19 +38,19 @@ def __call_control(loader: Loader):
             logging.error("<Loader>: Clients VM name cannot be None")
             return
 
-    try:
+        try:
 
-        loader.print_execution_info()
+            loader.print_execution_info()
 
-        manager = ScheduleManager(loader=loader)
+            manager = ScheduleManager(loader=loader)
 
-        # manager.start_execution()
+            manager.start_execution()
 
-        # status = "SUCCESS"
+            status = "SUCCESS"
 
-    except Exception as e:
-        logging.error(e)
-        # status = "ERROR"
+        except Exception as e:
+            logging.error(e)
+            # status = "ERROR"
 
     # if loader.dump:
     #     logging.info("Backup Database..")
@@ -67,8 +71,6 @@ def __call_pre_scheduling(loader: Loader):
             pre_sched.calculate_rpc_times_emulated()
 
             pre_sched.get_first_rounds_times_emulated()
-            # if loader.num_clients_pre_scheduling > 1:
-            #     pre_sched.calculate_concurrent_rpc_times_emulated()
         else:
             pre_sched.calculate_rtt_values()
 

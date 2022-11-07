@@ -16,10 +16,10 @@ from control.config.file_system_config import FileSystemConfig
 from control.config.input_config import InputConfig
 from control.config.logging_config import LoggingConfig
 from control.config.notify_config import NotifyConfig
-# from control.config.scheduler_config import SchedulerConfig
 from control.config.simulation_config import SimulationConfig
 from control.config.pre_scheduling_config import PreSchedConfig
 from control.config.cloudlab_config import CloudLabConfig
+from control.config.mapping_config import MappingConfig
 
 from control.domain.instance_type import InstanceType
 from control.domain.job import Job
@@ -115,10 +115,10 @@ class Loader:
         self.input_conf = InputConfig()
         self.logging_conf = LoggingConfig()
         self.notify_conf = NotifyConfig()
-        # self.scheduler_conf = SchedulerConfig()
         self.simulation_conf = SimulationConfig()
         self.pre_scheduling_conf = PreSchedConfig()
         self.cloudlab_conf = CloudLabConfig()
+        self.mapping_conf = MappingConfig()
 
         # local path where the daemon file is
         self.daemon_aws_file = None

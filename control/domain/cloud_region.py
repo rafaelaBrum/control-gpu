@@ -1,6 +1,7 @@
 class CloudRegion:
 
-    def __init__(self, region_id, provider, region, zones, client_image_id, server_image_id, key_file, cluster_urn):
+    def __init__(self, region_id, provider, region, zones, client_image_id, server_image_id, key_file, cluster_urn,
+                 global_cpu_limit, global_gpu_limit, regional_cpu_limit, regional_gpu_limit, cost_transfer):
         self.id = region_id
 
         self.provider = provider
@@ -11,6 +12,12 @@ class CloudRegion:
         self.key_file = key_file
 
         self.cluster_urn = cluster_urn
+
+        self.global_cpu_limit = global_cpu_limit
+        self.global_gpu_limit = global_gpu_limit
+        self.regional_cpu_limit = regional_cpu_limit
+        self.regional_gpu_limit = regional_gpu_limit
+        self.cost_transfer = cost_transfer
 
     def setup_zones(self, zones):
         self.zones = zones
@@ -26,7 +33,12 @@ class CloudRegion:
                 server_image_id=a_dict['locations'][key]['server_image_id'],
                 zones=a_dict['locations'][key]['zones'],
                 key_file=a_dict['locations'][key]['key_file'],
-                cluster_urn=a_dict['locations'][key]['cluster_urn']
+                cluster_urn=a_dict['locations'][key]['cluster_urn'],
+                global_cpu_limit=a_dict['locations'][key]['global_cpu_limit'],
+                global_gpu_limit=a_dict['locations'][key]['global_gpu_limit'],
+                regional_cpu_limit=a_dict['locations'][key]['regional_cpu_limit'],
+                regional_gpu_limit=a_dict['locations'][key]['regional_gpu_limit'],
+                cost_transfer=a_dict['locations'][key]['cost_transfer']
             )
             for key in a_dict['locations']
         ]

@@ -1,0 +1,207 @@
+{
+    "instances": {
+        "g4dn.2xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": {
+                    "us-east-1": 0.752,
+                    "us-west-2": 0.752
+                },
+                "preemptible": {
+                    "us-east-1": 0.2256,
+                    "us-west-2": 0.2256
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/nvme2n1",
+            "vcpu": 8,
+            "memory": 16,
+            "gpu": "yes",
+            "gpu_count": 1
+        },
+        "g3.4xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": {
+                    "us-east-1": 1.14,
+                    "us-west-2": 1.14
+                },
+                "preemptible": {
+                    "us-east-1": 0.342,
+                    "us-west-2": 0.342
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/xvdf",
+            "vcpu": 16,
+            "memory": 122,
+            "gpu": "yes",
+            "gpu_count": 1
+        },
+        "t2.xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": {
+                    "us-east-1": 0.1856,
+                    "us-west-2": 0.1856
+                },
+                "preemptible": {
+                    "us-east-1": 0.0595,
+                    "us-west-2": 0.0608
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/xvdf",
+            "vcpu": 3,
+            "memory": 0,
+            "gpu": "no",
+            "gpu_count": 0
+        },
+        "n1-standard-8_t4": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.7299979999999999,
+                    "us-central1": 0.7299979999999999
+                },
+                "preemptible": {
+                    "us-west1": 0.19,
+                    "us-central1": 0.19
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-t4",
+            "gpu_count": 1
+        },
+        "e2-standard-4": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.13402284,
+                    "us-central1": 0.13402284
+                },
+                "preemptible": {
+                    "us-west1": 0.040206852,
+                    "us-central1": 0.040206852
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 4,
+            "memory": 16,
+            "gpu": "",
+            "gpu_count": 0
+        },
+        "n1-standard-8_v100": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 2.859998,
+                    "us-central1": 2.859998
+                },
+                "preemptible": {
+                    "us-west1": 0.82,
+                    "us-central1": 0.82
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-v100",
+            "gpu_count": 1
+        },
+        "n1-standard-16_p4": {
+            "provider": "gcloud",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 1.359996,
+                    "us-central1": 1.359996
+                },
+                "preemptible": {
+                    "us-west1": 0.376,
+                    "us-central1": 0.376
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 16,
+            "memory": 60,
+            "gpu": "nvidia-tesla-p4",
+            "gpu_count": 1
+        }
+    }
+}

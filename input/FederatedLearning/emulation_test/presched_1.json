@@ -14,7 +14,7 @@
                     "TestMsg": "5.624362945556641",
                     "TrainMsg": "12.796394348144531"
                 }
-            }
+            },
             "CloudLab_Wisconsin_Emulated": {
                 "client-server": {
                     "TestMsg": "12.514953374862671",

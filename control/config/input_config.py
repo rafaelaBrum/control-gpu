@@ -24,9 +24,9 @@ class InputConfig(Config):
     def pre_file(self):
         return self.get_property(self._key, 'pre_file')
 
-    # @property
-    # def map_file(self):
-    #     return self.get_property(self._key, 'map_file')
+    @property
+    def map_file(self):
+        return self.get_property(self._key, 'map_file')
 
     @property
     def deadline_seconds(self):
