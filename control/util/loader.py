@@ -62,6 +62,7 @@ class Loader:
         self.env_file = args.env_file
         self.loc_file = args.loc_file
         self.pre_file = args.pre_file
+        self.input_file = args.input_file
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -86,6 +87,8 @@ class Loader:
         self.clients_vm_name = args.clients_vm_name
         # Client command
         self.client_command = args.command
+        # getting scheduler name
+        self.scheduler_name = args.scheduler_name
 
         self.emulated = args.emulated
 
@@ -119,9 +122,6 @@ class Loader:
         self.pre_scheduling_conf = PreSchedConfig()
         self.cloudlab_conf = CloudLabConfig()
         self.mapping_conf = MappingConfig()
-
-        # getting scheduler name
-        self.scheduler_name = self.mapping_conf.scheduler_name
 
         # local path where the daemon file is
         self.daemon_aws_file = None
@@ -214,13 +214,18 @@ class Loader:
         else:
             self.pre_file = os.path.join(self.input_path, self.pre_file)
 
+        if self.input_file is None:
+            self.input_file = os.path.join(self.input_path, self.input_conf.input_file)
+        else:
+            self.input_file = os.path.join(self.input_path, self.input_file)
+
         # if self.map_file is None:
         #     self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
         # else:
         #     self.map_file = os.path.join(self.input_path, self.map_file)
 
-        # if self.scheduler_name is None:
-        #     self.scheduler_name = SchedulerConfig().name
+        if self.scheduler_name is None:
+            self.scheduler_name = self.mapping_conf.scheduler_name
 
         self.daemon_aws_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_aws_file)
         self.daemon_gcp_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_gcp_file)

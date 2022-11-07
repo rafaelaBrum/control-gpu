@@ -105,6 +105,8 @@ def main():
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
     parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
     parser.add_argument('--pre_file', help="pre scheduling file name", type=str, default=None)
+    parser.add_argument('--input_file', help="input metrics file name", type=str, default=None)
+    parser.add_argument('--scheduler_name', help="Scheduler name", type=str, default=None)
     # parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",

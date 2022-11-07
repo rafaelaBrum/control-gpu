@@ -32,7 +32,8 @@
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "VGG16"
+                "net": "VGG16",
+                "baseline_exec": 233.01
             },
             "1" : {
                 "task_name": "Task VGG16 (client 1)",
@@ -47,7 +48,8 @@
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "VGG16"
+                "net": "VGG16",
+                "baseline_exec": 233.01
             },
             "2" : {
                 "task_name": "Task VGG16 (client 2)",
@@ -62,7 +64,8 @@
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "VGG16"
+                "net": "VGG16",
+                "baseline_exec": 233.01
             },
             "3" : {
                 "task_name": "Task VGG16 (client 3)",
@@ -77,7 +80,8 @@
                 "train_epochs": 5,
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "VGG16"
+                "net": "VGG16",
+                "baseline_exec": 233.01
             }
         }
     }
