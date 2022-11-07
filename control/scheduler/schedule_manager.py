@@ -26,7 +26,7 @@ from control.repository.postgres_objects import InstanceType as InstanceTypeRepo
 from control.repository.postgres_objects import Statistic as StatisticRepo
 
 from control.scheduler.fl_simple_scheduler import FLSimpleScheduler
-from control.scheduler.fl_simple_emulation_scheduler import FLSimpleEmulationScheduler
+from control.scheduler.mathematical_formulation_scheduler import MathematicalFormulationScheduler
 
 from control.util.loader import Loader
 
@@ -34,6 +34,9 @@ import threading
 
 
 class ScheduleManager:
+    FL_SIMPLE = "SIMPLE"
+    MAT_FORM = "FORMULATION"
+
     # hibernated_dispatcher: List[Dispatcher]
     terminated_dispatcher: List[Dispatcher]
     idle_dispatchers: List[Dispatcher]
@@ -46,11 +49,8 @@ class ScheduleManager:
         self.loader = loader
 
         # load the Scheduler that will be used
-        if self.loader.emulated:
-            self.scheduler = FLSimpleEmulationScheduler(instance_types=self.loader.env, locations=self.loader.loc)
-        else:
-            self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
-        # self.__load_scheduler()
+        self.__load_scheduler()
+        print(self.scheduler)
 
         # read expected_makespan on build_dispatcher()
         # self.expected_makespan_seconds = None
@@ -112,23 +112,41 @@ class ScheduleManager:
 
     # # PRE-EXECUTION FUNCTIONS
 
-    # def __load_scheduler(self):
-    #
-    #     if self.loader.scheduler_name.upper() == Scheduler.CC:
-    #         self.scheduler = CCScheduler(loader=self.loader)
-    #
-    #     elif self.loader.scheduler_name.upper() == Scheduler.IPDPS:
-    #         self.scheduler = IPDPS(loader=self.loader)
-    #
-    #     if self.scheduler is None:
-    #         logging.error("<Scheduler Manager {}_{}>: "
-    #                       "ERROR - Scheduler {} not found".format(self.loader.job.job_id,
-    #                                                               self.loader.execution_id,
-    #                                                               self.loader.scheduler_name))
-    #         Exception("<Scheduler Manager {}_{}>:  "
-    #                   "ERROR - Scheduler {} not found".format(self.loader.job.job_id,
-    #                                                           self.loader.execution_id,
-    #                                                           self.loader.scheduler_name))
+    def __load_scheduler(self):
+
+        if self.loader.scheduler_name.upper() == self.FL_SIMPLE:
+            if self.loader.server_provider is None:
+                logging.error("<Loader>: Server provider cannot be None")
+                return
+            if self.loader.server_region is None:
+                logging.error("<Loader>: Server region cannot be None")
+                return
+            if self.loader.server_vm_name is None:
+                logging.error("<Loader>: Server VM name cannot be None")
+                return
+            if self.loader.clients_provider is None:
+                logging.error("<Loader>: Clients provider cannot be None")
+                return
+            if self.loader.clients_region is None:
+                logging.error("<Loader>: Clients region cannot be None")
+                return
+            if self.loader.clients_vm_name is None:
+                logging.error("<Loader>: Clients VM name cannot be None")
+                return
+            self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
+
+        elif self.loader.scheduler_name.upper() == self.MAT_FORM:
+            self.scheduler = MathematicalFormulationScheduler(loader=self.loader)
+
+        if self.scheduler is None:
+            logging.error("<Scheduler Manager {}_{}>: "
+                          "ERROR - Scheduler {} not found".format(self.loader.job.job_id,
+                                                                  self.loader.execution_id,
+                                                                  self.loader.scheduler_name))
+            Exception("<Scheduler Manager {}_{}>:  "
+                      "ERROR - Scheduler {} not found".format(self.loader.job.job_id,
+                                                              self.loader.execution_id,
+                                                              self.loader.scheduler_name))
 
     def __build_dispatchers(self):
         # logging.info("Starts building dispatchers")

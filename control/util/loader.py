@@ -120,6 +120,9 @@ class Loader:
         self.cloudlab_conf = CloudLabConfig()
         self.mapping_conf = MappingConfig()
 
+        # getting scheduler name
+        self.scheduler_name = self.mapping_conf.scheduler_name
+
         # local path where the daemon file is
         self.daemon_aws_file = None
         self.daemon_gcp_file = None

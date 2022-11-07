@@ -71,14 +71,14 @@ class MathematicalFormulationScheduler:
     def __init__(self, loader: Loader):
         self.clients = []
         self.location_ds_clients = {}
-        for client in loader.job.client_tasks:
+        for client in loader.job.client_tasks.values():
             aux = client.client_id
             self.clients.append(aux)
-            self.location_ds_clients[aux] = client.bucket_location
+            self.location_ds_clients[aux] = client.bucket_region
         self.clients = gp.tuplelist(self.clients)
 
         # self.baseline_exec = baseline_exec
-        self.baseline_exec = -1
+        self.baseline_exec = {}
         # self.comm_baseline = comm_baseline
         self.comm_baseline = -1
         self.server_msg_train = loader.job.server_msg_train
@@ -99,23 +99,33 @@ class MathematicalFormulationScheduler:
 
         for region_id, region in loader.loc.items():
             aux = region.provider.upper()
+            aux_global_cpu_limit = region.global_cpu_limit
+            if aux_global_cpu_limit < 0:
+                aux_global_cpu_limit = inf
+            aux_global_gpu_limit = region.global_gpu_limit
+            if aux_global_gpu_limit < 0:
+                aux_global_gpu_limit = inf
             test_prov = self.providers.count(aux)
             if test_prov > 0:
-                if self.global_cpu_limits[aux] != region.global_cpu_limit:
+                if self.global_cpu_limits[aux] != aux_global_cpu_limit:
                     raise Exception(f"Global vCPUs limit different in region {region_id}")
-                if self.global_gpu_limits[aux] != region.global_gpu_limit:
+                if self.global_gpu_limits[aux] != aux_global_gpu_limit:
                     raise Exception(f"Global GPUs limit different in region {region_id}")
                 if self.cost_transfer[aux] != region.cost_transfer:
                     raise Exception(f"Cost transfer different in region {region_id}")
             else:
                 self.providers.append(aux)
-                self.global_cpu_limits[aux] = region.global_cpu_limit
-                self.global_gpu_limits[aux] = region.global_gpu_limit
+                self.global_cpu_limits[aux] = aux_global_cpu_limit
+                self.global_gpu_limits[aux] = aux_global_gpu_limit
                 self.cost_transfer[aux] = region.cost_transfer
             aux = (aux, region.region)
             self.prov_regions.append(aux)
             self.regional_gpu_limits[aux] = region.regional_gpu_limit
+            if self.regional_gpu_limits[aux] < 0:
+                self.regional_gpu_limits[aux] = inf
             self.regional_cpu_limits[aux] = region.regional_cpu_limit
+            if self.regional_cpu_limits[aux] < 0:
+                self.regional_cpu_limits[aux] = inf
         self.providers = gp.tuplelist(self.providers)
         self.prov_regions = gp.tuplelist(self.prov_regions)
 
@@ -328,29 +338,28 @@ class MathematicalFormulationScheduler:
                f"\tclients: {self.clients}\n" \
                f"\tDS locations: {self.location_ds_clients}\n" \
                f"\tserver_msg_train: {self.server_msg_train}\n" \
-               f"\tserver_msg_test: {self.server_msg_test}\n"
-        self.server_msg_test = loader.job.server_msg_test
-        self.client_msg_train = loader.job.client_msg_train
-        self.client_msg_test = loader.job.client_msg_test
-        self.T_round = float(loader.mapping_conf.deadline) / loader.job.server_task.n_rounds
-        self.B_round = float(loader.mapping_conf.budget) / loader.job.server_task.n_rounds
-        self.alpha = loader.mapping_conf.alpha
-
-        self.providers = []
-        self.global_cpu_limits = {}
-        self.global_gpu_limits = {}
-        self.cost_transfer = {}
-        self.prov_regions = []
-        self.regional_cpu_limits = {}
-        self.regional_gpu_limits = {}
-        self.prov_regions_vms = None
-        self.cpu_vms = None
-        self.gpu_vms = None
-        self.cost_vms = None
-        self.time_aggreg = None
-        self.client_prov_regions_vms = []
-        self.time_exec = {}
-        self.time_comm = {}
+               f"\tserver_msg_test: {self.server_msg_test}\n" \
+               f"\tclient_msg_train: {self.client_msg_train}\n" \
+               f"\tclient_msg_test: {self.client_msg_test}\n" \
+               f"\tT_round: {self.T_round}\n" \
+               f"\tB_round: {self.B_round}\n" \
+               f"\talpha: {self.alpha}\n" \
+               f"\n" \
+               f"\tproviders: {self.providers}\n" \
+               f"\tglobal_cpu_limits: {self.global_cpu_limits}\n" \
+               f"\tglobal_gpu_limits: {self.global_gpu_limits}\n" \
+               f"\tcost_transfer: {self.cost_transfer}\n" \
+               f"\tprov_regions: {self.prov_regions}\n" \
+               f"\tregional_cpu_limits: {self.regional_cpu_limits}\n" \
+               f"\tregional_gpu_limits: {self.regional_gpu_limits}\n" \
+               f"\tprov_regions_vms: {self.prov_regions_vms}\n" \
+               f"\tcpu_vms: {self.cpu_vms}\n" \
+               f"\tgpu_vms: {self.gpu_vms}\n" \
+               f"\tcost_vms: {self.cost_vms}\n" \
+               f"\ttime_aggreg: {self.time_aggreg}\n" \
+               f"\tclient_prov_regions_vms: {self.client_prov_regions_vms}\n" \
+               f"\ttime_exec: {self.time_exec}\n" \
+               f"\ttime_comm: {self.time_comm}"
 
     def __repr__(self):
         return self.__str__()

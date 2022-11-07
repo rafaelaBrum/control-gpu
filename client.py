@@ -15,28 +15,10 @@ import argparse
 
 def __call_control(loader: Loader):
     if loader.emulated:
-        if not loader.has_input_metrics()
-            __call_pre_scheduling(loader=loader)
+        # if not loader.has_input_metrics()
+        __call_pre_scheduling(loader=loader)
 
     else:
-        if loader.server_provider is None:
-            logging.error("<Loader>: Server provider cannot be None")
-            return
-        if loader.server_region is None:
-            logging.error("<Loader>: Server region cannot be None")
-            return
-        if loader.server_vm_name is None:
-            logging.error("<Loader>: Server VM name cannot be None")
-            return
-        if loader.clients_provider is None:
-            logging.error("<Loader>: Clients provider cannot be None")
-            return
-        if loader.clients_region is None:
-            logging.error("<Loader>: Clients region cannot be None")
-            return
-        if loader.clients_vm_name is None:
-            logging.error("<Loader>: Clients VM name cannot be None")
-            return
 
         try:
 
@@ -44,7 +26,7 @@ def __call_control(loader: Loader):
 
             manager = ScheduleManager(loader=loader)
 
-            manager.start_execution()
+            # manager.start_execution()
 
             status = "SUCCESS"
 

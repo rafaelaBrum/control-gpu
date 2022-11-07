@@ -15,3 +15,7 @@ class MappingConfig(Config):
     @property
     def alpha(self):
         return self.get_property(self._key, 'alpha')
+
+    @property
+    def scheduler_name(self):
+        return self.get_property(self._key, 'scheduler_name')

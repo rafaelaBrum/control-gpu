@@ -14,11 +14,12 @@
                 "us-east-1e",
                 "us-east-1f"
             ],
-            "global_cpu_limits": -1,
-            "global_gpu_limits": -1,
-            "regional_cpu_limits": 52,
-            "regional_gpu_limits": -1,
-            "cost_transfer": 0.120
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": 52,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.09,
+            "cluster_urn": ""
         },
         "AWS_us-west-2": {
             "provider": "aws",
@@ -32,11 +33,12 @@
                 "us-west-2c",
                 "us-west-2d"
             ],
-            "global_cpu_limits": -1,
-            "global_gpu_limits": -1,
-            "regional_cpu_limits": 36,
-            "regional_gpu_limits": -1,
-            "cost_transfer": 0.090
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": 36,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.09,
+            "cluster_urn": ""
         },
         "GCP_us-west1": {
             "provider": "gcp",
@@ -49,11 +51,12 @@
                 "us-west1-b",
                 "us-west1-c"
             ],
-            "global_cpu_limits": 40,
-            "global_gpu_limits": 4,
-            "regional_cpu_limits": 40,
-            "regional_gpu_limits": 4,
-            "cost_transfer": 0.120
+            "global_cpu_limit": 40,
+            "global_gpu_limit": 4,
+            "regional_cpu_limit": 40,
+            "regional_gpu_limit": 4,
+            "cost_transfer": 0.12,
+            "cluster_urn": ""
         },
         "GCP_us-central1": {
             "provider": "gcp",
@@ -67,11 +70,12 @@
                 "us-central1-c",
                 "us-central1-f"
             ],
-            "global_cpu_limits": 40,
-            "global_gpu_limits": 4,
-            "regional_cpu_limits": 40,
-            "regional_gpu_limits": 4,
-            "cost_transfer": 0.120
+            "global_cpu_limit": 40,
+            "global_gpu_limit": 4,
+            "regional_cpu_limit": 40,
+            "regional_gpu_limit": 4,
+            "cost_transfer": 0.12,
+            "cluster_urn": ""
         }
     }
 }

@@ -27,7 +27,11 @@
             "vcpu": 8,
             "memory": 16,
             "gpu": "yes",
-            "gpu_count": 1
+            "gpu_count": 1,
+            "locations": [
+                "AWS_us-east-1",
+                "AWS_us-west-2"
+            ]
         },
         "g3.4xlarge": {
             "provider": "ec2",
@@ -56,7 +60,11 @@
             "vcpu": 16,
             "memory": 122,
             "gpu": "yes",
-            "gpu_count": 1
+            "gpu_count": 1,
+            "locations": [
+                "AWS_us-east-1",
+                "AWS_us-west-2"
+            ]
         },
         "t2.xlarge": {
             "provider": "ec2",
@@ -85,7 +93,11 @@
             "vcpu": 3,
             "memory": 0,
             "gpu": "no",
-            "gpu_count": 0
+            "gpu_count": 0,
+            "locations": [
+                "AWS_us-east-1",
+                "AWS_us-west-2"
+            ]
         },
         "n1-standard-8_t4": {
             "provider": "gcloud",
@@ -114,7 +126,11 @@
             "vcpu": 8,
             "memory": 30,
             "gpu": "nvidia-tesla-t4",
-            "gpu_count": 1
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
         },
         "e2-standard-4": {
             "provider": "gcloud",
@@ -143,7 +159,11 @@
             "vcpu": 4,
             "memory": 16,
             "gpu": "",
-            "gpu_count": 0
+            "gpu_count": 0,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
         },
         "n1-standard-8_v100": {
             "provider": "gcloud",
@@ -172,7 +192,11 @@
             "vcpu": 8,
             "memory": 30,
             "gpu": "nvidia-tesla-v100",
-            "gpu_count": 1
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
         },
         "n1-standard-16_p4": {
             "provider": "gcloud",
@@ -201,7 +225,10 @@
             "vcpu": 16,
             "memory": 60,
             "gpu": "nvidia-tesla-p4",
-            "gpu_count": 1
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-central1"
+            ]
         }
     }
 }
