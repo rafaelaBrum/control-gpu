@@ -4,27 +4,14 @@ import gurobipy as gp
 from gurobipy import GRB
 from math import inf
 
+import logging
+import os
+import json
+
 
 class MathematicalFormulationScheduler:
 
     def pre_process_model_vgg(self):
-
-        self.prov_regions_vms, self.cpu_vms, self.gpu_vms, self.cost_vms, self.time_aggreg,\
-        slowdown_us_east_1, slowdown_us_west_2, slowdown_us_central1, slowdown_us_west1 = gp.multidict({
-            ('AWS', 'us-east-1', 'g4dn.2xlarge'): [8, 1, 0.752 / 3600, 100000.3, 1.00, 0, 1.00, 0],
-            ('AWS', 'us-east-1', 'g3.4xlarge'): [16, 1, 1.14 / 3600, 0.3, 5.09, 0, 1.52, 0],
-            ('AWS', 'us-east-1', 't2.xlarge'): [4, 0, 0.1856 / 3600, 0.3, 10, 10, 10, 10],
-            ('AWS', 'us-west-2', 'g4dn.2xlarge'): [8, 1, 0.752 / 3600, 0.3, 0.99, 0, 1.36, 0],
-            ('AWS', 'us-west-2', 'g3.4xlarge'): [16, 1, 1.14 / 3600, 0.3, 4.44, 0, 1.92, 0],
-            ('AWS', 'us-west-2', 't2.xlarge'): [4, 0, 0.1856 / 3600, 0.3, 10, 10, 10, 10],
-            ('GCP', 'us-central1', 'n1-standard-8_t4'): [8, 1, 0.730 / 3600, 0.2, 1.03, 0, 0.84, 0],
-            ('GCP', 'us-central1', 'n1-standard-16_p4'): [16, 1, 1.360 / 3600, 0.2, 1.28, 0, 0.89, 0],
-            ('GCP', 'us-central1', 'n1-standard-8_v100'): [8, 1, 2.860 / 3600, 0.2, 1.04, 0, 0.42, 0],
-            ('GCP', 'us-central1', 'e2-standard-4'): [4, 0, 0.134 / 3600, 0.2, 10, 10, 10, 10],
-            ('GCP', 'us-west1', 'n1-standard-8_t4'): [8, 1, 0.730 / 3600, 0.2, 1.07, 0, 0.99, 0],
-            ('GCP', 'us-west1', 'n1-standard-8_v100'): [8, 1, 2.860 / 3600, 0.2, 1.10, 0, 0.90, 0],
-            ('GCP', 'us-west1', 'e2-standard-4'): [4, 0, 0.134 / 3600, 0.2, 10, 10, 10, 10]
-        })
 
         for client in self.clients:
             for prov, region, vm in self.prov_regions_vms:
@@ -42,28 +29,9 @@ class MathematicalFormulationScheduler:
                 elif self.location_ds_clients[client] == 'us-west1':
                     self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_west1[prov, region, vm]
                 else:
-                    print(f"We do not support the location of client {client}: {self.location_ds_clients[client]}")
+                    logging.error(f"We do not support the location of client {client}: {self.location_ds_clients[client]}")
                     return
         self.client_prov_regions_vms = gp.tuplelist(self.client_prov_regions_vms)
-
-        pair_regions, comm_slowdown = gp.multidict({
-            ('AWS', 'us-east-1', 'AWS', 'us-east-1'): 1.0,
-            ('AWS', 'us-east-1', 'AWS', 'us-west-2'): 5.84,
-            ('AWS', 'us-east-1', 'GCP', 'us-central1'): 3.40,
-            ('AWS', 'us-east-1', 'GCP', 'us-west1'): 4.78,
-            ('AWS', 'us-west-2', 'AWS', 'us-west-2'): 0.97,
-            ('AWS', 'us-west-2', 'GCP', 'us-central1'): 4.65,
-            ('AWS', 'us-west-2', 'GCP', 'us-west1'): 3.04,
-            ('GCP', 'us-central1', 'GCP', 'us-central1'): 0.34,
-            ('GCP', 'us-central1', 'GCP', 'us-west1'): 1.09,
-            ('GCP', 'us-west1', 'GCP', 'us-west1'): 0.62,
-            ('AWS', 'us-west-2', 'AWS', 'us-east-1'): 5.84,
-            ('GCP', 'us-central1', 'AWS', 'us-east-1'): 3.40,
-            ('GCP', 'us-west1', 'AWS', 'us-east-1'): 4.78,
-            ('GCP', 'us-central1', 'AWS', 'us-west-2'): 4.65,
-            ('GCP', 'us-west1', 'AWS', 'us-west-2'): 3.04,
-            ('GCP', 'us-west1', 'GCP', 'us-central1'): 1.09
-        })
 
         for pair in pair_regions:
             self.time_comm[pair] = self.comm_baseline * comm_slowdown[pair]
@@ -129,14 +97,16 @@ class MathematicalFormulationScheduler:
         self.providers = gp.tuplelist(self.providers)
         self.prov_regions = gp.tuplelist(self.prov_regions)
 
-        self.prov_regions_vms = None
-        self.cpu_vms = None
-        self.gpu_vms = None
-        self.cost_vms = None
-        self.time_aggreg = None
+        self.prov_regions_vms = []
+        self.cpu_vms = {}
+        self.gpu_vms = {}
+        self.cost_vms = {}
+        self.time_aggreg = {}
         self.client_prov_regions_vms = []
         self.time_exec = {}
         self.time_comm = {}
+
+        self.__read_json(loader=loader)
 
     def solve(self):
         try:
@@ -363,3 +333,108 @@ class MathematicalFormulationScheduler:
 
     def __repr__(self):
         return self.__str__()
+
+    # def write_json(self):
+    #     # build a map
+    #     dict_json = {"job_id": self.loader.job.job_id,
+    #                  "job_name": self.loader.job.job_name,
+    #                  "number_datacenters": len(self.rtt_values),
+    #                  "rtt": {},
+    #                  "exec_times": self.exec_times,
+    #                  "rpc": {},
+    #                  "rpc_concurrent": {}
+    #                  }
+    #
+    #     # print("dict_json")
+    #     # print(dict_json)
+    #
+    #     for datacenter, rtt_value in self.rtt_values.items():
+    #         # print(datacenter)
+    #         # print("rtt_value", rtt_value)
+    #         dict_json['rtt'][datacenter] = rtt_value
+    #
+    #     for datacenter, rpc_value in self.rpc_times.items():
+    #         # print(datacenter)
+    #         # print("rpc_value", rpc_value)
+    #         dict_json['rpc'][datacenter] = rpc_value
+    #
+    #     for num_clients, rpc_value in self.rpc_times_concurrent.items():
+    #         # print(datacenter)
+    #         # print("rpc_value", rpc_value)
+    #         dict_json['rpc_concurrent'][num_clients] = rpc_value
+    #
+    #     file_output = self.loader.pre_file
+    #
+    #     # print(dict_json)
+    #     logging.info(f"<PreSchedulerManager> Writing {file_output} file")
+    #
+    #     # print("dict_json", dict_json)
+    #
+    #     with open(file_output, "w") as fp:
+    #         json.dump(dict_json, fp, sort_keys=True, indent=4, default=str)
+
+    def __read_json(self, loader):
+
+        try:
+            with open(loader.input_file) as f:
+                data = f.read()
+            json_data = json.loads(data)
+            aux_data = json_data['cpu_vms']
+            for provider in aux_data:
+                # print(provider)
+                for region in aux_data[provider]:
+                    # print(region)
+                    for vm in aux_data[provider][region]:
+                        # print(vm)
+                        aux_key = (provider, region, vm)
+                        self.prov_regions_vms.append(aux_key)
+                        self.cpu_vms[aux_key] = aux_data[provider][region][vm]
+
+            aux_data = json_data['gpu_vms']
+            for provider in aux_data:
+                # print(provider)
+                for region in aux_data[provider]:
+                    # print(region)
+                    for vm in aux_data[provider][region]:
+                        # print(vm)
+                        aux_key = (provider, region, vm)
+                        test_prov = self.prov_regions_vms.count(aux_key)
+                        if test_prov > 0:
+                            self.gpu_vms[aux_key] = aux_data[provider][region][vm]
+                        else:
+                            raise Exception(f"Only GPU values to ({provider}, {region}. {vm})")
+
+            aux_data = json_data['cost_vms']
+            for provider in aux_data:
+                # print(provider)
+                for region in aux_data[provider]:
+                    # print(region)
+                    for vm in aux_data[provider][region]:
+                        # print(vm)
+                        aux_key = (provider, region, vm)
+                        test_prov = self.prov_regions_vms.count(aux_key)
+                        if test_prov > 0:
+                            self.cost_vms[aux_key] = aux_data[provider][region][vm]
+                        else:
+                            raise Exception(f"Only cost to ({provider}, {region}. {vm})")
+
+            aux_data = json_data['time_aggreg']
+            for provider in aux_data:
+                # print(provider)
+                for region in aux_data[provider]:
+                    # print(region)
+                    for vm in aux_data[provider][region]:
+                        # print(vm)
+                        aux_key = (provider, region, vm)
+                        test_prov = self.prov_regions_vms.count(aux_key)
+                        if test_prov > 0:
+                            self.time_aggreg[aux_key] = aux_data[provider][region][vm]
+                        else:
+                            raise Exception(f"Only time to aggregate to ({provider}, {region}. {vm})")
+
+            #TODO: read slowdowns (slowdown and comm_slowdown fields)
+            self.prov_regions_vms = gp.tuplelist(self.prov_regions_vms)
+
+        except Exception as e:
+            logging.error(e)
+

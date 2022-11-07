@@ -1,0 +1,212 @@
+{
+    "cpu_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g4dn.2xlarge": 8,
+                "g3.4xlarge": 16,
+                "t2.xlarge": 4
+            },
+            "us-west-2": {
+                "g4dn.2xlarge": 8,
+                "g3.4xlarge": 16,
+                "t2.xlarge": 4
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "n1-standard-8_t4": 8,
+                "n1-standard-16_p4": 16,
+                "n1-standard-8_v100": 8,
+                "e2-standard-4": 4
+            },
+            "us-west1": {
+                "n1-standard-8_t4": 8,
+                "n1-standard-8_v100": 8,
+                "e2-standard-4": 4
+            }
+        }
+    },
+    "gpu_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g4dn.2xlarge": 1,
+                "g3.4xlarge": 1,
+                "t2.xlarge": 0
+            },
+            "us-west-2": {
+                "g4dn.2xlarge": 1,
+                "g3.4xlarge": 1,
+                "t2.xlarge": 0
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "n1-standard-8_t4": 1,
+                "n1-standard-16_p4": 1,
+                "n1-standard-8_v100": 1,
+                "e2-standard-4": 0
+            },
+            "us-west1": {
+                "n1-standard-8_t4": 1,
+                "n1-standard-8_v100": 1,
+                "e2-standard-4": 0
+            }
+        }
+    },
+    "cost_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g4dn.2xlarge": 0.00020889,
+                "g3.4xlarge": 0.00031667,
+                "t2.xlarge": 0.000051556
+            },
+            "us-west-2": {
+                "g4dn.2xlarge": 0.00020889,
+                "g3.4xlarge": 0.00031667,
+                "t2.xlarge": 0.000051556
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "n1-standard-8_t4": 0.000202778,
+                "n1-standard-16_p4": 0.0003778,
+                "n1-standard-8_v100": 0.00079444,
+                "e2-standard-4": 0.000037222
+            },
+            "us-west1": {
+                "n1-standard-8_t4": 0.000202778,
+                "n1-standard-8_v100": 0.00079444,
+                "e2-standard-4": 0.000037222
+            }
+        }
+    },
+    "time_aggreg": {
+        "AWS": {
+            "us-east-1": {
+                "g4dn.2xlarge": 100000.3,
+                "g3.4xlarge": 0.3,
+                "t2.xlarge": 0.3
+            },
+            "us-west-2": {
+                "g4dn.2xlarge": 0.3,
+                "g3.4xlarge": 0.3,
+                "t2.xlarge": 0.3
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "n1-standard-8_t4": 0.2,
+                "n1-standard-16_p4": 0.2,
+                "n1-standard-8_v100": 0.2,
+                "e2-standard-4": 0.2
+            },
+            "us-west1": {
+                "n1-standard-8_t4": 0.2,
+                "n1-standard-8_v100": 0.2,
+                "e2-standard-4": 0.2
+            }
+        }
+    },
+    "slowdown": {
+        "AWS_us-east-1": {
+            "AWS": {
+                "us-east-1": {
+                    "g4dn.2xlarge": 1.00,
+                    "g3.4xlarge": 5.09,
+                    "t2.xlarge": 10
+                },
+                "us-west-2": {
+                    "g4dn.2xlarge": 0.99,
+                    "g3.4xlarge": 4.44,
+                    "t2.xlarge": 10
+                }
+            },
+            "GCP": {
+                "us-central1": {
+                    "n1-standard-8_t4": 1.03,
+                    "n1-standard-16_p4": 1.28,
+                    "n1-standard-8_v100": 1.04,
+                    "e2-standard-4": 10
+                },
+                "us-west1": {
+                    "n1-standard-8_t4": 1.07,
+                    "n1-standard-8_v100": 1.10,
+                    "e2-standard-4": 10
+                }
+            }
+        },
+        "GCP_us-central1": {
+            "AWS": {
+                "us-east-1": {
+                    "g4dn.2xlarge": 1.00,
+                    "g3.4xlarge": 1.52,
+                    "t2.xlarge": 10
+                },
+                "us-west-2": {
+                    "g4dn.2xlarge": 1.36,
+                    "g3.4xlarge": 1.92,
+                    "t2.xlarge": 10
+                }
+            },
+            "GCP": {
+                "us-central1": {
+                    "n1-standard-8_t4": 0.84,
+                    "n1-standard-16_p4": 0.89,
+                    "n1-standard-8_v100": 0.42,
+                    "e2-standard-4": 10
+                },
+                "us-west1": {
+                    "n1-standard-8_t4": 0.99,
+                    "n1-standard-8_v100": 0.90,
+                    "e2-standard-4": 10
+                }
+            }
+        }
+    },
+    "comm_slowdown": {
+        "AWS": {
+            "us-east-1": {
+                "AWS": {
+                    "us-east-1": 1.0,
+                    "us-west-2": 5.84
+                },
+                "GCP": {
+                    "us-central1": 3.40,
+                    "us-west1": 4.78
+                }
+            },
+            "us-west-2": {
+                "AWS": {
+                    "us-east-1": 5.84,
+                    "us-west-2": 0.97
+                },
+                "GCP": {
+                    "us-central1": 4.65,
+                    "us-west1": 3.04
+                }
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "AWS": {
+                    "us-east-1": 3.40,
+                    "us-west-2": 4.65
+                },
+                "GCP": {
+                    "us-central1": 0.34,
+                    "us-west1": 1.09
+                }
+            },
+            "us-west1": {
+                "AWS": {
+                    "us-east-1": 4.78,
+                    "us-west-2": 3.04
+                },
+                "GCP": {
+                    "us-central1": 1.09,
+                    "us-west1": 0.62
+                }
+            }
+        }
+    }
+}
