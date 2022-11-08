@@ -29,7 +29,8 @@ class MathematicalFormulationScheduler:
                 elif self.location_ds_clients[client] == 'us-west1':
                     self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_west1[prov, region, vm]
                 else:
-                    logging.error(f"We do not support the location of client {client}: {self.location_ds_clients[client]}")
+                    logging.error(f"We do not support the location of client {client}: "
+                                  f"{self.location_ds_clients[client]}")
                     return
         self.client_prov_regions_vms = gp.tuplelist(self.client_prov_regions_vms)
 
@@ -102,6 +103,9 @@ class MathematicalFormulationScheduler:
         self.gpu_vms = {}
         self.cost_vms = {}
         self.time_aggreg = {}
+        self.slowdown = {}
+        self.pair_regions = []
+        self.comm_slowdown = {}
         self.client_prov_regions_vms = []
         self.time_exec = {}
         self.time_comm = {}
@@ -179,8 +183,8 @@ class MathematicalFormulationScheduler:
                         max_cost_transfer = comp
 
             max_cost = max_vm_cost * max_total_exec * (len(self.clients) + 1) + max_cost_transfer * \
-                       (self.server_msg_train + self.server_msg_test + self.client_msg_train +
-                        self.client_msg_test) * len(self.clients)
+                (self.server_msg_train + self.server_msg_test + self.client_msg_train +
+                 self.client_msg_test) * len(self.clients)
 
             # print("max_cost", max_cost)
             # print("max_total_exec", max_total_exec)
@@ -327,6 +331,9 @@ class MathematicalFormulationScheduler:
                f"\tgpu_vms: {self.gpu_vms}\n" \
                f"\tcost_vms: {self.cost_vms}\n" \
                f"\ttime_aggreg: {self.time_aggreg}\n" \
+               f"\tslowdown: {self.slowdown}\n" \
+               f"\tpair_regions: {self.pair_regions}\n" \
+               f"\tcomm_slowdown: {self.comm_slowdown}\n" \
                f"\tclient_prov_regions_vms: {self.client_prov_regions_vms}\n" \
                f"\ttime_exec: {self.time_exec}\n" \
                f"\ttime_comm: {self.time_comm}"
@@ -432,9 +439,46 @@ class MathematicalFormulationScheduler:
                         else:
                             raise Exception(f"Only time to aggregate to ({provider}, {region}. {vm})")
 
-            #TODO: read slowdowns (slowdown and comm_slowdown fields)
+            aux_data = json_data['slowdown']
+            for ds_location in aux_data:
+                print(ds_location)
+                self.slowdown[ds_location] = {}
+                for provider in aux_data[ds_location]:
+                    print(provider)
+                    for region in aux_data[ds_location][provider]:
+                        print(region)
+                        for vm in aux_data[ds_location][provider][region]:
+                            print(vm)
+                            aux_key = (provider, region, vm)
+                            test_prov = self.prov_regions_vms.count(aux_key)
+                            if test_prov > 0:
+                                self.slowdown[ds_location][aux_key] = aux_data[ds_location][provider][region][vm]
+                            else:
+                                raise Exception(f"Only slowdown time in {ds_location} to ({provider}, {region}. {vm})")
+
             self.prov_regions_vms = gp.tuplelist(self.prov_regions_vms)
+
+            # TODO: read comm_slowdown field
+
+            # aux_data = json_data['comm_slowdown']
+            # pair_regions, comm_slowdown = gp.multidict({
+            #     ('AWS', 'us-east-1', 'AWS', 'us-east-1'): 1.0,
+            #     ('AWS', 'us-east-1', 'AWS', 'us-west-2'): 5.84,
+            #     ('AWS', 'us-east-1', 'GCP', 'us-central1'): 3.40,
+            #     ('AWS', 'us-east-1', 'GCP', 'us-west1'): 4.78,
+            #     ('AWS', 'us-west-2', 'AWS', 'us-west-2'): 0.97,
+            #     ('AWS', 'us-west-2', 'GCP', 'us-central1'): 4.65,
+            #     ('AWS', 'us-west-2', 'GCP', 'us-west1'): 3.04,
+            #     ('GCP', 'us-central1', 'GCP', 'us-central1'): 0.34,
+            #     ('GCP', 'us-central1', 'GCP', 'us-west1'): 1.09,
+            #     ('GCP', 'us-west1', 'GCP', 'us-west1'): 0.62,
+            #     ('AWS', 'us-west-2', 'AWS', 'us-east-1'): 5.84,
+            #     ('GCP', 'us-central1', 'AWS', 'us-east-1'): 3.40,
+            #     ('GCP', 'us-west1', 'AWS', 'us-east-1'): 4.78,
+            #     ('GCP', 'us-central1', 'AWS', 'us-west-2'): 4.65,
+            #     ('GCP', 'us-west1', 'AWS', 'us-west-2'): 3.04,
+            #     ('GCP', 'us-west1', 'GCP', 'us-central1'): 1.09
+            # })
 
         except Exception as e:
             logging.error(e)
-
