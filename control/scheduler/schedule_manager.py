@@ -50,7 +50,7 @@ class ScheduleManager:
 
         # load the Scheduler that will be used
         self.__load_scheduler()
-        print(self.scheduler)
+        # print(self.scheduler)
 
         # read expected_makespan on build_dispatcher()
         # self.expected_makespan_seconds = None

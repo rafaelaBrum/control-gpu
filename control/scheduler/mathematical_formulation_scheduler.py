@@ -11,7 +11,7 @@ import json
 
 class MathematicalFormulationScheduler:
 
-    def pre_process_model_vgg(self):
+    def pre_process(self):
 
         for client in self.clients:
             for prov, region, vm in self.prov_regions_vms:
@@ -20,22 +20,18 @@ class MathematicalFormulationScheduler:
                 aux = (client, prov, region, vm)
                 # print(aux)
                 self.client_prov_regions_vms.append(aux)
-                if self.location_ds_clients[client] == 'us-east-1':
-                    self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_east_1[prov, region, vm]
-                elif self.location_ds_clients[client] == 'us-west-2':
-                    self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_west_2[prov, region, vm]
-                elif self.location_ds_clients[client] == 'us-central1':
-                    self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_central1[prov, region, vm]
-                elif self.location_ds_clients[client] == 'us-west1':
-                    self.time_exec[aux] = self.baseline_exec[client] * slowdown_us_west1[prov, region, vm]
-                else:
+                aux_loc = self.location_ds_clients[client]
+                try:
+                    self.time_exec[aux] = self.baseline_exec[client] * self.slowdown[aux_loc][prov, region, vm]
+                except Exception as e:
+                    logging.error(e)
                     logging.error(f"We do not support the location of client {client}: "
-                                  f"{self.location_ds_clients[client]}")
+                                  f"{aux}")
                     return
         self.client_prov_regions_vms = gp.tuplelist(self.client_prov_regions_vms)
 
-        for pair in pair_regions:
-            self.time_comm[pair] = self.comm_baseline * comm_slowdown[pair]
+        for pair in self.pair_regions:
+            self.time_comm[pair] = self.comm_baseline * self.comm_slowdown[pair]
 
     def __init__(self, loader: Loader):
         self.clients = []
@@ -43,7 +39,7 @@ class MathematicalFormulationScheduler:
         for client in loader.job.client_tasks.values():
             aux = client.client_id
             self.clients.append(aux)
-            self.location_ds_clients[aux] = client.bucket_region
+            self.location_ds_clients[aux] = client.bucket_provider.upper() + "_" + client.bucket_region
         self.clients = gp.tuplelist(self.clients)
 
         # self.baseline_exec = baseline_exec
@@ -111,6 +107,8 @@ class MathematicalFormulationScheduler:
         self.time_comm = {}
 
         self.__read_json(loader=loader)
+        self.pre_process()
+        self.solve()
 
     def solve(self):
         try:
@@ -334,6 +332,8 @@ class MathematicalFormulationScheduler:
                f"\tslowdown: {self.slowdown}\n" \
                f"\tpair_regions: {self.pair_regions}\n" \
                f"\tcomm_slowdown: {self.comm_slowdown}\n" \
+               f"\tbaseline_exec: {self.baseline_exec}\n" \
+               f"\tcomm_baseline: {self.comm_baseline}\n" \
                f"\tclient_prov_regions_vms: {self.client_prov_regions_vms}\n" \
                f"\ttime_exec: {self.time_exec}\n" \
                f"\ttime_comm: {self.time_comm}"
@@ -441,14 +441,14 @@ class MathematicalFormulationScheduler:
 
             aux_data = json_data['slowdown']
             for ds_location in aux_data:
-                print(ds_location)
+                # print(ds_location)
                 self.slowdown[ds_location] = {}
                 for provider in aux_data[ds_location]:
-                    print(provider)
+                    # print(provider)
                     for region in aux_data[ds_location][provider]:
-                        print(region)
+                        # print(region)
                         for vm in aux_data[ds_location][provider][region]:
-                            print(vm)
+                            # print(vm)
                             aux_key = (provider, region, vm)
                             test_prov = self.prov_regions_vms.count(aux_key)
                             if test_prov > 0:
@@ -459,26 +459,36 @@ class MathematicalFormulationScheduler:
             self.prov_regions_vms = gp.tuplelist(self.prov_regions_vms)
 
             # TODO: read comm_slowdown field
+            aux_data = json_data['comm_slowdown']
+            for provider_1 in aux_data:
+                for region_1 in aux_data[provider_1]:
+                    for provider_2 in aux_data[provider_1][region_1]:
+                        for region_2 in aux_data[provider_1][region_1][provider_2]:
+                            aux = (provider_1, region_1, provider_2, region_2)
+                            self.pair_regions.append(aux)
+                            self.comm_slowdown[aux] = aux_data[provider_1][region_1][provider_2][region_2]
 
-            # aux_data = json_data['comm_slowdown']
-            # pair_regions, comm_slowdown = gp.multidict({
-            #     ('AWS', 'us-east-1', 'AWS', 'us-east-1'): 1.0,
-            #     ('AWS', 'us-east-1', 'AWS', 'us-west-2'): 5.84,
-            #     ('AWS', 'us-east-1', 'GCP', 'us-central1'): 3.40,
-            #     ('AWS', 'us-east-1', 'GCP', 'us-west1'): 4.78,
-            #     ('AWS', 'us-west-2', 'AWS', 'us-west-2'): 0.97,
-            #     ('AWS', 'us-west-2', 'GCP', 'us-central1'): 4.65,
-            #     ('AWS', 'us-west-2', 'GCP', 'us-west1'): 3.04,
-            #     ('GCP', 'us-central1', 'GCP', 'us-central1'): 0.34,
-            #     ('GCP', 'us-central1', 'GCP', 'us-west1'): 1.09,
-            #     ('GCP', 'us-west1', 'GCP', 'us-west1'): 0.62,
-            #     ('AWS', 'us-west-2', 'AWS', 'us-east-1'): 5.84,
-            #     ('GCP', 'us-central1', 'AWS', 'us-east-1'): 3.40,
-            #     ('GCP', 'us-west1', 'AWS', 'us-east-1'): 4.78,
-            #     ('GCP', 'us-central1', 'AWS', 'us-west-2'): 4.65,
-            #     ('GCP', 'us-west1', 'AWS', 'us-west-2'): 3.04,
-            #     ('GCP', 'us-west1', 'GCP', 'us-central1'): 1.09
-            # })
+            self.pair_regions = gp.tuplelist(self.pair_regions)
+
+            if 'baseline_exec' in json_data:
+                aux_data = json_data['baseline_exec']
+                # TODO: finish later when baseline_exec values are in input.json
+            else:
+                with open(loader.job_file) as f:
+                    data = f.read()
+                json_data = json.loads(data)
+                aux_data = json_data['tasks']['clients']
+                for i in self.clients:
+                    self.baseline_exec[i] = aux_data[str(i)]['baseline_exec']
+
+            if 'comm_baseline' in json_data:
+                self.comm_baseline = json_data['comm_baseline']
+            else:
+                with open(loader.job_file) as f:
+                    data = f.read()
+                json_data = json.loads(data)
+                aux_data = json_data['tasks']['server']
+                self.comm_baseline = aux_data['comm_baseline']
 
         except Exception as e:
             logging.error(e)
