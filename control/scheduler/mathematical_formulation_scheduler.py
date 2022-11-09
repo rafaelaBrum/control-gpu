@@ -5,7 +5,7 @@ from gurobipy import GRB
 from math import inf
 
 import logging
-import os
+# import os
 import json
 
 
@@ -46,13 +46,13 @@ class MathematicalFormulationScheduler:
         self.baseline_exec = {}
         # self.comm_baseline = comm_baseline
         self.comm_baseline = -1
-        self.server_msg_train = loader.job.server_msg_train
-        self.server_msg_test = loader.job.server_msg_test
-        self.client_msg_train = loader.job.client_msg_train
-        self.client_msg_test = loader.job.client_msg_test
+        self.server_msg_train = float(loader.job.server_msg_train)
+        self.server_msg_test = float(loader.job.server_msg_test)
+        self.client_msg_train = float(loader.job.client_msg_train)
+        self.client_msg_test = float(loader.job.client_msg_test)
         self.T_round = float(loader.mapping_conf.deadline) / loader.job.server_task.n_rounds
         self.B_round = float(loader.mapping_conf.budget) / loader.job.server_task.n_rounds
-        self.alpha = loader.mapping_conf.alpha
+        self.alpha = float(loader.mapping_conf.alpha)
 
         self.providers = []
         self.global_cpu_limits = {}
@@ -106,9 +106,14 @@ class MathematicalFormulationScheduler:
         self.time_exec = {}
         self.time_comm = {}
 
-        self.__read_json(loader=loader)
+        self.input_data = {}
+
+        self.__read_json(input_file=loader.input_file, job_file=loader.job_file)
         self.pre_process()
+        # print(self)
         self.solve()
+        # print(self.input_data)
+        self.__write_map_json(file_output=loader.map_file)
 
     def solve(self):
         try:
@@ -283,13 +288,29 @@ class MathematicalFormulationScheduler:
             # Print solution
             if model.Status == GRB.OPTIMAL:
                 obj_value = objective_function.getValue()
-                print("Objective Function Value = {0}".format(obj_value))
+                self.input_data['obj_value'] = obj_value
+                self.input_data['clients'] = {}
                 var_tm = 0
                 for v in model.getVars():
                     if v.x == 1:
-                        print("{0} = {1}".format(v.varName, v.x))
+                        # print("{0} = {1}".format(v.varName, v.x))
+                        aux_var_name = v.varName[2:]
+                        aux_var_name = aux_var_name[:-1]
+                        print(aux_var_name)
+                        indexes = aux_var_name.split(',')
+                        print(indexes)
+                        if v.varName[0] == 'y':
+                            # server
+                            self.input_data['server'] = {'provider': indexes[0],
+                                                         'region': indexes[1],
+                                                         'instance_type': indexes[2]}
+                        else:
+                            # client
+                            self.input_data['clients'][indexes[0]] = {'provider': indexes[1],
+                                                                      'region': indexes[2],
+                                                                      'instance_type': indexes[3]}
                     if v.varName == "t_m":
-                        print("{0} = {1}".format(v.varName, v.x))
+                        self.input_data['makespan'] = v.x
                         var_tm = v.x
 
                 if self.alpha > 0:
@@ -298,7 +319,7 @@ class MathematicalFormulationScheduler:
                     # print("max_cost", max_cost)
                     # print("max_total_exec", max_total_exec)
 
-                    print("Computed cost = ", cost)
+                    self.input_data['cost'] = cost
         except gp.GurobiError as e:
             print('Error code ' + str(e.errno) + ": " + str(e))
 
@@ -341,49 +362,17 @@ class MathematicalFormulationScheduler:
     def __repr__(self):
         return self.__str__()
 
-    # def write_json(self):
-    #     # build a map
-    #     dict_json = {"job_id": self.loader.job.job_id,
-    #                  "job_name": self.loader.job.job_name,
-    #                  "number_datacenters": len(self.rtt_values),
-    #                  "rtt": {},
-    #                  "exec_times": self.exec_times,
-    #                  "rpc": {},
-    #                  "rpc_concurrent": {}
-    #                  }
-    #
-    #     # print("dict_json")
-    #     # print(dict_json)
-    #
-    #     for datacenter, rtt_value in self.rtt_values.items():
-    #         # print(datacenter)
-    #         # print("rtt_value", rtt_value)
-    #         dict_json['rtt'][datacenter] = rtt_value
-    #
-    #     for datacenter, rpc_value in self.rpc_times.items():
-    #         # print(datacenter)
-    #         # print("rpc_value", rpc_value)
-    #         dict_json['rpc'][datacenter] = rpc_value
-    #
-    #     for num_clients, rpc_value in self.rpc_times_concurrent.items():
-    #         # print(datacenter)
-    #         # print("rpc_value", rpc_value)
-    #         dict_json['rpc_concurrent'][num_clients] = rpc_value
-    #
-    #     file_output = self.loader.pre_file
-    #
-    #     # print(dict_json)
-    #     logging.info(f"<PreSchedulerManager> Writing {file_output} file")
-    #
-    #     # print("dict_json", dict_json)
-    #
-    #     with open(file_output, "w") as fp:
-    #         json.dump(dict_json, fp, sort_keys=True, indent=4, default=str)
+    def __write_map_json(self, file_output):
+        logging.info(f"<MathematicalFormulation> Writing {file_output} file")
 
-    def __read_json(self, loader):
+        with open(file_output, "w") as fp:
+            json.dump(self.input_data, fp, sort_keys=True, indent=4, default=str)
+
+    def __read_json(self, input_file, job_file):
+        logging.info(f"<MathematicalFormulation> Reading {input_file} file")
 
         try:
-            with open(loader.input_file) as f:
+            with open(input_file) as f:
                 data = f.read()
             json_data = json.loads(data)
             aux_data = json_data['cpu_vms']
@@ -474,7 +463,7 @@ class MathematicalFormulationScheduler:
                 aux_data = json_data['baseline_exec']
                 # TODO: finish later when baseline_exec values are in input.json
             else:
-                with open(loader.job_file) as f:
+                with open(job_file) as f:
                     data = f.read()
                 json_data = json.loads(data)
                 aux_data = json_data['tasks']['clients']
@@ -484,7 +473,7 @@ class MathematicalFormulationScheduler:
             if 'comm_baseline' in json_data:
                 self.comm_baseline = json_data['comm_baseline']
             else:
-                with open(loader.job_file) as f:
+                with open(job_file) as f:
                     data = f.read()
                 json_data = json.loads(data)
                 aux_data = json_data['tasks']['server']

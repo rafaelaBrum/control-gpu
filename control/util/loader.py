@@ -63,6 +63,7 @@ class Loader:
         self.loc_file = args.loc_file
         self.pre_file = args.pre_file
         self.input_file = args.input_file
+        self.map_file = args.map_file
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -219,10 +220,10 @@ class Loader:
         else:
             self.input_file = os.path.join(self.input_path, self.input_file)
 
-        # if self.map_file is None:
-        #     self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
-        # else:
-        #     self.map_file = os.path.join(self.input_path, self.map_file)
+        if self.map_file is None:
+            self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
+        else:
+            self.map_file = os.path.join(self.input_path, self.map_file)
 
         if self.scheduler_name is None:
             self.scheduler_name = self.mapping_conf.scheduler_name

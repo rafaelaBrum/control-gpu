@@ -1,0 +1,32 @@
+{
+    "clients": {
+        "0": {
+            "instance_type": "n1-standard-8_v100",
+            "provider": "GCP",
+            "region": "us-central1"
+        },
+        "1": {
+            "instance_type": "n1-standard-8_v100",
+            "provider": "GCP",
+            "region": "us-central1"
+        },
+        "2": {
+            "instance_type": "n1-standard-8_v100",
+            "provider": "GCP",
+            "region": "us-central1"
+        },
+        "3": {
+            "instance_type": "n1-standard-8_v100",
+            "provider": "GCP",
+            "region": "us-central1"
+        }
+    },
+    "cost": 1.1184713363732002,
+    "makespan": 107.33260000000001,
+    "obj_value": 0.0019284571019324173,
+    "server": {
+        "instance_type": "e2-standard-4",
+        "provider": "GCP",
+        "region": "us-central1"
+    }
+}

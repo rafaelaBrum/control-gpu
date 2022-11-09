@@ -113,5 +113,6 @@ tqdm >= 4.56.2
 scikit-image >= 0.17.2
 
 
-gurobipy
+# gurobipy==9.1.2
+gurobipy==9.5.0
 xmltodict~=0.13.0
