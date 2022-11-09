@@ -15,7 +15,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.js
 for num_seed in 1 2 3 4 5 6 7 8 9 10
 do
   echo " ----------------------------
-  Strategy $strategy
+  Seed $num_seed
   ---------------------------- "
   SERVER_PROVIDER="gcp"
   SERVER_REGION="us-central1"

@@ -13,7 +13,8 @@ export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 # for strategy in FedAvg Fast_Slow FTFedAvg FedAdagrad FedAdam FedAvgM FedFSv0 FedFSv1 FedOpt FedYogi QFedAvg
-for strategy in FedFSv1 FedOpt FedYogi QFedAvg
+# for strategy in FedAvg Fast_Slow FTFedAvg FedAdagrad FedAdam FedAvgM FedFSv0 FedFSv1 FedOpt FedYogi
+for strategy in FedAvg Fast_Slow FTFedAvg FedAvgM FedFSv0 FedFSv1
 do
   echo " ----------------------------
   Strategy $strategy
