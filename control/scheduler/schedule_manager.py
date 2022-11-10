@@ -1,4 +1,4 @@
-# import json
+import json
 
 import time
 
@@ -27,15 +27,16 @@ from control.repository.postgres_objects import Statistic as StatisticRepo
 
 from control.scheduler.fl_simple_scheduler import FLSimpleScheduler
 from control.scheduler.mathematical_formulation_scheduler import MathematicalFormulationScheduler
+from control.scheduler.scheduler import Scheduler
 
 from control.util.loader import Loader
 
 import threading
 
+import os
+
 
 class ScheduleManager:
-    FL_SIMPLE = "SIMPLE"
-    MAT_FORM = "FORMULATION"
 
     # hibernated_dispatcher: List[Dispatcher]
     terminated_dispatcher: List[Dispatcher]
@@ -101,7 +102,7 @@ class ScheduleManager:
                 Build the initial dispatchers
                 The class Dispatcher is responsible to manager the execution steps
                 '''
-        # self.__build_dispatchers()
+        self.__build_dispatchers()
         #
         # # Prepare the control database and the folders structure in S3
         # try:
@@ -114,7 +115,7 @@ class ScheduleManager:
 
     def __load_scheduler(self):
 
-        if self.loader.scheduler_name.upper() == self.FL_SIMPLE:
+        if self.loader.scheduler_name.upper() == Scheduler.FL_SIMPLE:
             if self.loader.server_provider is None:
                 logging.error("<Loader>: Server provider cannot be None")
                 return
@@ -135,7 +136,7 @@ class ScheduleManager:
                 return
             self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
 
-        elif self.loader.scheduler_name.upper() == self.MAT_FORM:
+        elif self.loader.scheduler_name.upper() == Scheduler.MAT_FORM:
             self.scheduler = MathematicalFormulationScheduler(loader=self.loader)
 
         if self.scheduler is None:
@@ -149,13 +150,27 @@ class ScheduleManager:
                                                               self.loader.scheduler_name))
 
     def __build_dispatchers(self):
+        try:
+            with open(self.loader.map_file) as f:
+                data = f.read()
+            json_data = json.loads(data)
+        except Exception:
+            json_data = None
+        if json_data is None:
+            aux_provider = self.loader.server_provider,
+            aux_region = self.loader.server_region,
+            aux_vm_name = self.loader.server_vm_name
+        else:
+            aux_provider = json_data['server']['provider']
+            aux_region = json_data['server']['region']
+            aux_vm_name = json_data['server']['instance_type']
+
         # logging.info("Starts building dispatchers")
         instance_type, market, region, zone = self.scheduler.get_server_initial_instance(
-            provider=self.loader.server_provider,
-            region=self.loader.server_region,
-            vm_name=self.loader.server_vm_name
+            provider=aux_provider,
+            region=aux_region,
+            vm_name=aux_vm_name
         )
-
         # Create the Vm that will be used by the dispatcher
         vm = VirtualMachine(
             instance_type=instance_type,
@@ -182,10 +197,19 @@ class ScheduleManager:
 
         for i in range(self.loader.job.num_clients):
             # client = self.loader.job.client_tasks[i]
+            if json_data is None:
+                aux_provider = self.loader.clients_provider[i],
+                aux_region = self.loader.clients_region[i],
+                aux_vm_name = self.loader.clients_vm_name[i]
+            else:
+                aux_provider = json_data['clients'][str(i)]['provider']
+                aux_region = json_data['clients'][str(i)]['region']
+                aux_vm_name = json_data['clients'][str(i)]['instance_type']
+
             instance_type, market, region, zone = self.scheduler.get_client_initial_instance(
-                provider=self.loader.clients_provider[i],
-                region=self.loader.clients_region[i],
-                vm_name=self.loader.clients_vm_name[i]
+                provider=aux_provider,
+                region=aux_region,
+                vm_name=aux_vm_name
             )
 
             print(f"Client {i} on region {region.region} and zone {zone}")

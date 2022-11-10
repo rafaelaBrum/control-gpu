@@ -1,3 +1,5 @@
+import os.path
+
 from control.util.loader import Loader
 
 import gurobipy as gp
@@ -8,8 +10,10 @@ import logging
 # import os
 import json
 
+from control.scheduler.scheduler import Scheduler
 
-class MathematicalFormulationScheduler:
+
+class MathematicalFormulationScheduler(Scheduler):
 
     def pre_process(self):
 
@@ -34,86 +38,88 @@ class MathematicalFormulationScheduler:
             self.time_comm[pair] = self.comm_baseline * self.comm_slowdown[pair]
 
     def __init__(self, loader: Loader):
-        self.clients = []
-        self.location_ds_clients = {}
-        for client in loader.job.client_tasks.values():
-            aux = client.client_id
-            self.clients.append(aux)
-            self.location_ds_clients[aux] = client.bucket_provider.upper() + "_" + client.bucket_region
-        self.clients = gp.tuplelist(self.clients)
+        super().__init__(instance_types=loader.env, locations=loader.loc)
+        if not os.path.exists(loader.map_file):
+            self.clients = []
+            self.location_ds_clients = {}
+            for client in loader.job.client_tasks.values():
+                aux = client.client_id
+                self.clients.append(aux)
+                self.location_ds_clients[aux] = client.bucket_provider.upper() + "_" + client.bucket_region
+            self.clients = gp.tuplelist(self.clients)
 
-        # self.baseline_exec = baseline_exec
-        self.baseline_exec = {}
-        # self.comm_baseline = comm_baseline
-        self.comm_baseline = -1
-        self.server_msg_train = float(loader.job.server_msg_train)
-        self.server_msg_test = float(loader.job.server_msg_test)
-        self.client_msg_train = float(loader.job.client_msg_train)
-        self.client_msg_test = float(loader.job.client_msg_test)
-        self.T_round = float(loader.mapping_conf.deadline) / loader.job.server_task.n_rounds
-        self.B_round = float(loader.mapping_conf.budget) / loader.job.server_task.n_rounds
-        self.alpha = float(loader.mapping_conf.alpha)
+            # self.baseline_exec = baseline_exec
+            self.baseline_exec = {}
+            # self.comm_baseline = comm_baseline
+            self.comm_baseline = -1
+            self.server_msg_train = float(loader.job.server_msg_train)
+            self.server_msg_test = float(loader.job.server_msg_test)
+            self.client_msg_train = float(loader.job.client_msg_train)
+            self.client_msg_test = float(loader.job.client_msg_test)
+            self.T_round = float(loader.mapping_conf.deadline) / loader.job.server_task.n_rounds
+            self.B_round = float(loader.mapping_conf.budget) / loader.job.server_task.n_rounds
+            self.alpha = float(loader.mapping_conf.alpha)
 
-        self.providers = []
-        self.global_cpu_limits = {}
-        self.global_gpu_limits = {}
-        self.cost_transfer = {}
-        self.prov_regions = []
-        self.regional_cpu_limits = {}
-        self.regional_gpu_limits = {}
+            self.providers = []
+            self.global_cpu_limits = {}
+            self.global_gpu_limits = {}
+            self.cost_transfer = {}
+            self.prov_regions = []
+            self.regional_cpu_limits = {}
+            self.regional_gpu_limits = {}
 
-        for region_id, region in loader.loc.items():
-            aux = region.provider.upper()
-            aux_global_cpu_limit = region.global_cpu_limit
-            if aux_global_cpu_limit < 0:
-                aux_global_cpu_limit = inf
-            aux_global_gpu_limit = region.global_gpu_limit
-            if aux_global_gpu_limit < 0:
-                aux_global_gpu_limit = inf
-            test_prov = self.providers.count(aux)
-            if test_prov > 0:
-                if self.global_cpu_limits[aux] != aux_global_cpu_limit:
-                    raise Exception(f"Global vCPUs limit different in region {region_id}")
-                if self.global_gpu_limits[aux] != aux_global_gpu_limit:
-                    raise Exception(f"Global GPUs limit different in region {region_id}")
-                if self.cost_transfer[aux] != region.cost_transfer:
-                    raise Exception(f"Cost transfer different in region {region_id}")
-            else:
-                self.providers.append(aux)
-                self.global_cpu_limits[aux] = aux_global_cpu_limit
-                self.global_gpu_limits[aux] = aux_global_gpu_limit
-                self.cost_transfer[aux] = region.cost_transfer
-            aux = (aux, region.region)
-            self.prov_regions.append(aux)
-            self.regional_gpu_limits[aux] = region.regional_gpu_limit
-            if self.regional_gpu_limits[aux] < 0:
-                self.regional_gpu_limits[aux] = inf
-            self.regional_cpu_limits[aux] = region.regional_cpu_limit
-            if self.regional_cpu_limits[aux] < 0:
-                self.regional_cpu_limits[aux] = inf
-        self.providers = gp.tuplelist(self.providers)
-        self.prov_regions = gp.tuplelist(self.prov_regions)
+            for region_id, region in loader.loc.items():
+                aux = region.provider.upper()
+                aux_global_cpu_limit = region.global_cpu_limit
+                if aux_global_cpu_limit < 0:
+                    aux_global_cpu_limit = inf
+                aux_global_gpu_limit = region.global_gpu_limit
+                if aux_global_gpu_limit < 0:
+                    aux_global_gpu_limit = inf
+                test_prov = self.providers.count(aux)
+                if test_prov > 0:
+                    if self.global_cpu_limits[aux] != aux_global_cpu_limit:
+                        raise Exception(f"Global vCPUs limit different in region {region_id}")
+                    if self.global_gpu_limits[aux] != aux_global_gpu_limit:
+                        raise Exception(f"Global GPUs limit different in region {region_id}")
+                    if self.cost_transfer[aux] != region.cost_transfer:
+                        raise Exception(f"Cost transfer different in region {region_id}")
+                else:
+                    self.providers.append(aux)
+                    self.global_cpu_limits[aux] = aux_global_cpu_limit
+                    self.global_gpu_limits[aux] = aux_global_gpu_limit
+                    self.cost_transfer[aux] = region.cost_transfer
+                aux = (aux, region.region)
+                self.prov_regions.append(aux)
+                self.regional_gpu_limits[aux] = region.regional_gpu_limit
+                if self.regional_gpu_limits[aux] < 0:
+                    self.regional_gpu_limits[aux] = inf
+                self.regional_cpu_limits[aux] = region.regional_cpu_limit
+                if self.regional_cpu_limits[aux] < 0:
+                    self.regional_cpu_limits[aux] = inf
+            self.providers = gp.tuplelist(self.providers)
+            self.prov_regions = gp.tuplelist(self.prov_regions)
 
-        self.prov_regions_vms = []
-        self.cpu_vms = {}
-        self.gpu_vms = {}
-        self.cost_vms = {}
-        self.time_aggreg = {}
-        self.slowdown = {}
-        self.pair_regions = []
-        self.comm_slowdown = {}
-        self.client_prov_regions_vms = []
-        self.time_exec = {}
-        self.time_comm = {}
+            self.prov_regions_vms = []
+            self.cpu_vms = {}
+            self.gpu_vms = {}
+            self.cost_vms = {}
+            self.time_aggreg = {}
+            self.slowdown = {}
+            self.pair_regions = []
+            self.comm_slowdown = {}
+            self.client_prov_regions_vms = []
+            self.time_exec = {}
+            self.time_comm = {}
 
-        self.input_data = {}
+            self.input_data = {}
 
-        self.__read_json(input_file=loader.input_file, job_file=loader.job_file)
-        self.pre_process()
-        # print(self)
-        self.solve()
-        # print(self.input_data)
-        self.__write_map_json(file_output=loader.map_file)
+            self.__read_json(input_file=loader.input_file, job_file=loader.job_file)
+            self.pre_process()
+            # print(self)
+            self.solve()
+            # print(self.input_data)
+            self.__write_map_json(file_output=loader.map_file)
 
     def solve(self):
         try:
