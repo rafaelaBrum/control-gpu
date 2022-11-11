@@ -27,3 +27,15 @@ class CloudLabConfig(Config):
     @property
     def home_path(self):
         return self.get_property(self._key, 'home_path')
+
+    @property
+    def cpu_costs(self):
+        return self.get_property(self._key, 'cpu_costs')
+
+    @property
+    def ram_costs(self):
+        return self.get_property(self._key, 'ram_costs')
+
+    @property
+    def gpu_costs(self):
+        return self.get_property(self._key, 'gpu_costs')

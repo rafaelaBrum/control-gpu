@@ -26,7 +26,6 @@ from pathlib import Path
 import threading
 
 
-# TODO: get API key from GClod Python API
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
 api_key = file.read()
 

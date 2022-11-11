@@ -19,8 +19,8 @@ class MathematicalFormulationScheduler(Scheduler):
 
         for client in self.clients:
             for prov, region, vm in self.prov_regions_vms:
-                if self.gpu_vms[prov, region, vm] == 0:
-                    continue
+                # if self.gpu_vms[prov, region, vm] == 0:
+                #     continue
                 aux = (client, prov, region, vm)
                 # print(aux)
                 self.client_prov_regions_vms.append(aux)
@@ -453,7 +453,6 @@ class MathematicalFormulationScheduler(Scheduler):
 
             self.prov_regions_vms = gp.tuplelist(self.prov_regions_vms)
 
-            # TODO: read comm_slowdown field
             aux_data = json_data['comm_slowdown']
             for provider_1 in aux_data:
                 for region_1 in aux_data[provider_1]:

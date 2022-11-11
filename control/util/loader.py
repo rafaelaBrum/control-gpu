@@ -337,12 +337,28 @@ class Loader:
         for instance in self.env.values():
 
             # print(instance.type)
+            if instance.provider == CloudManager.CLOUDLAB:
+                for loc in instance.locations:
+                    region = loc.split('_')[-1]
+                    price = float(instance.vcpu) * float(self.cloudlab_conf.cpu_costs) + float(instance.count_gpu) \
+                            * float(self.cloudlab_conf.gpu_costs) + float(instance.memory) \
+                            * float(self.cloudlab_conf.ram_costs)
+                    # print(f"Final on-demand price = {price}")
+                    instance.setup_ondemand_price(
+                        price=price,
+                        region=region
+                    )
+                    price = price * 0.3 # 70% of discount
+                    # print(f"Final preemptible price = {price}")
+                    instance.setup_preemptible_price(
+                        price=price,
+                        region=region,
+                        zone=''
+                    )
+
+                continue
 
             for loc in self.loc.values():
-
-                # TODO: change this to test in the instance type
-                if loc.provider == CloudManager.CLOUDLAB:
-                    continue
 
                 region = loc.region
                 zone = loc.zones[0]

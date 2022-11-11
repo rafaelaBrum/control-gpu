@@ -1901,3 +1901,62 @@ class PreSchedulingManager:
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside get_first_rounds_times')
             logging.error(e)
+
+    def update_input_file(self):
+        data_dict = {'cpu_vms': {},
+                     'gpu_vms': {},
+                     'cost_vms': {},
+                     'time_aggreg': {},
+                     'slowdown':{},
+                     'comm_slowdown': {}}
+
+        for key, instance_type in self.loader.env.items():
+            aux_provider = instance_type.provider
+            if aux_provider not in data_dict['cpu_vms']:
+                data_dict['cpu_vms'][aux_provider] = {}
+                data_dict['gpu_vms'][aux_provider] = {}
+                data_dict['cost_vms'][aux_provider] = {}
+                data_dict['time_aggreg'][aux_provider] = {}
+            for loc in instance_type.locations:
+                aux_region = loc.split('_')[-1]
+                if aux_region not in data_dict['cpu_vms'][aux_provider]:
+                    data_dict['cpu_vms'][aux_provider][aux_region] = {}
+                    data_dict['gpu_vms'][aux_provider][aux_region] = {}
+                    data_dict['cost_vms'][aux_provider][aux_region] = {}
+                    data_dict['time_aggreg'][aux_provider][aux_region] = {}
+                data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
+                data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
+                data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
+                data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.5
+
+        client_baseline = str(0)
+        time_baseline = 0.0
+        vm_baseline_chosen = False
+
+        for vm_name in self.exec_times:
+            for loc in self.exec_times[vm_name]:
+                aux_provider = loc.split("_")[0]
+                aux_region = loc.split("_")[-1]
+                if client_baseline in self.exec_times[vm_name][loc]:
+                    if not vm_baseline_chosen:
+                        try:
+                            time_baseline = float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) + \
+                                            float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])
+                            vm_baseline_chosen = True
+                        except Exception as e:
+                            logging.error(e)
+                    if self.loader.emulated:
+                        aux_location = 'CloudLab_all'
+                        if aux_location not in data_dict['slowdown']:
+                            data_dict['slowdown'][aux_location] = {}
+                        if aux_provider not in data_dict['slowdown'][aux_location]:
+                            data_dict['slowdown'][aux_location][aux_provider] = {}
+                        if aux_region not in data_dict['slowdown'][aux_location][aux_provider]:
+                            data_dict['slowdown'][aux_location][aux_provider][aux_region] = {}
+                        aux_slowdown = (float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) +
+                                        float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])) / time_baseline
+                        data_dict['slowdown'][aux_location][aux_provider][aux_region][vm_name] = aux_slowdown
+
+        print("data_dict")
+        print(json.dumps(data_dict, sort_keys=False, indent=4))
+

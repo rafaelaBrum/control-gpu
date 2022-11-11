@@ -12,27 +12,25 @@ from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 import logging
 import argparse
 
+import os
+
 
 def __call_control(loader: Loader):
-    if loader.emulated:
-        # if not loader.has_input_metrics()
-        __call_pre_scheduling(loader=loader)
 
-    else:
-
-        try:
-
+    try:
+        if not os.path.exists(loader.input_file):
+            __call_pre_scheduling(loader=loader)
+        else:
             loader.print_execution_info()
 
-            manager = ScheduleManager(loader=loader)
+        # manager = ScheduleManager(loader=loader)
+        #
+        # manager.start_execution()
 
-            manager.start_execution()
-
-            status = "SUCCESS"
-
-        except Exception as e:
-            logging.error(e)
-            # status = "ERROR"
+        status = "SUCCESS"
+    except Exception as e:
+        logging.error(e)
+        # status = "ERROR"
 
     # if loader.dump:
     #     logging.info("Backup Database..")
@@ -53,6 +51,8 @@ def __call_pre_scheduling(loader: Loader):
             pre_sched.calculate_rpc_times_emulated()
 
             pre_sched.get_first_rounds_times_emulated()
+
+            pre_sched.update_input_file()
         else:
             pre_sched.calculate_rtt_values()
 

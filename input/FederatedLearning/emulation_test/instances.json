@@ -3,8 +3,12 @@
         "c6525-100g": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 2.148
+                },
+                "preemptible": {
+                    "Utah": 0.6444
+                }
             },
             "restrictions": {
                 "limits": {
@@ -29,8 +33,12 @@
         "c6525-25g": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 1.956
+                },
+                "preemptible": {
+                    "Utah": 0.5868
+                }
             },
             "restrictions": {
                 "limits": {
@@ -55,8 +63,12 @@
         "d6515": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 2.34
+                },
+                "preemptible": {
+                    "Utah": 0.702
+                }
             },
             "restrictions": {
                 "limits": {
@@ -81,8 +93,12 @@
         "dl360": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 13.056000000000001
+                },
+                "preemptible": {
+                    "Utah": 3.9168000000000003
+                }
             },
             "restrictions": {
                 "limits": {
@@ -107,8 +123,12 @@
         "m400": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 0.876
+                },
+                "preemptible": {
+                    "Utah": 0.2628
+                }
             },
             "restrictions": {
                 "limits": {
@@ -133,8 +153,12 @@
         "m510": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 0.972
+                },
+                "preemptible": {
+                    "Utah": 0.29159999999999997
+                }
             },
             "restrictions": {
                 "limits": {
@@ -159,8 +183,12 @@
         "xl170": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Utah": 1.02
+                },
+                "preemptible": {
+                    "Utah": 0.306
+                }
             },
             "restrictions": {
                 "limits": {
@@ -185,8 +213,12 @@
         "c220g1": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 1.956
+                },
+                "preemptible": {
+                    "Wisconsin": 0.5868
+                }
             },
             "restrictions": {
                 "limits": {
@@ -211,8 +243,12 @@
         "c220g2": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 2.436
+                },
+                "preemptible": {
+                    "Wisconsin": 0.7308
+                }
             },
             "restrictions": {
                 "limits": {
@@ -237,8 +273,12 @@
         "c220g5": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 2.832
+                },
+                "preemptible": {
+                    "Wisconsin": 0.8495999999999999
+                }
             },
             "restrictions": {
                 "limits": {
@@ -263,8 +303,12 @@
         "c240g1": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 1.956
+                },
+                "preemptible": {
+                    "Wisconsin": 0.5868
+                }
             },
             "restrictions": {
                 "limits": {
@@ -289,8 +333,12 @@
         "c240g2": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 2.436
+                },
+                "preemptible": {
+                    "Wisconsin": 0.7308
+                }
             },
             "restrictions": {
                 "limits": {
@@ -315,8 +363,12 @@
         "c240g5": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 2.832
+                },
+                "preemptible": {
+                    "Wisconsin": 0.8495999999999999
+                }
             },
             "restrictions": {
                 "limits": {
@@ -341,8 +393,14 @@
         "c4130": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Wisconsin": 3.72,
+                    "Clemson": 3.72
+                },
+                "preemptible": {
+                    "Wisconsin": 1.116,
+                    "Clemson": 1.116
+                }
             },
             "restrictions": {
                 "limits": {
@@ -368,8 +426,12 @@
         "c6320": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 3.8160000000000003
+                },
+                "preemptible": {
+                    "Clemson": 1.1448
+                }
             },
             "restrictions": {
                 "limits": {
@@ -394,8 +456,12 @@
         "c6420": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 5.484
+                },
+                "preemptible": {
+                    "Clemson": 1.6452
+                }
             },
             "restrictions": {
                 "limits": {
@@ -420,8 +486,12 @@
         "c8220": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 3.624
+                },
+                "preemptible": {
+                    "Clemson": 1.0872
+                }
             },
             "restrictions": {
                 "limits": {
@@ -446,8 +516,12 @@
         "c8220x": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 3.624
+                },
+                "preemptible": {
+                    "Clemson": 1.0872
+                }
             },
             "restrictions": {
                 "limits": {
@@ -472,8 +546,12 @@
         "dss7500": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 1.86
+                },
+                "preemptible": {
+                    "Clemson": 0.558
+                }
             },
             "restrictions": {
                 "limits": {
@@ -498,8 +576,12 @@
         "ibm8335": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 5.064
+                },
+                "preemptible": {
+                    "Clemson": 1.5191999999999999
+                }
             },
             "restrictions": {
                 "limits": {
@@ -524,8 +606,12 @@
         "r650": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 4.872
+                },
+                "preemptible": {
+                    "Clemson": 1.4616
+                }
             },
             "restrictions": {
                 "limits": {
@@ -550,8 +636,12 @@
         "r6525": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 4.68
+                },
+                "preemptible": {
+                    "Clemson": 1.404
+                }
             },
             "restrictions": {
                 "limits": {
@@ -576,8 +666,12 @@
         "r7525": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Clemson": 7.824
+                },
+                "preemptible": {
+                    "Clemson": 2.3472
+                }
             },
             "restrictions": {
                 "limits": {
@@ -602,8 +696,12 @@
         "c6220": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "APT": 1.1640000000000001
+                },
+                "preemptible": {
+                    "APT": 0.3492
+                }
             },
             "restrictions": {
                 "limits": {
@@ -628,8 +726,12 @@
         "r320": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "APT": 0.384
+                },
+                "preemptible": {
+                    "APT": 0.1152
+                }
             },
             "restrictions": {
                 "limits": {
@@ -654,8 +756,12 @@
         "d430": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Emulab": 1.1640000000000001
+                },
+                "preemptible": {
+                    "Emulab": 0.3492
+                }
             },
             "restrictions": {
                 "limits": {
@@ -680,8 +786,12 @@
         "d710": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Emulab": 0.24000000000000002
+                },
+                "preemptible": {
+                    "Emulab": 0.07200000000000001
+                }
             },
             "restrictions": {
                 "limits": {
@@ -706,8 +816,12 @@
         "d820": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Emulab": 2.34
+                },
+                "preemptible": {
+                    "Emulab": 0.702
+                }
             },
             "restrictions": {
                 "limits": {
@@ -732,8 +846,12 @@
         "nuc11i9": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Emulab": 0.5760000000000001
+                },
+                "preemptible": {
+                    "Emulab": 0.1728
+                }
             },
             "restrictions": {
                 "limits": {
@@ -758,8 +876,12 @@
         "pc3000": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Emulab": 0.048
+                },
+                "preemptible": {
+                    "Emulab": 0.0144
+                }
             },
             "restrictions": {
                 "limits": {
@@ -784,8 +906,12 @@
         "build": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Massachusetts": 3.168
+                },
+                "preemptible": {
+                    "Massachusetts": 0.9504
+                }
             },
             "restrictions": {
                 "limits": {
@@ -810,8 +936,12 @@
         "fpga-alveo": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Massachusetts": 2.376
+                },
+                "preemptible": {
+                    "Massachusetts": 0.7128
+                }
             },
             "restrictions": {
                 "limits": {
@@ -836,8 +966,12 @@
         "rs440": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Massachusetts": 3.12
+                },
+                "preemptible": {
+                    "Massachusetts": 0.9359999999999999
+                }
             },
             "restrictions": {
                 "limits": {
@@ -862,8 +996,12 @@
         "rs620": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Massachusetts": 3.168
+                },
+                "preemptible": {
+                    "Massachusetts": 0.9504
+                }
             },
             "restrictions": {
                 "limits": {
@@ -888,8 +1026,12 @@
         "rs630": {
             "provider": "CloudLab",
             "prices": {
-                "on-demand": {},
-                "preemptible": {}
+                "on-demand": {
+                    "Massachusetts": 3.624
+                },
+                "preemptible": {
+                    "Massachusetts": 1.0872
+                }
             },
             "restrictions": {
                 "limits": {
