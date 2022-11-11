@@ -31,7 +31,7 @@
             "region": "us-east1",
             "key_file": "",
             "client_image_id": "",
-            "server_image_id": "disk-ubuntu-flower-server",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
             "zones": [
                 "us-east1-b",
                 "us-east1-c",
@@ -55,7 +55,7 @@
             "region": "us-west1",
             "key_file": "",
             "client_image_id": "",
-            "server_image_id": "disk-ubuntu-flower-server",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
             "zones": [
                 "us-west1-a",
                 "us-west1-b",
@@ -67,7 +67,7 @@
             "region": "us-central1",
             "key_file": "",
             "client_image_id": "",
-            "server_image_id": "disk-ubuntu-flower-server",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
             "zones": [
                 "us-central1-a",
                 "us-central1-b",

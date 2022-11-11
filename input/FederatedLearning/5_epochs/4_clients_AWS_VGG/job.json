@@ -5,7 +5,7 @@
     "tasks": {
         "server": {
             "task_name": "Task server VGG16",
-            "command": "python3 TIL_VGG_server.py",
+            "command": "python3.7 TIL_VGG_server.py",
             "runtime": {
                 "g4dn.xlarge": 65
             },
@@ -17,7 +17,7 @@
         "clients": {
             "0" : {
                 "task_name": "Task VGG (client 0)",
-                "command": "python3 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
                 "generic_checkpoint": "False",
                 "zip_file": "TIL_VGG_client.zip",
                 "split": "0.9 0.1 0.0",
@@ -32,7 +32,7 @@
             },
             "1" : {
                 "task_name": "Task VGG (client 1)",
-                "command": "python3 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
                 "generic_checkpoint": "False",
                 "zip_file": "TIL_VGG_client.zip",
                 "split": "0.9 0.1 0.0",
@@ -47,7 +47,7 @@
             },
             "2" : {
                 "task_name": "Task VGG (client 2)",
-                "command": "python3 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
                 "generic_checkpoint": "False",
                 "zip_file": "TIL_VGG_client.zip",
                 "split": "0.9 0.1 0.0",
@@ -62,7 +62,7 @@
             },
             "3" : {
                 "task_name": "Task VGG (client 3)",
-                "command": "python3 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
                 "generic_checkpoint": "False",
                 "zip_file": "TIL_VGG_client.zip",
                 "split": "0.9 0.1 0.0",
