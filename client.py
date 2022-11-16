@@ -24,7 +24,7 @@ def __call_control(loader: Loader):
             loader.print_execution_info()
 
         # manager = ScheduleManager(loader=loader)
-        #
+
         # manager.start_execution()
 
         status = "SUCCESS"
@@ -52,7 +52,6 @@ def __call_pre_scheduling(loader: Loader):
 
             pre_sched.get_first_rounds_times_emulated()
 
-            pre_sched.update_input_file()
         else:
             pre_sched.calculate_rtt_values()
 
@@ -64,6 +63,8 @@ def __call_pre_scheduling(loader: Loader):
                 pre_sched.calculate_concurrent_rpc_times()
 
         pre_sched.write_json()
+
+        pre_sched.update_input_file()
 
         # status = "SUCCESS"
 

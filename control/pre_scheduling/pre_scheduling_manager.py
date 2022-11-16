@@ -1918,7 +1918,7 @@ class PreSchedulingManager:
                 data_dict['cost_vms'][aux_provider] = {}
                 data_dict['time_aggreg'][aux_provider] = {}
             for loc in instance_type.locations:
-                aux_region = loc.split('_')[-1]
+                aux_region = loc.split('_')[1]
                 if aux_region not in data_dict['cpu_vms'][aux_provider]:
                     data_dict['cpu_vms'][aux_provider][aux_region] = {}
                     data_dict['gpu_vms'][aux_provider][aux_region] = {}
@@ -1936,7 +1936,7 @@ class PreSchedulingManager:
         for vm_name in self.exec_times:
             for loc in self.exec_times[vm_name]:
                 aux_provider = loc.split("_")[0]
-                aux_region = loc.split("_")[-1]
+                aux_region = loc.split("_")[1]
                 if client_baseline in self.exec_times[vm_name][loc]:
                     if not vm_baseline_chosen:
                         try:
@@ -1957,6 +1957,71 @@ class PreSchedulingManager:
                                         float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])) / time_baseline
                         data_dict['slowdown'][aux_location][aux_provider][aux_region][vm_name] = aux_slowdown
 
-        print("data_dict")
-        print(json.dumps(data_dict, sort_keys=False, indent=4))
+        time_baseline = 0.0
+        pair_regions_baseline_chosen = False
 
+        aux_comm_slowdown = {}
+
+        for loc_1 in self.rpc_times:
+            aux_provider_1 = loc_1.split("_")[0]
+            aux_region_1 = loc_1.split("_")[1]
+            for loc_2 in self.rpc_times[loc_1]:
+                aux_provider_2 = loc_2.split("_")[0]
+                aux_region_2 = loc_2.split("_")[1]
+                if not pair_regions_baseline_chosen:
+                    try:
+                        time_baseline_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['TestMsg']) +\
+                                                      float(self.rpc_times[loc_1][loc_2]['client-server']['TrainMsg'])
+                        time_baseline_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['TestMsg']) + \
+                                                      float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
+                        time_baseline = (time_baseline_client_server + time_baseline_server_client) / 2
+                        pair_regions_baseline_chosen = True
+                        # print("time_baseline", time_baseline)
+                    except Exception as e:
+                        logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")
+                        logging.error(e)
+                if aux_provider_1 not in aux_comm_slowdown:
+                    aux_comm_slowdown[aux_provider_1] = {}
+                if aux_region_1 not in aux_comm_slowdown[aux_provider_1]:
+                    aux_comm_slowdown[aux_provider_1][aux_region_1] = {}
+                if aux_provider_2 not in aux_comm_slowdown[aux_provider_1][aux_region_1]:
+                    aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2] = {}
+                if aux_region_2 not in aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2]:
+                    aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = {}
+                try:
+                    time_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['TestMsg']) + \
+                                         float(self.rpc_times[loc_1][loc_2]['client-server']['TrainMsg'])
+                    time_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['TestMsg']) + \
+                                         float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
+                    current_time = (time_client_server + time_server_client) / 2
+                    # print("current_time", current_time)
+
+                    aux_slowdown = current_time / time_baseline
+                    aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = aux_slowdown
+                except Exception as e:
+                    logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")
+                    logging.error(e)
+
+        for provider_1 in aux_comm_slowdown:
+            for region_1 in aux_comm_slowdown[provider_1]:
+                for provider_2 in aux_comm_slowdown[provider_1][region_1]:
+                    for region_2 in aux_comm_slowdown[provider_1][region_1][provider_2]:
+                        if aux_comm_slowdown[provider_1][region_1][provider_2][region_2]:
+                            if provider_1 not in data_dict['comm_slowdown']:
+                                data_dict['comm_slowdown'][provider_1] = {}
+                            if region_1 not in data_dict['comm_slowdown'][provider_1]:
+                                data_dict['comm_slowdown'][provider_1][region_1] = {}
+                            if provider_2 not in data_dict['comm_slowdown'][provider_1][region_1]:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2] = {}
+                            if region_2 not in data_dict['comm_slowdown'][provider_1][region_1][provider_2]:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = {}
+                            data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = \
+                            aux_comm_slowdown[provider_1][region_1][provider_2][region_2]
+
+        # print("data_dict")
+        # print(json.dumps(data_dict, sort_keys=False, indent=4))
+
+        file_output = self.loader.input_file
+
+        with open(file_output, "w") as fp:
+            json.dump(data_dict, fp, sort_keys=True, indent=4, default=str)
