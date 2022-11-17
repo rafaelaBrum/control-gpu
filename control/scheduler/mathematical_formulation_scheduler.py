@@ -23,15 +23,15 @@ class MathematicalFormulationScheduler(Scheduler):
                 #     continue
                 aux = (client, prov, region, vm)
                 # print(aux)
-                self.client_prov_regions_vms.append(aux)
-                aux_loc = self.location_ds_clients[client]
                 try:
+                    aux_loc = self.location_ds_clients[client]
                     self.time_exec[aux] = self.baseline_exec[client] * self.slowdown[aux_loc][prov, region, vm]
+                    self.client_prov_regions_vms.append(aux)
                 except Exception as e:
                     logging.error(e)
                     logging.error(f"We do not support the location of client {client}: "
                                   f"{aux}")
-                    return
+                    # return
         self.client_prov_regions_vms = gp.tuplelist(self.client_prov_regions_vms)
 
         for pair in self.pair_regions:
@@ -116,7 +116,7 @@ class MathematicalFormulationScheduler(Scheduler):
 
             self.__read_json(input_file=loader.input_file, job_file=loader.job_file)
             self.pre_process()
-            # print(self)
+            print(self)
             self.solve()
             # print(self.input_data)
             self.__write_map_json(file_output=loader.map_file)
@@ -284,12 +284,12 @@ class MathematicalFormulationScheduler(Scheduler):
                 "constraint_slowest_client"
             )
 
+            print(model.display())
+
+            model.write("file.lp")
+
             # Compute optimal solution
             model.optimize()
-
-            # print(model.display())
-
-            # model.write("file.lp")
 
             # Print solution
             if model.Status == GRB.OPTIMAL:

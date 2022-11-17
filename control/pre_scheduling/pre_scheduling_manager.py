@@ -1911,7 +1911,7 @@ class PreSchedulingManager:
                      'comm_slowdown': {}}
 
         for key, instance_type in self.loader.env.items():
-            aux_provider = instance_type.provider
+            aux_provider = instance_type.provider.upper()
             if aux_provider not in data_dict['cpu_vms']:
                 data_dict['cpu_vms'][aux_provider] = {}
                 data_dict['gpu_vms'][aux_provider] = {}
@@ -1935,7 +1935,7 @@ class PreSchedulingManager:
 
         for vm_name in self.exec_times:
             for loc in self.exec_times[vm_name]:
-                aux_provider = loc.split("_")[0]
+                aux_provider = loc.split("_")[0].upper()
                 aux_region = loc.split("_")[1]
                 if client_baseline in self.exec_times[vm_name][loc]:
                     if not vm_baseline_chosen:
@@ -1946,7 +1946,7 @@ class PreSchedulingManager:
                         except Exception as e:
                             logging.error(e)
                     if self.loader.emulated:
-                        aux_location = 'CloudLab_all'
+                        aux_location = 'CLOUDLAB_all'
                         if aux_location not in data_dict['slowdown']:
                             data_dict['slowdown'][aux_location] = {}
                         if aux_provider not in data_dict['slowdown'][aux_location]:
@@ -1963,10 +1963,10 @@ class PreSchedulingManager:
         aux_comm_slowdown = {}
 
         for loc_1 in self.rpc_times:
-            aux_provider_1 = loc_1.split("_")[0]
+            aux_provider_1 = loc_1.split("_")[0].upper()
             aux_region_1 = loc_1.split("_")[1]
             for loc_2 in self.rpc_times[loc_1]:
-                aux_provider_2 = loc_2.split("_")[0]
+                aux_provider_2 = loc_2.split("_")[0].upper()
                 aux_region_2 = loc_2.split("_")[1]
                 if not pair_regions_baseline_chosen:
                     try:
@@ -2022,6 +2022,8 @@ class PreSchedulingManager:
         # print(json.dumps(data_dict, sort_keys=False, indent=4))
 
         file_output = self.loader.input_file
+
+        logging.info(f"<PreSchedulerManager> Writing {file_output} file")
 
         with open(file_output, "w") as fp:
             json.dump(data_dict, fp, sort_keys=True, indent=4, default=str)

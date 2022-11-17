@@ -16,7 +16,8 @@
             "generic_checkpoint": "False",
             "zip_file": "TIL_VGG_server.zip",
             "n_rounds": 10,
-            "n_clients": 4
+            "n_clients": 4,
+            "comm_baseline": 7.42
         },
         "clients": {
             "0" : {
@@ -31,8 +32,9 @@
                 "test_dir": "100_clients/0/testset",
                 "train_epochs": 5,
                 "bucket_provider": "CloudLab",
-                "bucket_region": "",
-                "net": "VGG16"
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 24.3
             },
             "1" : {
                 "task_name": "Task VGG16 (client 1)",
@@ -46,8 +48,9 @@
                 "test_dir": "100_clients/1/testset",
                 "train_epochs": 5,
                 "bucket_provider": "CloudLab",
-                "bucket_region": "",
-                "net": "VGG16"
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 24.3
             },
             "2" : {
                 "task_name": "Task VGG16 (client 2)",
@@ -61,8 +64,9 @@
                 "test_dir": "100_clients/2/testset",
                 "train_epochs": 5,
                 "bucket_provider": "CloudLab",
-                "bucket_region": "",
-                "net": "VGG16"
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 24.3
             },
             "3" : {
                 "task_name": "Task VGG16 (client 3)",
@@ -76,8 +80,9 @@
                 "test_dir": "100_clients/3/testset",
                 "train_epochs": 5,
                 "bucket_provider": "CloudLab",
-                "bucket_region": "",
-                "net": "VGG16"
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 24.3
             }
         }
     }

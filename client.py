@@ -23,7 +23,8 @@ def __call_control(loader: Loader):
         else:
             loader.print_execution_info()
 
-        # manager = ScheduleManager(loader=loader)
+        print("calling ScheduleManager")
+        manager = ScheduleManager(loader=loader)
 
         # manager.start_execution()
 
@@ -46,6 +47,8 @@ def __call_pre_scheduling(loader: Loader):
 
         if pre_sched.stop_execution:
             return
+
+        print("loader.emulated", loader.emulated)
 
         if loader.emulated:
             pre_sched.calculate_rpc_times_emulated()

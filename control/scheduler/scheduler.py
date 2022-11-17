@@ -15,10 +15,13 @@ class Scheduler:
     def __init__(self, instance_types: Dict[str, InstanceType], locations: Dict[str, CloudRegion]):
         self.instances_server_aws: Dict[str, InstanceType] = {}
         self.instances_server_gcp: Dict[str, InstanceType] = {}
+        self.instances_server_cloudlab: Dict[str, InstanceType] = {}
         self.instances_client_gcp: Dict[str, InstanceType] = {}
         self.instances_client_aws: Dict[str, InstanceType] = {}
+        self.instances_client_cloudlab: Dict[str, InstanceType] = {}
         self.loc_aws: Dict[str, CloudRegion] = {}
         self.loc_gcp: Dict[str, CloudRegion] = {}
+        self.loc_cloudlab: Dict[str, CloudRegion] = {}
         self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
         self.__separate_location_by_cloud(locations)
 
@@ -27,7 +30,10 @@ class Scheduler:
 
         for name, instance in instance_types.items():
             # logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
-            if instance.have_gpu:
+            if instance.provider in CloudManager.CLOUDLAB:
+                self.instances_server_cloudlab[name] = instance
+                self.instances_client_cloudlab[name] = instance
+            elif instance.have_gpu:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_client_aws[name] = instance
                     # logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
@@ -35,7 +41,7 @@ class Scheduler:
                     self.instances_client_gcp[name] = instance
                     # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
-                    logging.error(f"<PreSchedulingManager>: {instance.provider} does not have support ({name})")
+                    logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
             else:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_server_aws[name] = instance
@@ -44,7 +50,7 @@ class Scheduler:
                     self.instances_server_gcp[name] = instance
                     # logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
                 else:
-                    logging.error(f"<PreSchedulingManager>: {instance.provider} does not have support ({name})")
+                    logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
     def get_server_initial_instance(self, provider, region, vm_name):
         logging.info("<Scheduler>: Choosing initial instance for server task from provider {}".format(provider))
@@ -102,5 +108,7 @@ class Scheduler:
                 self.loc_aws[loc_id] = loc
             elif loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.loc_gcp[loc_id] = loc
+            elif loc.provider in CloudManager.CLOUDLAB:
+                self.loc_cloudlab[loc_id] = loc
             else:
-                logging.error(f"<PreSchedulingManager>: {loc.provider} does not have support ({loc_id})")
+                logging.error(f"<Scheduler>: {loc.provider} does not have support ({loc_id})")
