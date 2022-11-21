@@ -2,6 +2,7 @@ from control.domain.instance_type import InstanceType
 from control.domain.cloud_region import CloudRegion
 
 from control.managers.cloud_manager import CloudManager
+from control.managers.experiment_cloudlab import Experiment
 
 from typing import Dict
 
@@ -76,6 +77,16 @@ class Scheduler:
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
+        elif provider.lower() in CloudManager.CLOUDLAB.lower():
+            for name, instance in self.instances_server_cloudlab.items():
+                if name == vm_name:
+                    for loc in self.loc_cloudlab.values():
+                        if loc.region == region:
+                            logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
+                                                                                                             region))
+                            return instance, Experiment.MARKET, loc, ""
+                    logging.error("<Scheduler>: Location {} not included in environment".format(region))
+            logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
     def get_client_initial_instance(self, provider, region, vm_name):
         logging.info("<Scheduler>: Choosing initial instance for client task from provider {}".format(provider))
@@ -99,6 +110,15 @@ class Scheduler:
                                 logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
                                 return instance, CloudManager.ON_DEMAND, loc, zone
+                    logging.error("<Scheduler>: Location {} not included in environment".format(region))
+        elif provider.lower() in CloudManager.CLOUDLAB.lower():
+            for name, instance in self.instances_server_cloudlab.items():
+                if name == vm_name:
+                    for loc in self.loc_cloudlab.values():
+                        if loc.region == region:
+                            logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
+                                                                                                             region))
+                            return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 

@@ -98,18 +98,18 @@ class ScheduleManager:
         # for i in range(self.loader.job.num_clients):
         #     self.client_tasks_status.append(Task.WAITING)
 
+        # Prepare the control database and the folders structure in S3
+        try:
+            self.__prepare_execution()
+        except Exception as e:
+            logging.error(e)
+            raise e
+
         '''
                 Build the initial dispatchers
                 The class Dispatcher is responsible to manager the execution steps
                 '''
         self.__build_dispatchers()
-        #
-        # # Prepare the control database and the folders structure in S3
-        # try:
-        #     self.__prepare_execution()
-        # except Exception as e:
-        #     logging.error(e)
-        #     raise e
 
     # # PRE-EXECUTION FUNCTIONS
 
@@ -310,7 +310,7 @@ class ScheduleManager:
         # Check Instances Type
         for key, instance_type in self.loader.env.items():
 
-            types = self.repo.get_instance_type(filter={
+            types = self.repo.get_instance_type(current_filter={
                 'instance_type': key
             })
 

@@ -1924,9 +1924,9 @@ class PreSchedulingManager:
                     data_dict['gpu_vms'][aux_provider][aux_region] = {}
                     data_dict['cost_vms'][aux_provider][aux_region] = {}
                     data_dict['time_aggreg'][aux_provider][aux_region] = {}
-                data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
-                data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
-                data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand
+                data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
+                data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
+                data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
                 data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.5
 
         client_baseline = str(0)
@@ -1988,6 +1988,15 @@ class PreSchedulingManager:
                     aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2] = {}
                 if aux_region_2 not in aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2]:
                     aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = {}
+
+                if aux_provider_2 not in aux_comm_slowdown:
+                    aux_comm_slowdown[aux_provider_2] = {}
+                if aux_region_2 not in aux_comm_slowdown[aux_provider_2]:
+                    aux_comm_slowdown[aux_provider_2][aux_region_2] = {}
+                if aux_provider_1 not in aux_comm_slowdown[aux_provider_2][aux_region_2]:
+                    aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1] = {}
+                if aux_region_1 not in aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1]:
+                    aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1][aux_region_1] = {}
                 try:
                     time_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['TestMsg']) + \
                                          float(self.rpc_times[loc_1][loc_2]['client-server']['TrainMsg'])
@@ -1998,6 +2007,7 @@ class PreSchedulingManager:
 
                     aux_slowdown = current_time / time_baseline
                     aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = aux_slowdown
+                    aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1][aux_region_1] = aux_slowdown
                 except Exception as e:
                     logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")
                     logging.error(e)
@@ -2006,17 +2016,33 @@ class PreSchedulingManager:
             for region_1 in aux_comm_slowdown[provider_1]:
                 for provider_2 in aux_comm_slowdown[provider_1][region_1]:
                     for region_2 in aux_comm_slowdown[provider_1][region_1][provider_2]:
+                        if provider_1 not in data_dict['comm_slowdown']:
+                            data_dict['comm_slowdown'][provider_1] = {}
+                        if region_1 not in data_dict['comm_slowdown'][provider_1]:
+                            data_dict['comm_slowdown'][provider_1][region_1] = {}
+                        if provider_2 not in data_dict['comm_slowdown'][provider_1][region_1]:
+                            data_dict['comm_slowdown'][provider_1][region_1][provider_2] = {}
+                        if region_2 not in data_dict['comm_slowdown'][provider_1][region_1][provider_2]:
+                            data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = {}
                         if aux_comm_slowdown[provider_1][region_1][provider_2][region_2]:
-                            if provider_1 not in data_dict['comm_slowdown']:
-                                data_dict['comm_slowdown'][provider_1] = {}
-                            if region_1 not in data_dict['comm_slowdown'][provider_1]:
-                                data_dict['comm_slowdown'][provider_1][region_1] = {}
-                            if provider_2 not in data_dict['comm_slowdown'][provider_1][region_1]:
-                                data_dict['comm_slowdown'][provider_1][region_1][provider_2] = {}
-                            if region_2 not in data_dict['comm_slowdown'][provider_1][region_1][provider_2]:
-                                data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = {}
                             data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = \
                             aux_comm_slowdown[provider_1][region_1][provider_2][region_2]
+                        else:
+                            data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = 10000000
+
+                        if provider_2 not in data_dict['comm_slowdown']:
+                            data_dict['comm_slowdown'][provider_2] = {}
+                        if region_2 not in data_dict['comm_slowdown'][provider_2]:
+                            data_dict['comm_slowdown'][provider_2][region_2] = {}
+                        if provider_1 not in data_dict['comm_slowdown'][provider_2][region_2]:
+                            data_dict['comm_slowdown'][provider_2][region_2][provider_1] = {}
+                        if region_1 not in data_dict['comm_slowdown'][provider_2][region_2][provider_1]:
+                            data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = {}
+                        if aux_comm_slowdown[provider_2][region_2][provider_1][region_1]:
+                            data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = \
+                            aux_comm_slowdown[provider_2][region_2][provider_1][region_1]
+                        else:
+                            data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = 10000000
 
         # print("data_dict")
         # print(json.dumps(data_dict, sort_keys=False, indent=4))

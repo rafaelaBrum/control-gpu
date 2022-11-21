@@ -26,7 +26,7 @@ def __call_control(loader: Loader):
         print("calling ScheduleManager")
         manager = ScheduleManager(loader=loader)
 
-        # manager.start_execution()
+        manager.start_execution()
 
         status = "SUCCESS"
     except Exception as e:

@@ -1,1 +1,32 @@
-{}
+{
+    "clients": {
+        "0": {
+            "instance_type": "c6525-25g",
+            "provider": "CLOUDLAB",
+            "region": "Utah"
+        },
+        "1": {
+            "instance_type": "c6525-25g",
+            "provider": "CLOUDLAB",
+            "region": "Utah"
+        },
+        "2": {
+            "instance_type": "c6525-25g",
+            "provider": "CLOUDLAB",
+            "region": "Utah"
+        },
+        "3": {
+            "instance_type": "c6525-25g",
+            "provider": "CLOUDLAB",
+            "region": "Utah"
+        }
+    },
+    "cost": 307.1604347331174,
+    "makespan": 30.144336459440918,
+    "obj_value": 2.3483553955889475e-07,
+    "server": {
+        "instance_type": "d6515",
+        "provider": "CLOUDLAB",
+        "region": "Utah"
+    }
+}
