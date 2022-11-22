@@ -135,7 +135,7 @@ class VirtualMachine:
 
     # Start the virtual machine
     # Return (boolean) True if success otherwise return False
-    def deploy(self, type_task, zone='', needs_volume=True, key_name='', ami_id=''):
+    def deploy(self, type_task, zone='', needs_volume=True, key_name='', ami_id='', dataset_urn=None):
 
         if zone == '':
             zone = self.zone
@@ -146,8 +146,11 @@ class VirtualMachine:
                 self.start_deploy = datetime.now()
                 try:
                     logging.info("<VirtualMachine>: Deploying a new {} instance of type {} in CloudLab "
-                                 "in cluster {} with AMI {}".format(self.market, self.instance_type.type, zone,
-                                                                    self.instance_type.image_id))
+                                 "in cluster {} with AMI {} and dataset {}".format(self.market,
+                                                                                   self.instance_type.type,
+                                                                                   zone,
+                                                                                   self.instance_type.image_id,
+                                                                                   dataset_urn))
                     if type_task == Job.SERVER:
                         self.experiment_emulation = \
                             Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name
@@ -159,7 +162,7 @@ class VirtualMachine:
                             Experiment(experiment_name=self.loader.cloudlab_conf.client_experiment_name
                                        + str(VirtualMachine.vm_num), profile_name=self.region.client_image_id,
                                        cluster=self.region.cluster_urn, loader=self.loader,
-                                       instances_types=self.instance_type)
+                                       instances_types=self.instance_type, dataset_urn=dataset_urn)
                     VirtualMachine.vm_num = VirtualMachine.vm_num + 1
                     self.instance_id = self.experiment_emulation.experiment_name
                     exp_status = self.experiment_emulation.start_and_wait()
@@ -465,6 +468,9 @@ class VirtualMachine:
             elif self.instance_type.provider == CloudManager.GCLOUD:
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
                                      self.key_file, self.loader.gcp_conf.vm_user)
+            elif self.instance_type.provider == CloudManager.CLOUDLAB:
+                self.ssh = SSHClient(self.instance_public_ip, self.loader.cloudlab_conf.key_path,
+                                     self.key_file, self.loader.cloudlab_conf.vm_user, emulated=True)
 
             # try to open the connection
             if self.ssh.open_connection():
@@ -474,15 +480,18 @@ class VirtualMachine:
                 # create directory
                 self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path), output=True)
 
-                if self.loader.file_system_conf.type == CloudManager.EBS:
-                    self.__create_ebs(self.loader.file_system_conf.path)
-                elif self.loader.file_system_conf.type == CloudManager.S3:
-                    if self.instance_type.provider == CloudManager.EC2:
-                        self.__create_s3(self.loader.file_system_conf.path)
-                    elif self.instance_type.provider == CloudManager.GCLOUD:
-                        self.__create_cloud_storage(self.loader.file_system_conf.path)
+                if self.emulated:
+                    self.__link_extra_cloudlab_folder(self.loader.file_system_conf.path)
                 else:
-                    logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
+                    if self.loader.file_system_conf.type == CloudManager.EBS:
+                        self.__create_ebs(self.loader.file_system_conf.path)
+                    elif self.loader.file_system_conf.type == CloudManager.S3:
+                        if self.instance_type.provider == CloudManager.EC2:
+                            self.__create_s3(self.loader.file_system_conf.path)
+                        elif self.instance_type.provider == CloudManager.GCLOUD:
+                            self.__create_cloud_storage(self.loader.file_system_conf.path)
+                    else:
+                        logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
                     raise Exception(
                         "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
@@ -499,7 +508,9 @@ class VirtualMachine:
                     self.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
                                              output=True)
 
-                    if client is not None and client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                    if self.emulated:
+                        self.__link_cloudlab_folder(self.loader.file_system_conf.path_storage, client)
+                    elif client is not None and client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):
                         self.__create_cloud_storage(self.loader.file_system_conf.path_storage, client)
                     else:
                         if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
@@ -585,6 +596,40 @@ class VirtualMachine:
                                  "--socket_port {}".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                         self.loader.application_conf.daemon_gcp_file),
                                                            self.loader.gcp_conf.vm_user,
+                                                           self.loader.file_system_conf.path,
+                                                           self.loader.job.job_id,
+                                                           client_id,
+                                                           self.loader.execution_id,
+                                                           self.instance_id,
+                                                           self.loader.communication_conf.socket_port)
+                elif self.instance_type.provider == CloudManager.CLOUDLAB:
+
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                      target=self.loader.cloudlab_conf.home_path,
+                                      item=item)
+
+                    cmd_unzip = f'unzip {item} -d .'
+
+                    logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_unzip))
+
+                    stdout, stderr, code_return = self.ssh.execute_command(cmd_unzip, output=True)
+                    print(stdout)
+
+                    self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                      target=self.loader.cloudlab_conf.home_path,
+                                      item=self.loader.application_conf.daemon_cloudlab_file)
+
+                    cmd_daemon = "python3.7 {} " \
+                                 "--vm_user {} " \
+                                 "--root_path {} " \
+                                 "--job_id {} " \
+                                 "--task_id {} " \
+                                 "--execution_id {}  " \
+                                 "--instance_id {} " \
+                                 "--socket_port {}".format(os.path.join(self.loader.cloudlab_conf.home_path,
+                                                                        self.loader.application_conf.
+                                                                        daemon_cloudlab_file),
+                                                           self.loader.cloudlab_conf.vm_user,
                                                            self.loader.file_system_conf.path,
                                                            self.loader.job.job_id,
                                                            client_id,
@@ -700,8 +745,15 @@ class VirtualMachine:
     @property
     def state(self):
         if self.emulated:
-            return self.experiment_emulation.status
-        if self.marked_to_interrupt:
+            if self.marked_to_interrupt:
+                self.current_state = CloudManager.STOPPING
+            elif self.experiment_emulation.status == Experiment.EXPERIMENT_READY:
+                self.current_state = CloudManager.RUNNING
+            elif self.experiment_emulation.status == Experiment.EXPERIMENT_FAILED:
+                self.current_state = CloudManager.ERROR
+            else:
+                self.current_state = CloudManager.TERMINATED
+        elif self.marked_to_interrupt:
             self.current_state = CloudManager.STOPPING
         elif not self.in_simulation:
             if not self.failed_to_created:
@@ -854,6 +906,35 @@ class VirtualMachine:
             path = path[:-1]
 
         cmd = 'rm {}'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+    def __link_extra_cloudlab_folder(self, path):
+
+        logging.info("<VirtualMachine {}>: - Linking volume CloudLab".format(self.instance_id))
+
+        cmd = 'rm {} -r'.format(path)
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+        if path[-1] == '/':
+            path = path[:-1]
+
+        cmd = f"sudo chown {self.loader.cloudlab_conf.vm_user}:{self.loader.cloudlab_conf.project_name.lower()}-PG0 " \
+              f"{self.loader.cloudlab_conf.extra_ds_path}"
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+        # ln -s /home/user/project /var/www/html
+        cmd = f"ln -s {self.loader.cloudlab_conf.extra_ds_path} {path}"
+
+        logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
+        self.ssh.execute_command(cmd, output=True)
+
+        cmd = f"echo 'text' > {path}/text.txt"
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)

@@ -39,3 +39,7 @@ class CloudLabConfig(Config):
     @property
     def gpu_costs(self):
         return self.get_property(self._key, 'gpu_costs')
+
+    @property
+    def extra_ds_path(self):
+        return self.get_property(self._key, 'extra_ds_path')

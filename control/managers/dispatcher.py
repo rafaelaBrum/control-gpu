@@ -72,7 +72,7 @@ class Executor:
                 execution_id=self.loader.execution_id,
                 job_id=self.loader.job.job_id,
                 task_id=self.task.task_id,
-                instance_id=self.vm.instance_id,
+                instance_id=f'{self.vm.instance_id}_{self.loader.execution_id}',
                 timestamp=datetime.now(),
                 status=self.status
             )
@@ -92,6 +92,8 @@ class Executor:
         # if self.task.has_checkpoint:
         #     action = Daemon.RESTART
         try:
+            # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
+            #                                                                     self.vm.instance_id))
             self.communicator.send(action=action, value=self.dict_info)
             current_time = datetime.now()
             # logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
@@ -533,9 +535,15 @@ class Dispatcher:
 
         # Start the VM in the cloud
         logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
-        logging.info("Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+        if self.type_task == Job.SERVER:
+            logging.info("Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.server_image_id))
+        else:
+            logging.info("Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
 
-        status = self.vm.deploy(type_task=self.type_task)
+        if self.client is None:
+            status = self.vm.deploy(type_task=self.type_task)
+        else:
+            status = self.vm.deploy(type_task=self.type_task, dataset_urn=self.client.dataset_urn)
 
         if not status:
             for zone in self.vm.region.zones:
@@ -543,8 +551,12 @@ class Dispatcher:
                 self.vm.zone = zone
                 self.vm.instance_type.zone = zone
                 logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
-                logging.info(
-                    "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+                if self.type_task == Job.SERVER:
+                    logging.info(
+                        "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.server_image_id))
+                else:
+                    logging.info(
+                        "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
                 status = self.vm.deploy(type_task=self.type_task)
                 if status:
                     break
@@ -552,7 +564,7 @@ class Dispatcher:
         # self.expected_makespan_timestamp = self.vm.start_time + timedelta(seconds=self.queue.makespan_seconds)
 
         # update instance_repo
-        self.repo.add_instance(InstanceRepo(id=self.vm.instance_id,
+        self.repo.add_instance(InstanceRepo(id=f'{self.vm.instance_id}_{self.loader.execution_id}',
                                             type=self.vm.instance_type.type,
                                             region=self.vm.instance_type.region,
                                             zone=self.vm.instance_type.zone,

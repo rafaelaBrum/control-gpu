@@ -77,7 +77,7 @@ class Experiment:
 
     def __init__(self, experiment_name, loader: Loader, profile_name, cluster=None, bindings=None,
                  # instances_types: List[InstanceType] = None):
-                 instances_types: InstanceType = None):
+                 instances_types: InstanceType = None, dataset_urn=None):
 
         experiment_name = experiment_name + self.EXPERIMENT_RANDOM
         if len(experiment_name) > 16:
@@ -97,6 +97,8 @@ class Experiment:
             self.cluster_urn = cluster
         if bindings is None:
             bindings = {'hostType': instances_types.type}
+            if dataset_urn is not None:
+                bindings['DS_URN'] = dataset_urn
         self.bindings = json.dumps(bindings, indent=4)
         self.status = self.EXPERIMENT_NOT_STARTED
         self.nodes = dict()
@@ -229,10 +231,10 @@ class Experiment:
             self.still_provisioning = self.status in [self.EXPERIMENT_PROVISIONING,
                                                       self.EXPERIMENT_PROVISIONED,
                                                       self.EXPERIMENT_STARTED]
-            logging.info('<Experiment CloudLab Manager> Experiment {}: '
-                         'experiment status is {} in cluster {}'.format(self.experiment_name,
-                                                                        output.split('\n')[0],
-                                                                        self.cluster_urn))
+            # logging.info('<Experiment CloudLab Manager> Experiment {}: '
+            #              'experiment status is {} in cluster {}'.format(self.experiment_name,
+            #                                                             output.split('\n')[0],
+            #                                                             self.cluster_urn))
         else:
             logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
                           f'failed to get experiment status')

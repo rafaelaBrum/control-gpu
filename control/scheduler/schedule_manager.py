@@ -212,8 +212,6 @@ class ScheduleManager:
                 vm_name=aux_vm_name
             )
 
-            print(f"Client {i} on region {region.region} and zone {zone}")
-
             # Create the Vm that will be used by the dispatcher
             vm = VirtualMachine(
                 instance_type=instance_type,
@@ -773,6 +771,13 @@ class ScheduleManager:
             # Call checkers loop
             self.__checkers()
 
-        self.__terminate_dispatcher()
+        if self.loader.emulated:
+            self.__get_results()
 
-        self.__end_of_execution()
+        # self.__terminate_dispatcher()
+        #
+        # self.__end_of_execution()
+
+    def __get_results(self):
+        logging.error("Needs to get results from CloudLab!")
+        pass

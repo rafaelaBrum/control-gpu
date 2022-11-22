@@ -34,7 +34,8 @@
                 "bucket_provider": "CloudLab",
                 "bucket_region": "all",
                 "net": "VGG16",
-                "baseline_exec": 24.3
+                "baseline_exec": 24.3,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients"
             },
             "1" : {
                 "task_name": "Task VGG16 (client 1)",
@@ -50,7 +51,8 @@
                 "bucket_provider": "CloudLab",
                 "bucket_region": "all",
                 "net": "VGG16",
-                "baseline_exec": 24.3
+                "baseline_exec": 24.3,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-1"
             },
             "2" : {
                 "task_name": "Task VGG16 (client 2)",
@@ -66,7 +68,8 @@
                 "bucket_provider": "CloudLab",
                 "bucket_region": "all",
                 "net": "VGG16",
-                "baseline_exec": 24.3
+                "baseline_exec": 24.3,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-2"
             },
             "3" : {
                 "task_name": "Task VGG16 (client 3)",
@@ -82,7 +85,8 @@
                 "bucket_provider": "CloudLab",
                 "bucket_region": "all",
                 "net": "VGG16",
-                "baseline_exec": 24.3
+                "baseline_exec": 24.3,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-3"
             }
         }
     }
