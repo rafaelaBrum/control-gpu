@@ -271,7 +271,10 @@ class FedAvgSave(Strategy):
 
             # Save aggregated_ndarrays
             print(f"Saving round {server_round} aggregated_ndarrays...")
-            np.savez(f"round-{server_round}-weights.npz", *aggregated_ndarrays)
+            checkpoint_file = f"round-{server_round}-weights.npz"
+            np.savez(checkpoint_file, *aggregated_ndarrays)
+            with open("checkpoints.txt", "a") as file:
+                file.write(f"\n{checkpoint_file}")
 
         return parameters_aggregated, metrics_aggregated
 
