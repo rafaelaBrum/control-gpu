@@ -42,6 +42,7 @@ class ScheduleManager:
     terminated_dispatcher: List[Dispatcher]
     idle_dispatchers: List[Dispatcher]
     working_dispatchers: List[Dispatcher]
+    extra_vm: VirtualMachine
     # hibernating_dispatcher: List[Dispatcher]
     job_status = Task.WAITING
 
@@ -89,7 +90,8 @@ class ScheduleManager:
         self.abort = False
 
         self.server_task_dispatcher: Dispatcher
-        self.client_tasks_dispatches: List[Dispatcher]
+        self.client_tasks_dispatchers: List[Dispatcher]
+        self.extra_vm = None
         self.terminated_dispatchers = []
         self.working_dispatchers = []
         self.idle_dispatchers = []
@@ -663,6 +665,9 @@ class ScheduleManager:
             if self.loader.file_system_conf.type == EC2Manager.EBS:
                 self.ebs_volumes.append(terminated_dispatcher.vm.volume_id)
 
+        if self.extra_vm is not None:
+            self.extra_vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
         # self.semaphore.release()
 
     def __end_of_execution(self):
@@ -771,6 +776,9 @@ class ScheduleManager:
         if status:
             self.__start_clients_dispatchers()
 
+            if self.loader.checkpoint_conf.extra_vm:
+                self.__start_extra_vm()
+
             # Call checkers loop
             self.__checkers()
 
@@ -805,3 +813,8 @@ class ScheduleManager:
         os.makedirs(folder)
         semaphore.release()
         dispatcher.vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)
+
+    def __start_extra_vm(self):
+        logging.error("<Scheduler Manager {}_{}>: - Needs to start extra VM"
+                      " for FT technique".format(self.loader.job.job_id, self.loader.execution_id))
+        pass
