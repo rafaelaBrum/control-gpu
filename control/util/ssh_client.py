@@ -8,6 +8,7 @@ import socket
 from time import sleep
 
 import os
+import stat
 
 
 class SSHClient:
@@ -198,6 +199,27 @@ class SSHClient:
         ftp_client.get(source, target)
 
         ftp_client.close()
+
+    def get_dir(self, source, target):
+        sftp_client = self.client.open_sftp()
+        try:
+            sftp_client.stat(source)
+
+            if not os.path.exists(target):
+                os.mkdir(target)
+
+            for filename in sftp_client.listdir(source):
+                if stat.S_ISDIR(sftp_client.stat(source + filename).st_mode):
+                    # uses '/' path delimiter for remote server
+                    self.get_dir(source + filename + '/', os.path.join(target, filename))
+                else:
+                    if not os.path.isfile(os.path.join(target, filename)):
+                        sftp_client.get(source + filename, os.path.join(target, filename))
+        except Exception as e:
+            logging.error(f"<SSHClient> Error getting directory {source}")
+            logging.error(e)
+
+        sftp_client.close()
 
     @property
     def app_is_running(self):

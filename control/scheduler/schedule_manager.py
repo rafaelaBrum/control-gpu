@@ -642,6 +642,9 @@ class ScheduleManager:
 
             idle_dispatcher.working = False
 
+            if not idle_dispatcher.main_thread.is_alive():
+                idle_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
             self.idle_dispatchers.remove(idle_dispatcher)
             self.terminated_dispatchers.append(idle_dispatcher)
 
@@ -774,10 +777,31 @@ class ScheduleManager:
         if self.loader.emulated:
             self.__get_results()
 
-        # self.__terminate_dispatcher()
-        #
-        # self.__end_of_execution()
+        self.__terminate_dispatcher()
+
+        self.__end_of_execution()
 
     def __get_results(self):
-        logging.error("Needs to get results from CloudLab!")
-        pass
+        logging.info("<Scheduler Manager {}_{}>: - Getting results from VMS".format(self.loader.job.job_id,
+                                                                                    self.loader.execution_id))
+        folder_root = f"results/{self.loader.job.job_id}_{self.loader.execution_id}"
+        threads_dispatcher = []
+        for dispatcher in self.idle_dispatchers:
+            thread = threading.Thread(target=self.__get_result_vm, args=(dispatcher,
+                                                                         folder_root,
+                                                                         self.semaphore))
+            thread.start()
+            threads_dispatcher.append(thread)
+
+        for thread in threads_dispatcher:
+            thread.join()
+
+    def __get_result_vm(self, dispatcher, folder_root, semaphore):
+        logging.info("<Scheduler Manager {}_{}>: - Getting results from VM {}".format(self.loader.job.job_id,
+                                                                                      self.loader.execution_id,
+                                                                                      dispatcher.vm.instance_id))
+        folder = f"{folder_root}/{dispatcher.vm.experiment_emulation.experiment_name}"
+        semaphore.acquire()
+        os.makedirs(folder)
+        semaphore.release()
+        dispatcher.vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)

@@ -673,7 +673,7 @@ class Dispatcher:
                 while self.debug_wait_command:
                     time.sleep(5)
 
-                self.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+                # self.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
 
             self.repo.close_session()
 

@@ -823,6 +823,8 @@ class VirtualMachine:
                 vcpu_price, mem_price = self.manager.get_ondemand_price(self.instance_type.type,
                                                                         self.region.region)
             return self.instance_type.vcpu*vcpu_price + self.instance_type.memory*mem_price
+        elif self.instance_type.provider == CloudManager.CLOUDLAB:
+            return self.instance_type.price_ondemand[self.region.region]
 
     @property
     def type(self):
