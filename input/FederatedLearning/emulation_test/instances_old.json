@@ -495,32 +495,6 @@
                 "CloudLab_Clemson"
             ]
         },
-        "ibm8335": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {},
-                "preemptible": {}
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 160,
-            "memory": 262,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Clemson"
-            ]
-        },
         "r650": {
             "provider": "CloudLab",
             "prices": {

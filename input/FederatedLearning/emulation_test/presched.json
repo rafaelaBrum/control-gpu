@@ -4,13 +4,34 @@
             "CloudLab_Massachusetts": {}
         },
         "c220g1": {
-            "CloudLab_Wisconsin": {}
+            "CloudLab_Wisconsin": {
+                "0": {
+                    "eval_1": "2.297779083251953",
+                    "eval_2": "2.2150466442108154",
+                    "fit_1": "119.89449286460876",
+                    "fit_2": "112.82709789276123"
+                }
+            }
         },
         "c220g2": {
-            "CloudLab_Wisconsin": {}
+            "CloudLab_Wisconsin": {
+                "0": {
+                    "eval_1": "1.932283878326416",
+                    "eval_2": "1.9563961029052734",
+                    "fit_1": "139.03699922561646",
+                    "fit_2": "131.74145913124084"
+                }
+            }
         },
         "c220g5": {
-            "CloudLab_Wisconsin": {}
+            "CloudLab_Wisconsin": {
+                "0": {
+                    "eval_1": "2.7511446475982666",
+                    "eval_2": "2.731745481491089",
+                    "fit_1": "133.407466173172",
+                    "fit_2": "130.82565259933472"
+                }
+            }
         },
         "c240g1": {
             "CloudLab_Wisconsin": {
@@ -47,7 +68,14 @@
             "CloudLab_Wisconsin": {}
         },
         "c6220": {
-            "CloudLab_APT": {}
+            "CloudLab_APT": {
+                "0": {
+                    "eval_1": "4.224476337432861",
+                    "eval_2": "4.260990142822266",
+                    "fit_1": "147.79132866859436",
+                    "fit_2": "141.61891555786133"
+                }
+            }
         },
         "c6320": {
             "CloudLab_Clemson": {
@@ -99,7 +127,9 @@
             "CloudLab_Emulab": {}
         },
         "d6515": {
-            "CloudLab_Utah": {}
+            "CloudLab_Utah": {
+                "0": {}
+            }
         },
         "d710": {
             "CloudLab_Emulab": {}
@@ -111,19 +141,30 @@
             "CloudLab_Utah": {}
         },
         "dss7500": {
-            "CloudLab_Clemson": {}
+            "CloudLab_Clemson": {
+                "0": {
+                    "eval_1": "2.785689353942871",
+                    "eval_2": "2.6738994121551514",
+                    "fit_1": "128.4557399749756",
+                    "fit_2": "122.39068841934204"
+                }
+            }
         },
         "fpga-alveo": {
             "CloudLab_Massachusetts": {}
-        },
-        "ibm8335": {
-            "CloudLab_Clemson": {}
         },
         "m400": {
             "CloudLab_Utah": {}
         },
         "m510": {
-            "CloudLab_Utah": {}
+            "CloudLab_Utah": {
+                "0": {
+                    "eval_1": "4.7071850299835205",
+                    "eval_2": "4.621936798095703",
+                    "fit_1": "163.1573679447174",
+                    "fit_2": "158.9494149684906"
+                }
+            }
         },
         "nuc11i9": {
             "CloudLab_Emulab": {}
@@ -132,10 +173,24 @@
             "CloudLab_Emulab": {}
         },
         "r320": {
-            "CloudLab_APT": {}
+            "CloudLab_APT": {
+                "0": {
+                    "eval_1": "11.180327653884888",
+                    "eval_2": "11.1284339427948",
+                    "fit_1": "263.88847255706787",
+                    "fit_2": "256.7258267402649"
+                }
+            }
         },
         "r650": {
-            "CloudLab_Clemson": {}
+            "CloudLab_Clemson": {
+                "0": {
+                    "eval_1": "0.9544546604156494",
+                    "eval_2": "0.8251371383666992",
+                    "fit_1": "84.89903664588928",
+                    "fit_2": "81.72443127632141"
+                }
+            }
         },
         "r6525": {
             "CloudLab_Clemson": {}
@@ -144,13 +199,34 @@
             "CloudLab_Clemson": {}
         },
         "rs440": {
-            "CloudLab_Massachusetts": {}
+            "CloudLab_Massachusetts": {
+                "0": {
+                    "eval_1": "1.256765604019165",
+                    "eval_2": "1.1965110301971436",
+                    "fit_1": "94.23153376579285",
+                    "fit_2": "92.42443704605103"
+                }
+            }
         },
         "rs620": {
-            "CloudLab_Massachusetts": {}
+            "CloudLab_Massachusetts": {
+                "0": {
+                    "eval_1": "4.104317903518677",
+                    "eval_2": "3.877317190170288",
+                    "fit_1": "150.18817901611328",
+                    "fit_2": "144.568284034729"
+                }
+            }
         },
         "rs630": {
-            "CloudLab_Massachusetts": {}
+            "CloudLab_Massachusetts": {
+                "0": {
+                    "eval_1": "1.9074654579162598",
+                    "eval_2": "1.7514877319335938",
+                    "fit_1": "112.43972110748291",
+                    "fit_2": "103.593106508255"
+                }
+            }
         },
         "xl170": {
             "CloudLab_Utah": {}
@@ -160,24 +236,6 @@
     "job_name": "4 clients - VGG16 (dataset in CloudLab)",
     "number_datacenters": 0,
     "rpc": {
-        "CloudLab_APT_Emulated": {
-            "CloudLab_APT_Emulated": {},
-            "CloudLab_Emulab_Emulated": {},
-            "CloudLab_Massachusetts_Emulated": {}
-        },
-        "CloudLab_Clemson_Emulated": {
-            "CloudLab_APT_Emulated": {},
-            "CloudLab_Clemson_Emulated": {},
-            "CloudLab_Emulab_Emulated": {},
-            "CloudLab_Massachusetts_Emulated": {}
-        },
-        "CloudLab_Emulab_Emulated": {
-            "CloudLab_Emulab_Emulated": {},
-            "CloudLab_Massachusetts_Emulated": {}
-        },
-        "CloudLab_Massachusetts_Emulated": {
-            "CloudLab_Massachusetts_Emulated": {}
-        },
         "CloudLab_Utah_Emulated": {
             "CloudLab_APT_Emulated": {
                 "client-server": {
@@ -199,8 +257,6 @@
                     "TrainMsg": "12.283066511154175"
                 }
             },
-            "CloudLab_Emulab_Emulated": {},
-            "CloudLab_Massachusetts_Emulated": {},
             "CloudLab_Utah_Emulated": {
                 "client-server": {
                     "TestMsg": "1.3109755516052246",
@@ -221,13 +277,6 @@
                     "TrainMsg": "21.928953409194946"
                 }
             }
-        },
-        "CloudLab_Wisconsin_Emulated": {
-            "CloudLab_APT_Emulated": {},
-            "CloudLab_Clemson_Emulated": {},
-            "CloudLab_Emulab_Emulated": {},
-            "CloudLab_Massachusetts_Emulated": {},
-            "CloudLab_Wisconsin_Emulated": {}
         }
     },
     "rpc_concurrent": {},

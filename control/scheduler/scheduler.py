@@ -25,6 +25,7 @@ class Scheduler:
         self.loc_cloudlab: Dict[str, CloudRegion] = {}
         self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
         self.__separate_location_by_cloud(locations)
+        self.index_extra_vm = []
 
     def __divide_instances_for_server_and_for_client_by_cloud(self, instance_types):
         # logging.info("<Scheduler>: Dividing instances types for server and client")
@@ -121,6 +122,44 @@ class Scheduler:
                             return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
+
+    def get_extra_vm_instance(self, provider, region):
+        logging.info("<Scheduler>: Choosing initial instance for extra VM from provider {}".format(provider))
+        if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
+            for name, instance in self.instances_client_aws.items():
+                if name in self.index_extra_vm:
+                    continue
+                self.index_extra_vm.append(name)
+                for loc in self.loc_aws.values():
+                    if loc.region == region:
+                        for zone in loc.zones:
+                            logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
+                                                                                                         region))
+                            return instance, CloudManager.ON_DEMAND, loc, zone
+                logging.error("<Scheduler>: Location {} not included in environment".format(region))
+        elif provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
+            for name, instance in self.instances_client_gcp.items():
+                if name in self.index_extra_vm:
+                    continue
+                self.index_extra_vm.append(name)
+                for loc in self.loc_gcp.values():
+                    if loc.region == region:
+                        for zone in loc.zones:
+                            logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
+                                                                                                         region))
+                            return instance, CloudManager.ON_DEMAND, loc, zone
+                logging.error("<Scheduler>: Location {} not included in environment".format(region))
+        elif provider.lower() in CloudManager.CLOUDLAB.lower():
+            for name, instance in self.instances_server_cloudlab.items():
+                if name in self.index_extra_vm:
+                    continue
+                self.index_extra_vm.append(name)
+                for loc in self.loc_cloudlab.values():
+                    if loc.region == region:
+                        logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
+                                                                                                         region))
+                        return instance, Experiment.MARKET, loc, ""
+                logging.error("<Scheduler>: Location {} not included in environment".format(region))
 
     def __separate_location_by_cloud(self, locations):
         for loc_id, loc in locations.items():

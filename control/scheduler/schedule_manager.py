@@ -815,6 +815,55 @@ class ScheduleManager:
         dispatcher.vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)
 
     def __start_extra_vm(self):
-        logging.error("<Scheduler Manager {}_{}>: - Needs to start extra VM"
-                      " for FT technique".format(self.loader.job.job_id, self.loader.execution_id))
-        pass
+        try:
+            with open(self.loader.map_file) as f:
+                data = f.read()
+            json_data = json.loads(data)
+        except Exception:
+            json_data = None
+        if json_data is None:
+            aux_provider = self.loader.server_provider,
+            aux_region = self.loader.server_region
+        else:
+            aux_provider = json_data['server']['provider']
+            aux_region = json_data['server']['region']
+        while True:
+            instance_type, market, region, zone = self.scheduler.get_extra_vm_instance(
+                provider=aux_provider,
+                region=aux_region
+            )
+            # Create the Vm that will be used by the dispatcher
+            self.extra_vm = VirtualMachine(
+                instance_type=instance_type,
+                market=market,
+                loader=self.loader,
+                region=region,
+                zone=zone
+            )
+
+            logging.info("Deploying extra VM in {}".format(self.extra_vm.zone))
+            logging.info("Vms region {} and image_id {}".format(self.extra_vm.region.region,
+                                                                self.extra_vm.region.server_image_id))
+
+            status = self.extra_vm.deploy(type_task='extra_vm')
+
+            if not status:
+                for zone in self.extra_vm.region.zones:
+                    self.extra_vm.instance_id = None
+                    self.extra_vm.zone = zone
+                    self.extra_vm.instance_type.zone = zone
+                    logging.info("Deploying extra VM in {}".format(self.extra_vm.zone))
+                    logging.info("Vms region {} and image_id {}".format(self.extra_vm.region.region,
+                                                                        self.extra_vm.region.server_image_id))
+                    status = self.extra_vm.deploy(type_task='extra_vm')
+                    if status:
+                        break
+
+            # PAREI AQUI
+            # self.repo.add_instance(InstanceRepo(id=f'{self.vm.instance_id}_{self.loader.execution_id}',
+            #                                     type=self.vm.instance_type.type,
+            #                                     region=self.vm.instance_type.region,
+            #                                     zone=self.vm.instance_type.zone,
+            #                                     market=self.vm.market,
+            #                                     ebs_volume=self.vm.volume_id,
+            #                                     price=self.vm.price))

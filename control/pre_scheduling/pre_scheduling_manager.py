@@ -116,6 +116,7 @@ class PreSchedulingManager:
         self.exec_times: Dict[str, Dict[str, Dict[str, float]]] = {}
         self.rpc_times: Dict[str, Dict[str, Dict[str, float]]] = {}
         self.rpc_times_concurrent: Dict[str, Dict[str, Dict[str, Dict[int, Dict[str, float]]]]] = {}
+        self.rpc_instances = deepcopy(self.loader.env)
 
         self.stop_execution = self.__read_json()
 
@@ -1653,9 +1654,10 @@ class PreSchedulingManager:
         return False
 
     def find_instance_cloudlab(self, id_region):
-        for instance_type in self.loader.env.keys():
-            instance = self.loader.env[instance_type]
+        for instance_type in self.rpc_instances.keys():
+            instance = self.rpc_instances[instance_type]
             if id_region in instance.locations:
+                self.rpc_instances.pop(instance_type)
                 return instance
 
     def calculate_rpc_times_emulated(self):
@@ -1701,11 +1703,22 @@ class PreSchedulingManager:
                     logging.info(f"<PreSchedulerManager>: Testing with region {region_copy.region} "
                                  f"of provider {region_copy.provider}")
                     if not vm_initial.failed_to_created:
-                        vm_initial.deploy(needs_volume=False, key_name=key_file_initial,
-                                          type_task='server')
+                        status = vm_initial.deploy(needs_volume=False, key_name=key_file_initial,
+                                                   type_task='server')
+                        while not status:
+                            instance_cloudlab = self.find_instance_cloudlab(region_id)
+                            vm_initial = VirtualMachine(instance_type=instance_cloudlab, market=Experiment.MARKET,
+                                                        loader=self.loader, region=region)
+                            status = vm_initial.deploy(needs_volume=False, key_name=key_file_initial,
+                                                       type_task='server')
                         if not vm_initial.failed_to_created:
                             vm_initial.update_ip()
-                    vm_final.deploy(needs_volume=False, key_name=key_file, type_task='server')
+                    status = vm_final.deploy(needs_volume=False, key_name=key_file, type_task='server')
+                    while not status:
+                        instance_cloudlab_2 = self.find_instance_cloudlab(region_id_copy)
+                        vm_final = VirtualMachine(instance_type=instance_cloudlab_2, market=Experiment.MARKET,
+                                                  loader=self.loader, region=region_copy)
+                        status = vm_final.deploy(needs_volume=False, key_name=key_file, type_task='server')
                     if not vm_final.failed_to_created:
                         # update instance IP
                         vm_final.update_ip()

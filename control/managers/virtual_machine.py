@@ -163,6 +163,13 @@ class VirtualMachine:
                                        + str(VirtualMachine.vm_num), profile_name=self.region.client_image_id,
                                        cluster=self.region.cluster_urn, loader=self.loader,
                                        instances_types=self.instance_type, dataset_urn=dataset_urn)
+                    elif type_task == "extra_vm":
+                        self.experiment_emulation = \
+                            Experiment(experiment_name=self.loader.cloudlab_conf.server_experiment_name
+                                                       + str(VirtualMachine.vm_num),
+                                       profile_name=self.region.server_image_id,
+                                       cluster=self.region.cluster_urn, loader=self.loader,
+                                       instances_types=self.instance_type)
                     VirtualMachine.vm_num = VirtualMachine.vm_num + 1
                     self.instance_id = self.experiment_emulation.experiment_name
                     exp_status = self.experiment_emulation.start_and_wait()
