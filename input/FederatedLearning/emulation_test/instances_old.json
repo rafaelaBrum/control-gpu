@@ -78,58 +78,6 @@
                 "CloudLab_Utah"
             ]
         },
-        "dl360": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {},
-                "preemptible": {}
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 40,
-            "memory": 1048,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Utah"
-            ]
-        },
-        "m400": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {},
-                "preemptible": {}
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 8,
-            "memory": 65,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Utah"
-            ]
-        },
         "m510": {
             "provider": "CloudLab",
             "prices": {
@@ -753,58 +701,6 @@
             "gpu_count": 0,
             "locations": [
                 "CloudLab_Emulab"
-            ]
-        },
-        "build": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {},
-                "preemptible": {}
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 2,
-            "memory": 262,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Massachusetts"
-            ]
-        },
-        "fpga-alveo": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {},
-                "preemptible": {}
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 2,
-            "memory": 196,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Massachusetts"
             ]
         },
         "rs440": {
