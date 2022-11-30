@@ -1685,6 +1685,7 @@ class PreSchedulingManager:
                     self.rpc_times[id_rpc] = {}
                 for region_id_copy, region_copy in loc_copy.items():
                     if region_copy.provider in CloudManager.CLOUDLAB and self.loader.emulated:
+                        self.rpc_instances = deepcopy(self.loader.env)
                         instance_cloudlab_2 = self.find_instance_cloudlab(region_id_copy)
                         vm_final = VirtualMachine(instance_type=instance_cloudlab_2, market=Experiment.MARKET,
                                                   loader=self.loader, region=region_copy)
@@ -1705,6 +1706,8 @@ class PreSchedulingManager:
                     if not vm_initial.failed_to_created:
                         status = vm_initial.deploy(needs_volume=False, key_name=key_file_initial,
                                                    type_task='server')
+                        self.rpc_instances = deepcopy(self.loader.env)
+                        self.rpc_instances.pop(instance_cloudlab.type)
                         while not status:
                             instance_cloudlab = self.find_instance_cloudlab(region_id)
                             vm_initial = VirtualMachine(instance_type=instance_cloudlab, market=Experiment.MARKET,
@@ -1714,6 +1717,8 @@ class PreSchedulingManager:
                         if not vm_initial.failed_to_created:
                             vm_initial.update_ip()
                     status = vm_final.deploy(needs_volume=False, key_name=key_file, type_task='server')
+                    self.rpc_instances = deepcopy(self.loader.env)
+                    self.rpc_instances.pop(instance_cloudlab_2.type)
                     while not status:
                         instance_cloudlab_2 = self.find_instance_cloudlab(region_id_copy)
                         vm_final = VirtualMachine(instance_type=instance_cloudlab_2, market=Experiment.MARKET,
@@ -1920,7 +1925,7 @@ class PreSchedulingManager:
                      'gpu_vms': {},
                      'cost_vms': {},
                      'time_aggreg': {},
-                     'slowdown':{},
+                     'slowdown': {},
                      'comm_slowdown': {}}
 
         for key, instance_type in self.loader.env.items():
@@ -1985,8 +1990,8 @@ class PreSchedulingManager:
                     try:
                         time_baseline_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['TestMsg']) +\
                                                       float(self.rpc_times[loc_1][loc_2]['client-server']['TrainMsg'])
-                        time_baseline_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['TestMsg']) + \
-                                                      float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
+                        time_baseline_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['TestMsg']) +\
+                            float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
                         time_baseline = (time_baseline_client_server + time_baseline_server_client) / 2
                         pair_regions_baseline_chosen = True
                         # print("time_baseline", time_baseline)
@@ -2014,7 +2019,7 @@ class PreSchedulingManager:
                     time_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['TestMsg']) + \
                                          float(self.rpc_times[loc_1][loc_2]['client-server']['TrainMsg'])
                     time_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['TestMsg']) + \
-                                         float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
+                        float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
                     current_time = (time_client_server + time_server_client) / 2
                     # print("current_time", current_time)
 
@@ -2039,7 +2044,7 @@ class PreSchedulingManager:
                             data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = {}
                         if aux_comm_slowdown[provider_1][region_1][provider_2][region_2]:
                             data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = \
-                            aux_comm_slowdown[provider_1][region_1][provider_2][region_2]
+                                aux_comm_slowdown[provider_1][region_1][provider_2][region_2]
                         else:
                             data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = 10000000
 
@@ -2053,7 +2058,7 @@ class PreSchedulingManager:
                             data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = {}
                         if aux_comm_slowdown[provider_2][region_2][provider_1][region_1]:
                             data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = \
-                            aux_comm_slowdown[provider_2][region_2][provider_1][region_1]
+                                aux_comm_slowdown[provider_2][region_2][provider_1][region_1]
                         else:
                             data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = 10000000
 
