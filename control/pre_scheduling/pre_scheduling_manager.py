@@ -1961,6 +1961,7 @@ class PreSchedulingManager:
                             time_baseline = float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) + \
                                             float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])
                             vm_baseline_chosen = True
+                            data_dict['vm_baseline'] = {'vm_name': vm_name, 'location': loc}
                         except Exception as e:
                             logging.error(e)
                     if self.loader.emulated:
@@ -1994,6 +1995,10 @@ class PreSchedulingManager:
                             float(self.rpc_times[loc_1][loc_2]['server-client']['TrainMsg'])
                         time_baseline = (time_baseline_client_server + time_baseline_server_client) / 2
                         pair_regions_baseline_chosen = True
+                        data_dict['pair_regions_baseline'] = {"provider_1": aux_provider_1,
+                                                              "location_1": loc_1,
+                                                              "provider_2": aux_provider_2,
+                                                              "location_2": loc_2}
                         # print("time_baseline", time_baseline)
                     except Exception as e:
                         logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")

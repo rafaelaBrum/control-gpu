@@ -3,47 +3,47 @@
         "CLOUDLAB": {
             "APT": {
                 "CLOUDLAB": {
-                    "APT": 1.1663471601746072,
-                    "Clemson": 2.4231835749647845,
-                    "Massachusetts": 21.74132063115127,
-                    "Utah": 1.0,
-                    "Wisconsin": 3.210164489177191
+                    "APT": 1.0,
+                    "Clemson": 2.0775834654598238,
+                    "Massachusetts": 18.64052262783964,
+                    "Utah": 0.8573776609104066,
+                    "Wisconsin": 2.75232332086839
                 }
             },
             "Clemson": {
                 "CLOUDLAB": {
-                    "APT": 2.4231835749647845,
-                    "Clemson": 1.1130922442188131,
-                    "Massachusetts": 14.53748926037987,
-                    "Utah": 2.2533438756319195,
-                    "Wisconsin": 1.3701018609486273
+                    "APT": 2.0775834654598238,
+                    "Clemson": 0.9543404247258411,
+                    "Massachusetts": 12.464118537574649,
+                    "Utah": 1.931966701316085,
+                    "Wisconsin": 1.1746947287491292
                 }
             },
             "Massachusetts": {
                 "CLOUDLAB": {
-                    "APT": 21.74132063115127,
-                    "Clemson": 14.53748926037987,
-                    "Massachusetts": 1.0829558934926409,
-                    "Utah": 16.436326948036513,
-                    "Wisconsin": 28.845245873295596
+                    "APT": 18.64052262783964,
+                    "Clemson": 12.464118537574649,
+                    "Massachusetts": 0.9285021908318597,
+                    "Utah": 14.092139552666225,
+                    "Wisconsin": 24.731269435231734
                 }
             },
             "Utah": {
                 "CLOUDLAB": {
-                    "APT": 1.0,
-                    "Clemson": 2.2533438756319195,
-                    "Massachusetts": 16.436326948036513,
-                    "Utah": 0.4344393728423116,
-                    "Wisconsin": 4.360327552212148
+                    "APT": 0.8573776609104066,
+                    "Clemson": 1.931966701316085,
+                    "Massachusetts": 14.092139552666225,
+                    "Utah": 0.3724786132949251,
+                    "Wisconsin": 3.73844743751885
                 }
             },
             "Wisconsin": {
                 "CLOUDLAB": {
-                    "APT": 3.210164489177191,
-                    "Clemson": 1.3701018609486273,
-                    "Massachusetts": 28.845245873295596,
-                    "Utah": 4.360327552212148,
-                    "Wisconsin": 1.1924745932889458
+                    "APT": 2.75232332086839,
+                    "Clemson": 1.1746947287491292,
+                    "Massachusetts": 24.731269435231734,
+                    "Utah": 3.73844743751885,
+                    "Wisconsin": 1.0224010774891648
                 }
             }
         }
@@ -168,6 +168,12 @@
             }
         }
     },
+    "pair_regions_baseline": {
+        "location_1": "CloudLab_APT_Emulated",
+        "location_2": "CloudLab_APT_Emulated",
+        "provider_1": "CLOUDLAB",
+        "provider_2": "CLOUDLAB"
+    },
     "slowdown": {
         "CLOUDLAB_all": {
             "CLOUDLAB": {
@@ -200,7 +206,8 @@
                     "c220g2": 1.1621641422998554,
                     "c220g5": 1.1609432231846422,
                     "c240g1": 0.9785185382957895,
-                    "c240g2": 1.1604512204690836
+                    "c240g2": 1.1604512204690836,
+                    "c4130": 0.0640817444475407
                 }
             }
         }
@@ -244,5 +251,9 @@
                 "c4130": 0.5
             }
         }
+    },
+    "vm_baseline": {
+        "location": "CloudLab_Wisconsin",
+        "vm_name": "c220g1"
     }
 }
