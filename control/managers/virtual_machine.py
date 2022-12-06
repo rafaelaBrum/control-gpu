@@ -947,3 +947,62 @@ class VirtualMachine:
 
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
+
+    def prepare_ft_daemon(self, ip_address):
+        task_id = self.loader.job.num_clients+1
+        if self.ssh.is_active:
+            item = self.loader.checkpoint_conf.daemon_fault_tolerance
+
+            self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                              target=self.loader.cloudlab_conf.home_path,
+                              item=item)
+
+            self.ssh.put_file(source=self.loader.ec2_conf.key_path,
+                              target=self.loader.cloudlab_conf.home_path,
+                              item=self.key_file)
+
+            cmd_daemon = "python3.7 {} " \
+                         "--vm_user {} " \
+                         "--root_path {} " \
+                         "--job_id {} " \
+                         "--task_id {} " \
+                         "--execution_id {}  " \
+                         "--instance_id {} " \
+                         "--extra_address {} " \
+                         "--key_file {} " \
+                         "--key_path {} " \
+                         "--user {}".format(os.path.join(self.loader.cloudlab_conf.home_path,
+                                                         item),
+                                            self.loader.cloudlab_conf.vm_user,
+                                            self.loader.file_system_conf.path,
+                                            self.loader.job.job_id,
+                                            task_id,
+                                            self.loader.execution_id,
+                                            self.instance_id,
+                                            ip_address,
+                                            self.loader.cloudlab_conf.home_path,
+                                            self.key_file,
+                                            self.loader.cloudlab_conf.vm_user)
+
+            # create execution folder
+            self.root_folder = os.path.join(self.loader.file_system_conf.path,
+                                            '{}_{}_{}'.format(self.loader.job.job_id,
+                                                              task_id,
+                                                              self.loader.execution_id))
+
+            self.ssh.execute_command('mkdir -p {}'.format(self.root_folder), output=True)
+
+            # Start Daemon
+            logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
+
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+            # cmd_screen = '{}'.format(cmd_daemon)
+
+            logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
+
+            stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True)
+            print(stdout)
+        else:
+
+            logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR".format(self.instance_id))
+            raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(self.instance_id))

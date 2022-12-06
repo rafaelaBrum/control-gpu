@@ -24,6 +24,7 @@ from control.repository.postgres_objects import Job as JobRepo
 from control.repository.postgres_objects import Task as TaskRepo
 from control.repository.postgres_objects import InstanceType as InstanceTypeRepo
 from control.repository.postgres_objects import Statistic as StatisticRepo
+from control.repository.postgres_objects import Instance as InstanceRepo
 
 from control.scheduler.fl_simple_scheduler import FLSimpleScheduler
 from control.scheduler.mathematical_formulation_scheduler import MathematicalFormulationScheduler
@@ -601,7 +602,7 @@ class ScheduleManager:
         # Starting working dispatcher
         for i in range(self.loader.job.num_clients):
             self.client_task_dispatchers[i].main_thread.start()
-            time.sleep(2)
+            time.sleep(60)
 
         self.semaphore.release()
 
@@ -665,8 +666,8 @@ class ScheduleManager:
             if self.loader.file_system_conf.type == EC2Manager.EBS:
                 self.ebs_volumes.append(terminated_dispatcher.vm.volume_id)
 
-        if self.extra_vm is not None:
-            self.extra_vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+        # if self.extra_vm is not None:
+        #     self.extra_vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
 
         # self.semaphore.release()
 
@@ -777,6 +778,7 @@ class ScheduleManager:
             self.__start_clients_dispatchers()
 
             if self.loader.checkpoint_conf.extra_vm:
+                time.sleep(600)
                 self.__start_extra_vm()
 
             # Call checkers loop
@@ -859,11 +861,15 @@ class ScheduleManager:
                     if status:
                         break
 
-            # PAREI AQUI
-            # self.repo.add_instance(InstanceRepo(id=f'{self.vm.instance_id}_{self.loader.execution_id}',
-            #                                     type=self.vm.instance_type.type,
-            #                                     region=self.vm.instance_type.region,
-            #                                     zone=self.vm.instance_type.zone,
-            #                                     market=self.vm.market,
-            #                                     ebs_volume=self.vm.volume_id,
-            #                                     price=self.vm.price))
+            if status:
+                self.repo.add_instance(InstanceRepo(id=f'{self.extra_vm.instance_id}_{self.loader.execution_id}',
+                                                    type=self.extra_vm.instance_type.type,
+                                                    region=self.extra_vm.instance_type.region,
+                                                    zone=self.extra_vm.instance_type.zone,
+                                                    market=self.extra_vm.market,
+                                                    ebs_volume=self.extra_vm.volume_id,
+                                                    price=self.extra_vm.price))
+
+                self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip)
+
+                break

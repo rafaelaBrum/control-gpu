@@ -560,8 +560,9 @@ class Trainer(object):
         # Get positive scores (binary only)
         if nclasses == 2:
             scores = Y_pred.transpose()[1]
-            fpr, tpr, thresholds = metrics.roc_curve(expected, scores, pos_label=1)
-            print("AUC: {0:f}".format(metrics.roc_auc_score(expected, scores)))
+            if len(np.unique(scores, return_counts=False)) == 2:
+                fpr, tpr, thresholds = metrics.roc_curve(expected, scores, pos_label=1)
+                print("AUC: {0:f}".format(metrics.roc_auc_score(expected, scores)))
 
             print("Accuracy: {0:.3f}".format(m_conf[nclasses + 2][nclasses]))
 

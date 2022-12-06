@@ -150,8 +150,12 @@ class Scheduler:
                             return instance, CloudManager.ON_DEMAND, loc, zone
                 logging.error("<Scheduler>: Location {} not included in environment".format(region))
         elif provider.lower() in CloudManager.CLOUDLAB.lower():
+            aux_region = 'CloudLab_' + region
             for name, instance in self.instances_server_cloudlab.items():
                 if name in self.index_extra_vm:
+                    continue
+                print(instance)
+                if aux_region not in instance.locations:
                     continue
                 self.index_extra_vm.append(name)
                 for loc in self.loc_cloudlab.values():
