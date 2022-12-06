@@ -962,7 +962,6 @@ class VirtualMachine:
                               item=self.key_file)
 
             cmd_daemon = "python3.7 {} " \
-                         "--vm_user {} " \
                          "--root_path {} " \
                          "--job_id {} " \
                          "--task_id {} " \
@@ -973,7 +972,6 @@ class VirtualMachine:
                          "--key_path {} " \
                          "--user {}".format(os.path.join(self.loader.cloudlab_conf.home_path,
                                                          item),
-                                            self.loader.cloudlab_conf.vm_user,
                                             self.loader.file_system_conf.path,
                                             self.loader.job.job_id,
                                             task_id,
