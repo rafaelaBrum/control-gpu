@@ -10,6 +10,8 @@ import socket
 
 from time import sleep
 
+from pathlib import Path
+
 FOLDER_CHECKPOINTS = 'checkpoints/'
 
 
@@ -18,6 +20,9 @@ class SSHClient:
     def __init__(self, ip_address, key_path, key_file, user):
 
         self.ip_address = ip_address
+
+        if key_path[-1] != '/':
+            key_path = key_path + '/'
 
         self.key = paramiko.Ed25519Key.from_private_key_file(key_path + key_file)
         self.user = user
@@ -147,7 +152,15 @@ def check_checkpoints(args):
                            key_path=args.key_path,
                            key_file=args.key_file,
                            user=args.user)
-    with open("checkpoints.txt", "r") as control_file:
+
+    path_file = "checkpoints.txt"
+
+    path = Path(path_file)
+
+    if not path.is_file():
+        with open(path_file, "a"):
+            path_file.write("")
+    with open(path_file, "r") as control_file:
         while True:
             lines = control_file.readlines()
             if len(lines) > 0:

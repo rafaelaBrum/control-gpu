@@ -961,6 +961,9 @@ class VirtualMachine:
                               target=self.loader.cloudlab_conf.home_path,
                               item=self.key_file)
 
+            cmd = f"chmod 400 {self.key_file}"
+            self.ssh.execute_command(cmd, output=True)
+
             cmd_daemon = "python3.7 {} " \
                          "--root_path {} " \
                          "--job_id {} " \
@@ -978,8 +981,8 @@ class VirtualMachine:
                                             self.loader.execution_id,
                                             self.instance_id,
                                             ip_address,
-                                            self.loader.cloudlab_conf.home_path,
                                             self.key_file,
+                                            self.loader.cloudlab_conf.home_path,
                                             self.loader.cloudlab_conf.vm_user)
 
             # create execution folder
