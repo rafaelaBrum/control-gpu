@@ -797,7 +797,7 @@ class ScheduleManager:
         folder_root = f"results/{self.loader.job.job_id}_{self.loader.execution_id}"
         threads_dispatcher = []
         for dispatcher in self.idle_dispatchers:
-            thread = threading.Thread(target=self.__get_result_vm, args=(dispatcher,
+            thread = threading.Thread(target=self.__get_result_vm, args=(dispatcher.vm,
                                                                          folder_root,
                                                                          self.semaphore))
             thread.start()
@@ -806,15 +806,22 @@ class ScheduleManager:
         for thread in threads_dispatcher:
             thread.join()
 
-    def __get_result_vm(self, dispatcher, folder_root, semaphore):
+    def __get_result_vm(self, vm, folder_root, semaphore):
         logging.info("<Scheduler Manager {}_{}>: - Getting results from VM {}".format(self.loader.job.job_id,
                                                                                       self.loader.execution_id,
-                                                                                      dispatcher.vm.instance_id))
-        folder = f"{folder_root}/{dispatcher.vm.experiment_emulation.experiment_name}"
+                                                                                      vm.instance_id))
+        folder = f"{folder_root}/{vm.experiment_emulation.experiment_name}"
         semaphore.acquire()
         os.makedirs(folder)
         semaphore.release()
-        dispatcher.vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)
+        try:
+            logging.info("Opening connection")
+            if vm.ssh.open_connection():
+                logging.info("Connection opened")
+                vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)
+                vm.ssh.close_connection()
+        except Exception as e:
+            logging.error(e)
 
     def __start_extra_vm(self):
         try:

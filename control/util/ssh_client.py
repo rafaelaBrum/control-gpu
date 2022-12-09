@@ -101,6 +101,7 @@ class SSHClient:
 
         try:
             self.client.close()
+            self.client = None
             return True
         except Exception as e:
             logging.error("<SSH Client>: closing connection error " + str(e))
@@ -201,20 +202,28 @@ class SSHClient:
         ftp_client.close()
 
     def get_dir(self, source, target):
+        # logging.info(f"entering get_dir with source {source} and target {target}")
         sftp_client = self.client.open_sftp()
+        # logging.info("Opened SFTP connection")
         try:
             sftp_client.stat(source)
+            # logging.info("Got source stat")
 
             if not os.path.exists(target):
                 os.mkdir(target)
 
+            # logging.info("Scanning all files in source")
             for filename in sftp_client.listdir(source):
                 if stat.S_ISDIR(sftp_client.stat(source + filename).st_mode):
+                    # logging.info(f"Filename {filename} is directory")
                     # uses '/' path delimiter for remote server
                     self.get_dir(source + filename + '/', os.path.join(target, filename))
                 else:
+                    # logging.info(f"Filename {filename} is a file")
                     if not os.path.isfile(os.path.join(target, filename)):
+                        # logging.info(f"Copying filename {filename}")
                         sftp_client.get(source + filename, os.path.join(target, filename))
+                        # logging.info(f"Copied filename {filename}")
         except Exception as e:
             logging.error(f"<SSHClient> Error getting directory {source}")
             logging.error(e)

@@ -10,9 +10,9 @@ import socket
 
 from time import sleep
 
-from pathlib import Path
-
 FOLDER_CHECKPOINTS = 'checkpoints/'
+
+COUNT_WAITING = 5000
 
 
 class SSHClient:
@@ -32,6 +32,8 @@ class SSHClient:
         self.retry_interval = 10
 
         self.client = None
+        self.ssh_transport = None
+        self.chan = None
 
     """
     This will check if the connection is still available.
@@ -119,6 +121,14 @@ class SSHClient:
 
         ftp_client.close()
 
+    def execute_command(self, command):
+        self.ssh_transport = self.client.get_transport()
+        self.chan = self.ssh_transport.open_session()
+
+        self.chan.setblocking(0)
+
+        self.chan.exec_command(command)
+
 
 def prepare_logging(args):
 
@@ -142,9 +152,12 @@ def prepare_logging(args):
 
 
 def send_checkpoint(ssh_client, file):
-    if ssh_client.open_connection():
-        ssh_client.put_file(source=file,
-                            target=FOLDER_CHECKPOINTS)
+    if not ssh_client.is_active:
+        ssh_client.open_connection()
+    ssh_client.put_file(source=os.getcwd(),
+                        target=FOLDER_CHECKPOINTS,
+                        item=file)
+    ssh_client.close_connection()
 
 
 def check_checkpoints(args):
@@ -153,18 +166,31 @@ def check_checkpoints(args):
                            key_file=args.key_file,
                            user=args.user)
 
-    path_file = "checkpoints.txt"
+    if ssh_client.open_connection():
 
-    path = Path(path_file)
+        ssh_client.execute_command(f"mkdir {FOLDER_CHECKPOINTS}")
 
-    if not path.is_file():
-        with open(path_file, "a"):
-            path_file.write("")
-    with open(path_file, "r") as control_file:
-        while True:
-            lines = control_file.readlines()
-            if len(lines) > 0:
-                send_checkpoint(ssh_client, lines[-1])
+        path_file = "checkpoints.txt"
+
+        ssh_client.close_connection()
+
+        while not os.path.exists(path_file):
+            continue
+
+        with open(path_file, "r") as control_file:
+            while True:
+                # logging.info("Reading new lines")
+                lines = control_file.readlines()
+                # logging.info(f"lines: {lines}")
+                if len(lines) > 0:
+                    logging.info(f"Sending {lines[-1]} file")
+                    send_checkpoint(ssh_client, lines[-1])
+                    logging.info(f"Finished sending {lines[-1]} file")
+                    count = 0
+                else:
+                    count = count + 1
+                if count % COUNT_WAITING:
+                    sleep(300)
 
 
 def main():

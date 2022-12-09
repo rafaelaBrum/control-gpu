@@ -102,7 +102,7 @@ def start_experiment(experiment_name, project_name, profile_name, cluster_urn, b
         params = {
             "name": experiment_name,
             "proj": project_name,
-            "duration": "16",
+            "duration": "5",
             "profile": ','.join([project_name, profile_name]),
             "aggregate": cluster_urn
         }
@@ -110,7 +110,7 @@ def start_experiment(experiment_name, project_name, profile_name, cluster_urn, b
         params = {
             "name": experiment_name,
             "proj": project_name,
-            "duration": "16",
+            "duration": "5",
             "profile": ','.join([project_name, profile_name]),
             "aggregate": cluster_urn,
             "bindings": bindings

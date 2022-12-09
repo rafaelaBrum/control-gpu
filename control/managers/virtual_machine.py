@@ -667,6 +667,8 @@ class VirtualMachine:
 
                 self.deploy_overhead = datetime.now() - self.start_deploy
 
+                self.ssh.close_connection()
+
             else:
 
                 logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR".format(self.instance_id))
@@ -950,7 +952,7 @@ class VirtualMachine:
 
     def prepare_ft_daemon(self, ip_address):
         task_id = self.loader.job.num_clients+1
-        if self.ssh.is_active:
+        if self.ssh.open_connection():
             item = self.loader.checkpoint_conf.daemon_fault_tolerance
 
             self.ssh.put_file(source=self.loader.application_conf.daemon_path,
@@ -996,13 +998,14 @@ class VirtualMachine:
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log_FT -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
             stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True)
             print(stdout)
+            self.ssh.close_connection()
         else:
 
             logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR".format(self.instance_id))
