@@ -28,6 +28,7 @@ from control.repository.postgres_objects import Instance as InstanceRepo
 
 from control.scheduler.fl_simple_scheduler import FLSimpleScheduler
 from control.scheduler.mathematical_formulation_scheduler import MathematicalFormulationScheduler
+from control.scheduler.dynamic_scheduler import DynamicScheduler
 from control.scheduler.scheduler import Scheduler
 
 from control.util.loader import Loader
@@ -142,6 +143,9 @@ class ScheduleManager:
         elif self.loader.scheduler_name.upper() == Scheduler.MAT_FORM:
             self.scheduler = MathematicalFormulationScheduler(loader=self.loader)
 
+        elif self.loader.scheduler_name.upper() == Scheduler.DYNAMIC_GREEDY:
+            self.scheduler = DynamicScheduler(loader=self.loader)
+
         if self.scheduler is None:
             logging.error("<Scheduler Manager {}_{}>: "
                           "ERROR - Scheduler {} not found".format(self.loader.job.job_id,
@@ -169,7 +173,7 @@ class ScheduleManager:
             aux_vm_name = json_data['server']['instance_type']
 
         # logging.info("Starts building dispatchers")
-        instance_type, market, region, zone = self.scheduler.get_server_initial_instance(
+        instance_type, market, region, zone = self.scheduler.get_server_instance(
             provider=aux_provider,
             region=aux_region,
             vm_name=aux_vm_name
@@ -209,10 +213,11 @@ class ScheduleManager:
                 aux_region = json_data['clients'][str(i)]['region']
                 aux_vm_name = json_data['clients'][str(i)]['instance_type']
 
-            instance_type, market, region, zone = self.scheduler.get_client_initial_instance(
+            instance_type, market, region, zone = self.scheduler.get_client_instance(
                 provider=aux_provider,
                 region=aux_region,
-                vm_name=aux_vm_name
+                vm_name=aux_vm_name,
+                client_id=i
             )
 
             # Create the Vm that will be used by the dispatcher
@@ -445,42 +450,75 @@ class ScheduleManager:
         #
         # # self.semaphore.release()
 
-    def __terminated_handle(self, dispatcher: Dispatcher):
+    def __terminated_handle(self, affected_dispatcher: Dispatcher):
         self.semaphore.acquire()
 
-        if dispatcher in self.working_dispatchers:
-            self.working_dispatchers.remove(dispatcher)
+        if affected_dispatcher in self.working_dispatchers:
+            self.working_dispatchers.remove(affected_dispatcher)
 
-            self.idle_dispatchers.append(dispatcher)
+            self.idle_dispatchers.append(affected_dispatcher)
 
         if len(self.working_dispatchers) == 1:
             self.abort = True
 
         self.semaphore.release()
-        # # Move task to others VM
+
+        # Move task to other VM
         # # self.semaphore.acquire()
         #
-        # if not self.loader.cudalign_task.has_task_finished():
-        #     self.loader.cudalign_task.stop_execution()
-        #
-        # # logging.info("Entered terminated_handle")
-        #
-        # # getting volume-id
-        # if self.loader.file_system_conf.type == EC2Manager.EBS:
-        #     self.ebs_volume_id = self.task_dispatcher.vm.volume_id
-        #
-        # # logging.info("Got EBS id: {}".format(self.ebs_volume_id))
-        #
-        # # See in which VM will restart
-        # current_time = self.start_timestamp - datetime.now()
-        #
-        # instance_type, market = self.scheduler.choose_restart_best_instance_type(
-        #     cudalign_task=self.loader.cudalign_task,
-        #     deadline=self.loader.deadline_seconds,
-        #     current_time=current_time.total_seconds()
-        # )
-        #
-        # # logging.info("Chose instance {} of type {}".format(instance_type.type, market))
+        if affected_dispatcher.type_task == Job.SERVER:
+            logging.error("Missing implementation to server failure")
+        elif affected_dispatcher.type_task == Job.CLIENT:
+            if not self.loader.job.client_tasks[affected_dispatcher.client.client_id].has_task_finished():
+                self.loader.job.client_tasks[affected_dispatcher.client_id].stop_execution()
+
+            logging.info("Entered terminated_handle")
+
+            new_provider, new_region, new_vm_name = self.scheduler.choose_new_client_instance(
+                affected_dispatcher.client_id
+            )
+
+            instance_type, market, region, zone = self.scheduler.get_client_instance(
+                provider=new_provider,
+                region=new_region,
+                vm_name=new_vm_name,
+                client_id=affected_dispatcher.client_id
+            )
+
+            logging.info("Chosen instance {} of type {} in region {} in zone {}".format(instance_type.type, market,
+                                                                                        region, zone))
+
+            if not self.loader.job.client_tasks[affected_dispatcher.client.client_id].has_task_finished():
+
+                # Create the Vm that will be used by the dispatcher
+                new_vm = VirtualMachine(
+                    instance_type=instance_type,
+                    market=market,
+                    loader=self.loader,
+                    region=region,
+                    zone=zone
+                )
+
+                new_dispatcher = Dispatcher(
+                    vm=new_vm,
+                    loader=self.loader,
+                    client_id=affected_dispatcher.client_id,
+                    type_task=Job.CLIENT
+                )
+
+                # check if the VM need to be registered on the simulator
+                if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
+                    self.simulator.register_vm(new_vm)
+
+                # self.semaphore.acquire()
+
+                self.terminated_dispatchers.append(affected_dispatcher)
+                self.client_task_dispatchers[affected_dispatcher.client_id] = new_dispatcher
+
+                # self.semaphore.release()
+
+                new_dispatcher.main_thread.start()
+
         #
         # if not self.loader.cudalign_task.has_task_finished():
         #     new_vm = VirtualMachine(

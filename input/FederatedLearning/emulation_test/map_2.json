@@ -1,29 +1,29 @@
 {
     "clients": {
         "0": {
-            "instance_type": "c4130",
+            "instance_type": "c220g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
         },
         "1": {
-            "instance_type": "c4130",
+            "instance_type": "c220g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
         },
         "2": {
-            "instance_type": "c4130",
+            "instance_type": "c220g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
         },
         "3": {
-            "instance_type": "c4130",
+            "instance_type": "c220g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
         }
     },
-    "cost": 163.12972151397508,
-    "makespan": 9.643402385044839,
-    "obj_value": 0.028706875464635916,
+    "cost": 124.82837129779439,
+    "makespan": 9.338676026681293,
+    "obj_value": 0.026039055035355033,
     "server": {
         "instance_type": "c220g1",
         "provider": "CLOUDLAB",

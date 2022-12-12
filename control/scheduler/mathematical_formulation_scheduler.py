@@ -120,6 +120,9 @@ class MathematicalFormulationScheduler(Scheduler):
             self.solve()
             # print(self.input_data)
             self.__write_map_json(file_output=loader.map_file)
+        else:
+            # gets only time exec, time aggreg and time comm
+            pass
 
     def solve(self):
         try:

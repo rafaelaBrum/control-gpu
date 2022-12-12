@@ -207,6 +207,29 @@ class Experiment:
 
         return self
 
+    def update_status(self):
+        """Get experiment status and update local state.
+
+                """
+        return_val, response = p_rpc.get_experiment_status(self.project_name,
+                                                           self.experiment_name)
+        if return_val == p_rpc.RESPONSE_SUCCESS:
+            output = response['output']
+            if 'Status: ready\n' in output:
+                self.status = self.EXPERIMENT_READY
+            elif 'Status: provisioning\n' in output:
+                self.status = self.EXPERIMENT_PROVISIONING
+            elif 'Status: provisioned\n' in output:
+                self.status = self.EXPERIMENT_PROVISIONED
+            elif 'Status: failed\n' in output:
+                self.status = self.EXPERIMENT_FAILED
+            elif 'Status: created\n' in output:
+                self.status = self.EXPERIMENT_STARTED
+        else:
+            logging.error(f'<Experiment CloudLab Manager> Experiment {self.experiment_name}: '
+                          f'failed to get experiment status')
+            self.status = self.EXPERIMENT_FAILED
+
     def _get_status(self):
         """Get experiment status and update local state. If the experiment is ready, get
         and parse the associated manifests.

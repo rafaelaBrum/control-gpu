@@ -12,6 +12,7 @@ import logging
 class Scheduler:
     FL_SIMPLE = "SIMPLE"
     MAT_FORM = "FORMULATION"
+    DYNAMIC_GREEDY = "GREEDY"
 
     def __init__(self, instance_types: Dict[str, InstanceType], locations: Dict[str, CloudRegion]):
         self.instances_server_aws: Dict[str, InstanceType] = {}
@@ -26,6 +27,8 @@ class Scheduler:
         self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
         self.__separate_location_by_cloud(locations)
         self.index_extra_vm = []
+        self.current_vms: Dict[str, InstanceType] = {'server': None}
+        self.current_locations: Dict[str, CloudRegion] = {'server': None}
 
     def __divide_instances_for_server_and_for_client_by_cloud(self, instance_types):
         # logging.info("<Scheduler>: Dividing instances types for server and client")
@@ -54,7 +57,7 @@ class Scheduler:
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
-    def get_server_initial_instance(self, provider, region, vm_name):
+    def get_server_instance(self, provider, region, vm_name):
         logging.info("<Scheduler>: Choosing initial instance for server task from provider {}".format(provider))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_server_aws.items():
@@ -64,6 +67,8 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                                self.current_vms['server'] = instance
+                                self.current_locations['server'] = loc
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
@@ -75,6 +80,8 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                                self.current_vms['server'] = instance
+                                self.current_locations['server'] = loc
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
@@ -85,11 +92,13 @@ class Scheduler:
                         if loc.region == region:
                             logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                            self.current_vms['server'] = instance
+                            self.current_locations['server'] = loc
                             return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
-    def get_client_initial_instance(self, provider, region, vm_name):
+    def get_client_instance(self, provider, region, vm_name, client_id):
         logging.info("<Scheduler>: Choosing initial instance for client task from provider {}".format(provider))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_client_aws.items():
@@ -99,6 +108,8 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                                self.current_vms[str(client_id)] = instance
+                                self.current_locations[str(client_id)] = loc
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
@@ -110,6 +121,8 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                                self.current_vms[str(client_id)] = instance
+                                self.current_locations[str(client_id)] = loc
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
         elif provider.lower() in CloudManager.CLOUDLAB.lower():
@@ -119,6 +132,8 @@ class Scheduler:
                         if loc.region == region:
                             logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
+                            self.current_vms[str(client_id)] = instance
+                            self.current_locations[str(client_id)] = loc
                             return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
@@ -154,7 +169,6 @@ class Scheduler:
             for name, instance in self.instances_server_cloudlab.items():
                 if name in self.index_extra_vm:
                     continue
-                print(instance)
                 if aux_region not in instance.locations:
                     continue
                 self.index_extra_vm.append(name)

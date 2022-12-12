@@ -23,7 +23,7 @@ def __call_control(loader: Loader):
         else:
             loader.print_execution_info()
 
-        print("calling ScheduleManager")
+        # print("calling ScheduleManager")
         manager = ScheduleManager(loader=loader)
 
         manager.start_execution()
