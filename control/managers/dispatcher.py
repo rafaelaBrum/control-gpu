@@ -177,7 +177,7 @@ class Executor:
                     self.__stopped(Task.RUNTIME_ERROR)
                     return
 
-                time.sleep(1)
+                time.sleep(10)
 
             if self.status != Task.FINISHED:
                 self.task.stop_execution()

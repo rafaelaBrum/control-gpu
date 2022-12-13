@@ -474,7 +474,7 @@ class ScheduleManager:
 
             logging.info("Entered terminated_handle")
 
-            new_provider, new_region, new_vm_name = self.scheduler.choose_new_client_instance(
+            new_provider, new_region, new_vm_name = self.scheduler.choose_client_new_instance(
                 affected_dispatcher.client_id
             )
 
@@ -510,14 +510,15 @@ class ScheduleManager:
                 if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
                     self.simulator.register_vm(new_vm)
 
-                # self.semaphore.acquire()
+                self.semaphore.acquire()
 
                 self.terminated_dispatchers.append(affected_dispatcher)
                 self.client_task_dispatchers[affected_dispatcher.client_id] = new_dispatcher
 
-                # self.semaphore.release()
-
                 new_dispatcher.main_thread.start()
+                time.sleep(60)
+
+                self.semaphore.release()
 
         #
         # if not self.loader.cudalign_task.has_task_finished():
