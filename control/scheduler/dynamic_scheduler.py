@@ -33,7 +33,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                               f"from {self.instances_client_cloudlab[current_instance.type].locations}")
 
             if not self.instances_client_cloudlab[current_instance.type].locations:
-                logging.info(f"Popping {current_instance.provider + '_' + current_location} from {current_instance.type} from possible future VMs")
+                logging.info(f"Popping {current_instance.type} from possible future VMs")
                 self.instances_client_cloudlab.pop(current_instance.type)
 
         for instance_type, instance in self.instances_client_cloudlab.items():

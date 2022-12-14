@@ -1890,7 +1890,8 @@ class PreSchedulingManager:
                     vm.instance_type.image_id = region.client_image_id
                     key_file = region.key_file
                     try:
-                        status = vm.deploy(needs_volume=False, key_name=key_file, type_task='client')
+                        status = vm.deploy(needs_volume=False, key_name=key_file, type_task='client',
+                                           dataset_urn=clients[0].dataset_urn)
                         if not status:
                             vm.instance_id = None
                         if not vm.failed_to_created:
