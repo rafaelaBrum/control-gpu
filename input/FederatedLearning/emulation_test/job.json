@@ -35,7 +35,7 @@
                 "bucket_region": "all",
                 "net": "VGG16",
                 "baseline_exec": 24.3,
-                "dataset_urn": "urn:publicid:IDN+wisc.cloudlab.us:multi-fedls-pg0+imdataset+4-clients"
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients"
             },
             "1" : {
                 "task_name": "Task VGG16 (client 1)",
