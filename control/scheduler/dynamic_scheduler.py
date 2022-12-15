@@ -1,6 +1,9 @@
 from control.util.loader import Loader
+from control.domain.instance_type import InstanceType
 
 from math import inf
+from copy import deepcopy
+from typing import Dict
 
 import logging
 
@@ -11,6 +14,10 @@ class DynamicScheduler(MathematicalFormulationScheduler):
 
     def __init__(self, loader: Loader):
         super().__init__(loader=loader)
+        self.dynamic_scheduler_instances_server_cloudlab = deepcopy(self.instances_server_cloudlab)
+        self.dynamic_scheduler_inst_cli_cloudlab: Dict[int, Dict[str, InstanceType]] = {}
+        for cli in self.clients:
+            self.dynamic_scheduler_inst_cli_cloudlab[cli] = deepcopy(self.instances_client_cloudlab)
 
     def choose_client_new_instance(self, client_num):
         min_time_exec = inf
@@ -18,25 +25,26 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         location_chosen = None
         server_provider = self.current_vms['server'].provider
         server_loc = self.current_locations['server'].region
-        current_instance = self.current_vms[str(client_num)]
-        current_location = self.current_locations[str(client_num)]
+        current_inst = self.current_vms[str(client_num)]
+        current_loc = self.current_locations[str(client_num)]
 
-        aux_location = current_instance.provider + '_' + current_location.region
+        aux_loc = current_inst.provider + '_' + current_loc.region
 
-        if current_instance.type in self.instances_client_cloudlab:
+        if current_inst.type in self.dynamic_scheduler_inst_cli_cloudlab[client_num]:
             try:
-                if aux_location in self.instances_client_cloudlab[current_instance.type].locations:
-                    self.instances_client_cloudlab[current_instance.type].locations.remove(aux_location)
-                    logging.info(f"<Scheduler> Popping {aux_location} from {current_instance.type}")
+                if aux_loc in self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
+                    self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations.remove(aux_loc)
+                    logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
             except Exception as e:
-                logging.error(f"<Scheduler> Error removing {aux_location} "
-                              f"from {self.instances_client_cloudlab[current_instance.type].locations}")
+                logging.error(f"<Scheduler> Error removing {aux_loc} from "
+                              f" {self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations}")
+                logging.error(e)
 
-            if not self.instances_client_cloudlab[current_instance.type].locations:
-                logging.info(f"Popping {current_instance.type} from possible future VMs")
-                self.instances_client_cloudlab.pop(current_instance.type)
+            if not self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
+                logging.info(f"Popping {current_inst.type} from possible future VMs")
+                self.dynamic_scheduler_inst_cli_cloudlab[client_num].pop(current_inst.type)
 
-        for instance_type, instance in self.instances_client_cloudlab.items():
+        for instance_type, instance in self.dynamic_scheduler_inst_cli_cloudlab[client_num].items():
             for aux_loc in instance.locations:
                 loc = aux_loc.split('_')[-1]
                 try:

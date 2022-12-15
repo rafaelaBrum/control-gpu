@@ -1927,7 +1927,9 @@ class PreSchedulingManager:
                      'cost_vms': {},
                      'time_aggreg': {},
                      'slowdown': {},
-                     'comm_slowdown': {}}
+                     'comm_slowdown': {},
+                     'vm_baseline': {},
+                     'pair_regions_baseline': {}}
 
         for key, instance_type in self.loader.env.items():
             aux_provider = instance_type.provider.upper()
@@ -1943,8 +1945,8 @@ class PreSchedulingManager:
                     data_dict['gpu_vms'][aux_provider][aux_region] = {}
                     data_dict['cost_vms'][aux_provider][aux_region] = {}
                     data_dict['time_aggreg'][aux_provider][aux_region] = {}
-                data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
-                data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
+                data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.vcpu
+                data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.count_gpu
                 data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
                 data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.5
 
@@ -2072,6 +2074,79 @@ class PreSchedulingManager:
         # print(json.dumps(data_dict, sort_keys=False, indent=4))
 
         file_output = self.loader.input_file
+
+        if os.path.exists(file_output):
+            logging.info(f"<PreSchedulerManager> File {file_output} already exists. Reading info")
+            try:
+                with open(file_output) as f:
+                    data = f.read()
+                json_data = json.loads(data)
+
+                if 'cpu_vms' in json_data:
+                    for provider in json_data['cpu_vms']:
+                        if provider in data_dict['cpu_vms']:
+                            for region in json_data['cpu_vms'][provider]:
+                                if region in data_dict['cpu_vms'][provider]:
+                                    for vm in json_data['cpu_vms'][provider][region]:
+                                        if vm in data_dict['cpu_vms'][provider][region]:
+                                            data_dict['cpu_vms'][provider][region][vm] = \
+                                                json_data['cpu_vms'][provider][region][vm]
+                if 'gpu_vms' in json_data:
+                    for provider in json_data['gpu_vms']:
+                        if provider in data_dict['gpu_vms']:
+                            for region in json_data['gpu_vms'][provider]:
+                                if region in data_dict['gpu_vms'][provider]:
+                                    for vm in json_data['gpu_vms'][provider][region]:
+                                        if vm in data_dict['gpu_vms'][provider][region]:
+                                            data_dict['gpu_vms'][provider][region][vm] = \
+                                                json_data['gpu_vms'][provider][region][vm]
+                if 'cost_vms' in json_data:
+                    for provider in json_data['cost_vms']:
+                        if provider in data_dict['cost_vms']:
+                            for region in json_data['cost_vms'][provider]:
+                                if region in data_dict['cost_vms'][provider]:
+                                    for vm in json_data['cost_vms'][provider][region]:
+                                        if vm in data_dict['cost_vms'][provider][region]:
+                                            data_dict['cost_vms'][provider][region][vm] = \
+                                                json_data['cost_vms'][provider][region][vm]
+                if 'time_aggreg' in json_data:
+                    for provider in json_data['time_aggreg']:
+                        if provider in data_dict['time_aggreg']:
+                            for region in json_data['time_aggreg'][provider]:
+                                if region in data_dict['time_aggreg'][provider]:
+                                    for vm in json_data['time_aggreg'][provider][region]:
+                                        if vm in data_dict['time_aggreg'][provider][region]:
+                                            data_dict['time_aggreg'][provider][region][vm] = \
+                                                json_data['time_aggreg'][provider][region][vm]
+                if 'slowdown' in json_data:
+                    for location in json_data['slowdown']:
+                        if location in data_dict['slowdown']:
+                            for provider in json_data['slowdown'][location]:
+                                if provider in data_dict['slowdown'][location]:
+                                    for region in json_data['slowdown'][location][provider]:
+                                        if region in data_dict['slowdown'][location][provider]:
+                                            for vm in json_data['slowdown'][location][provider][region]:
+                                                if vm in data_dict['slowdown'][location][provider][region]:
+                                                    data_dict['slowdown'][location][provider][region][vm] = \
+                                                        json_data['slowdown'][location][provider][region][vm]
+                if 'comm_slowdown' in json_data:
+                    for provider1 in json_data['comm_slowdown']:
+                        if provider1 in data_dict['comm_slowdown']:
+                            for region1 in json_data['comm_slowdown'][provider1]:
+                                if region1 in data_dict['comm_slowdown'][provider1]:
+                                    for provider2 in json_data['comm_slowdown'][provider1][region1]:
+                                        if provider2 in data_dict['comm_slowdown'][provider1][region1]:
+                                            for region2 in json_data['comm_slowdown'][provider1][region1][provider2]:
+                                                if region2 in data_dict['comm_slowdown'][provider1][region1][provider2]:
+                                                    data_dict['comm_slowdown'][provider1][region1][provider2] = \
+                                                        json_data['comm_slowdown'][provider1][region1][provider2]
+                if 'vm_baseline' in json_data:
+                    data_dict['vm_baseline'] = json_data['vm_baseline']
+                if 'pair_regions_baseline' in json_data:
+                    data_dict['pair_regions_baseline'] = json_data['pair_regions_baseline']
+
+            except Exception as e:
+                logging.error(e)
 
         logging.info(f"<PreSchedulerManager> Writing {file_output} file")
 
