@@ -1,0 +1,93 @@
+{
+    "job_id": 2000,
+    "job_name": "4 clients - VGG16 (dataset in CloudLab)",
+    "description": "4 clients executing VGG16 with dataset stored in CloudLab",
+    "server_msg_train": 0.537082008,
+    "server_msg_test": 0.537082008,
+    "client_msg_train": 0.537082008,
+    "client_msg_test": 0.000001808,
+    "tasks": {
+        "server": {
+            "task_name": "Task server VGG16",
+            "command": "python3.7 TIL_VGG_server.py",
+            "runtime": {
+                "g4dn.xlarge": 65
+            },
+            "generic_checkpoint": "False",
+            "zip_file": "TIL_VGG_server.zip",
+            "n_rounds": 2,
+            "n_clients": 4,
+            "comm_baseline": 7.42
+        },
+        "clients": {
+            "0" : {
+                "task_name": "Task VGG16 (client 0)",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_checkpoint": "False",
+                "zip_file": "TIL_VGG_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "/mydata/",
+                "trainset_dir": "4_clients/0/trainset",
+                "test_dir": "4_clients/0/testset",
+                "train_epochs": 5,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 2765.4,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients"
+            },
+            "1" : {
+                "task_name": "Task VGG16 (client 1)",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_checkpoint": "False",
+                "zip_file": "TIL_VGG_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "/mydata/",
+                "trainset_dir": "4_clients/1/trainset",
+                "test_dir": "4_clients/1/testset",
+                "train_epochs": 5,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 2765.4,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-1"
+            },
+            "2" : {
+                "task_name": "Task VGG16 (client 2)",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_checkpoint": "False",
+                "zip_file": "TIL_VGG_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "/mydata/",
+                "trainset_dir": "4_clients/2/trainset",
+                "test_dir": "4_clients/2/testset",
+                "train_epochs": 5,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 2765.4,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-2"
+            },
+            "3" : {
+                "task_name": "Task VGG16 (client 3)",
+                "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
+                "generic_checkpoint": "False",
+                "zip_file": "TIL_VGG_client.zip",
+                "split": "0.9 0.1 0.0",
+                "batch": 32,
+                "bucket_name": "/mydata/",
+                "trainset_dir": "4_clients/3/trainset",
+                "test_dir": "4_clients/3/testset",
+                "train_epochs": 5,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "net": "VGG16",
+                "baseline_exec": 2765.4,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+4-clients-3"
+            }
+        }
+    }
+}
