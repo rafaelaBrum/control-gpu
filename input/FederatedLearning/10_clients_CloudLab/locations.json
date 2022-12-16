@@ -1,0 +1,74 @@
+{
+    "locations": {
+        "CloudLab_Utah": {
+            "provider": "CloudLab",
+            "region": "Utah",
+            "key_file": "cloudlab_key_pem.pem",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+utah.cloudlab.us+authority+cm",
+            "zones": [],
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": -1,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.12
+        },
+        "CloudLab_Wisconsin": {
+            "provider": "CloudLab",
+            "region": "Wisconsin",
+            "key_file": "cloudlab_key_pem.pem",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+wisc.cloudlab.us+authority+cm",
+            "zones": [],
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": -1,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.12
+        },
+        "CloudLab_Clemson": {
+            "provider": "CloudLab",
+            "region": "Clemson",
+            "key_file": "cloudlab_key_pem.pem",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+clemson.cloudlab.us+authority+cm",
+            "zones": [],
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": -1,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.12
+        },
+        "CloudLab_APT": {
+            "provider": "CloudLab",
+            "region": "APT_Utah",
+            "key_file": "cloudlab_key_pem.pem",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+apt.emulab.net+authority+cm",
+            "zones": [],
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": -1,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.12
+        },
+        "CloudLab_Massachusetts": {
+            "provider": "CloudLab",
+            "region": "Massachusetts",
+            "key_file": "cloudlab_key_pem.pem",
+            "client_image_id": "fl_clients",
+            "server_image_id": "Flower-server-clusters",
+            "cluster_urn": "urn:publicid:IDN+cloudlab.umass.edu+authority+cm",
+            "zones": [],
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": -1,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.12
+        }
+    }
+}
