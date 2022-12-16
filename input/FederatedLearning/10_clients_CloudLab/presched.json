@@ -1,5 +1,15 @@
 {
     "exec_times": {
+        "c220g1": {
+            "CloudLab_Wisconsin": {
+                "0": {
+                    "eval_1": "19.102976083755493",
+                    "eval_2": "18.965187788009644",
+                    "fit_1": "1092.309811115265",
+                    "fit_2": "1081.6359260082245"
+                }
+            }
+        },
         "c220g2": {
             "CloudLab_Wisconsin": {
                 "0": {
@@ -228,8 +238,8 @@
             }
         }
     },
-    "job_id": 2000,
-    "job_name": "4 clients - VGG16 (dataset in CloudLab)",
+    "job_id": 3000,
+    "job_name": "10 clients - VGG16 (dataset in CloudLab)",
     "number_datacenters": 0,
     "rpc": {
         "CloudLab_APT_Emulated": {
