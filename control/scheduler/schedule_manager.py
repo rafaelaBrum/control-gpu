@@ -450,16 +450,19 @@ class ScheduleManager:
         #
         # # self.semaphore.release()
 
-    def __terminated_handle(self, affected_dispatcher: Dispatcher):
+    def __terminated_handle(self, affected_dispatcher: Dispatcher, terminate_vm):
         self.semaphore.acquire()
 
         if affected_dispatcher in self.working_dispatchers:
             self.working_dispatchers.remove(affected_dispatcher)
 
-            self.idle_dispatchers.append(affected_dispatcher)
+            self.terminated_dispatchers.append(affected_dispatcher)
 
-        if len(self.working_dispatchers) == 1:
-            self.abort = True
+        if terminate_vm:
+            affected_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
+        # if len(self.working_dispatchers) == 1:
+        #     self.abort = True
 
         self.semaphore.release()
 
@@ -512,7 +515,7 @@ class ScheduleManager:
 
                 self.semaphore.acquire()
 
-                self.terminated_dispatchers.append(affected_dispatcher)
+                self.working_dispatchers.append(new_dispatcher)
                 self.client_task_dispatchers[affected_dispatcher.client_id] = new_dispatcher
 
                 new_dispatcher.main_thread.start()
@@ -581,13 +584,15 @@ class ScheduleManager:
         #                  .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
         #     # self.__interruption_handle()
         #
-        # elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR]:
         elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR, CloudManager.STOPPING]:
             logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
                          .format(self.loader.job.job_id, self.loader.execution_id))
             if not affected_dispatcher.vm.marked_to_interrupt:
                 self.n_sim_interruptions += 1
-            self.__terminated_handle(affected_dispatcher)
+            if event.value == CloudManager.ERROR:
+                self.__terminated_handle(affected_dispatcher, terminate_vm=True)
+            else:
+                self.__terminated_handle(affected_dispatcher, terminate_vm=False)
 
         elif event.value in CloudManager.ABORT:
             self.abort = True
@@ -835,7 +840,12 @@ class ScheduleManager:
                                                                                     self.loader.execution_id))
         folder_root = f"results/{self.loader.job.job_id}_{self.loader.execution_id}"
         threads_dispatcher = []
-        for dispatcher in self.idle_dispatchers:
+        thread = threading.Thread(target=self.__get_result_vm, args=(self.server_task_dispatcher.vm,
+                                                                     folder_root,
+                                                                     self.semaphore))
+        thread.start()
+        threads_dispatcher.append(thread)
+        for dispatcher in self.client_task_dispatchers:
             thread = threading.Thread(target=self.__get_result_vm, args=(dispatcher.vm,
                                                                          folder_root,
                                                                          self.semaphore))
