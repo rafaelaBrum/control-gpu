@@ -1,0 +1,254 @@
+{
+    "exec_times": {
+        "c220g1": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c220g2": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c220g5": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c240g1": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c240g2": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c240g5": {
+            "CloudLab_Wisconsin": {}
+        },
+        "c4130": {
+            "CloudLab_Clemson": {},
+            "CloudLab_Wisconsin": {}
+        },
+        "c6220": {
+            "CloudLab_APT": {}
+        },
+        "c6320": {
+            "CloudLab_Clemson": {}
+        },
+        "c6420": {
+            "CloudLab_Clemson": {}
+        },
+        "c6525-100g": {
+            "CloudLab_Utah": {
+                "0": {
+                    "eval_1": "24.99402093887329",
+                    "eval_2": "25.31321430206299",
+                    "fit_1": "2972.3498542308807",
+                    "fit_2": "2974.050665616989"
+                }
+            }
+        },
+        "c6525-25g": {
+            "CloudLab_Utah": {}
+        },
+        "c8220": {
+            "CloudLab_Clemson": {}
+        },
+        "c8220x": {
+            "CloudLab_Clemson": {}
+        },
+        "d6515": {
+            "CloudLab_Utah": {}
+        },
+        "dss7500": {
+            "CloudLab_Clemson": {}
+        },
+        "m510": {
+            "CloudLab_Utah": {}
+        },
+        "r320": {
+            "CloudLab_APT": {}
+        },
+        "r650": {
+            "CloudLab_Clemson": {}
+        },
+        "r6525": {
+            "CloudLab_Clemson": {}
+        },
+        "r7525": {
+            "CloudLab_Clemson": {}
+        },
+        "rs440": {
+            "CloudLab_Massachusetts": {}
+        },
+        "rs620": {
+            "CloudLab_Massachusetts": {}
+        },
+        "rs630": {
+            "CloudLab_Massachusetts": {}
+        },
+        "xl170": {
+            "CloudLab_Utah": {}
+        }
+    },
+    "job_id": 2000,
+    "job_name": "4 clients - VGG16 (dataset in CloudLab)",
+    "number_datacenters": 0,
+    "rpc": {
+        "CloudLab_APT_Emulated": {
+            "CloudLab_APT_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.910413980484009",
+                    "TrainMsg": "5.370412111282349"
+                },
+                "server-client": {
+                    "TestMsg": "2.9144864082336426",
+                    "TrainMsg": "5.4474451541900635"
+                }
+            },
+            "CloudLab_Massachusetts_Emulated": {
+                "client-server": {
+                    "TestMsg": "22.516791343688965",
+                    "TrainMsg": "100.6999683380127"
+                },
+                "server-client": {
+                    "TestMsg": "82.85741925239563",
+                    "TrainMsg": "112.08328795433044"
+                }
+            }
+        },
+        "CloudLab_Clemson_Emulated": {
+            "CloudLab_APT_Emulated": {
+                "client-server": {
+                    "TestMsg": "5.726051092147827",
+                    "TrainMsg": "10.84090518951416"
+                },
+                "server-client": {
+                    "TestMsg": "5.68389892578125",
+                    "TrainMsg": "11.010215520858765"
+                }
+            },
+            "CloudLab_Clemson_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.822350025177002",
+                    "TrainMsg": "5.236064195632935"
+                },
+                "server-client": {
+                    "TestMsg": "2.7794954776763916",
+                    "TrainMsg": "5.1444196701049805"
+                }
+            },
+            "CloudLab_Massachusetts_Emulated": {
+                "client-server": {
+                    "TestMsg": "18.633044958114624",
+                    "TrainMsg": "104.43725681304932"
+                },
+                "server-client": {
+                    "TestMsg": "85.77232432365417",
+                    "TrainMsg": "101.13032603263855"
+                }
+            }
+        },
+        "CloudLab_Massachusetts_Emulated": {
+            "CloudLab_Massachusetts_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.924523115158081",
+                    "TrainMsg": "5.46882700920105"
+                },
+                "server-client": {
+                    "TestMsg": "2.9283175468444824",
+                    "TrainMsg": "5.482538938522339"
+                }
+            }
+        },
+        "CloudLab_Utah_Emulated": {
+            "CloudLab_APT_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.5736656188964844",
+                    "TrainMsg": "4.829649209976196"
+                },
+                "server-client": {
+                    "TestMsg": "2.606621742248535",
+                    "TrainMsg": "4.9125282764434814"
+                }
+            },
+            "CloudLab_Clemson_Emulated": {
+                "client-server": {
+                    "TestMsg": "5.260921478271484",
+                    "TrainMsg": "10.277351379394531"
+                },
+                "server-client": {
+                    "TestMsg": "5.273636102676392",
+                    "TrainMsg": "10.327473402023315"
+                }
+            },
+            "CloudLab_Massachusetts_Emulated": {
+                "client-server": {
+                    "TestMsg": "22.208937883377075",
+                    "TrainMsg": "99.88553738594055"
+                },
+                "server-client": {
+                    "TestMsg": "49.70876383781433",
+                    "TrainMsg": "72.12934374809265"
+                }
+            },
+            "CloudLab_Utah_Emulated": {
+                "client-server": {
+                    "TestMsg": "0.6660451889038086",
+                    "TrainMsg": "1.2070844173431396"
+                },
+                "server-client": {
+                    "TestMsg": "0.6641135215759277",
+                    "TrainMsg": "1.2100319862365723"
+                }
+            },
+            "CloudLab_Wisconsin_Emulated": {
+                "client-server": {
+                    "TestMsg": "16.0098876953125",
+                    "TrainMsg": "16.187421560287476"
+                },
+                "server-client": {
+                    "TestMsg": "3.8627285957336426",
+                    "TrainMsg": "19.925385236740112"
+                }
+            }
+        },
+        "CloudLab_Wisconsin_Emulated": {
+            "CloudLab_APT_Emulated": {
+                "client-server": {
+                    "TestMsg": "4.228196144104004",
+                    "TrainMsg": "8.210927724838257"
+                },
+                "server-client": {
+                    "TestMsg": "4.400011777877808",
+                    "TrainMsg": "8.310689926147461"
+                }
+            },
+            "CloudLab_Clemson_Emulated": {
+                "client-server": {
+                    "TestMsg": "10.79035234451294",
+                    "TrainMsg": "11.358153581619263"
+                },
+                "server-client": {
+                    "TestMsg": "3.9407339096069336",
+                    "TrainMsg": "10.945013999938965"
+                }
+            },
+            "CloudLab_Massachusetts_Emulated": {
+                "client-server": {
+                    "TestMsg": "29.7907817363739",
+                    "TrainMsg": "120.45023846626282"
+                },
+                "server-client": {
+                    "TestMsg": "117.65395784378052",
+                    "TrainMsg": "154.87060284614563"
+                }
+            },
+            "CloudLab_Wisconsin_Emulated": {
+                "client-server": {
+                    "TestMsg": "2.996121883392334",
+                    "TrainMsg": "5.495763301849365"
+                },
+                "server-client": {
+                    "TestMsg": "2.991533041000366",
+                    "TrainMsg": "5.43852162361145"
+                }
+            }
+        }
+    },
+    "rpc_concurrent": {},
+    "rtt": {}
+}
