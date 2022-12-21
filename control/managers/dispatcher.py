@@ -63,9 +63,6 @@ class Executor:
         self.thread = threading.Thread(target=self.__run, daemon=True)
         self.thread_executing = False
 
-    def update_server_ip(self, server_ip):
-        self.task.server_ip = server_ip
-
     def update_status_table(self):
         """
         Update Execution Table
@@ -99,6 +96,10 @@ class Executor:
         try:
             # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
             #                                                                     self.vm.instance_id))
+            if self.type_task == Job.CLIENT:
+                logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+                                                                     self.vm.instance_id,
+                                                                     self.dict_info))
             self.communicator.send(action=action, value=self.dict_info)
             current_time = datetime.now()
             # logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
@@ -329,6 +330,10 @@ class Executor:
         self.status = Task.RESTART
         for i in range(10):
             try:
+                if self.type_task == Job.CLIENT:
+                    logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+                                                                         self.vm.instance_id,
+                                                                         self.dict_info))
                 self.communicator.send(action=Daemon.START, value=self.dict_info)
             except Exception as e:
                 logging.error(e)
@@ -394,14 +399,10 @@ class Executor:
             "gpu": self.vm.instance_type.count_gpu
         }
 
-        if self.type_task == Job.CLIENT:
-            logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id, self.vm.instance_id, info))
-
         return info
 
 
 class Dispatcher:
-    executor: Executor
 
     def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id):
         self.loader = loader
@@ -443,7 +444,15 @@ class Dispatcher:
         self.least_status = None
         self.timestamp_status_update = None
 
+        self.executor: Executor = None
+
         # self.stop_period = None
+
+    def update_server_ip(self, server_ip):
+        if self.type_task == Job.CLIENT:
+            self.loader.job.client_tasks[self.client_id].server_ip = server_ip
+            if self.executor is not None:
+                self.executor.task.server_ip = server_ip
 
     # def __get_instance_usage(self):
     #     memory = 0

@@ -60,36 +60,6 @@
                 "CloudLab_Utah"
             ]
         },
-        "d6515": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {
-                    "Utah": 2.34
-                },
-                "preemptible": {
-                    "Utah": 0.702
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 64,
-            "memory": 131,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Utah"
-            ]
-        },
         "m510": {
             "provider": "CloudLab",
             "prices": {
@@ -537,66 +507,6 @@
             "ebs_device_name": "",
             "vcpu": 144,
             "memory": 262,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Clemson"
-            ]
-        },
-        "r6525": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {
-                    "Clemson": 4.68
-                },
-                "preemptible": {
-                    "Clemson": 1.404
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 128,
-            "memory": 262,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Clemson"
-            ]
-        },
-        "r7525": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {
-                    "Clemson": 7.824
-                },
-                "preemptible": {
-                    "Clemson": 2.3472
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 128,
-            "memory": 524,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [

@@ -527,8 +527,7 @@ class ScheduleManager:
                     for i in range(self.loader.job.num_clients):
                         self.loader.job.client_tasks[i].server_ip = server_ip
                     for working_dispatcher in self.working_dispatchers:
-                        if working_dispatcher.type_task == Job.CLIENT:
-                            working_dispatcher.executor.update_server_ip(server_ip)
+                        working_dispatcher.update_server_ip(server_ip)
 
                 self.semaphore.release()
 
