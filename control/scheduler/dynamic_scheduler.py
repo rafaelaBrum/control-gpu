@@ -66,4 +66,65 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         return instance_chosen.provider, location_chosen, instance_chosen.type
 
     def choose_server_new_instance(self):
-        logging.error("<Scheduler> Missing implementation of choosing server instance!")
+        max_client_time_exec = -inf
+        max_client_location = None
+        max_client_provider = None
+
+        for cli in self.clients:
+            cli_instance = self.current_vms[str(cli)]
+            cli_loc = self.current_locations[str(cli)].region
+            try:
+                    current_time = self.time_exec[cli,
+                                                  cli_instance.provider.upper(),
+                                                  cli_loc,
+                                                  cli_instance.type]
+            except Exception as e:
+                logging.error("<Scheduler> Error getting new client VM")
+                logging.error(e)
+                current_time = -inf
+            if current_time > max_client_time_exec:
+                max_client_time_exec = current_time
+                max_client_location = cli_loc
+                max_client_provider = cli_instance.provider.upper()
+
+        min_server_time = inf
+        instance_chosen = None
+        location_chosen = None
+        current_inst = self.current_vms['server']
+        current_loc = self.current_locations['server']
+
+        aux_loc = current_inst.provider + '_' + current_loc.region
+
+        if current_inst.type in self.dynamic_scheduler_instances_server_cloudlab:
+            try:
+                if aux_loc in self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
+                    self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations.remove(aux_loc)
+                    logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
+            except Exception as e:
+                logging.error(f"<Scheduler> Error removing {aux_loc} from "
+                              f" {self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations}")
+                logging.error(e)
+
+            if not self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
+                logging.info(f"Popping {current_inst.type} from possible future VMs")
+                self.dynamic_scheduler_instances_server_cloudlab.pop(current_inst.type)
+
+        for instance_type, instance in self.dynamic_scheduler_instances_server_cloudlab.items():
+            for aux_loc in instance.locations:
+                loc = aux_loc.split('_')[-1]
+                try:
+                    current_time = self.time_comm[instance.provider.upper(),
+                                                  loc,
+                                                  max_client_provider,
+                                                  max_client_location] + self.time_aggreg[instance.provider.upper(),
+                                                                                          loc,
+                                                                                          instance.type]
+                except Exception as e:
+                    logging.error("<Scheduler> Error getting new client VM")
+                    logging.error(e)
+                    current_time = inf
+                if current_time < min_server_time:
+                    min_server_time = current_time
+                    instance_chosen = instance
+                    location_chosen = loc
+        return instance_chosen.provider, location_chosen, instance_chosen.type

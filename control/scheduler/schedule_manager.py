@@ -470,12 +470,73 @@ class ScheduleManager:
         # # self.semaphore.acquire()
         #
         if affected_dispatcher.type_task == Job.SERVER:
-            logging.error("Missing implementation to server failure")
+            if not self.loader.job.server_task.has_task_finished():
+                self.loader.job.server_task.stop_execution()
+
+            logging.info("Entered terminated_handle to server VM")
+
+            new_provider, new_region, new_vm_name = self.scheduler.choose_server_new_instance()
+
+            instance_type, market, region, zone = self.scheduler.get_server_instance(
+                provider=new_provider,
+                region=new_region,
+                vm_name=new_vm_name
+            )
+
+            logging.info("Chosen instance {} of type {} in region {} in zone {}".format(instance_type.type, market,
+                                                                                        region, zone))
+
+            if not self.loader.job.server_task.has_task_finished():
+
+                # Create the Vm that will be used by the dispatcher
+                new_vm = VirtualMachine(
+                    instance_type=instance_type,
+                    market=market,
+                    loader=self.loader,
+                    region=region,
+                    zone=zone
+                )
+
+                new_dispatcher = Dispatcher(
+                    vm=new_vm,
+                    loader=self.loader,
+                    type_task=Job.SERVER,
+                    client_id=self.loader.job.num_clients
+                )
+
+                # check if the VM need to be registered on the simulator
+                if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
+                    self.simulator.register_vm(new_vm)
+
+                self.semaphore.acquire()
+
+                self.working_dispatchers.append(new_dispatcher)
+                self.server_task_dispatcher = new_dispatcher
+
+                new_dispatcher.main_thread.start()
+                time.sleep(60)
+                while not self.server_task_dispatcher.vm.ready:
+                    if self.server_task_dispatcher.vm.failed_to_created:
+                        break
+                    time.sleep(1)
+                    # print("Testing vm.ready: ", self.server_task_dispatcher.vm.ready)
+                if not self.server_task_dispatcher.vm.failed_to_created:
+                    server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:" \
+                                f"{self.loader.application_conf.fl_port}"
+                    print("new server_ip:", server_ip)
+                    for i in range(self.loader.job.num_clients):
+                        self.loader.job.client_tasks[i].server_ip = server_ip
+                    for working_dispatcher in self.working_dispatchers:
+                        if working_dispatcher.type_task == Job.CLIENT:
+                            working_dispatcher.executor.update_server_ip(server_ip)
+
+                self.semaphore.release()
+
         elif affected_dispatcher.type_task == Job.CLIENT:
             if not self.loader.job.client_tasks[affected_dispatcher.client.client_id].has_task_finished():
                 self.loader.job.client_tasks[affected_dispatcher.client_id].stop_execution()
 
-            logging.info("Entered terminated_handle")
+            logging.info("Entered terminated_handle to client VM")
 
             new_provider, new_region, new_vm_name = self.scheduler.choose_client_new_instance(
                 affected_dispatcher.client_id

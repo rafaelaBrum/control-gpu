@@ -36,12 +36,14 @@ from zope.event import notify
 
 class Executor:
 
-    def __init__(self, task: Task, vm: VirtualMachine, loader: Loader):
+    def __init__(self, task: Task, vm: VirtualMachine, loader: Loader, type_task):
 
         self.loader = loader
 
         self.task = task
         self.vm = vm
+
+        self.type_task = type_task
 
         self.repo = None
         # Execution Status
@@ -60,6 +62,9 @@ class Executor:
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
         self.thread_executing = False
+
+    def update_server_ip(self, server_ip):
+        self.task.server_ip = server_ip
 
     def update_status_table(self):
         """
@@ -120,7 +125,7 @@ class Executor:
             logging.info("<Executor {}-{}>: Begin execution loop".format(self.task.task_id, self.vm.instance_id))
 
             # start task execution Loop
-            while (self.status == Task.EXECUTING) and not self.stop_signal and self.vm.state == CloudManager.RUNNING:
+            while self.status in (Task.EXECUTING, Task.RESTART) and not self.stop_signal and self.vm.state == CloudManager.RUNNING:
 
                 try:
                     # logging.info(
@@ -173,9 +178,13 @@ class Executor:
                     return
 
                 if command_status is not None and command_status != 'running':
-                    self.task.stop_execution()
-                    self.__stopped(Task.RUNTIME_ERROR)
-                    return
+                    task_status = False
+                    if self.type_task == Job.CLIENT:
+                        task_status = self.__restart_client_task()
+                    if self.type_task == Job.SERVER or not task_status:
+                        self.task.stop_execution()
+                        self.__stopped(Task.RUNTIME_ERROR)
+                        return
 
                 time.sleep(10)
 
@@ -316,6 +325,20 @@ class Executor:
 
         raise Exception("<Executor {}-{}>: Get instance action error".format(self.task.task_id, self.vm.instance_id))
 
+    def __restart_client_task(self):
+        self.status = Task.RESTART
+        for i in range(10):
+            try:
+                self.communicator.send(action=Daemon.START, value=self.dict_info)
+            except Exception as e:
+                logging.error(e)
+                # if task was started with success
+                # start execution loop
+            if self.communicator.response['status'] == 'success':
+                self.status = Task.EXECUTING
+                break
+            time.sleep(300)
+
     # def __get_task_usage(self):
     #     for i in range(3):
     #         try:
@@ -370,6 +393,9 @@ class Executor:
             "cpu": self.vm.instance_type.vcpu,
             "gpu": self.vm.instance_type.count_gpu
         }
+
+        if self.type_task == Job.CLIENT:
+            logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id, self.vm.instance_id, info))
 
         return info
 
@@ -614,7 +640,8 @@ class Dispatcher:
                         self.executor = Executor(
                             task=task,
                             vm=self.vm,
-                            loader=self.loader
+                            loader=self.loader,
+                            type_task=self.type_task
                         )
                         # start the executor loop to execute the task
                         self.executor.thread.start()

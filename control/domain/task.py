@@ -4,6 +4,7 @@ from typing import Dict
 
 
 class Task:
+    RESTART = 'client_restart'
     EXECUTING = 'executing'
     FINISHED = 'finished'
     WAITING = 'waiting'
