@@ -37,8 +37,16 @@ class CloudLabConfig(Config):
         return self.get_property(self._key, 'ram_costs')
 
     @property
-    def gpu_costs(self):
-        return self.get_property(self._key, 'gpu_costs')
+    def gpu_v100_costs(self):
+        return self.get_property(self._key, 'gpu_v100_costs')
+
+    @property
+    def gpu_p100_costs(self):
+        return self.get_property(self._key, 'gpu_p100_costs')
+
+    @property
+    def gpu_k40_costs(self):
+        return self.get_property(self._key, 'gpu_k40_costs')
 
     @property
     def extra_ds_path(self):

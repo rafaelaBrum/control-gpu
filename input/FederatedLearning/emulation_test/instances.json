@@ -4,10 +4,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Utah": 2.148
+                    "Utah": 2.2134400000000003
                 },
                 "preemptible": {
-                    "Utah": 0.6444
+                    "Utah": 0.6640320000000001
                 }
             },
             "restrictions": {
@@ -34,10 +34,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Utah": 1.956
+                    "Utah": 1.6697600000000001
                 },
                 "preemptible": {
-                    "Utah": 0.5868
+                    "Utah": 0.500928
                 }
             },
             "restrictions": {
@@ -64,10 +64,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Utah": 2.34
+                    "Utah": 2.7571200000000005
                 },
                 "preemptible": {
-                    "Utah": 0.702
+                    "Utah": 0.8271360000000001
                 }
             },
             "restrictions": {
@@ -94,10 +94,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Utah": 0.972
+                    "Utah": 0.8348800000000001
                 },
                 "preemptible": {
-                    "Utah": 0.29159999999999997
+                    "Utah": 0.250464
                 }
             },
             "restrictions": {
@@ -124,10 +124,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Utah": 1.02
+                    "Utah": 0.9708000000000001
                 },
                 "preemptible": {
-                    "Utah": 0.306
+                    "Utah": 0.29124
                 }
             },
             "restrictions": {
@@ -154,10 +154,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 1.956
+                    "Wisconsin": 1.6697600000000001
                 },
                 "preemptible": {
-                    "Wisconsin": 0.5868
+                    "Wisconsin": 0.500928
                 }
             },
             "restrictions": {
@@ -184,10 +184,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 2.436
+                    "Wisconsin": 2.0872
                 },
                 "preemptible": {
-                    "Wisconsin": 0.7308
+                    "Wisconsin": 0.62616
                 }
             },
             "restrictions": {
@@ -214,10 +214,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 2.832
+                    "Wisconsin": 2.2328
                 },
                 "preemptible": {
-                    "Wisconsin": 0.8495999999999999
+                    "Wisconsin": 0.66984
                 }
             },
             "restrictions": {
@@ -244,10 +244,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 1.956
+                    "Wisconsin": 1.6697600000000001
                 },
                 "preemptible": {
-                    "Wisconsin": 0.5868
+                    "Wisconsin": 0.500928
                 }
             },
             "restrictions": {
@@ -274,10 +274,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 2.436
+                    "Wisconsin": 2.0872
                 },
                 "preemptible": {
-                    "Wisconsin": 0.7308
+                    "Wisconsin": 0.62616
                 }
             },
             "restrictions": {
@@ -304,10 +304,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 2.832
+                    "Wisconsin": 4.6928
                 },
                 "preemptible": {
-                    "Wisconsin": 0.8495999999999999
+                    "Wisconsin": 1.40784
                 }
             },
             "restrictions": {
@@ -335,11 +335,11 @@
             "prices": {
                 "on-demand": {
                     "Wisconsin": 3.72,
-                    "Clemson": 3.72
+                    "Clemson": 5.51768
                 },
                 "preemptible": {
                     "Wisconsin": 1.116,
-                    "Clemson": 1.116
+                    "Clemson": 1.655304
                 }
             },
             "restrictions": {
@@ -366,10 +366,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 3.8160000000000003
+                    "Clemson": 3.06768
                 },
                 "preemptible": {
-                    "Clemson": 1.1448
+                    "Clemson": 0.920304
                 }
             },
             "restrictions": {
@@ -396,10 +396,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 5.484
+                    "Clemson": 3.92192
                 },
                 "preemptible": {
-                    "Clemson": 1.6452
+                    "Clemson": 1.176576
                 }
             },
             "restrictions": {
@@ -426,10 +426,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 3.624
+                    "Clemson": 2.524
                 },
                 "preemptible": {
-                    "Clemson": 1.0872
+                    "Clemson": 0.7572
                 }
             },
             "restrictions": {
@@ -456,10 +456,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 3.624
+                    "Clemson": 2.524
                 },
                 "preemptible": {
-                    "Clemson": 1.0872
+                    "Clemson": 0.7572
                 }
             },
             "restrictions": {
@@ -486,10 +486,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 1.86
+                    "Clemson": 1.39792
                 },
                 "preemptible": {
-                    "Clemson": 0.558
+                    "Clemson": 0.419376
                 }
             },
             "restrictions": {
@@ -516,10 +516,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 4.872
+                    "Clemson": 6.057920000000001
                 },
                 "preemptible": {
-                    "Clemson": 1.4616
+                    "Clemson": 1.8173760000000003
                 }
             },
             "restrictions": {
@@ -546,10 +546,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 4.68
+                    "Clemson": 5.514240000000001
                 },
                 "preemptible": {
-                    "Clemson": 1.404
+                    "Clemson": 1.6542720000000002
                 }
             },
             "restrictions": {
@@ -576,10 +576,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Clemson": 7.824
+                    "Clemson": 11.159040000000001
                 },
                 "preemptible": {
-                    "Clemson": 2.3472
+                    "Clemson": 3.347712
                 }
             },
             "restrictions": {
@@ -606,10 +606,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "APT": 1.1640000000000001
+                    "APT": 1.3785600000000002
                 },
                 "preemptible": {
-                    "APT": 0.3492
+                    "APT": 0.41356800000000005
                 }
             },
             "restrictions": {
@@ -636,10 +636,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "APT": 0.384
+                    "APT": 0.61648
                 },
                 "preemptible": {
-                    "APT": 0.1152
+                    "APT": 0.184944
                 }
             },
             "restrictions": {
@@ -666,10 +666,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Massachusetts": 3.12
+                    "Massachusetts": 3.0483200000000004
                 },
                 "preemptible": {
-                    "Massachusetts": 0.9359999999999999
+                    "Massachusetts": 0.9144960000000001
                 }
             },
             "restrictions": {
@@ -696,10 +696,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Massachusetts": 3.624
+                    "Massachusetts": 2.524
                 },
                 "preemptible": {
-                    "Massachusetts": 1.0872
+                    "Massachusetts": 0.7572
                 }
             },
             "restrictions": {

@@ -340,9 +340,14 @@ class Loader:
             if instance.provider == CloudManager.CLOUDLAB:
                 for loc in instance.locations:
                     region = loc.split('_')[-1]
-                    price = float(instance.vcpu) * float(self.cloudlab_conf.cpu_costs) + float(instance.count_gpu) \
-                            * float(self.cloudlab_conf.gpu_costs) + float(instance.memory) \
+                    price = float(instance.vcpu) * float(self.cloudlab_conf.cpu_costs) + float(instance.memory) \
                             * float(self.cloudlab_conf.ram_costs)
+                    if instance.gpu == "K40":
+                        price = price + float(instance.count_gpu) + float(self.cloudlab_conf.gpu_k40_costs)
+                    elif instance.gpu == "P100":
+                        price = price + float(instance.count_gpu) + float(self.cloudlab_conf.gpu_p100_costs)
+                    elif instance.gpu == "V100":
+                        price = price + float(instance.count_gpu) + float(self.cloudlab_conf.gpu_v100_costs)
                     # print(f"Final on-demand price = {price}")
                     instance.setup_ondemand_price(
                         price=price,
