@@ -2118,32 +2118,40 @@ class PreSchedulingManager:
                                         if vm in data_dict['time_aggreg'][provider][region]:
                                             data_dict['time_aggreg'][provider][region][vm] = \
                                                 json_data['time_aggreg'][provider][region][vm]
-                if 'slowdown' in json_data:
-                    for location in json_data['slowdown']:
-                        if location in data_dict['slowdown']:
-                            for provider in json_data['slowdown'][location]:
-                                if provider in data_dict['slowdown'][location]:
-                                    for region in json_data['slowdown'][location][provider]:
-                                        if region in data_dict['slowdown'][location][provider]:
-                                            for vm in json_data['slowdown'][location][provider][region]:
-                                                if vm in data_dict['slowdown'][location][provider][region]:
-                                                    data_dict['slowdown'][location][provider][region][vm] = \
-                                                        json_data['slowdown'][location][provider][region][vm]
-                if 'comm_slowdown' in json_data:
-                    for provider1 in json_data['comm_slowdown']:
-                        if provider1 in data_dict['comm_slowdown']:
-                            for region1 in json_data['comm_slowdown'][provider1]:
-                                if region1 in data_dict['comm_slowdown'][provider1]:
-                                    for provider2 in json_data['comm_slowdown'][provider1][region1]:
-                                        if provider2 in data_dict['comm_slowdown'][provider1][region1]:
-                                            for region2 in json_data['comm_slowdown'][provider1][region1][provider2]:
-                                                if region2 in data_dict['comm_slowdown'][provider1][region1][provider2]:
-                                                    data_dict['comm_slowdown'][provider1][region1][provider2] = \
-                                                        json_data['comm_slowdown'][provider1][region1][provider2]
                 if 'vm_baseline' in json_data:
-                    data_dict['vm_baseline'] = json_data['vm_baseline']
+                    if data_dict['vm_baseline']['vm_name'] == json_data['vm_baseline']['vm_name'] and \
+                            data_dict['vm_baseline']['location'] == json_data['vm_baseline']['location']:
+                        if 'slowdown' in json_data:
+                            for location in json_data['slowdown']:
+                                if location in data_dict['slowdown']:
+                                    for provider in json_data['slowdown'][location]:
+                                        if provider in data_dict['slowdown'][location]:
+                                            for region in json_data['slowdown'][location][provider]:
+                                                if region in data_dict['slowdown'][location][provider]:
+                                                    for vm in json_data['slowdown'][location][provider][region]:
+                                                        if vm in data_dict['slowdown'][location][provider][region]:
+                                                            data_dict['slowdown'][location][provider][region][vm] = \
+                                                                json_data['slowdown'][location][provider][region][vm]
                 if 'pair_regions_baseline' in json_data:
-                    data_dict['pair_regions_baseline'] = json_data['pair_regions_baseline']
+                    if data_dict['pair_regions_baseline']['provider_1'] == json_data['pair_regions_baseline'][
+                        'provider_1'] and data_dict['pair_regions_baseline']['provider_2'] == json_data[
+                        'pair_regions_baseline']['provider_2'] and data_dict['pair_regions_baseline'][
+                        'location_1'] == json_data['pair_regions_baseline']['location_1'] and data_dict[
+                            'pair_regions_baseline']['location_2'] == json_data['pair_regions_baseline']['location_2']:
+                        if 'comm_slowdown' in json_data:
+                            for provider1 in json_data['comm_slowdown']:
+                                if provider1 in data_dict['comm_slowdown']:
+                                    for region1 in json_data['comm_slowdown'][provider1]:
+                                        if region1 in data_dict['comm_slowdown'][provider1]:
+                                            for provider2 in json_data['comm_slowdown'][provider1][region1]:
+                                                if provider2 in data_dict['comm_slowdown'][provider1][region1]:
+                                                    for region2 in json_data['comm_slowdown'][provider1][region1][
+                                                            provider2]:
+                                                        if region2 in data_dict['comm_slowdown'][provider1][region1][
+                                                                provider2]:
+                                                            data_dict['comm_slowdown'][provider1][region1][provider2] =\
+                                                                json_data['comm_slowdown'][provider1][region1][
+                                                                    provider2]
 
             except Exception as e:
                 logging.error(e)

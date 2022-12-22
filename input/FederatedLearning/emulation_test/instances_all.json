@@ -354,6 +354,38 @@
             },
             "image_id": "",
             "ebs_device_name": "",
+            "vcpu": 32,
+            "memory": 128,
+            "gpu": "V100",
+            "gpu_count": 4,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c4130": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 3.72,
+                    "Clemson": 3.72
+                },
+                "preemptible": {
+                    "Wisconsin": 1.116,
+                    "Clemson": 1.116
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
             "vcpu": 56,
             "memory": 256,
             "gpu": "K40",

@@ -23,7 +23,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 48,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -53,7 +53,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 32,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -83,7 +83,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 64,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -113,7 +113,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 16,
-            "memory": 65,
+            "memory": 64,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -143,7 +143,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 20,
-            "memory": 65,
+            "memory": 64,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -173,7 +173,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 32,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -203,7 +203,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 163,
+            "memory": 160,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -233,7 +233,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 196,
+            "memory": 192,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -263,7 +263,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 32,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -293,7 +293,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 163,
+            "memory": 160,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -323,9 +323,9 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 196,
-            "gpu": "no",
-            "gpu_count": 0,
+            "memory": 192,
+            "gpu": "P100",
+            "gpu_count": 1,
             "locations": [
                 "CloudLab_Wisconsin"
             ]
@@ -354,12 +354,11 @@
             },
             "image_id": "",
             "ebs_device_name": "",
-            "vcpu": 48,
-            "memory": 262,
-            "gpu": "no",
-            "gpu_count": 0,
+            "vcpu": 56,
+            "memory": 256,
+            "gpu": "K40",
+            "gpu_count": 2,
             "locations": [
-                "CloudLab_Wisconsin",
                 "CloudLab_Clemson"
             ]
         },
@@ -386,7 +385,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 56,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -416,7 +415,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 64,
-            "memory": 393,
+            "memory": 384,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -446,7 +445,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -476,7 +475,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -506,7 +505,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 24,
-            "memory": 131,
+            "memory": 128,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -536,7 +535,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 144,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -566,7 +565,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 128,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -596,9 +595,9 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 128,
-            "memory": 524,
-            "gpu": "no",
-            "gpu_count": 0,
+            "memory": 512,
+            "gpu": "V100",
+            "gpu_count": 2,
             "locations": [
                 "CloudLab_Clemson"
             ]
@@ -626,7 +625,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 32,
-            "memory": 65,
+            "memory": 64,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -686,37 +685,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 64,
-            "memory": 196,
-            "gpu": "no",
-            "gpu_count": 0,
-            "locations": [
-                "CloudLab_Massachusetts"
-            ]
-        },
-        "rs620": {
-            "provider": "CloudLab",
-            "prices": {
-                "on-demand": {
-                    "Massachusetts": 3.168
-                },
-                "preemptible": {
-                    "Massachusetts": 0.9504
-                }
-            },
-            "restrictions": {
-                "limits": {
-                    "on-demand": 999999999,
-                    "preemptible": 999999999
-                },
-                "markets": {
-                    "on-demand": "yes",
-                    "preemptible": "yes"
-                }
-            },
-            "image_id": "",
-            "ebs_device_name": "",
-            "vcpu": 2,
-            "memory": 262,
+            "memory": 192,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
@@ -746,7 +715,7 @@
             "image_id": "",
             "ebs_device_name": "",
             "vcpu": 40,
-            "memory": 262,
+            "memory": 256,
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
