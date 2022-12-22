@@ -51,9 +51,9 @@
             "region": "Wisconsin"
         }
     },
-    "cost": 2787.423878245367,
-    "makespan": 57.31725867297112,
-    "obj_value": 0.01456833652647594,
+    "cost": 1964.2077234820913,
+    "makespan": 64.81286253414191,
+    "obj_value": 0.015953695606674312,
     "server": {
         "instance_type": "c240g1",
         "provider": "CLOUDLAB",
