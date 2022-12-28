@@ -12,7 +12,7 @@ export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
-COUNTER=4
+COUNTER=1
 echo " ----------------------------
 Test Case 1 (10 clients)
 ---------------------------- "
@@ -28,7 +28,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=4
+COUNTER=1
 echo " ----------------------------
 Test Case 2 (4 clients)
 ---------------------------- "

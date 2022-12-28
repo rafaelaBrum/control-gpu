@@ -304,10 +304,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Wisconsin": 4.7292000000000005
+                    "Wisconsin": 4.6928
                 },
                 "preemptible": {
-                    "Wisconsin": 1.41876
+                    "Wisconsin": 1.40784
                 }
             },
             "restrictions": {
