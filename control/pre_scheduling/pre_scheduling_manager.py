@@ -1947,7 +1947,7 @@ class PreSchedulingManager:
                     data_dict['time_aggreg'][aux_provider][aux_region] = {}
                 data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.vcpu
                 data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.count_gpu
-                data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]
+                data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]/3600
                 data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.5
 
         client_baseline = str(0)

@@ -1,15 +1,17 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Testes_SBAC_2022/Sc5'
-test_case = "Optimal"
+test_folder = 'Initial_mapping'
+test_case = "4_clients"
 current_exec = 3
 
-first_server_message_date_string = "2022-06-03 21:00:03,794"
-last_server_message_date_string = "2022-06-03 22:29:52,348"
+first_server_message_date_string = "2022-12-29 14:27:37,001"
+last_server_message_date_string = "2022-12-29 14:52:27,531"
+
+n_clients = 4
 
 
-def get_server_times_one_round(n_clients, current_round):
+def get_server_times_one_round(current_round):
     file_path = f'{Path.home()}/{test_folder}/' \
                 f'{test_case}/Exec {current_exec}/server/screen_task_log_modified'
 
@@ -29,16 +31,14 @@ def get_server_times_one_round(n_clients, current_round):
     if current_round > 0:
         time1 = content[initial_line][13:36]
         gap = 4*n_clients+2+1
-        time2 = content[initial_line + gap][13:36]
+        time2 = content[initial_line + gap][13:35]
     else:
-        time1 = content[initial_line][13:36]
+        time1 = content[initial_line][13:35]
         gap = 2*n_clients+1
-        time2 = content[initial_line + gap][13:36]
+        time2 = content[initial_line + gap][13:35]
 
-    # print("First time:", time1)
-    # print("Second time:", time2)
-    # print("Third time:", time3)
-    # print("Fourth time:", time4)
+    # print("First time:", time1, "'")
+    # print("Second time:", time2, "'")
 
     return time1, time2
 
@@ -69,10 +69,11 @@ def get_client_times_one_round(current_client, current_round):
         time3 = time1
         time4 = content[initial_line + 5][12:35]
 
-    # print("First time:", time1)
-    # print("Second time:", time2)
-    # print("Third time:", time3)
-    # print("Fourth time:", time4)
+    # print("Client", current_client)
+    # print("First time:", time1, "'")
+    # print("Second time:", time2, "'")
+    # print("Third time:", time3, "'")
+    # print("Fourth time:", time4, "'")
 
     return time1, time2, time3, time4
 
@@ -109,300 +110,160 @@ if __name__ == "__main__":
     print(f'{Path.home()}/{test_folder}/{test_case}/Exec {current_exec}')
 
     for round in range(1, 11):
-        results = get_server_times_one_round(n_clients=4, current_round=round)
+        results = get_server_times_one_round(current_round=round)
         initial_sync_initial_date_string = results[0]
         test_sync_final_date_string = results[1]
 
-        client = 0
-        results = get_client_times_one_round(client, round)
-        initial_sync_final_client_0_date_string = results[0]
-        aggregation_sync_initial_client_0_date_string = results[1]
-        aggregation_sync_final_client_0_date_string = results[2]
-        test_sync_initial_client_0_date_string = results[3]
-        client = 1
-        results = get_client_times_one_round(client, round)
-        initial_sync_final_client_1_date_string = results[0]
-        aggregation_sync_initial_client_1_date_string = results[1]
-        aggregation_sync_final_client_1_date_string = results[2]
-        test_sync_initial_client_1_date_string = results[3]
-        client = 2
-        results = get_client_times_one_round(client, round)
-        initial_sync_final_client_2_date_string = results[0]
-        aggregation_sync_initial_client_2_date_string = results[1]
-        aggregation_sync_final_client_2_date_string = results[2]
-        test_sync_initial_client_2_date_string = results[3]
-        client = 3
-        results = get_client_times_one_round(client, round)
-        initial_sync_final_client_3_date_string = results[0]
-        aggregation_sync_initial_client_3_date_string = results[1]
-        aggregation_sync_final_client_3_date_string = results[2]
-        test_sync_initial_client_3_date_string = results[3]
+        initial_sync_final_date_string = []
+        aggregation_sync_initial_date_string = []
+        aggregation_sync_final_date_string = []
+        test_sync_initial_date_string = []
+
+        for client in range(n_clients):
+            results = get_client_times_one_round(client, round)
+            initial_sync_final_date_string.append(results[0])
+            aggregation_sync_initial_date_string.append(results[1])
+            aggregation_sync_final_date_string.append(results[2])
+            test_sync_initial_date_string.append(results[3])
 
         first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
         last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
         total_fl_execution_duration = last_server_message_date - first_server_message_date
 
         # Initial sync - Time between the server sending the first message and the last client receiving it
+        initial_sync_final_date = []
         initial_sync_initial_date = datetime.strptime(initial_sync_initial_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        initial_sync_final_client_0_date = datetime.strptime(initial_sync_final_client_0_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-        initial_sync_final_client_1_date = datetime.strptime(initial_sync_final_client_1_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-        initial_sync_final_client_2_date = datetime.strptime(initial_sync_final_client_2_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-        initial_sync_final_client_3_date = datetime.strptime(initial_sync_final_client_3_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-        initial_sync_duration = max(initial_sync_final_client_0_date,
-                                    initial_sync_final_client_1_date,
-                                    initial_sync_final_client_2_date,
-                                    initial_sync_final_client_3_date) - initial_sync_initial_date
+        for date in initial_sync_final_date_string:
+            initial_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
+
+        initial_sync_duration = max(initial_sync_final_date) - initial_sync_initial_date
 
         # Aggregation sync - Time between the first client sending the updated weights and
         # the last client receiving the aggregated weights
-        aggregation_sync_initial_client_0_date = datetime.strptime(aggregation_sync_initial_client_0_date_string,
-                                                                   "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_initial_client_1_date = datetime.strptime(aggregation_sync_initial_client_1_date_string,
-                                                                   "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_initial_client_2_date = datetime.strptime(aggregation_sync_initial_client_2_date_string,
-                                                                   "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_initial_client_3_date = datetime.strptime(aggregation_sync_initial_client_3_date_string,
-                                                                   "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_final_client_0_date = datetime.strptime(aggregation_sync_final_client_0_date_string,
-                                                                 "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_final_client_1_date = datetime.strptime(aggregation_sync_final_client_1_date_string,
-                                                                 "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_final_client_2_date = datetime.strptime(aggregation_sync_final_client_2_date_string,
-                                                                 "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_final_client_3_date = datetime.strptime(aggregation_sync_final_client_3_date_string,
-                                                                 "%Y-%m-%d %H:%M:%S,%f")
-        aggregation_sync_duration = max(aggregation_sync_final_client_0_date,
-                                        aggregation_sync_final_client_1_date,
-                                        aggregation_sync_final_client_2_date,
-                                        aggregation_sync_final_client_3_date) - min(aggregation_sync_initial_client_0_date,
-                                                                                    aggregation_sync_initial_client_1_date,
-                                                                                    aggregation_sync_initial_client_2_date,
-                                                                                    aggregation_sync_initial_client_3_date)
+        aggregation_sync_initial_date = []
+        for date in aggregation_sync_initial_date_string:
+            aggregation_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
+
+        aggregation_sync_final_date = []
+        for date in aggregation_sync_final_date_string:
+            aggregation_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
+
+        aggregation_sync_duration = max(aggregation_sync_final_date) - min(aggregation_sync_initial_date)
 
         # Test sync - Time between the first client sending the test metrics and the server aggregates all
-        test_sync_initial_client_0_date = datetime.strptime(test_sync_initial_client_0_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        test_sync_initial_client_1_date = datetime.strptime(test_sync_initial_client_1_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        test_sync_initial_client_2_date = datetime.strptime(test_sync_initial_client_2_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        test_sync_initial_client_3_date = datetime.strptime(test_sync_initial_client_3_date_string, "%Y-%m-%d %H:%M:%S,%f")
+        test_sync_initial_date = []
+        for date in test_sync_initial_date_string:
+            test_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
         test_sync_final_date = datetime.strptime(test_sync_final_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        test_sync_duration = test_sync_final_date - min(test_sync_initial_client_0_date,
-                                                        test_sync_initial_client_1_date,
-                                                        test_sync_initial_client_2_date,
-                                                        test_sync_initial_client_3_date)
+        test_sync_duration = test_sync_final_date - min(test_sync_initial_date)
 
         # Clients training and test times
-        initial_training_time_client_0_date = initial_sync_final_client_0_date
-        initial_training_time_client_1_date = initial_sync_final_client_1_date
-        initial_training_time_client_2_date = initial_sync_final_client_2_date
-        initial_training_time_client_3_date = initial_sync_final_client_3_date
-        final_training_time_client_0_date = aggregation_sync_initial_client_0_date
-        final_training_time_client_1_date = aggregation_sync_initial_client_1_date
-        final_training_time_client_2_date = aggregation_sync_initial_client_2_date
-        final_training_time_client_3_date = aggregation_sync_initial_client_3_date
+        initial_training_time_date = []
+        final_training_time_date = []
+        initial_test_time_date = []
+        final_test_time_date = []
+        training_duration = []
+        test_duration = []
 
-        initial_test_time_client_0_date = aggregation_sync_final_client_0_date
-        initial_test_time_client_1_date = aggregation_sync_final_client_1_date
-        initial_test_time_client_2_date = aggregation_sync_final_client_2_date
-        initial_test_time_client_3_date = aggregation_sync_final_client_3_date
-        final_test_time_client_0_date = test_sync_initial_client_0_date
-        final_test_time_client_1_date = test_sync_initial_client_1_date
-        final_test_time_client_2_date = test_sync_initial_client_2_date
-        final_test_time_client_3_date = test_sync_initial_client_3_date
-
-        training_client_0_duration = final_training_time_client_0_date - initial_training_time_client_0_date
-        training_client_1_duration = final_training_time_client_1_date - initial_training_time_client_1_date
-        training_client_2_duration = final_training_time_client_2_date - initial_training_time_client_2_date
-        training_client_3_duration = final_training_time_client_3_date - initial_training_time_client_3_date
-
-        test_client_0_duration = final_test_time_client_0_date - initial_test_time_client_0_date
-        test_client_1_duration = final_test_time_client_1_date - initial_test_time_client_1_date
-        test_client_2_duration = final_test_time_client_2_date - initial_test_time_client_2_date
-        test_client_3_duration = final_test_time_client_3_date - initial_test_time_client_3_date
-
-        # print("Initial sync duration: ", initial_sync_duration)
-        #
-        # print("Client 0 training duration:", training_client_0_duration)
-        #
-        # print("Client 1 training duration:", training_client_1_duration)
-        #
-        # print("Client 2 training duration:", training_client_2_duration)
-        #
-        # print("Client 3 training duration:", training_client_3_duration)
-        #
-        # print("Aggregation sync duration: ", aggregation_sync_duration)
-        #
-        # print("Client 0 test duration:", test_client_0_duration)
-        #
-        # print("Client 1 test duration:", test_client_1_duration)
-        #
-        # print("Client 2 test duration:", test_client_2_duration)
-        #
-        # print("Client 3 test duration:", test_client_3_duration)
-        #
-        # print("Test sync duration: ", test_sync_duration)
-        #
-        # print("FL total execution: ", total_fl_execution_duration)
+        for client in range(n_clients):
+            initial_training_time_date.append(initial_sync_final_date[client])
+            final_training_time_date.append(aggregation_sync_initial_date[client])
+            initial_test_time_date.append(aggregation_sync_final_date[client])
+            final_test_time_date.append(test_sync_initial_date[client])
+            training_duration.append(final_training_time_date[client] - initial_training_time_date[client])
+            test_duration.append(final_test_time_date[client] - initial_test_time_date[client])
 
         if round > 0:
             print(f'----------\n Round {round}\n----------')
         else:
             print(f'----------\n Final\n----------')
 
-        print(f"{initial_sync_duration}, {training_client_0_duration}, {training_client_1_duration}, "
-              f"{training_client_2_duration}, {training_client_3_duration}, {aggregation_sync_duration}, "
-              f"{test_client_0_duration}, {test_client_1_duration}, {test_client_2_duration}, "
-              f"{test_client_3_duration}, {test_sync_duration}, {total_fl_execution_duration}")
+        print_string = f"{initial_sync_duration}"
+        for client in range(n_clients):
+            print_string = print_string + f", {training_duration[client]}"
+        print_string = print_string + f", {aggregation_sync_duration}"
+        for client in range(n_clients):
+            print_string = print_string + f", {test_duration[client]}"
+        print_string = print_string + f", {test_sync_duration}, {total_fl_execution_duration}"
 
-    round = -1
+        print(print_string)
 
-    results = get_server_times_one_round(n_clients=4, current_round=round)
-    initial_sync_initial_date_string = results[0]
-    test_sync_final_date_string = results[1]
-
-    client = 0
-    results = get_client_times_one_round(client, round)
-    initial_sync_final_client_0_date_string = results[0]
-    aggregation_sync_initial_client_0_date_string = results[1]
-    aggregation_sync_final_client_0_date_string = results[2]
-    test_sync_initial_client_0_date_string = results[3]
-    client = 1
-    results = get_client_times_one_round(client, round)
-    initial_sync_final_client_1_date_string = results[0]
-    aggregation_sync_initial_client_1_date_string = results[1]
-    aggregation_sync_final_client_1_date_string = results[2]
-    test_sync_initial_client_1_date_string = results[3]
-    client = 2
-    results = get_client_times_one_round(client, round)
-    initial_sync_final_client_2_date_string = results[0]
-    aggregation_sync_initial_client_2_date_string = results[1]
-    aggregation_sync_final_client_2_date_string = results[2]
-    test_sync_initial_client_2_date_string = results[3]
-    client = 3
-    results = get_client_times_one_round(client, round)
-    initial_sync_final_client_3_date_string = results[0]
-    aggregation_sync_initial_client_3_date_string = results[1]
-    aggregation_sync_final_client_3_date_string = results[2]
-    test_sync_initial_client_3_date_string = results[3]
-
-    first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    total_fl_execution_duration = last_server_message_date - first_server_message_date
-
-    # Initial sync - Time between the server sending the first message and the last client receiving it
-    initial_sync_initial_date = datetime.strptime(initial_sync_initial_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    initial_sync_final_client_0_date = datetime.strptime(initial_sync_final_client_0_date_string,
-                                                         "%Y-%m-%d %H:%M:%S,%f")
-    initial_sync_final_client_1_date = datetime.strptime(initial_sync_final_client_1_date_string,
-                                                         "%Y-%m-%d %H:%M:%S,%f")
-    initial_sync_final_client_2_date = datetime.strptime(initial_sync_final_client_2_date_string,
-                                                         "%Y-%m-%d %H:%M:%S,%f")
-    initial_sync_final_client_3_date = datetime.strptime(initial_sync_final_client_3_date_string,
-                                                         "%Y-%m-%d %H:%M:%S,%f")
-    initial_sync_duration = max(initial_sync_final_client_0_date,
-                                initial_sync_final_client_1_date,
-                                initial_sync_final_client_2_date,
-                                initial_sync_final_client_3_date) - initial_sync_initial_date
-
-    # Aggregation sync - Time between the first client sending the updated weights and
-    # the last client receiving the aggregated weights
-    aggregation_sync_initial_client_0_date = datetime.strptime(aggregation_sync_initial_client_0_date_string,
-                                                               "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_initial_client_1_date = datetime.strptime(aggregation_sync_initial_client_1_date_string,
-                                                               "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_initial_client_2_date = datetime.strptime(aggregation_sync_initial_client_2_date_string,
-                                                               "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_initial_client_3_date = datetime.strptime(aggregation_sync_initial_client_3_date_string,
-                                                               "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_final_client_0_date = datetime.strptime(aggregation_sync_final_client_0_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_final_client_1_date = datetime.strptime(aggregation_sync_final_client_1_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_final_client_2_date = datetime.strptime(aggregation_sync_final_client_2_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_final_client_3_date = datetime.strptime(aggregation_sync_final_client_3_date_string,
-                                                             "%Y-%m-%d %H:%M:%S,%f")
-    aggregation_sync_duration = max(aggregation_sync_final_client_0_date,
-                                    aggregation_sync_final_client_1_date,
-                                    aggregation_sync_final_client_2_date,
-                                    aggregation_sync_final_client_3_date) - min(aggregation_sync_initial_client_0_date,
-                                                                                aggregation_sync_initial_client_1_date,
-                                                                                aggregation_sync_initial_client_2_date,
-                                                                                aggregation_sync_initial_client_3_date)
-
-    # Test sync - Time between the first client sending the test metrics and the server aggregates all
-    test_sync_initial_client_0_date = datetime.strptime(test_sync_initial_client_0_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    test_sync_initial_client_1_date = datetime.strptime(test_sync_initial_client_1_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    test_sync_initial_client_2_date = datetime.strptime(test_sync_initial_client_2_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    test_sync_initial_client_3_date = datetime.strptime(test_sync_initial_client_3_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    test_sync_final_date = datetime.strptime(test_sync_final_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    test_sync_duration = test_sync_final_date - min(test_sync_initial_client_0_date,
-                                                    test_sync_initial_client_1_date,
-                                                    test_sync_initial_client_2_date,
-                                                    test_sync_initial_client_3_date)
-
-    # Clients training and test times
-    initial_training_time_client_0_date = initial_sync_final_client_0_date
-    initial_training_time_client_1_date = initial_sync_final_client_1_date
-    initial_training_time_client_2_date = initial_sync_final_client_2_date
-    initial_training_time_client_3_date = initial_sync_final_client_3_date
-    final_training_time_client_0_date = aggregation_sync_initial_client_0_date
-    final_training_time_client_1_date = aggregation_sync_initial_client_1_date
-    final_training_time_client_2_date = aggregation_sync_initial_client_2_date
-    final_training_time_client_3_date = aggregation_sync_initial_client_3_date
-
-    initial_test_time_client_0_date = aggregation_sync_final_client_0_date
-    initial_test_time_client_1_date = aggregation_sync_final_client_1_date
-    initial_test_time_client_2_date = aggregation_sync_final_client_2_date
-    initial_test_time_client_3_date = aggregation_sync_final_client_3_date
-    final_test_time_client_0_date = test_sync_initial_client_0_date
-    final_test_time_client_1_date = test_sync_initial_client_1_date
-    final_test_time_client_2_date = test_sync_initial_client_2_date
-    final_test_time_client_3_date = test_sync_initial_client_3_date
-
-    training_client_0_duration = final_training_time_client_0_date - initial_training_time_client_0_date
-    training_client_1_duration = final_training_time_client_1_date - initial_training_time_client_1_date
-    training_client_2_duration = final_training_time_client_2_date - initial_training_time_client_2_date
-    training_client_3_duration = final_training_time_client_3_date - initial_training_time_client_3_date
-
-    test_client_0_duration = final_test_time_client_0_date - initial_test_time_client_0_date
-    test_client_1_duration = final_test_time_client_1_date - initial_test_time_client_1_date
-    test_client_2_duration = final_test_time_client_2_date - initial_test_time_client_2_date
-    test_client_3_duration = final_test_time_client_3_date - initial_test_time_client_3_date
-
-    # print("Initial sync duration: ", initial_sync_duration)
+    # round = -1
     #
-    # print("Client 0 training duration:", training_client_0_duration)
+    # results = get_server_times_one_round(current_round=round)
+    # initial_sync_initial_date_string = results[0]
+    # test_sync_final_date_string = results[1]
     #
-    # print("Client 1 training duration:", training_client_1_duration)
+    # initial_sync_final_date_string = []
+    # aggregation_sync_initial_date_string = []
+    # aggregation_sync_final_date_string = []
+    # test_sync_initial_date_string = []
     #
-    # print("Client 2 training duration:", training_client_2_duration)
+    # for client in range(n_clients):
+    #     results = get_client_times_one_round(client, round)
+    #     initial_sync_final_date_string.append(results[0])
+    #     aggregation_sync_initial_date_string.append(results[1])
+    #     aggregation_sync_final_date_string.append(results[2])
+    #     test_sync_initial_date_string.append(results[3])
     #
-    # print("Client 3 training duration:", training_client_3_duration)
+    # first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    # last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    # total_fl_execution_duration = last_server_message_date - first_server_message_date
     #
-    # print("Aggregation sync duration: ", aggregation_sync_duration)
+    # # Initial sync - Time between the server sending the first message and the last client receiving it
+    # initial_sync_final_date = []
+    # initial_sync_initial_date = datetime.strptime(initial_sync_initial_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    # for date in initial_sync_final_date_string:
+    #     initial_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
     #
-    # print("Client 0 test duration:", test_client_0_duration)
+    # initial_sync_duration = max(initial_sync_final_date) - initial_sync_initial_date
     #
-    # print("Client 1 test duration:", test_client_1_duration)
+    # # Aggregation sync - Time between the first client sending the updated weights and
+    # # the last client receiving the aggregated weights
+    # aggregation_sync_initial_date = []
+    # for date in aggregation_sync_initial_date_string:
+    #     aggregation_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
     #
-    # print("Client 2 test duration:", test_client_2_duration)
+    # aggregation_sync_final_date = []
+    # for date in aggregation_sync_final_date_string:
+    #     aggregation_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
     #
-    # print("Client 3 test duration:", test_client_3_duration)
+    # aggregation_sync_duration = max(aggregation_sync_final_date) - min(aggregation_sync_initial_date)
     #
-    # print("Test sync duration: ", test_sync_duration)
+    # # Test sync - Time between the first client sending the test metrics and the server aggregates all
+    # test_sync_initial_date = []
+    # for date in test_sync_initial_date_string:
+    #     test_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
+    # test_sync_final_date = datetime.strptime(test_sync_final_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    # test_sync_duration = test_sync_final_date - min(test_sync_initial_date)
     #
-    # print("FL total execution: ", total_fl_execution_duration)
-
-    if round > 0:
-        print(f'----------\n Round {round}\n----------')
-    else:
-        print(f'----------\n Final\n----------')
-
-    print(f"{initial_sync_duration}, {training_client_0_duration}, {training_client_1_duration}, "
-          f"{training_client_2_duration}, {training_client_3_duration}, {aggregation_sync_duration}, "
-          f"{test_client_0_duration}, {test_client_1_duration}, {test_client_2_duration}, "
-          f"{test_client_3_duration}, {test_sync_duration}, {total_fl_execution_duration}")
+    # # Clients training and test times
+    # initial_training_time_date = []
+    # final_training_time_date = []
+    # initial_test_time_date = []
+    # final_test_time_date = []
+    # training_duration = []
+    # test_duration = []
+    #
+    # for client in range(n_clients):
+    #     initial_training_time_date.append(initial_sync_final_date[client])
+    #     final_training_time_date.append(aggregation_sync_initial_date[client])
+    #     initial_test_time_date.append(aggregation_sync_final_date[client])
+    #     final_test_time_date.append(test_sync_initial_date[client])
+    #     training_duration.append(final_training_time_date[client] - initial_training_time_date[client])
+    #     test_duration.append(final_test_time_date[client] - initial_test_time_date[client])
+    #
+    # if round > 0:
+    #     print(f'----------\n Round {round}\n----------')
+    # else:
+    #     print(f'----------\n Final\n----------')
+    #
+    # print_string = f"{initial_sync_duration}"
+    # for client in range(n_clients):
+    #     print_string = print_string + f", {training_duration[client]}"
+    # print_string = print_string + f", {aggregation_sync_duration}"
+    # for client in range(n_clients):
+    #     print_string = print_string + f", {test_duration[client]}"
+    # print_string = print_string + f", {test_sync_duration}, {total_fl_execution_duration}"
+    #
+    # print(print_string)

@@ -17,7 +17,7 @@
             "zip_file": "TIL_VGG_server.zip",
             "n_rounds": 10,
             "n_clients": 10,
-            "comm_baseline": 7.42
+            "comm_baseline": 8.66
         },
         "clients": {
             "0" : {

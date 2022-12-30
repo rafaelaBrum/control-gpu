@@ -430,7 +430,7 @@ class MathematicalFormulationScheduler(Scheduler):
                         aux_key = (provider, region, vm)
                         test_prov = self.prov_regions_vms.count(aux_key)
                         if test_prov > 0:
-                            self.time_aggreg[aux_key] = aux_data[provider][region][vm]
+                            self.time_aggreg[aux_key] = aux_data[provider][region][vm] * len(self.clients)
                         else:
                             raise Exception(f"Only time to aggregate to ({provider}, {region}. {vm})")
 
