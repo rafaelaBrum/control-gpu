@@ -3,10 +3,10 @@ from pathlib import Path
 
 test_folder = 'Initial_mapping'
 test_case = "4_clients"
-current_exec = 3
+current_exec = 4
 
-first_server_message_date_string = "2022-12-29 14:27:37,001"
-last_server_message_date_string = "2022-12-29 14:52:27,531"
+first_server_message_date_string = "2022-12-30 12:46:57,829"
+last_server_message_date_string = "2022-12-30 13:25:51,524"
 
 n_clients = 4
 
