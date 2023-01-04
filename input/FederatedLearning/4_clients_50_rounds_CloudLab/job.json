@@ -1,7 +1,7 @@
 {
-    "job_id": 2000,
+    "job_id": 4000,
     "job_name": "4 clients - VGG16 (dataset in CloudLab)",
-    "description": "4 clients executing VGG16 with dataset stored in CloudLab",
+    "description": "4 clients executing VGG16 with dataset stored in CloudLab - 50 rounds",
     "server_msg_train": 0.537082008,
     "server_msg_test": 0.537082008,
     "client_msg_train": 0.537082008,
@@ -15,7 +15,7 @@
             },
             "generic_checkpoint": "False",
             "zip_file": "TIL_VGG_server.zip",
-            "n_rounds": 10,
+            "n_rounds": 50,
             "n_clients": 4,
             "comm_baseline": 8.66
         },
