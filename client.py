@@ -144,6 +144,8 @@ def main():
 
     parser.add_argument('--strategy', help="Strategy to use in server aggregation", type=str, default=None,
                         required=False)
+    parser.add_argument('--frequency_ckpt', help='Frequency of checkpointing when using FedAvgSave', type=int,
+                        default=None)
 
     parser.add_argument('--num_seed', help="Seed to be used by the clients to randomly shuffle their dataset",
                         default=None, required=False)

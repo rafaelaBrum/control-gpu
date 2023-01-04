@@ -91,6 +91,7 @@ class FedAvgSave(Strategy):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        frequency_ckpt = 1
     ) -> None:
         """Federated Averaging strategy.
 
@@ -149,6 +150,9 @@ class FedAvgSave(Strategy):
 
         if self.evaluate_metrics_aggregation_fn is None:
             self.evaluate_metrics_aggregation_fn = weighted_metrics_avg
+
+        self.next_ckpt = frequency_ckpt
+        self.frequency_ckpt = frequency_ckpt
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -269,12 +273,14 @@ class FedAvgSave(Strategy):
             # Convert `Parameters` to `List[np.ndarray]`
             aggregated_ndarrays: List[np.ndarray] = parameters_to_ndarrays(parameters_aggregated)
 
-            # Save aggregated_ndarrays
-            print(f"Saving round {server_round} aggregated_ndarrays...")
-            checkpoint_file = f"round-{server_round}-weights.npz"
-            np.savez(checkpoint_file, *aggregated_ndarrays)
-            with open("checkpoints.txt", "a") as file:
-                file.write(f"\n{checkpoint_file}")
+            if server_round == self.next_ckpt:
+                # Save aggregated_ndarrays
+                print(f"Saving round {server_round} aggregated_ndarrays...")
+                checkpoint_file = f"round-{server_round}-weights.npz"
+                np.savez(checkpoint_file, *aggregated_ndarrays)
+                with open("checkpoints.txt", "a") as file:
+                    file.write(f"\n{checkpoint_file}")
+                self.next_ckpt = self.next_ckpt + self.frequency_ckpt
 
         return parameters_aggregated, metrics_aggregated
 

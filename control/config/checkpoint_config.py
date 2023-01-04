@@ -15,3 +15,7 @@ class CheckPointConfig(Config):
     @property
     def extra_vm(self):
         return self.get_boolean(self._key, 'extra_vm')
+
+    @property
+    def frequency_ckpt(self):
+        return self.get_property(self._key, 'frequency_ckpt')

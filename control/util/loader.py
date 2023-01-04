@@ -90,6 +90,7 @@ class Loader:
         self.client_command = args.command
         # getting scheduler name
         self.scheduler_name = args.scheduler_name
+        self.frequency_ckpt = args.frequency_ckpt
 
         self.emulated = args.emulated
 
@@ -244,6 +245,9 @@ class Loader:
 
         if self.num_clients_pre_scheduling is None:
             self.num_clients_pre_scheduling = self.pre_scheduling_conf.num_clients
+
+        if self.frequency_ckpt is None:
+            self.frequency_ckpt = self.checkpoint_conf.frequency_ckpt
 
     def __load_job(self):
         """
@@ -479,6 +483,9 @@ class Loader:
                             self.application_conf.fl_port,
                             strategy
                             )
+                if strategy == 'FedAvgSave':
+                    self.job.server_task.command = self.job.server_task.command + f" --frequency_ckpt " \
+                                                                                  f"{self.frequency_ckpt}"
             else:
                 self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
                                               " --min_num_clients {2} --server_address [::]:{3}"\
