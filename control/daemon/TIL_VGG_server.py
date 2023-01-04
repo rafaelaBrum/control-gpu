@@ -113,6 +113,9 @@ def get_args():
         default='vgg16_weights.bin',
         help="File where initial weights are stored (default: weights.bin)",
     )
+
+    parser.add_argument('--frequency_ckpt', help='Frequency of checkpointing when using FedAvgSave', type=int,
+                        default=None)
     args = parser.parse_args()
     return args
 
@@ -280,7 +283,8 @@ def main():
                 min_eval_clients=args.min_sample_size,
                 min_available_clients=args.min_num_clients,
                 on_fit_config_fn=fit_config,
-                initial_parameters=initial_weights
+                initial_parameters=initial_weights,
+                frequency_ckpt=args.frequency_ckpt
             )
         else:
             strategy = FedAvgSave(
@@ -289,7 +293,8 @@ def main():
                 min_fit_clients=args.min_sample_size,
                 min_eval_clients=args.min_sample_size,
                 min_available_clients=args.min_num_clients,
-                on_fit_config_fn=fit_config
+                on_fit_config_fn=fit_config,
+                frequency_ckpt=args.frequency_ckpt
             )
     else:
         print(strategy_print)
