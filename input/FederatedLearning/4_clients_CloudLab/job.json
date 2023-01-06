@@ -1,5 +1,5 @@
 {
-    "job_id": 2000,
+    "job_id": 2002,
     "job_name": "4 clients - VGG16 (dataset in CloudLab)",
     "description": "4 clients executing VGG16 with dataset stored in CloudLab",
     "server_msg_train": 0.537082008,
