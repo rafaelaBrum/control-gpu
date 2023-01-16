@@ -15,7 +15,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.js
 echo " ----------------------------
 4 clients running 50 rounds
 ---------------------------- "
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 1 (every 10 rounds)
 ---------------------------- "
@@ -31,7 +31,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 2 (every 20 rounds)
 ---------------------------- "
@@ -47,7 +47,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=4
 echo " ----------------------------
 Test Case 3 (every 30 rounds)
 ---------------------------- "
@@ -63,9 +63,9 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=1
+COUNTER=3
 echo " ----------------------------
-Test Case 1 (every 40 rounds)
+Test Case 4 (every 40 rounds)
 ---------------------------- "
 cp setup_cloudlab/4_clients_50_rounds_ckpt_40_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
