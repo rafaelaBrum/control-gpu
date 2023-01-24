@@ -113,6 +113,9 @@ class MathematicalFormulationScheduler(Scheduler):
 
         self.input_data = {}
 
+        self.max_total_exec = 0.0
+        self.max_cost = 0.0
+
         self.__read_json(input_file=loader.input_file, job_file=loader.job_file)
         self.pre_process()
         # print(self)
@@ -176,7 +179,7 @@ class MathematicalFormulationScheduler(Scheduler):
             # print("max_time_aggreg", max_time_aggreg)
             # print("max_time_comm", max_time_comm)
 
-            max_total_exec = max_time_exec + max_time_aggreg + max_time_comm
+            self.max_total_exec = max_time_exec + max_time_aggreg + max_time_comm
 
             max_vm_cost = 0
             for j, k, l in self.cost_vms:
@@ -191,16 +194,17 @@ class MathematicalFormulationScheduler(Scheduler):
                     if comp > max_cost_transfer:
                         max_cost_transfer = comp
 
-            max_cost = max_vm_cost * max_total_exec * (len(self.clients) + 1) + max_cost_transfer * \
+            self.max_cost = max_vm_cost * self.max_total_exec * (len(self.clients) + 1) + max_cost_transfer * \
                 (self.server_msg_train + self.server_msg_test + self.client_msg_train +
                  self.client_msg_test) * len(self.clients)
 
-            # print("max_cost", max_cost)
-            # print("max_total_exec", max_total_exec)
+            # print("max_cost", self.max_cost)
+            # print("max_total_exec", self.max_total_exec)
 
             # Objective function
 
-            objective_function = self.alpha * (total_costs / max_cost) + (1 - self.alpha) * (t_m / max_total_exec)
+            objective_function = self.alpha * (total_costs / self.max_cost) + (1 - self.alpha) * \
+                                 (t_m / self.max_total_exec)
             # objective_function = total_costs
             # objective_function = t_m
             model.setObjective(objective_function, GRB.MINIMIZE)
@@ -320,10 +324,11 @@ class MathematicalFormulationScheduler(Scheduler):
                         var_tm = v.x
 
                 if self.alpha > 0:
-                    cost = ((obj_value - (1 - self.alpha) * (var_tm / max_total_exec)) / self.alpha) * max_cost
+                    cost = ((obj_value - (1 - self.alpha) * (var_tm / self.max_total_exec)) / self.alpha)\
+                           * self.max_cost
 
-                    # print("max_cost", max_cost)
-                    # print("max_total_exec", max_total_exec)
+                    # print("max_cost", self.max_cost)
+                    # print("max_total_exec", self.max_total_exec)
 
                     self.input_data['cost'] = cost
         except gp.GurobiError as e:
@@ -370,6 +375,8 @@ class MathematicalFormulationScheduler(Scheduler):
 
     def __write_map_json(self, file_output):
         logging.info(f"<MathematicalFormulation> Writing {file_output} file")
+        self.input_data['max_cost'] = self.max_cost
+        self.input_data['max_total_exec'] = self.max_total_exec
 
         with open(file_output, "w") as fp:
             json.dump(self.input_data, fp, sort_keys=True, indent=4, default=str)

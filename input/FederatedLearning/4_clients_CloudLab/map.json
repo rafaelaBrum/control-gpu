@@ -1,28 +1,30 @@
 {
     "clients": {
         "0": {
-            "instance_type": "r7525",
+            "instance_type": "c240g5",
             "provider": "CLOUDLAB",
-            "region": "Clemson"
+            "region": "Wisconsin"
         },
         "1": {
-            "instance_type": "r7525",
+            "instance_type": "c240g5",
             "provider": "CLOUDLAB",
-            "region": "Clemson"
+            "region": "Wisconsin"
         },
         "2": {
-            "instance_type": "r7525",
+            "instance_type": "c240g5",
             "provider": "CLOUDLAB",
-            "region": "Clemson"
+            "region": "Wisconsin"
         },
         "3": {
-            "instance_type": "r7525",
+            "instance_type": "c240g5",
             "provider": "CLOUDLAB",
-            "region": "Clemson"
+            "region": "Wisconsin"
         }
     },
     "cost": 1.5442125836443847,
     "makespan": 135.75336224051048,
+    "max_cost": 104.40670300677051,
+    "max_total_exec": 6656.0929290840495,
     "obj_value": 0.01759285562941339,
     "server": {
         "instance_type": "c220g1",

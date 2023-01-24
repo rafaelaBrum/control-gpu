@@ -1,0 +1,694 @@
+{
+    "instances": {
+        "c6525-100g": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Utah": 2.2134400000000003
+                },
+                "preemptible": {
+                    "Utah": 0.6640320000000001
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 48,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Utah"
+            ]
+        },
+        "c6525-25g": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Utah": 1.6697600000000001
+                },
+                "preemptible": {
+                    "Utah": 0.500928
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 32,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Utah"
+            ]
+        },
+        "d6515": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Utah": 2.7571200000000005
+                },
+                "preemptible": {
+                    "Utah": 0.8271360000000001
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 64,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Utah"
+            ]
+        },
+        "m510": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Utah": 0.8348800000000001
+                },
+                "preemptible": {
+                    "Utah": 0.250464
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 16,
+            "memory": 64,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Utah"
+            ]
+        },
+        "xl170": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Utah": 0.9708000000000001
+                },
+                "preemptible": {
+                    "Utah": 0.29124
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 20,
+            "memory": 64,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Utah"
+            ]
+        },
+        "c220g1": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 1.6697600000000001
+                },
+                "preemptible": {
+                    "Wisconsin": 0.500928
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 32,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c220g2": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 2.0872
+                },
+                "preemptible": {
+                    "Wisconsin": 0.62616
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 160,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c220g5": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 2.2328
+                },
+                "preemptible": {
+                    "Wisconsin": 0.66984
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 192,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c240g1": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 1.6697600000000001
+                },
+                "preemptible": {
+                    "Wisconsin": 0.500928
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 32,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c240g2": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 2.0872
+                },
+                "preemptible": {
+                    "Wisconsin": 0.62616
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 160,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c240g5": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Wisconsin": 4.6928
+                },
+                "preemptible": {
+                    "Wisconsin": 1.40784
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 192,
+            "gpu": "P100",
+            "gpu_count": 1,
+            "locations": [
+                "CloudLab_Wisconsin"
+            ]
+        },
+        "c6320": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 3.06768
+                },
+                "preemptible": {
+                    "Clemson": 0.920304
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 56,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "c6420": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 3.92192
+                },
+                "preemptible": {
+                    "Clemson": 1.176576
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 64,
+            "memory": 384,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "c8220": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 2.524
+                },
+                "preemptible": {
+                    "Clemson": 0.7572
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "c8220x": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 2.524
+                },
+                "preemptible": {
+                    "Clemson": 0.7572
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "dss7500": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 1.39792
+                },
+                "preemptible": {
+                    "Clemson": 0.419376
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 24,
+            "memory": 128,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "r650": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 6.057920000000001
+                },
+                "preemptible": {
+                    "Clemson": 1.8173760000000003
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 144,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "r6525": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 5.514240000000001
+                },
+                "preemptible": {
+                    "Clemson": 1.6542720000000002
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 128,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "r7525": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Clemson": 11.159040000000001
+                },
+                "preemptible": {
+                    "Clemson": 3.347712
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 128,
+            "memory": 512,
+            "gpu": "V100",
+            "gpu_count": 2,
+            "locations": [
+                "CloudLab_Clemson"
+            ]
+        },
+        "c6220": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "APT": 1.3785600000000002
+                },
+                "preemptible": {
+                    "APT": 0.41356800000000005
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 32,
+            "memory": 64,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_APT"
+            ]
+        },
+        "r320": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "APT": 0.61648
+                },
+                "preemptible": {
+                    "APT": 0.184944
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 16,
+            "memory": 16,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_APT"
+            ]
+        },
+        "rs440": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Massachusetts": 3.0483200000000004
+                },
+                "preemptible": {
+                    "Massachusetts": 0.9144960000000001
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 64,
+            "memory": 192,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Massachusetts"
+            ]
+        },
+        "rs630": {
+            "provider": "CloudLab",
+            "prices": {
+                "on-demand": {
+                    "Massachusetts": 2.524
+                },
+                "preemptible": {
+                    "Massachusetts": 0.7572
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "",
+            "vcpu": 40,
+            "memory": 256,
+            "gpu": "no",
+            "gpu_count": 0,
+            "locations": [
+                "CloudLab_Massachusetts"
+            ]
+        }
+    }
+}

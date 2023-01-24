@@ -1,0 +1,32 @@
+{
+    "clients": {
+        "0": {
+            "instance_type": "r7525",
+            "provider": "CLOUDLAB",
+            "region": "Clemson"
+        },
+        "1": {
+            "instance_type": "r7525",
+            "provider": "CLOUDLAB",
+            "region": "Clemson"
+        },
+        "2": {
+            "instance_type": "r7525",
+            "provider": "CLOUDLAB",
+            "region": "Clemson"
+        },
+        "3": {
+            "instance_type": "r7525",
+            "provider": "CLOUDLAB",
+            "region": "Clemson"
+        }
+    },
+    "cost": 1.5442125836443847,
+    "makespan": 135.75336224051048,
+    "obj_value": 0.01759285562941339,
+    "server": {
+        "instance_type": "c6320",
+        "provider": "CLOUDLAB",
+        "region": "Clemson"
+    }
+}
