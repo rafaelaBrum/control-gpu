@@ -58,7 +58,7 @@ class Scheduler:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
     def get_server_instance(self, provider, region, vm_name):
-        logging.info("<Scheduler>: Choosing initial instance for server task from provider {}".format(provider))
+        logging.info("<Scheduler>: Choosing instance for server task from provider {}".format(provider))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_server_aws.items():
                 if name == vm_name:
@@ -99,7 +99,7 @@ class Scheduler:
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
     def get_client_instance(self, provider, region, vm_name, client_id):
-        logging.info("<Scheduler>: Choosing initial instance for client task from provider {}".format(provider))
+        logging.info("<Scheduler>: Choosing instance for client task from provider {}".format(provider))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_client_aws.items():
                 if name == vm_name:

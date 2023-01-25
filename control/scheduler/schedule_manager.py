@@ -80,7 +80,7 @@ class ScheduleManager:
 
         # Semaphore
         self.semaphore = threading.Semaphore()
-        self.semaphore_count = threading.Semaphore()
+        # self.semaphore_count = threading.Semaphore()
 
         # TRACKERS VALUES
         self.n_interruptions = 0
@@ -97,6 +97,8 @@ class ScheduleManager:
         self.terminated_dispatchers = []
         self.working_dispatchers = []
         self.idle_dispatchers = []
+
+        self.server_revoked = False
         # self.server_task_status = Task.WAITING
         # self.client_tasks_status = []
         # for i in range(self.loader.job.num_clients):
@@ -451,25 +453,26 @@ class ScheduleManager:
         # # self.semaphore.release()
 
     def __terminated_handle(self, affected_dispatcher: Dispatcher, terminate_vm):
-        self.semaphore.acquire()
-
-        if affected_dispatcher in self.working_dispatchers:
-            self.working_dispatchers.remove(affected_dispatcher)
-
-            self.terminated_dispatchers.append(affected_dispatcher)
-
-        if terminate_vm:
-            affected_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
-
-        # if len(self.working_dispatchers) == 1:
-        #     self.abort = True
-
-        self.semaphore.release()
-
         # Move task to other VM
         # # self.semaphore.acquire()
         #
         if affected_dispatcher.type_task == Job.SERVER:
+            self.server_revoked = True
+            self.semaphore.acquire()
+
+            if affected_dispatcher in self.working_dispatchers:
+                self.working_dispatchers.remove(affected_dispatcher)
+
+                self.terminated_dispatchers.append(affected_dispatcher)
+
+            # if len(self.working_dispatchers) == 1:
+            #     self.abort = True
+
+            self.semaphore.release()
+
+            if terminate_vm:
+                affected_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
             if not self.loader.job.server_task.has_task_finished():
                 self.loader.job.server_task.stop_execution()
 
@@ -528,10 +531,27 @@ class ScheduleManager:
                         self.loader.job.client_tasks[i].server_ip = server_ip
                     for working_dispatcher in self.working_dispatchers:
                         working_dispatcher.update_server_ip(server_ip)
+                        # working_dispatcher.main_thread.start()
 
                 self.semaphore.release()
+                self.server_revoked = False
 
-        elif affected_dispatcher.type_task == Job.CLIENT:
+        elif affected_dispatcher.type_task == Job.CLIENT and not self.server_revoked:
+            self.semaphore.acquire()
+
+            if affected_dispatcher in self.working_dispatchers:
+                self.working_dispatchers.remove(affected_dispatcher)
+
+                self.terminated_dispatchers.append(affected_dispatcher)
+
+            # if len(self.working_dispatchers) == 1:
+            #     self.abort = True
+
+            self.semaphore.release()
+
+            if terminate_vm:
+                affected_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
             if not self.loader.job.client_tasks[affected_dispatcher.client.client_id].has_task_finished():
                 self.loader.job.client_tasks[affected_dispatcher.client_id].stop_execution()
 
@@ -627,10 +647,12 @@ class ScheduleManager:
                                           event.value))
 
         if event.value == CloudManager.IDLE and affected_dispatcher.working:
-            logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.job.job_id,
-                                                                                   self.loader.execution_id))
 
-            self.__idle_handle(affected_dispatcher, type_affected_task, affected_client_id)
+            if affected_dispatcher.type_task == Job.SERVER or (affected_dispatcher.type_task == Job.CLIENT
+                                                               and not self.server_revoked):
+                logging.info("<Scheduler Manager {}_{}>: - Calling Idle Handle".format(self.loader.job.job_id,
+                                                                                       self.loader.execution_id))
+                self.__idle_handle(affected_dispatcher, type_affected_task, affected_client_id)
 
             # self.client_tasks_status[i] = Task.FINISHED
         # elif event.value == CloudManager.STOPPED:

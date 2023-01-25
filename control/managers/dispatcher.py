@@ -125,69 +125,76 @@ class Executor:
 
             logging.info("<Executor {}-{}>: Begin execution loop".format(self.task.task_id, self.vm.instance_id))
 
-            # start task execution Loop
-            while self.status in (Task.EXECUTING, Task.RESTART) and not self.stop_signal and self.vm.state == CloudManager.RUNNING:
+            try:
 
-                try:
-                    # logging.info(
-                    #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
-                    command_status, current_stage = self.__get_task_status()
-                    # logging.info(
-                    #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
-                    #                                                  command_status))
+                # start task execution Loop
+                while self.status in (Task.EXECUTING, Task.RESTART) and not self.stop_signal \
+                        and self.vm.state == CloudManager.RUNNING:
 
-                    instance_action = None
-                    if self.vm.market == CloudManager.PREEMPTIBLE:
+                    try:
                         # logging.info(
-                        #     "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
-                        #                                                              self.vm.instance_id))
-                        instance_action = self.__get_instance_action()
+                        #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
+                        command_status, current_stage = self.__get_task_status()
                         # logging.info(
-                        #     "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
-                        #                                                   instance_action))
+                        #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
+                        #                                                  command_status))
 
-                    # if self.loader.checkpoint_conf.with_checkpoint \
-                    #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
-                    #     self.__checkpoint_task()
+                        instance_action = None
+                        if self.vm.market == CloudManager.PREEMPTIBLE:
+                            # logging.info(
+                            #     "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
+                            #                                                              self.vm.instance_id))
+                            instance_action = self.__get_instance_action()
+                            # logging.info(
+                            #     "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
+                            #                                                   instance_action))
 
-                except Exception as e:
-                    logging.error(e)
-                    self.__stopped(Task.ERROR)
-                    return
+                        # if self.loader.checkpoint_conf.with_checkpoint \
+                        #     and self.vm.market == CloudManager.PREEMPTIBLE and self.task.do_checkpoint:
+                        #     self.__checkpoint_task()
 
-                # check task status
-                if command_status is not None and command_status == 'finished':
-
-                    self.status = status = Task.FINISHED
-
-                    self.task.finish_execution()
-                    self.__stopped(status)
-                    return
-
-                if command_status is not None and command_status == 'running':
-                    elapsed_time = datetime.now() - current_time
-                    current_time = current_time + elapsed_time
-                    self.task.update_execution_time(elapsed_time.total_seconds())
-
-                if ((self.vm.instance_type.provider == CloudManager.EC2 and
-                     instance_action is not None and
-                     instance_action != 'none') or
-                        (self.vm.instance_type.provider == CloudManager.GCLOUD and
-                         instance_action == 'TRUE')):
-                    self.vm.interrupt()
-                    self.__stopped(Task.INTERRUPTED)
-                    return
-
-                if command_status is not None and command_status != 'running':
-                    task_status = False
-                    if self.type_task == Job.CLIENT:
-                        task_status = self.__restart_client_task()
-                    if self.type_task == Job.SERVER or not task_status:
-                        self.task.stop_execution()
-                        self.__stopped(Task.RUNTIME_ERROR)
+                    except Exception as e:
+                        logging.error(e)
+                        self.__stopped(Task.ERROR)
                         return
 
-                time.sleep(10)
+                    # check task status
+                    if command_status is not None and command_status == 'finished':
+
+                        self.status = status = Task.FINISHED
+
+                        self.task.finish_execution()
+                        self.__stopped(status)
+                        return
+
+                    if command_status is not None and command_status == 'running':
+                        elapsed_time = datetime.now() - current_time
+                        current_time = current_time + elapsed_time
+                        self.task.update_execution_time(elapsed_time.total_seconds())
+
+                    if ((self.vm.instance_type.provider == CloudManager.EC2 and
+                         instance_action is not None and
+                         instance_action != 'none') or
+                            (self.vm.instance_type.provider == CloudManager.GCLOUD and
+                             instance_action == 'TRUE')):
+                        self.vm.interrupt()
+                        self.__stopped(Task.INTERRUPTED)
+                        return
+
+                    if command_status is not None and command_status != 'running':
+                        task_status = False
+                        if self.type_task == Job.CLIENT:
+                            task_status = self.__restart_client_task()
+                        if self.type_task == Job.SERVER or not task_status:
+                            self.task.stop_execution()
+                            self.__stopped(Task.RUNTIME_ERROR)
+                            return
+
+                    time.sleep(10)
+            except Exception as e:
+                logging.error(e)
+                self.__stopped(Task.RUNTIME_ERROR)
+                return
 
             if self.status != Task.FINISHED:
                 self.task.stop_execution()
@@ -328,21 +335,26 @@ class Executor:
 
     def __restart_client_task(self):
         self.status = Task.RESTART
-        for i in range(10):
+        for i in range(20):
             try:
-                if self.type_task == Job.CLIENT:
-                    logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
-                                                                         self.vm.instance_id,
-                                                                         self.dict_info))
+                # logging.info("<Executor {}-{}>: restarting task".format(self.task.task_id,
+                                                                        # self.vm.instance_id))
+                # if self.type_task == Job.CLIENT:
+                #     logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+                #                                                          self.vm.instance_id,
+                #                                                          self.dict_info))
                 self.communicator.send(action=Daemon.START, value=self.dict_info)
             except Exception as e:
                 logging.error(e)
-                # if task was started with success
-                # start execution loop
+            # if task was started with success
+            # start execution loop
             if self.communicator.response['status'] == 'success':
+                logging.info("<Executor {}-{}>: Successfully restarted task".format(self.task.task_id,
+                                                                                    self.vm.instance_id))
                 self.status = Task.EXECUTING
-                break
+                return True
             time.sleep(300)
+        return False
 
     # def __get_task_usage(self):
     #     for i in range(3):
@@ -453,6 +465,9 @@ class Dispatcher:
             self.loader.job.client_tasks[self.client_id].server_ip = server_ip
             if self.executor is not None:
                 self.executor.task.server_ip = server_ip
+            # if self.main_thread.is_alive():
+            #     logging.error("<Dispatcher {}>: Thread still alive".format(self.vm.instance_id))
+            # self.main_thread = threading.Thread(target=self.__restart_client_execution_loop, daemon=True)
 
     # def __get_instance_usage(self):
     #     memory = 0
@@ -716,4 +731,110 @@ class Dispatcher:
         else:
             # Error to start VM
             logging.error("<Dispatcher> Instance type: {} Was not started".format(self.vm.instance_type.type))
+            self.vm.failed_to_created = True
             self.__notify(CloudManager.ERROR)
+
+    def __restart_client_execution_loop(self):
+
+        self.working = True
+
+        status = False
+
+        try:
+            status = self.__prepare_daemon()
+        except Exception as e:
+            logging.error(e)
+
+            # stop working process
+            # self.waiting_work.clear()
+            # Notify abort!
+            self.__notify(CloudManager.ABORT)
+
+        if not status:
+            logging.error("<Dispatcher {}>: Daemon not working!".format(self.vm.instance_id))
+            self.__notify(CloudManager.ABORT)
+            self.working = False
+
+        # indicate that the VM is ready to execute
+        self.vm.ready = self.ready = True
+        if self.type_task == Job.SERVER:
+            task = self.loader.job.server_task
+        elif self.type_task == Job.CLIENT:
+            task = self.loader.job.client_tasks[self.client_id]
+        else:
+            task = None
+
+        if not task.has_task_finished() and self.working:
+            if self.vm.state == CloudManager.RUNNING:
+
+                self.semaphore.acquire()
+                # # check running tasks
+                # self.__update_running_executors()
+
+                if not task.is_running():
+                    self.executor = Executor(
+                        task=task,
+                        vm=self.vm,
+                        loader=self.loader,
+                        type_task=self.type_task
+                    )
+                    # start the executor loop to execute the task
+                    self.executor.thread.start()
+                    task.start_execution(self.vm.instance_type.type)
+
+                self.semaphore.release()
+
+        while self.working and not task.has_task_finished() and task.is_running():
+            # waiting for work
+            # self.waiting_work.wait()
+            #
+            # self.waiting_work.clear()
+            if not self.working:
+                break
+
+            # # execution loop
+            # self.semaphore.acquire()
+            # self.semaphore.release()
+
+            # Error: instance was not deployed or was terminated
+            if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN,
+                                 CloudManager.TERMINATED, CloudManager.STOPPING):
+                # waiting running tasks
+                self.executor.thread.join()
+                # VM was not created, raise a event
+                self.__notify(CloudManager.TERMINATED)
+
+                break
+
+            # elif self.vm.state == CloudManager.STOPPING:
+            #     # waiting running tasks
+            #     self.executor.thread.join()
+            #
+            #     self.resume = False
+            #
+            #     self.__notify(CloudManager.STOPPING)
+
+            elif self.vm.state == CloudManager.STOPPED:
+                # STOP and CHECKPOINT all tasks
+                self.executor.stop_signal = True
+
+                # waiting running tasks
+                self.executor.thread.join()
+
+                self.resume = False
+
+                self.__notify(CloudManager.STOPPED)
+
+                # break
+
+        if self.vm.state == CloudManager.RUNNING:
+
+            # self.__update_instance_status_table(state=CloudManager.IDLE)
+            self.__notify(CloudManager.IDLE)
+
+            while self.debug_wait_command:
+                time.sleep(5)
+
+            # self.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
+
+        self.repo.close_session()

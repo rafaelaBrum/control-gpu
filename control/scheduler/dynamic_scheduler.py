@@ -265,7 +265,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                     current_value = self.alpha * (current_cost / self.max_cost) \
                                     + (1 - self.alpha) * (current_makespan / self.max_total_exec)
                 except Exception as e:
-                    logging.error("<Scheduler> Error getting new client VM")
+                    logging.error("<Scheduler> Error getting new server VM")
                     logging.error(e)
                     current_value = inf
                     current_makespan = None
@@ -301,7 +301,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         max_makespan = -inf
         if server_vm is None:
             server_vm = self.current_vms['server']
-            server_loc = self.current_locations['server']
+            server_loc = self.current_locations['server'].region
 
         for cli in self.clients:
             if skip and cli == client_num:
@@ -334,7 +334,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
 
         if server_vm is None:
             server_vm = self.current_vms['server']
-            server_loc = self.current_locations['server']
+            server_loc = self.current_locations['server'].region
 
         for cli in self.clients:
             if skip and cli == client_num:
@@ -348,7 +348,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                               (self.server_msg_train + self.server_msg_test)
                               * self.cost_transfer[vm_cli.provider.upper()])
 
-        expected_cost += (self.cost_vms[server_vm.provider.upper(), server_loc.region, server_vm.type]
+        expected_cost += (self.cost_vms[server_vm.provider.upper(), server_loc, server_vm.type]
                           * makespan)
 
         return expected_cost

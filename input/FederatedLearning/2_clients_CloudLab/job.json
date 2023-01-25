@@ -15,7 +15,7 @@
             },
             "generic_checkpoint": "False",
             "zip_file": "TIL_VGG_server.zip",
-            "n_rounds": 10,
+            "n_rounds": 20,
             "n_clients": 2,
             "comm_baseline": 8.66
         },
