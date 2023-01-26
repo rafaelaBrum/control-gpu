@@ -349,8 +349,8 @@ class Executor:
             # if task was started with success
             # start execution loop
             if self.communicator.response['status'] == 'success':
-                logging.info("<Executor {}-{}>: Successfully restarted task".format(self.task.task_id,
-                                                                                    self.vm.instance_id))
+                # logging.info("<Executor {}-{}>: Successfully restarted task".format(self.task.task_id,
+                #                                                                     self.vm.instance_id))
                 self.status = Task.EXECUTING
                 return True
             time.sleep(300)

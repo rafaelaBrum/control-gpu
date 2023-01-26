@@ -4,21 +4,6 @@
             "instance_type": "c240g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
-        },
-        "1": {
-            "instance_type": "c240g5",
-            "provider": "CLOUDLAB",
-            "region": "Wisconsin"
-        },
-        "2": {
-            "instance_type": "c240g5",
-            "provider": "CLOUDLAB",
-            "region": "Wisconsin"
-        },
-        "3": {
-            "instance_type": "c240g5",
-            "provider": "CLOUDLAB",
-            "region": "Wisconsin"
         }
     },
     "cost": 1.5442125836443847,

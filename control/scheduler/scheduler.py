@@ -58,7 +58,8 @@ class Scheduler:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
     def get_server_instance(self, provider, region, vm_name):
-        logging.info("<Scheduler>: Choosing instance for server task from provider {}".format(provider))
+        logging.info("<Scheduler>: Choosing instance for server task from provider {} in region {} "
+                     "with name {}".format(provider, region, vm_name))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_server_aws.items():
                 if name == vm_name:
@@ -85,10 +86,13 @@ class Scheduler:
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
-        elif provider.lower() in CloudManager.CLOUDLAB.lower():
+        elif provider.lower() in (CloudManager.CLOUDLAB.lower()):
+            # print("instances", self.instances_server_cloudlab)
             for name, instance in self.instances_server_cloudlab.items():
+                # print("name", name)
                 if name == vm_name:
                     for loc in self.loc_cloudlab.values():
+                        # print("loc", loc)
                         if loc.region == region:
                             logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
                                                                                                              region))
@@ -99,7 +103,8 @@ class Scheduler:
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
     def get_client_instance(self, provider, region, vm_name, client_id):
-        logging.info("<Scheduler>: Choosing instance for client task from provider {}".format(provider))
+        logging.info("<Scheduler>: Choosing instance for client task from provider {} in region {} "
+                     "with name {}".format(provider, region, vm_name))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_client_aws.items():
                 if name == vm_name:
@@ -125,8 +130,8 @@ class Scheduler:
                                 self.current_locations[str(client_id)] = loc
                                 return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
-        elif provider.lower() in CloudManager.CLOUDLAB.lower():
-            for name, instance in self.instances_server_cloudlab.items():
+        elif provider.lower() in (CloudManager.CLOUDLAB.lower()):
+            for name, instance in self.instances_client_cloudlab.items():
                 if name == vm_name:
                     for loc in self.loc_cloudlab.values():
                         if loc.region == region:

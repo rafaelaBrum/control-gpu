@@ -1,0 +1,19 @@
+{
+    "clients": {
+        "0": {
+            "instance_type": "c240g5",
+            "provider": "CLOUDLAB",
+            "region": "Wisconsin"
+        }
+    },
+    "cost": 0.4290355088558285,
+    "makespan": 133.3533622405105,
+    "max_cost": 41.56088187322723,
+    "max_total_exec": 6653.69292908405,
+    "obj_value": 0.015182534029259414,
+    "server": {
+        "instance_type": "c220g1",
+        "provider": "CLOUDLAB",
+        "region": "Wisconsin"
+    }
+}

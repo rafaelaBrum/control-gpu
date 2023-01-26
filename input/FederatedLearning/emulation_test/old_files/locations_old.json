@@ -44,7 +44,7 @@
         },
         "CloudLab_APT": {
             "provider": "CloudLab",
-            "region": "APT_Utah",
+            "region": "APT",
             "key_file": "cloudlab_key_pem.pem",
             "client_image_id": "fl_clients",
             "server_image_id": "Flower-server-clusters",

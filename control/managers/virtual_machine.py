@@ -754,7 +754,10 @@ class VirtualMachine:
     @property
     def state(self):
         if self.emulated:
-            self.experiment_emulation.update_status()
+            try:
+                self.experiment_emulation.update_status()
+            except Exception as e:
+                logging.error("<VirtualMachine {}>{}".format(self.instance_id, e))
             if self.marked_to_interrupt:
                 self.current_state = CloudManager.STOPPING
             elif self.experiment_emulation.status == Experiment.EXPERIMENT_READY:
