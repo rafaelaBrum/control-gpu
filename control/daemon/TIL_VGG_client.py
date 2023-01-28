@@ -43,6 +43,23 @@ from vgg_daemon import VGG16
 img_types = ['svs', 'dicom', 'nii', 'tif', 'tiff', 'png']
 
 
+def get_initial_weights(ckpt_file):
+    try:
+        with open(ckpt_file, "r") as control_file:
+            lines = control_file.readlines()
+            file = lines[-1]
+        print("file to restore", file)
+        aux_data = np.load(file)
+        aux_list: fl.common.NDArrays = []
+        for file in aux_data.files:
+            aux_list.append(aux_data[file])
+        weights = aux_list
+        return weights
+    except Exception as e:
+        print("ERROR:", e)
+        return None
+
+
 def print_confusion_matrix(y_pred, expected, classes, label):
     stp = len(expected)
     # x is expected, y is actual
@@ -211,6 +228,16 @@ def get_args():
                            help=f"gRPC server address", default='localhost:8080')
     flwr_args.add_argument("-epochs", type=int, required=True, default=10,
                            help="Number of epochs per round of federated learning")
+
+    # Checkpoint args
+    ckpt_args = parser.add_argument_group('Checkpoint args')
+    arg_groups.append(ckpt_args)
+    ckpt_args.add_argument("--save_ckpt", action="store_true", dest="save_ckpt", default=False,
+                           help="Save checkpoint on client side")
+    ckpt_args.add_argument("--restore_ckpt", action="store_true", dest="restore_ckpt", default=False,
+                           help="Restore checkpoint from client side")
+    ckpt_args.add_argument("-ccnkpt_file", dest="ckpt_file", type=str, default='checkpoints.txt',
+                           help="Checkpoint file")
 
     args, unparsed = parser.parse_known_args()
     return args, unparsed
@@ -637,7 +664,7 @@ def main_exec(args):
         print("TF configuration time:", str(time_end-time_start))
 
         # Start Flower client
-        client = VGG16Client(trainer)
+        client = VGG16Client(trainer, args)
         fl.client.start_numpy_client(args.server_address, client=client)
 
     if not args.train:
@@ -756,8 +783,18 @@ def split_test(args, ds, test=False):
 
 # Flower client
 class VGG16Client(fl.client.NumPyClient):
-    def __init__(self, model:Trainer):
+    def __init__(self, model: Trainer, args):
         self.model = model
+        print("args.save_ckpt", args.save_ckpt)
+        print("args.restore_ckpt", args.restore_ckpt)
+        print("args.ckpt_file", args.ckpt_file)
+        self.save_ckpt = args.save_ckpt
+        self.restore_ckpt = args.restore_ckpt
+        self.ckpt_file = args.ckpt_file
+        if self.restore_ckpt:
+            initial_weights = get_initial_weights(self.ckpt_file)
+            if initial_weights is not None:
+                self.model.set_model_weights(initial_weights)
 
     def get_parameters(self):
         # print("tipo weights", type(self.model.get_model_weights()))
@@ -808,6 +845,14 @@ class VGG16Client(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         # Update local model with global parameters
         self.model.set_model_weights(parameters)
+
+        if self.save_ckpt:
+            global_epoch = config['epoch_global']
+            print(f"Saving round {global_epoch} aggregated_ndarrays...")
+            checkpoint_file = f"round-{global_epoch}-weights.npz"
+            np.savez(checkpoint_file, *parameters)
+            with open(self.ckpt_file, "a") as file:
+                file.write(f"\n{checkpoint_file}")
 
         # Evaluate global model parameters on the local test data and return results
         history, neg_acc, pos_acc, precision, recall, f1_score  = self.model.evaluate()

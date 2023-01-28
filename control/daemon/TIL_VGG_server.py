@@ -154,7 +154,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FAST_SLOW":
         strategy = FastAndSlow(
@@ -163,7 +164,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FTFEDAVG":
         strategy = FaultTolerantFedAvg(
@@ -172,7 +174,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDADAGRAD":
         download_blob(args.file_weights)
@@ -188,6 +191,7 @@ def main():
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
             on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config,
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "FEDADAM":
@@ -204,6 +208,7 @@ def main():
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
             on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config,
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "FEDAVGM":
@@ -213,7 +218,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDFSV0":
         strategy = FedFSv0(
@@ -222,7 +228,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDFSV1":
         strategy = FedFSv1(
@@ -231,7 +238,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDOPT":
         download_blob(args.file_weights)
@@ -247,6 +255,7 @@ def main():
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
             on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config,
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "FEDYOGI":
@@ -263,6 +272,7 @@ def main():
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
             on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config,
             initial_parameters=initial_parameters
         )
     elif args.strategy.upper() == "QFEDAVG":
@@ -272,7 +282,8 @@ def main():
             min_fit_clients=args.min_sample_size,
             min_eval_clients=args.min_sample_size,
             min_available_clients=args.min_num_clients,
-            on_fit_config_fn=fit_config
+            on_fit_config_fn=fit_config,
+            on_evaluate_config_fn=fit_config
         )
     elif args.strategy.upper() == "FEDAVGSAVE":
         if initial_weights is not None:
@@ -283,6 +294,7 @@ def main():
                 min_eval_clients=args.min_sample_size,
                 min_available_clients=args.min_num_clients,
                 on_fit_config_fn=fit_config,
+                on_evaluate_config_fn=fit_config,
                 initial_parameters=initial_weights,
                 frequency_ckpt=args.frequency_ckpt
             )
@@ -294,6 +306,7 @@ def main():
                 min_eval_clients=args.min_sample_size,
                 min_available_clients=args.min_num_clients,
                 on_fit_config_fn=fit_config,
+                on_evaluate_config_fn=fit_config,
                 frequency_ckpt=args.frequency_ckpt
             )
     else:
