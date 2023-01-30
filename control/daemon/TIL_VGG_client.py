@@ -236,7 +236,7 @@ def get_args():
                            help="Save checkpoint on client side")
     ckpt_args.add_argument("--restore_ckpt", action="store_true", dest="restore_ckpt", default=False,
                            help="Restore checkpoint from client side")
-    ckpt_args.add_argument("-ccnkpt_file", dest="ckpt_file", type=str, default='checkpoints.txt',
+    ckpt_args.add_argument("-ckpt_file", dest="ckpt_file", type=str, default='checkpoints.txt',
                            help="Checkpoint file")
 
     args, unparsed = parser.parse_known_args()

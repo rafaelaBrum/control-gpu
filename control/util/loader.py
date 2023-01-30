@@ -357,7 +357,7 @@ class Loader:
                         price=price,
                         region=region
                     )
-                    price = price * 0.3 # 70% of discount
+                    price = price * 0.3  # 70% of discount
                     # print(f"Final preemptible price = {price}")
                     instance.setup_preemptible_price(
                         price=price,
@@ -534,21 +534,20 @@ class Loader:
                 else:
                     self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
                                                       "-model_dir {5} -logdir {5} -cache {5} -epochs {6} " \
-                                                      " > {7} 2> {8}" \
                         .format(self.job.client_tasks[i].simple_command,
                                 predst,
                                 self.job.client_tasks[i].split,
                                 self.job.client_tasks[i].batch,
                                 os.path.join(self.file_system_conf.path, 'logs'),
                                 os.path.join(self.file_system_conf.path, 'results'),
-                                self.job.client_tasks[i].train_epochs,
-                                os.path.join(self.file_system_conf.path,
-                                             '{}_{}/output.txt'.format(self.job.client_tasks[i].task_id,
-                                                                       self.execution_id)),
-                                os.path.join(self.file_system_conf.path,
-                                             '{}_{}/error.txt'.format(self.job.client_tasks[i].task_id,
-                                                                      self.execution_id))
+                                self.job.client_tasks[i].train_epochs
                                 )
+                if self.checkpoint_conf.client_checkpoint:
+                    self.job.client_tasks[i].command = "{0} --save_ckpt --restore_ckpt -ckpt_file {1}" \
+                        .format(
+                        self.job.client_tasks[i].command,
+                        self.checkpoint_conf.ckpt_file
+                    )
 
     def print_execution_info(self):
         logging.info("\n")
@@ -587,6 +586,8 @@ class Loader:
         if self.simulation_conf.with_simulation:
             logging.info("\tRevocation Rate: {}".format(self.revocation_rate))
         logging.info("\tWITH CHECKPOINT: {}".format(self.checkpoint_conf.with_checkpoint))
+        logging.info("\tServer Checkpoint: {}".format(self.checkpoint_conf.server_checkpoint))
+        logging.info("\tClient Checkpoint: {}".format(self.checkpoint_conf.client_checkpoint))
         logging.info("\tDEBUG MODE: {}".format(self.debug_conf.debug_mode))
         logging.info("")
 
