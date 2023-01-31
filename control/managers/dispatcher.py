@@ -416,7 +416,7 @@ class Executor:
 
 class Dispatcher:
 
-    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id):
+    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id, needs_external_transfer=False):
         self.loader = loader
 
         self.vm: VirtualMachine = vm  # Class that control a Virtual machine on the cloud
@@ -440,6 +440,10 @@ class Dispatcher:
 
         # migration count
         self.migration_count = 0
+
+        # needs_external_transfer (send ckpt to restart task)
+        self.needs_external_transfer = needs_external_transfer
+        self.start_execution = not self.needs_external_transfer
 
         '''
         List that determine the execution order of the
@@ -653,6 +657,10 @@ class Dispatcher:
             else:
                 task = None
 
+            if self.needs_external_transfer:
+                while not self.start_execution:
+                    continue
+
             if not task.has_task_finished() and self.working:
                 if self.vm.state == CloudManager.RUNNING:
 
@@ -757,9 +765,7 @@ class Dispatcher:
 
         # indicate that the VM is ready to execute
         self.vm.ready = self.ready = True
-        if self.type_task == Job.SERVER:
-            task = self.loader.job.server_task
-        elif self.type_task == Job.CLIENT:
+        if self.type_task == Job.CLIENT:
             task = self.loader.job.client_tasks[self.client_id]
         else:
             task = None
@@ -838,3 +844,17 @@ class Dispatcher:
             # self.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
 
         self.repo.close_session()
+
+    def update_rounds(self, rounds_done):
+        if self.type_task == Job.SERVER:
+            self.loader.job.server_task.n_rounds = self.loader.job.server_task.n_rounds - rounds_done
+            logging.info('<Dispatcher {}>: Updating num rounds to {}'.format(self.vm.instance_id,
+                                                                             self.loader.job.server_task.n_rounds))
+            aux_split = self.loader.job.server_task.command.split(' --rounds ')
+            space_split = aux_split[-1].split(" ")
+            aux_split[-1] = " ".join(space_split[1:])
+            final_command = aux_split[0] + f" --rounds {self.loader.job.server_task.n_rounds} " + aux_split[-1]
+            print("final_command", final_command)
+            self.loader.job.server_task.command = final_command
+            if self.executor is not None:
+                self.executor.task.command = final_command

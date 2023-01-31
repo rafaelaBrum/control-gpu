@@ -504,7 +504,8 @@ class ScheduleManager:
                     vm=new_vm,
                     loader=self.loader,
                     type_task=Job.SERVER,
-                    client_id=self.loader.job.num_clients
+                    client_id=self.loader.job.num_clients,
+                    needs_external_transfer=True
                 )
 
                 # check if the VM need to be registered on the simulator
@@ -523,7 +524,44 @@ class ScheduleManager:
                         break
                     time.sleep(1)
                     # print("Testing vm.ready: ", self.server_task_dispatcher.vm.ready)
+
                 if not self.server_task_dispatcher.vm.failed_to_created:
+
+                    # update number of rounds
+                    server_ckpt_round = 0
+                    client_ckpt_round = 0
+                    if self.loader.checkpoint_conf.server_checkpoint:
+                        stdout, stderr, code_return = self.extra_vm.ssh.execute_command("ls . | grep '.npz$' | wc -l",
+                                                                                        output=True)
+                        try:
+                            server_ckpt_round = int(stdout) * self.loader.frequency_ckpt
+                        except Exception:
+                            server_ckpt_round = 0
+
+                        self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip)
+
+                    if self.loader.checkpoint_conf.client_checkpoint:
+                        for dispatcher in self.client_task_dispatchers:
+                            try:
+                                stdout, stderr, code_return = dispatcher.vm.ssh.execute_command(
+                                    "ls . | grep '.npz$' | wc -l",
+                                    output=True)
+                                client_ckpt_round = int(stdout)
+                                break
+                            except Exception:
+                                client_ckpt_round = 0
+                                continue
+
+                    if client_ckpt_round > server_ckpt_round:
+                        # Restarts from client checkpoint
+                        self.server_task_dispatcher.update_rounds(client_ckpt_round)
+                    else:
+                        # Restarts from server checkpoint
+                        self.server_task_dispatcher.update_rounds(server_ckpt_round)
+                        # PAREI AQUI
+
+                    self.server_task_dispatcher.start_execution = True
+
                     server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:" \
                                 f"{self.loader.application_conf.fl_port}"
                     print("new server_ip:", server_ip)
