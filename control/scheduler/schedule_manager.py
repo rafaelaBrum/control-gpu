@@ -531,11 +531,21 @@ class ScheduleManager:
                     server_ckpt_round = 0
                     client_ckpt_round = 0
                     if self.loader.checkpoint_conf.server_checkpoint:
-                        stdout, stderr, code_return = self.extra_vm.ssh.execute_command("ls . | grep '.npz$' | wc -l",
-                                                                                        output=True)
+
+                        self.extra_vm.open_connection()
+
+                        if not self.extra_vm.ssh.is_active:
+                            self.extra_vm.ssh.open_connection()
                         try:
-                            server_ckpt_round = int(stdout) * self.loader.frequency_ckpt
-                        except Exception:
+                            stdout, stderr, code_return = self.extra_vm.ssh.execute_command(
+                                "ls {} | grep '.npz$' | wc -l".format(self.loader.checkpoint_conf.folder_checkpoints),
+                                output=True)
+                            print("stdout", stdout)
+                            print("stderr", stderr)
+                            print("code_return", code_return)
+                            server_ckpt_round = int(stdout) * int(self.loader.frequency_ckpt)
+                        except Exception as e:
+                            logging.error(e)
                             server_ckpt_round = 0
 
                         self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip)
@@ -543,24 +553,62 @@ class ScheduleManager:
                     if self.loader.checkpoint_conf.client_checkpoint:
                         for dispatcher in self.client_task_dispatchers:
                             try:
+                                dispatcher.vm.open_connection()
+
+                                if not dispatcher.vm.ssh.is_active:
+                                    dispatcher.vm.ssh.open_connection()
                                 stdout, stderr, code_return = dispatcher.vm.ssh.execute_command(
                                     "ls . | grep '.npz$' | wc -l",
                                     output=True)
+                                print("stdout", stdout)
+                                print("stderr", stderr)
+                                print("code_return", code_return)
                                 client_ckpt_round = int(stdout)
                                 break
-                            except Exception:
+                            except Exception as e:
+                                logging.error(e)
                                 client_ckpt_round = 0
                                 continue
 
-                    if client_ckpt_round > server_ckpt_round:
+                    logging.info(f"client_ckpt_round {client_ckpt_round} - server_ckpt_round {server_ckpt_round}")
+
+                    if client_ckpt_round >= server_ckpt_round:
                         # Restarts from client checkpoint
                         self.server_task_dispatcher.update_rounds(client_ckpt_round)
                     else:
-                        # Restarts from server checkpoint
-                        self.server_task_dispatcher.update_rounds(server_ckpt_round)
-                        # PAREI AQUI
+                        try:
+                            # Restarts from server checkpoint
+                            ckpt_file = f"round-{server_ckpt_round}-weights.npz"
+
+                            folder_ckpt = self.loader.checkpoint_conf.folder_checkpoints
+
+                            self.extra_vm.ssh.get_file(source=folder_ckpt,
+                                                       target=folder_ckpt,
+                                                       item=ckpt_file)
+                            self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
+
+                            new_ckpt_file = 'weights.npz'
+
+                            cmd = f"mv {os.path.join(folder_ckpt, ckpt_file)} " \
+                                  f"{os.path.join(folder_ckpt, new_ckpt_file)} "
+                            logging.info(cmd)
+                            os.system(cmd)
+
+                            self.server_task_dispatcher.vm.open_connection()
+
+                            if not self.server_task_dispatcher.vm.ssh.is_active:
+                                self.server_task_dispatcher.vm.ssh.open_connection()
+
+                            self.server_task_dispatcher.vm.ssh.put_file(source=folder_ckpt,
+                                                                        target=self.loader.cloudlab_conf.home_path,
+                                                                        item=new_ckpt_file)
+
+                            self.server_task_dispatcher.update_rounds(server_ckpt_round)
+                        except Exception as e:
+                            logging.error(e)
 
                     self.server_task_dispatcher.start_execution = True
+                    time.sleep(20)
 
                     server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:" \
                                 f"{self.loader.application_conf.fl_port}"

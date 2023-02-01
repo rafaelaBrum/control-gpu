@@ -31,3 +31,7 @@ class CheckPointConfig(Config):
     @property
     def ckpt_file(self):
         return self.get_property(self._key, 'ckpt_file')
+
+    @property
+    def folder_checkpoints(self):
+        return self.get_property(self._key, 'folder_checkpoints')

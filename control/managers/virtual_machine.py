@@ -979,17 +979,19 @@ class VirtualMachine:
                          "--extra_address {} " \
                          "--key_file {} " \
                          "--key_path {} " \
-                         "--user {}".format(os.path.join(self.loader.cloudlab_conf.home_path,
-                                                         item),
-                                            self.loader.file_system_conf.path,
-                                            self.loader.job.job_id,
-                                            task_id,
-                                            self.loader.execution_id,
-                                            self.instance_id,
-                                            ip_address,
-                                            self.key_file,
-                                            self.loader.cloudlab_conf.home_path,
-                                            self.loader.cloudlab_conf.vm_user)
+                         "--user {} " \
+                         "--folder_checkpoints {} ".format(os.path.join(self.loader.cloudlab_conf.home_path,
+                                                                        item),
+                                                           self.loader.file_system_conf.path,
+                                                           self.loader.job.job_id,
+                                                           task_id,
+                                                           self.loader.execution_id,
+                                                           self.instance_id,
+                                                           ip_address,
+                                                           self.key_file,
+                                                           self.loader.cloudlab_conf.home_path,
+                                                           self.loader.cloudlab_conf.vm_user,
+                                                           self.loader.checkpoint_conf.folder_checkpoints)
 
             # create execution folder
             self.root_folder = os.path.join(self.loader.file_system_conf.path,
@@ -1014,3 +1016,22 @@ class VirtualMachine:
 
             logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR".format(self.instance_id))
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(self.instance_id))
+
+    def open_connection(self):
+        # update instance IP
+        self.update_ip()
+        # Start a new SSH Client
+        if self.ssh is not None:
+            return
+        if self.instance_type.provider == CloudManager.EC2:
+            self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
+                                 self.key_file, self.loader.ec2_conf.vm_user)
+        elif self.instance_type.provider == CloudManager.GCLOUD:
+            self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
+                                 self.key_file, self.loader.gcp_conf.vm_user)
+        elif self.instance_type.provider == CloudManager.CLOUDLAB:
+            self.ssh = SSHClient(self.instance_public_ip, self.loader.cloudlab_conf.key_path,
+                                 self.key_file, self.loader.cloudlab_conf.vm_user, emulated=True)
+
+        # try to open the connection
+        self.ssh.open_connection()

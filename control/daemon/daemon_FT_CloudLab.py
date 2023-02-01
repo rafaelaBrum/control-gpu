@@ -10,8 +10,6 @@ import socket
 
 from time import sleep
 
-FOLDER_CHECKPOINTS = 'checkpoints/'
-
 COUNT_WAITING = 5000
 
 
@@ -151,11 +149,11 @@ def prepare_logging(args):
     root_logger.addHandler(console_handler)
 
 
-def send_checkpoint(ssh_client, file):
+def send_checkpoint(ssh_client, file, folder_checkpoints):
     if not ssh_client.is_active:
         ssh_client.open_connection()
     ssh_client.put_file(source=os.getcwd(),
-                        target=FOLDER_CHECKPOINTS,
+                        target=folder_checkpoints,
                         item=file)
     ssh_client.close_connection()
 
@@ -168,7 +166,7 @@ def check_checkpoints(args):
 
     if ssh_client.open_connection():
 
-        ssh_client.execute_command(f"mkdir {FOLDER_CHECKPOINTS}")
+        ssh_client.execute_command(f"mkdir {args.folder_checkpoints}")
 
         path_file = "checkpoints.txt"
 
@@ -178,13 +176,14 @@ def check_checkpoints(args):
             continue
 
         with open(path_file, "r") as control_file:
+            count = 0
             while True:
                 # logging.info("Reading new lines")
                 lines = control_file.readlines()
                 # logging.info(f"lines: {lines}")
                 if len(lines) > 0:
                     logging.info(f"Sending {lines[-1]} file")
-                    send_checkpoint(ssh_client, lines[-1])
+                    send_checkpoint(ssh_client, lines[-1], args.folder_checkpoints)
                     logging.info(f"Finished sending {lines[-1]} file")
                     count = 0
                 else:
@@ -207,6 +206,8 @@ def main():
     parser.add_argument('--key_file', type=str, required=True)
     parser.add_argument('--key_path', type=str, required=True)
     parser.add_argument('--user', type=str, required=True)
+
+    parser.add_argument('--folder_checkpoints', type=str, required=True)
 
     args = parser.parse_args()
 

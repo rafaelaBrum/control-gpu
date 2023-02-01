@@ -110,3 +110,6 @@ control/pre_scheduling/*.json
 
 # gurobi file
 *.lp
+
+# checkpoints folder
+checkpoints/
