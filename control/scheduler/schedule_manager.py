@@ -572,15 +572,19 @@ class ScheduleManager:
 
                     logging.info(f"client_ckpt_round {client_ckpt_round} - server_ckpt_round {server_ckpt_round}")
 
+                    folder_ckpt = self.loader.checkpoint_conf.folder_checkpoints
+                    if folder_ckpt[-1] == '/':
+                        folder_ckpt = folder_ckpt[:-1]
+
                     if client_ckpt_round >= server_ckpt_round:
+                        if self.loader.checkpoint_conf.server_checkpoint:
+                            self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
                         # Restarts from client checkpoint
                         self.server_task_dispatcher.update_rounds(client_ckpt_round)
                     else:
                         try:
                             # Restarts from server checkpoint
                             ckpt_file = f"round-{server_ckpt_round}-weights.npz"
-
-                            folder_ckpt = self.loader.checkpoint_conf.folder_checkpoints
 
                             self.extra_vm.ssh.get_file(source=folder_ckpt,
                                                        target=folder_ckpt,
@@ -1033,7 +1037,7 @@ class ScheduleManager:
         semaphore.release()
         try:
             logging.info("Opening connection")
-            if vm.ssh.open_connection():
+            if vm.ssh.is_active or vm.ssh.open_connection():
                 logging.info("Connection opened")
                 vm.ssh.get_dir(source=self.loader.file_system_conf.path, target=folder)
                 vm.ssh.close_connection()

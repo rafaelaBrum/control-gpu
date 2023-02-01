@@ -189,6 +189,7 @@ def check_checkpoints(args):
                 else:
                     count = count + 1
                 if count % COUNT_WAITING:
+                    logging.info("Sleeping")
                     sleep(300)
 
 
