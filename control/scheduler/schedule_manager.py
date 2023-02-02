@@ -16,6 +16,7 @@ from control.managers.virtual_machine import VirtualMachine
 from control.managers.dispatcher import Dispatcher
 from control.managers.cloud_manager import CloudManager
 from control.managers.ec2_manager import EC2Manager
+from control.managers.experiment_cloudlab import Experiment
 
 from control.simulators.status_simulator import RevocationSim
 
@@ -195,7 +196,10 @@ class ScheduleManager:
                                        type_task=Job.SERVER, client_id=self.loader.job.num_clients)
 
         # check if the VM need to be registered on the simulator
-        if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
+        if self.loader.simulation_conf.with_simulation and vm.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET)\
+                and self.loader.simulation_conf.faulty_server:
+            logging.info("<Scheduler Manager {}_{}>: Revogation simulation of server".format(self.loader.job.job_id,
+                                                                                             self.loader.execution_id))
             self.simulator.register_vm(vm)
 
         self.server_task_dispatcher = server_dispatcher
@@ -236,7 +240,13 @@ class ScheduleManager:
                                            type_task=Job.CLIENT, client_id=i)
 
             # check if the VM need to be registered on the simulator
-            if self.loader.simulation_conf.with_simulation and vm.market == CloudManager.PREEMPTIBLE:
+            if self.loader.simulation_conf.with_simulation and vm.market in (CloudManager.PREEMPTIBLE,
+                                                                             Experiment.MARKET) and \
+                    self.loader.simulation_conf.faulty_clients:
+                logging.info("<Scheduler Manager {}_{}>: Revogation simulation "
+                             "of client {}".format(self.loader.job.job_id,
+                                                   self.loader.execution_id,
+                                                   i))
                 self.simulator.register_vm(vm)
 
             self.semaphore.acquire()

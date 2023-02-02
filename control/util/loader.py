@@ -584,6 +584,8 @@ class Loader:
         logging.info("")
         logging.info("\tWITH SIMULATION: {}".format(self.simulation_conf.with_simulation))
         if self.simulation_conf.with_simulation:
+            logging.info("\tFaulty server: {}".format(self.simulation_conf.faulty_server))
+            logging.info("\tFaulty clients: {}".format(self.simulation_conf.faulty_clients))
             logging.info("\tRevocation Rate: {}".format(self.revocation_rate))
         logging.info("\tWITH CHECKPOINT: {}".format(self.checkpoint_conf.with_checkpoint))
         logging.info("\tServer Checkpoint: {}".format(self.checkpoint_conf.server_checkpoint))
