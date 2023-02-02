@@ -954,7 +954,7 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
 
-    def prepare_ft_daemon(self, ip_address):
+    def prepare_ft_daemon(self, ip_address, restart=False):
         task_id = self.loader.job.num_clients+1
         if self.ssh.open_connection():
             item = self.loader.checkpoint_conf.daemon_fault_tolerance
@@ -992,6 +992,9 @@ class VirtualMachine:
                                                            self.loader.cloudlab_conf.home_path,
                                                            self.loader.cloudlab_conf.vm_user,
                                                            self.loader.checkpoint_conf.folder_checkpoints)
+
+            if restart:
+                cmd_daemon = f"{cmd_daemon} --get_file"
 
             # create execution folder
             self.root_folder = os.path.join(self.loader.file_system_conf.path,

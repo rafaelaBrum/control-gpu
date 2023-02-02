@@ -119,6 +119,18 @@ class SSHClient:
 
         ftp_client.close()
 
+    def get_file(self, source, target, item=None):
+
+        ftp_client = self.client.open_sftp()
+
+        if item is not None:
+            source = os.path.join(source, item)
+            target = os.path.join(target, item)
+
+        ftp_client.get(source, target)
+
+        ftp_client.close()
+
     def execute_command(self, command):
         self.ssh_transport = self.client.get_transport()
         self.chan = self.ssh_transport.open_session()
@@ -193,6 +205,46 @@ def check_checkpoints(args):
                     sleep(300)
 
 
+def get_checkpoint(args):
+    ssh_client = SSHClient(ip_address=args.extra_address,
+                           key_path=args.key_path,
+                           key_file=args.key_file,
+                           user=args.user)
+
+    path_file = "name_checkpoint.txt"
+
+    while not os.path.exists(path_file):
+        continue
+
+    with open(path_file, "r") as file:
+        ckpt_file_name = file.readlines()
+        ckpt_file_name = ckpt_file_name[0][:-1]
+
+    print("ckpt_file", ckpt_file_name)
+
+    if ckpt_file_name == "":
+        return
+
+    if not ssh_client.is_active:
+        ssh_client.open_connection()
+
+    ssh_client.get_file(source=args.folder_checkpoints,
+                        target=os.getcwd(),
+                        item=ckpt_file_name)
+
+    ssh_client.execute_command(f'rm {args.folder_checkpoints} -r')
+    ssh_client.execute_command(f'mkdir {args.folder_checkpoints}')
+
+    ssh_client.close_connection()
+
+    new_ckpt_file_name = 'weights.npz'
+
+    cmd = f"mv {ckpt_file_name} {new_ckpt_file_name} "
+
+    print(cmd)
+    os.system(cmd)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Execute FT application to send checkpoint to other VM.')
 
@@ -210,9 +262,14 @@ def main():
 
     parser.add_argument('--folder_checkpoints', type=str, required=True)
 
+    parser.add_argument('--get_file', action='store_true', dest='get_file', default=False)
+
     args = parser.parse_args()
 
     prepare_logging(args)
+
+    if args.get_file:
+        get_checkpoint(args)
     
     check_checkpoints(args)
 

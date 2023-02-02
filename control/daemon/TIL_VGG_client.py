@@ -848,6 +848,9 @@ class VGG16Client(fl.client.NumPyClient):
 
         if self.save_ckpt:
             global_epoch = config['epoch_global']
+            if global_epoch > 1:
+                print(f"Removing old round-{global_epoch-1}-weights.npz saved file")
+                os.remove(f"round-{global_epoch-1}-weights.npz")
             print(f"Saving round {global_epoch} aggregated_ndarrays...")
             checkpoint_file = f"round-{global_epoch}-weights.npz"
             np.savez(checkpoint_file, *parameters)

@@ -558,7 +558,8 @@ class ScheduleManager:
                             logging.error(e)
                             server_ckpt_round = 0
 
-                        self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip)
+                        self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip,
+                                                                         restart=True)
 
                     if self.loader.checkpoint_conf.client_checkpoint:
                         for dispatcher in self.client_task_dispatchers:
@@ -568,12 +569,16 @@ class ScheduleManager:
                                 if not dispatcher.vm.ssh.is_active:
                                     dispatcher.vm.ssh.open_connection()
                                 stdout, stderr, code_return = dispatcher.vm.ssh.execute_command(
-                                    "ls . | grep '.npz$' | wc -l",
+                                    f"cat {self.loader.checkpoint_conf.ckpt_file}",
                                     output=True)
                                 print("stdout", stdout)
                                 print("stderr", stderr)
                                 print("code_return", code_return)
-                                client_ckpt_round = int(stdout)
+                                aux_list = stdout.split('\n')
+                                print("aux_list", aux_list)
+                                last_line = aux_list[-1].split('-')
+                                print("last_line", last_line)
+                                client_ckpt_round = int(last_line[1])
                                 break
                             except Exception as e:
                                 logging.error(e)
@@ -586,10 +591,18 @@ class ScheduleManager:
                     if folder_ckpt[-1] == '/':
                         folder_ckpt = folder_ckpt[:-1]
 
+                    self.server_task_dispatcher.vm.open_connection()
+
+                    if not self.server_task_dispatcher.vm.ssh.is_active:
+                        self.server_task_dispatcher.vm.ssh.open_connection()
+
                     if client_ckpt_round >= server_ckpt_round:
                         if self.loader.checkpoint_conf.server_checkpoint:
-                            self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
+                            self.extra_vm.ssh.execute_command(f'rm {folder_ckpt} -r')
                             self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
+
+                        self.server_task_dispatcher.vm.ssh.execute_command(f"echo '' > name_checkpoint.txt")
+
                         # Restarts from client checkpoint
                         self.server_task_dispatcher.update_rounds(client_ckpt_round)
                     else:
@@ -597,27 +610,8 @@ class ScheduleManager:
                             # Restarts from server checkpoint
                             ckpt_file = f"round-{server_ckpt_round}-weights.npz"
 
-                            self.extra_vm.ssh.get_file(source=folder_ckpt,
-                                                       target=folder_ckpt,
-                                                       item=ckpt_file)
-                            self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
-                            self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
-
-                            new_ckpt_file = 'weights.npz'
-
-                            cmd = f"mv {os.path.join(folder_ckpt, ckpt_file)} " \
-                                  f"{os.path.join(folder_ckpt, new_ckpt_file)} "
-                            logging.info(cmd)
-                            os.system(cmd)
-
-                            self.server_task_dispatcher.vm.open_connection()
-
-                            if not self.server_task_dispatcher.vm.ssh.is_active:
-                                self.server_task_dispatcher.vm.ssh.open_connection()
-
-                            self.server_task_dispatcher.vm.ssh.put_file(source=folder_ckpt,
-                                                                        target=self.loader.cloudlab_conf.home_path,
-                                                                        item=new_ckpt_file)
+                            self.server_task_dispatcher.vm.ssh.execute_command(f"echo {ckpt_file} > "
+                                                                               f"name_checkpoint.txt")
 
                             self.server_task_dispatcher.update_rounds(server_ckpt_round)
                         except Exception as e:
