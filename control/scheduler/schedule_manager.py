@@ -579,6 +579,7 @@ class ScheduleManager:
                     if client_ckpt_round >= server_ckpt_round:
                         if self.loader.checkpoint_conf.server_checkpoint:
                             self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
+                            self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
                         # Restarts from client checkpoint
                         self.server_task_dispatcher.update_rounds(client_ckpt_round)
                     else:
@@ -590,6 +591,7 @@ class ScheduleManager:
                                                        target=folder_ckpt,
                                                        item=ckpt_file)
                             self.extra_vm.ssh.execute_command(f'mv {folder_ckpt} {folder_ckpt}_old')
+                            self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
 
                             new_ckpt_file = 'weights.npz'
 
