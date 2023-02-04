@@ -847,7 +847,7 @@ class VGG16Client(fl.client.NumPyClient):
         self.model.set_model_weights(parameters)
 
         if self.save_ckpt:
-            global_epoch = config['epoch_global']
+            global_epoch = int(config['epoch_global'])
             if global_epoch > 1:
                 print(f"Removing old round-{global_epoch-1}-weights.npz saved file")
                 os.remove(f"round-{global_epoch-1}-weights.npz")

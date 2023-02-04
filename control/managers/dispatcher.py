@@ -96,10 +96,10 @@ class Executor:
         try:
             # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
             #                                                                     self.vm.instance_id))
-            if self.type_task == Job.CLIENT:
-                logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
-                                                                     self.vm.instance_id,
-                                                                     self.dict_info))
+            # if self.type_task == Job.CLIENT:
+            #     logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+            #                                                          self.vm.instance_id,
+            #                                                          self.dict_info))
             self.communicator.send(action=action, value=self.dict_info)
             current_time = datetime.now()
             # logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
@@ -133,7 +133,8 @@ class Executor:
 
                     try:
                         # logging.info(
-                        #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
+                        #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id,
+                        #                                                          self.vm.instance_id))
                         command_status, current_stage = self.__get_task_status()
                         # logging.info(
                         #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
@@ -657,9 +658,16 @@ class Dispatcher:
             else:
                 task = None
 
+            # logging.info('<Dispatcher {}>: needs_external_transfer? {}'.format(self.vm.instance_id,
+            #                                                                    self.needs_external_transfer))
+
             if self.needs_external_transfer:
                 while not self.start_execution:
                     continue
+
+            # logging.info('<Dispatcher {}>: starting execution'.format(self.vm.instance_id))
+            #
+            # logging.info('<Dispatcher {}>: task finished? {}'.format(self.vm.instance_id, task.has_task_finished()))
 
             if not task.has_task_finished() and self.working:
                 if self.vm.state == CloudManager.RUNNING:
@@ -667,6 +675,9 @@ class Dispatcher:
                     self.semaphore.acquire()
                     # # check running tasks
                     # self.__update_running_executors()
+
+                    # logging.info('<Dispatcher {}>: task is running? {}'.format(self.vm.instance_id,
+                    #                                                            task.is_running()))
 
                     if not task.is_running():
                         self.executor = Executor(
@@ -678,6 +689,9 @@ class Dispatcher:
                         # start the executor loop to execute the task
                         self.executor.thread.start()
                         task.start_execution(self.vm.instance_type.type)
+
+                    # logging.info('<Dispatcher {}>: task is running? {}'.format(self.vm.instance_id,
+                    #                                                            task.is_running()))
 
                     self.semaphore.release()
 

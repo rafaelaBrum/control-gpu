@@ -575,9 +575,9 @@ class ScheduleManager:
                                 print("stderr", stderr)
                                 print("code_return", code_return)
                                 aux_list = stdout.split('\n')
-                                print("aux_list", aux_list)
+                                # print("aux_list", aux_list)
                                 last_line = aux_list[-1].split('-')
-                                print("last_line", last_line)
+                                # print("last_line", last_line)
                                 client_ckpt_round = int(last_line[1])
                                 break
                             except Exception as e:
@@ -994,17 +994,16 @@ class ScheduleManager:
                                                                                self.loader.execution_id))
         logging.info("")
 
-        status = self.__start_server_dispatcher()
+        self.__start_server_dispatcher()
 
-        if status:
-            self.__start_clients_dispatchers()
+        self.__start_clients_dispatchers()
 
-            if self.loader.checkpoint_conf.extra_vm:
-                time.sleep(600)
-                self.__start_extra_vm()
+        if self.loader.checkpoint_conf.extra_vm:
+            time.sleep(600)
+            self.__start_extra_vm()
 
-            # Call checkers loop
-            self.__checkers()
+        # Call checkers loop
+        self.__checkers()
 
         if self.loader.emulated:
             self.__get_results()
