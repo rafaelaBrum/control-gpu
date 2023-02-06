@@ -483,7 +483,7 @@ class Loader:
                             self.application_conf.fl_port,
                             strategy
                             )
-                if strategy == 'FedAvgSave':
+                if strategy == 'FedAvgSave' and self.checkpoint_conf.server_checkpoint:
                     self.job.server_task.command = self.job.server_task.command + f" --frequency_ckpt " \
                                                                                   f"{self.frequency_ckpt}"
             else:

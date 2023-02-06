@@ -548,12 +548,16 @@ class ScheduleManager:
                             self.extra_vm.ssh.open_connection()
                         try:
                             stdout, stderr, code_return = self.extra_vm.ssh.execute_command(
-                                "ls {} | grep '.npz$' | wc -l".format(self.loader.checkpoint_conf.folder_checkpoints),
+                                "ls {} | grep '.npz$'".format(self.loader.checkpoint_conf.folder_checkpoints),
                                 output=True)
                             print("stdout", stdout)
                             print("stderr", stderr)
                             print("code_return", code_return)
-                            server_ckpt_round = int(stdout) * int(self.loader.frequency_ckpt)
+                            aux_list = stdout.split('\n')
+                            # print("aux_list", aux_list)
+                            last_line = aux_list[-2].split('-')
+                            # print("last_line", last_line)
+                            server_ckpt_round = int(last_line[1])
                         except Exception as e:
                             logging.error(e)
                             server_ckpt_round = 0
@@ -613,7 +617,7 @@ class ScheduleManager:
                             self.server_task_dispatcher.vm.ssh.execute_command(f"echo {ckpt_file} > "
                                                                                f"name_checkpoint.txt")
 
-                            self.server_task_dispatcher.update_rounds(server_ckpt_round)
+                            self.server_task_dispatcher.update_rounds(server_ckpt_round, ckpt_restore=True)
                         except Exception as e:
                             logging.error(e)
 

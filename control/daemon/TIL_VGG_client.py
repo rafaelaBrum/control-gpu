@@ -48,8 +48,10 @@ def get_initial_weights(ckpt_file):
         with open(ckpt_file, "r") as control_file:
             lines = control_file.readlines()
             file = lines[-1]
-        print("file to restore", file)
+        print("file to restore ", file)
         aux_data = np.load(file)
+        print("removing ", file, " file")
+        os.remove(file)
         aux_list: fl.common.NDArrays = []
         for file in aux_data.files:
             aux_list.append(aux_data[file])

@@ -5,6 +5,8 @@ import argparse
 import numpy as np
 import pickle
 
+import os
+
 from google.cloud import storage
 
 from fedavg_strategy import FedAvg
@@ -116,12 +118,17 @@ def get_args():
 
     parser.add_argument('--frequency_ckpt', help='Frequency of checkpointing when using FedAvgSave', type=int,
                         default=None)
+
+    parser.add_argument("--ckpt_restore", action="store_true", dest="ckpt_restore", default=False)
     args = parser.parse_args()
     return args
 
 
-def get_initial_weights():
+def get_initial_weights(args):
     try:
+        if args.ckpt_restore:
+            while not os.path.exists('weights.npz'):
+                continue
         file = 'weights.npz'
         aux_data = np.load(file)
         aux_list: fl.common.NDArrays = []
@@ -140,7 +147,7 @@ def main():
     # Create strategy
     strategy = None
 
-    initial_weights = get_initial_weights()
+    initial_weights = get_initial_weights(args)
 
     if initial_weights is not None:
         args.strategy = "FedAvgSave"

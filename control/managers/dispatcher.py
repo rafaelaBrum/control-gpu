@@ -859,7 +859,7 @@ class Dispatcher:
 
         self.repo.close_session()
 
-    def update_rounds(self, rounds_done):
+    def update_rounds(self, rounds_done, ckpt_restore=False):
         if self.type_task == Job.SERVER:
             self.loader.job.server_task.n_rounds = self.loader.job.server_task.n_rounds - rounds_done
             logging.info('<Dispatcher {}>: Updating num rounds to {}'.format(self.vm.instance_id,
@@ -868,6 +868,8 @@ class Dispatcher:
             space_split = aux_split[-1].split(" ")
             aux_split[-1] = " ".join(space_split[1:])
             final_command = aux_split[0] + f" --rounds {self.loader.job.server_task.n_rounds} " + aux_split[-1]
+            if ckpt_restore:
+                final_command = final_command + " --ckpt_restore "
             print("final_command", final_command)
             self.loader.job.server_task.command = final_command
             if self.executor is not None:
