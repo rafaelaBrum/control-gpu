@@ -1,17 +1,23 @@
 from datetime import datetime
 from pathlib import Path
 
-test_folder = 'Initial_mapping'
+test_folder = '2 - Client checkpoint'
 test_case = "4_clients"
-current_exec = 4
+current_exec = 3
+n_rounds = 50
+# -1 if there is no server ckpt
+server_checkpoint = -1
 
-first_server_message_date_string = "2022-12-30 12:46:57,829"
-last_server_message_date_string = "2022-12-30 13:25:51,524"
+first_framework_log_date_string = "2023-02-06 22:37:15,665"
+last_framework_log_date_string = "2023-02-07 01:39:28,885"
+
+first_server_message_date_string = "2023-02-06 20:09:29,245"
+last_server_message_date_string = "2023-02-06 22:16:28,147"
 
 n_clients = 4
 
 
-def get_server_times_one_round(current_round):
+def get_server_times_one_round(current_round, checkpoint):
     file_path = f'{Path.home()}/{test_folder}/' \
                 f'{test_case}/Exec {current_exec}/server/screen_task_log_modified'
 
@@ -28,14 +34,29 @@ def get_server_times_one_round(current_round):
 
     initial_line = initial_line + 2
 
-    if current_round > 0:
-        time1 = content[initial_line][13:36]
-        gap = 4*n_clients+2+1
-        time2 = content[initial_line + gap][13:35]
+    if checkpoint < 0:
+        if current_round > 0:
+            time1 = content[initial_line][13:36]
+            gap = 4*n_clients+2+1
+            time2 = content[initial_line + gap][13:35]
+        else:
+            time1 = content[initial_line][13:35]
+            gap = 2*n_clients+1
+            time2 = content[initial_line + gap][13:35]
     else:
-        time1 = content[initial_line][13:35]
-        gap = 2*n_clients+1
-        time2 = content[initial_line + gap][13:35]
+        if current_round > 0:
+            if current_round % checkpoint == 0:
+                time1 = content[initial_line][13:36]
+                gap = 4*n_clients+2+1+1
+                time2 = content[initial_line + gap][13:35]
+            else:
+                time1 = content[initial_line][13:36]
+                gap = 4*n_clients+2+1
+                time2 = content[initial_line + gap][13:35]
+        else:
+            time1 = content[initial_line][13:35]
+            gap = 2*n_clients+1
+            time2 = content[initial_line + gap][13:35]
 
     # print("First time:", time1, "'")
     # print("Second time:", time2, "'")
@@ -78,39 +99,12 @@ def get_client_times_one_round(current_client, current_round):
     return time1, time2, time3, time4
 
 
-def put_times_by_hand():
-    # Initial sync - Time between the server sending the first message and the last client receiving it
-    initial_sync_initial_date_string = "2022-04-11 23:04:17,042"
-    initial_sync_final_client_0_date_string = "2022-04-11 23:04:30,018"
-    initial_sync_final_client_1_date_string = "2022-04-11 23:04:31,359"
-    initial_sync_final_client_2_date_string = "2022-04-11 23:04:21,606"
-    initial_sync_final_client_3_date_string = "2022-04-11 23:04:21,935"
-
-    # Aggregation sync - Time between the first client sending the updated weights and
-    # the last client receiving the aggregated weights
-    aggregation_sync_initial_client_0_date_string = "2022-04-11 23:09:28,038"
-    aggregation_sync_initial_client_1_date_string = "2022-04-11 23:10:20,881"
-    aggregation_sync_initial_client_2_date_string = "2022-04-11 23:06:39,736"
-    aggregation_sync_initial_client_3_date_string = "2022-04-11 23:06:42,332"
-    aggregation_sync_final_client_0_date_string = "2022-04-11 23:10:48,115"
-    aggregation_sync_final_client_1_date_string = "2022-04-11 23:10:43,396"
-    aggregation_sync_final_client_2_date_string = "2022-04-11 23:10:33,440"
-    aggregation_sync_final_client_3_date_string = "2022-04-11 23:10:31,984"
-
-    # Test sync - Time between the first client sending the test metrics and the server aggregates all
-    test_sync_initial_client_0_date_string = "2022-04-11 23:12:36,486"
-    test_sync_initial_client_1_date_string = "2022-04-11 23:12:41,474"
-    test_sync_initial_client_2_date_string = "2022-04-11 23:11:05,282"
-    test_sync_initial_client_3_date_string = "2022-04-11 23:11:10,652"
-    test_sync_final_date_string = "2022-04-11 23:12:41,558"
-
-
 if __name__ == "__main__":
 
     print(f'{Path.home()}/{test_folder}/{test_case}/Exec {current_exec}')
 
-    for round in range(1, 11):
-        results = get_server_times_one_round(current_round=round)
+    for round_id in range(1, n_rounds+1):
+        results = get_server_times_one_round(current_round=round_id, checkpoint=server_checkpoint)
         initial_sync_initial_date_string = results[0]
         test_sync_final_date_string = results[1]
 
@@ -120,15 +114,11 @@ if __name__ == "__main__":
         test_sync_initial_date_string = []
 
         for client in range(n_clients):
-            results = get_client_times_one_round(client, round)
+            results = get_client_times_one_round(client, round_id)
             initial_sync_final_date_string.append(results[0])
             aggregation_sync_initial_date_string.append(results[1])
             aggregation_sync_final_date_string.append(results[2])
             test_sync_initial_date_string.append(results[3])
-
-        first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-        total_fl_execution_duration = last_server_message_date - first_server_message_date
 
         # Initial sync - Time between the server sending the first message and the last client receiving it
         initial_sync_final_date = []
@@ -173,10 +163,10 @@ if __name__ == "__main__":
             training_duration.append(final_training_time_date[client] - initial_training_time_date[client])
             test_duration.append(final_test_time_date[client] - initial_test_time_date[client])
 
-        if round > 0:
-            print(f'----------\n Round {round}\n----------')
-        else:
-            print(f'----------\n Final\n----------')
+        # if round_id > 0:
+        #     print(f'----------\n Round {round_id}\n----------')
+        # else:
+        #     print(f'----------\n Final\n----------')
 
         print_string = f"{initial_sync_duration}"
         for client in range(n_clients):
@@ -184,86 +174,17 @@ if __name__ == "__main__":
         print_string = print_string + f", {aggregation_sync_duration}"
         for client in range(n_clients):
             print_string = print_string + f", {test_duration[client]}"
-        print_string = print_string + f", {test_sync_duration}, {total_fl_execution_duration}"
+        print_string = print_string + f", {test_sync_duration}"
 
         print(print_string)
 
-    # round = -1
-    #
-    # results = get_server_times_one_round(current_round=round)
-    # initial_sync_initial_date_string = results[0]
-    # test_sync_final_date_string = results[1]
-    #
-    # initial_sync_final_date_string = []
-    # aggregation_sync_initial_date_string = []
-    # aggregation_sync_final_date_string = []
-    # test_sync_initial_date_string = []
-    #
-    # for client in range(n_clients):
-    #     results = get_client_times_one_round(client, round)
-    #     initial_sync_final_date_string.append(results[0])
-    #     aggregation_sync_initial_date_string.append(results[1])
-    #     aggregation_sync_final_date_string.append(results[2])
-    #     test_sync_initial_date_string.append(results[3])
-    #
-    # first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    # last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    # total_fl_execution_duration = last_server_message_date - first_server_message_date
-    #
-    # # Initial sync - Time between the server sending the first message and the last client receiving it
-    # initial_sync_final_date = []
-    # initial_sync_initial_date = datetime.strptime(initial_sync_initial_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    # for date in initial_sync_final_date_string:
-    #     initial_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
-    #
-    # initial_sync_duration = max(initial_sync_final_date) - initial_sync_initial_date
-    #
-    # # Aggregation sync - Time between the first client sending the updated weights and
-    # # the last client receiving the aggregated weights
-    # aggregation_sync_initial_date = []
-    # for date in aggregation_sync_initial_date_string:
-    #     aggregation_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
-    #
-    # aggregation_sync_final_date = []
-    # for date in aggregation_sync_final_date_string:
-    #     aggregation_sync_final_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
-    #
-    # aggregation_sync_duration = max(aggregation_sync_final_date) - min(aggregation_sync_initial_date)
-    #
-    # # Test sync - Time between the first client sending the test metrics and the server aggregates all
-    # test_sync_initial_date = []
-    # for date in test_sync_initial_date_string:
-    #     test_sync_initial_date.append(datetime.strptime(date, "%Y-%m-%d %H:%M:%S,%f"))
-    # test_sync_final_date = datetime.strptime(test_sync_final_date_string, "%Y-%m-%d %H:%M:%S,%f")
-    # test_sync_duration = test_sync_final_date - min(test_sync_initial_date)
-    #
-    # # Clients training and test times
-    # initial_training_time_date = []
-    # final_training_time_date = []
-    # initial_test_time_date = []
-    # final_test_time_date = []
-    # training_duration = []
-    # test_duration = []
-    #
-    # for client in range(n_clients):
-    #     initial_training_time_date.append(initial_sync_final_date[client])
-    #     final_training_time_date.append(aggregation_sync_initial_date[client])
-    #     initial_test_time_date.append(aggregation_sync_final_date[client])
-    #     final_test_time_date.append(test_sync_initial_date[client])
-    #     training_duration.append(final_training_time_date[client] - initial_training_time_date[client])
-    #     test_duration.append(final_test_time_date[client] - initial_test_time_date[client])
-    #
-    # if round > 0:
-    #     print(f'----------\n Round {round}\n----------')
-    # else:
-    #     print(f'----------\n Final\n----------')
-    #
-    # print_string = f"{initial_sync_duration}"
-    # for client in range(n_clients):
-    #     print_string = print_string + f", {training_duration[client]}"
-    # print_string = print_string + f", {aggregation_sync_duration}"
-    # for client in range(n_clients):
-    #     print_string = print_string + f", {test_duration[client]}"
-    # print_string = print_string + f", {test_sync_duration}, {total_fl_execution_duration}"
-    #
-    # print(print_string)
+    first_server_message_date = datetime.strptime(first_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    last_server_message_date = datetime.strptime(last_server_message_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    total_fl_execution_duration = last_server_message_date - first_server_message_date
+
+    first_framework_log_date = datetime.strptime(first_framework_log_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    last_framework_log_date = datetime.strptime(last_framework_log_date_string, "%Y-%m-%d %H:%M:%S,%f")
+    total_framework_execution_duration = last_framework_log_date - first_framework_log_date
+
+    print(f'----------\n Total Exec Times\n----------')
+    print(f"{total_fl_execution_duration}, {total_framework_execution_duration}")
