@@ -47,7 +47,7 @@ while [  $COUNTER -lt 4 ]; do
   fi
   COUNTER=$((COUNTER+1))
 done
-COUNTER=3
+COUNTER=1
 echo " ----------------------------
 Test Case 3 (every 30 rounds)
 ---------------------------- "
