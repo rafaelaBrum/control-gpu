@@ -345,6 +345,7 @@ class Executor:
                 #                                                          self.vm.instance_id,
                 #                                                          self.dict_info))
                 self.communicator.send(action=Daemon.START, value=self.dict_info)
+                time.sleep(300)
             except Exception as e:
                 logging.error(e)
             # if task was started with success
