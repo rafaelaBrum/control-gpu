@@ -48,21 +48,21 @@ while [  $COUNTER -lt 4 ]; do
         fi
         COUNTER=$((COUNTER+1))
 done
-echo " ----------------------------
-  Failure rate of 1/(6 hours)
- ---------------------------- "
-COUNTER=1
-while [  $COUNTER -lt 4 ]; do
-	echo " ----------------------------
-  Running test - Counter=$COUNTER
- ----------------------------"
-        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        if [ $COUNTER -ne 3 ]; then
-          sleep 5m
-        fi
-        COUNTER=$((COUNTER+1))
-done
+#echo " ----------------------------
+#  Failure rate of 1/(6 hours)
+# ---------------------------- "
+#COUNTER=1
+#while [  $COUNTER -lt 4 ]; do
+#	echo " ----------------------------
+#  Running test - Counter=$COUNTER
+# ----------------------------"
+#        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        if [ $COUNTER -ne 3 ]; then
+#          sleep 5m
+#        fi
+#        COUNTER=$((COUNTER+1))
+#done
 echo " ----------------------------
 Test Case 2 (only server is faulty)
 ---------------------------- "
@@ -97,21 +97,21 @@ while [  $COUNTER -lt 4 ]; do
         fi
         COUNTER=$((COUNTER+1))
 done
-echo " ----------------------------
-  Failure rate of 1/(6 hours)
- ---------------------------- "
-COUNTER=1
-while [  $COUNTER -lt 4 ]; do
-	echo " ----------------------------
-  Running test - Counter=$COUNTER
- ----------------------------"
-        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        if [ $COUNTER -ne 3 ]; then
-          sleep 5m
-        fi
-        COUNTER=$((COUNTER+1))
-done
+#echo " ----------------------------
+#  Failure rate of 1/(6 hours)
+# ---------------------------- "
+#COUNTER=1
+#while [  $COUNTER -lt 4 ]; do
+#	echo " ----------------------------
+#  Running test - Counter=$COUNTER
+# ----------------------------"
+#        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        if [ $COUNTER -ne 3 ]; then
+#          sleep 5m
+#        fi
+#        COUNTER=$((COUNTER+1))
+#done
 echo " ----------------------------
 Test Case 3 (only clients are faulty)
 ---------------------------- "
@@ -146,21 +146,21 @@ while [  $COUNTER -lt 4 ]; do
         fi
         COUNTER=$((COUNTER+1))
 done
-echo " ----------------------------
-  Failure rate of 1/(6 hours)
- ---------------------------- "
-COUNTER=1
-while [  $COUNTER -lt 4 ]; do
-	echo " ----------------------------
-  Running test - Counter=$COUNTER
- ----------------------------"
-        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
-        if [ $COUNTER -ne 3 ]; then
-          sleep 5m
-        fi
-        COUNTER=$((COUNTER+1))
-done
+#echo " ----------------------------
+#  Failure rate of 1/(6 hours)
+# ---------------------------- "
+#COUNTER=1
+#while [  $COUNTER -lt 4 ]; do
+#	echo " ----------------------------
+#  Running test - Counter=$COUNTER
+# ----------------------------"
+#        echo python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        python3 client.py control --emulated --strategy FedAvgSave --revocation_rate 4.6296296296296294e-05
+#        if [ $COUNTER -ne 3 ]; then
+#          sleep 5m
+#        fi
+#        COUNTER=$((COUNTER+1))
+#done
 echo " ----------------------------
   Stopping docker
  ----------------------------"

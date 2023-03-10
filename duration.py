@@ -2,19 +2,19 @@ from datetime import datetime
 from pathlib import Path
 
 test_folder = 'Initial_mapping'
-test_case = "10_clients"
-current_exec = 6
+test_case = "4_clients"
+current_exec = 4
 n_rounds = 10
 # -1 if there is no server ckpt
 server_checkpoint = -1
 
-n_clients = 10
+n_clients = 4
 
-first_framework_log_date_string = "2023-03-04 02:42:34,323"
-last_framework_log_date_string = "2023-03-04 02:42:34,323"
+first_framework_log_date_string = "2022-12-29 10:41:03,326"
+last_framework_log_date_string = "2022-12-29 10:41:03,326"
 
-first_server_message_date_string = "2023-03-04 02:42:34,323"
-last_server_message_date_string = "2023-03-04 03:13:25,581"
+first_server_message_date_string = "2022-12-30 17:47:48,801"
+last_server_message_date_string = "2022-12-30 18:26:46,748"
 
 
 def get_server_times_one_round(current_round, checkpoint):
