@@ -233,7 +233,8 @@ class ScheduleManager:
                 market=market,
                 loader=self.loader,
                 region=region,
-                zone=zone
+                zone=zone,
+                simulator=self.simulator
             )
 
             # Then a dispatcher, that will execute the tasks, is created
@@ -509,7 +510,8 @@ class ScheduleManager:
                     market=market,
                     loader=self.loader,
                     region=region,
-                    zone=zone
+                    zone=zone,
+                    simulator=self.simulator
                 )
 
                 new_dispatcher = Dispatcher(
@@ -681,7 +683,8 @@ class ScheduleManager:
                     market=market,
                     loader=self.loader,
                     region=region,
-                    zone=zone
+                    zone=zone,
+                    simulator=self.simulator
                 )
 
                 new_dispatcher = Dispatcher(
