@@ -187,7 +187,8 @@ class ScheduleManager:
             market=market,
             loader=self.loader,
             region=region,
-            zone=zone
+            zone=zone,
+            simulator=self.simulator
         )
 
         # Then a dispatcher, that will execute the tasks, is created
@@ -197,7 +198,7 @@ class ScheduleManager:
 
         # check if the VM need to be registered on the simulator
         if self.loader.simulation_conf.with_simulation and vm.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET)\
-                and self.loader.simulation_conf.faulty_server:
+                and self.loader.simulation_conf.faulty_server and not self.loader.emulated:
             logging.info("<Scheduler Manager {}_{}>: Revogation simulation of server".format(self.loader.job.job_id,
                                                                                              self.loader.execution_id))
             self.simulator.register_vm(vm)
@@ -247,7 +248,8 @@ class ScheduleManager:
                              "of client {}".format(self.loader.job.job_id,
                                                    self.loader.execution_id,
                                                    i))
-                self.simulator.register_vm(vm)
+                if not self.loader.emulated:
+                    self.simulator.register_vm(vm)
 
             self.semaphore.acquire()
 
