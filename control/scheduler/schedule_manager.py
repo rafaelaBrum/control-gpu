@@ -511,7 +511,7 @@ class ScheduleManager:
                     loader=self.loader,
                     region=region,
                     zone=zone,
-                    simulator=self.simulator
+                    simulator=None
                 )
 
                 new_dispatcher = Dispatcher(
@@ -684,7 +684,7 @@ class ScheduleManager:
                     loader=self.loader,
                     region=region,
                     zone=zone,
-                    simulator=self.simulator
+                    simulator=None
                 )
 
                 new_dispatcher = Dispatcher(

@@ -38,7 +38,7 @@ class VirtualMachine:
     vm_num = 1
 
     def __init__(self, instance_type: InstanceType, market, loader: Loader, volume_id=None, disk_name='', vm_name='',
-                 region: CloudRegion = None, zone='', simulator = None):
+                 region: CloudRegion = None, zone='', simulator=None):
 
         self.loader = loader
 
@@ -670,22 +670,23 @@ class VirtualMachine:
 
                 self.ssh.close_connection()
 
-                # check if the VM need to be registered on the simulator
-                if type_task == Job.CLIENT and self.loader.simulation_conf.with_simulation and \
-                        self.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET) and \
-                        self.loader.simulation_conf.faulty_clients and self.loader.emulated:
-                    logging.info("<Scheduler Manager {}_{}>: Revogation simulation "
-                                 "of client {}".format(self.loader.job.job_id,
-                                                       self.loader.execution_id,
-                                                       client_id))
-                    self.simulator.register_vm(self)
-                if type_task == Job.SERVER and self.loader.simulation_conf.with_simulation and \
-                        self.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET) and \
-                        self.loader.simulation_conf.faulty_server and self.loader.emulated:
-                    logging.info(
-                        "<Scheduler Manager {}_{}>: Revogation simulation of server".format(self.loader.job.job_id,
-                                                                                            self.loader.execution_id))
-                    self.simulator.register_vm(self)
+                if self.simulator is not None:
+                    # check if the VM need to be registered on the simulator
+                    if type_task == Job.CLIENT and self.loader.simulation_conf.with_simulation and \
+                            self.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET) and \
+                            self.loader.simulation_conf.faulty_clients and self.loader.emulated:
+                        logging.info("<Scheduler Manager {}_{}>: Revogation simulation "
+                                     "of client {}".format(self.loader.job.job_id,
+                                                           self.loader.execution_id,
+                                                           client_id))
+                        self.simulator.register_vm(self)
+                    if type_task == Job.SERVER and self.loader.simulation_conf.with_simulation and \
+                            self.market in (CloudManager.PREEMPTIBLE, Experiment.MARKET) and \
+                            self.loader.simulation_conf.faulty_server and self.loader.emulated:
+                        logging.info(
+                            "<Scheduler Manager {}_{}>: Revogation simulation of server"
+                            "".format(self.loader.job.job_id, self.loader.execution_id))
+                        self.simulator.register_vm(self)
 
             else:
 
