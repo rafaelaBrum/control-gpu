@@ -189,15 +189,14 @@ class StackedLSTMClient(fl.client.NumPyClient):
         history = self.test(set_to_use='train')
 
         results = {
-            "loss": history["loss"],
+            "loss": float(history["loss"]),
             "accuracy": history[ACCURACY_KEY],
             "num_examples_ceil": num_train_samples*epochs,
             "num_examples": num_train_samples*epochs,
             "fit_duration": fit_duration
         }
         print("num_examples fit:", num_train_samples)
-        print("num_examples fit:", type(num_train_samples))
-        print("fit results: ", type(results))
+        print("fit results: ", results)
         return parameters_prime, num_train_samples, results
 
     def evaluate(self, parameters, config):
@@ -220,11 +219,8 @@ class StackedLSTMClient(fl.client.NumPyClient):
         loss = float(history['loss'])
         accuracy = history[ACCURACY_KEY]
         print("num_examples test:", self.num_test_samples)
-        print("num_examples test:", type(self.num_test_samples))
         print("evaluate loss: ", loss)
-        print("evaluate loss: ", type(loss))
         print("evaluate accuracy: ", accuracy)
-        print("evaluate accuracy: ", type(accuracy))
         return loss, self.num_test_samples, {"accuracy": accuracy}
 
     def train(self, num_epochs=1, batch_size=10):
