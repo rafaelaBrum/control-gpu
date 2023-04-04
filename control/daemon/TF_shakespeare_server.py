@@ -5,8 +5,6 @@ import numpy as np
 import os
 import flwr as fl
 
-import writer_daemon as metrics_writer
-
 from fedavg_strategy import FedAvg
 from fedavg_saving_strategy import FedAvgSave
 

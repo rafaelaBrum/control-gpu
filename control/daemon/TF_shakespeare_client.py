@@ -14,8 +14,6 @@ import flwr as fl
 import json
 from time import time
 
-import writer_daemon as metrics_writer
-
 from stacked_lstm import ClientModel
 
 ACCURACY_KEY = 'accuracy'
