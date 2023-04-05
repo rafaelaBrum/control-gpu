@@ -68,6 +68,8 @@ class ScheduleManager:
         if self.loader.simulation_conf.with_simulation:
             # start simulator
             self.simulator = RevocationSim(self.loader.revocation_rate)
+        else:
+            self.simulator = None
 
         # Keep Used EBS Volumes
         self.ebs_volumes = []

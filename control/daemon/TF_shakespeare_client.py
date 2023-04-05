@@ -71,6 +71,11 @@ def get_args():
     parser.add_argument('--use-val-set',
                         help='use validation set;',
                         action='store_true')
+    parser.add_argument('-predst',
+                        help='use validation set;',
+                        type=str,
+                        dest='folder_data',
+                        default='bucket_folder')
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
@@ -327,9 +332,9 @@ if __name__ == "__main__":
     client_model = ClientModel(args.seed, *model_params)
 
     eval_set = 'test' if not args.use_val_set else 'val'
-    train_data_dir = os.path.join('data', 'train')
+    train_data_dir = os.path.join(args.folder_data, 'train')
     train_data_file = os.path.join(train_data_dir, 'train_data_user_' + str(args.id_client) + '.json')
-    test_data_dir = os.path.join('data', eval_set)
+    test_data_dir = os.path.join(args.folder_data, eval_set)
     test_data_file = os.path.join(test_data_dir, 'test_data_user_' + str(args.id_client) + '.json')
 
     user, train_data, test_data = read_data(train_data_file, test_data_file)

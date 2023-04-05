@@ -548,6 +548,12 @@ class Loader:
                         self.job.client_tasks[i].command,
                         self.checkpoint_conf.ckpt_file
                     )
+                if self.input_conf.task_leaf:
+                    self.job.client_tasks[i].command = "{0} -id_client {1}" \
+                        .format(
+                        self.job.client_tasks[i].command,
+                        self.job.client_tasks[i].client_id
+                    )
 
     def print_execution_info(self):
         logging.info("\n")

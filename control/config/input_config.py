@@ -36,6 +36,10 @@ class InputConfig(Config):
     def deadline_seconds(self):
         return float(self.get_property(self._key, 'deadline_seconds'))
 
+    @property
+    def task_leaf(self):
+        return self.get_boolean(self._key, 'task_leaf')
+
     # @property
     # def ac_size_seconds(self):
     #     return float(self.get_property(self._key, 'ac_size_seconds'))
