@@ -1016,6 +1016,10 @@ class ScheduleManager:
         # Call checkers loop
         self.__checkers()
 
+        # terminate simulation
+        if self.loader.simulation_conf.with_simulation:
+            self.simulator.stop_simulation()
+
         if self.loader.emulated:
             self.__get_results()
 

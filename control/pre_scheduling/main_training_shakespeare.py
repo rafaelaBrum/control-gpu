@@ -322,6 +322,7 @@ if __name__ == "__main__":
     time_start = time()
 
     client.train()
+    client.test(set_to_use='train')
 
     time_end = time()
 
@@ -338,6 +339,7 @@ if __name__ == "__main__":
     time_start = time()
 
     client.train()
+    client.test(set_to_use='train')
 
     time_end = time()
 

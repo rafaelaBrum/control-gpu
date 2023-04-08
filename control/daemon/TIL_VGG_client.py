@@ -852,7 +852,10 @@ class VGG16Client(fl.client.NumPyClient):
             global_epoch = int(config['epoch_global'])
             if global_epoch > 1:
                 print(f"Removing old round-{global_epoch-1}-weights.npz saved file")
-                os.remove(f"round-{global_epoch-1}-weights.npz")
+                try:
+                    os.remove(f"round-{global_epoch-1}-weights.npz")
+                except Exception as e:
+                    print("ERROR:", e)
             print(f"Saving round {global_epoch} aggregated_ndarrays...")
             checkpoint_file = f"round-{global_epoch}-weights.npz"
             np.savez(checkpoint_file, *parameters)
