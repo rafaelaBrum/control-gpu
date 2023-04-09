@@ -119,13 +119,6 @@ class VirtualMachine:
         self.start_deploy = datetime.now()
         self.terminate_overhead = timedelta(seconds=0)
 
-        # Hibernation Trackers
-        self.hibernation_process_finished = False
-
-        self.__hibernation_duration = timedelta(seconds=0)
-        self.__hibernation_start_timestamp = None
-        self.__hibernation_end_timestamp = None
-
         self.failed_to_created = False
 
         self.root_folder = None
@@ -712,6 +705,7 @@ class VirtualMachine:
         status = False
 
         print("state", self.state)
+        self.__end_time = datetime.now()
 
         if self.emulated:
             status = self.experiment_emulation.terminate()
@@ -721,7 +715,6 @@ class VirtualMachine:
                 return False
 
         if self.state not in (CloudManager.TERMINATED, None):
-            self.__end_time = datetime.now()
             status = self.manager.terminate_instance(self.instance_id, wait=wait, zone=zone)
 
             if delete_volume and self.volume_id is not None:
@@ -826,7 +819,7 @@ class VirtualMachine:
                 _uptime = datetime.now() - self.__start_time
 
             # remove the hibernation_duration
-            _uptime = max(_uptime - self.hibernation_duration, timedelta(seconds=0))
+            _uptime = max(_uptime, timedelta(seconds=0))
 
         return _uptime
 
@@ -835,10 +828,6 @@ class VirtualMachine:
     @property
     def end_time(self):
         return self.__end_time
-
-    @property
-    def hibernation_duration(self):
-        return self.__hibernation_duration
 
     @property
     def price(self):
@@ -856,7 +845,7 @@ class VirtualMachine:
                                                                         self.region.region)
             return self.instance_type.vcpu*vcpu_price + self.instance_type.memory*mem_price
         elif self.instance_type.provider == CloudManager.CLOUDLAB:
-            return self.instance_type.price_ondemand[self.region.region]
+            return self.instance_type.price_preemptible[self.region.region]
 
     @property
     def type(self):
