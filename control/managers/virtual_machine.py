@@ -845,7 +845,10 @@ class VirtualMachine:
                                                                         self.region.region)
             return self.instance_type.vcpu*vcpu_price + self.instance_type.memory*mem_price
         elif self.instance_type.provider == CloudManager.CLOUDLAB:
-            return self.instance_type.price_preemptible[self.region.region]
+            if self.simulator:
+                return self.instance_type.price_preemptible[self.region.region]
+            else:
+                return self.instance_type.price_ondemand[self.region.region]
 
     @property
     def type(self):

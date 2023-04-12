@@ -11,14 +11,15 @@ export SETUP_PATH=$HOME/control-gpu/
 export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
+export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 echo " ----------------------------
-FEMNIST app (5 clients running 20 rounds)
+FEMNIST app (5 clients running 100 rounds)
 ---------------------------- "
 echo " ----------------------------
 Test Case 0 (without simulation)
 ---------------------------- "
 cp setup_cloudlab/setup_femnist.cfg setup.cfg
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -37,7 +38,7 @@ cp setup_cloudlab/setup_femnist_dyn_sched_all.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -52,7 +53,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
-COUNTER=1
+COUNTER=3
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER

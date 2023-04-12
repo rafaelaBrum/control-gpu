@@ -141,7 +141,7 @@ class Model(ABC):
                 corresponding to a variable in the resulting graph
         """
         for i in range(num_epochs):
-            print("epoch", i)
+            # print("epoch", i)
             self.run_epoch(data, batch_size)
 
         update = self.get_params()
@@ -150,11 +150,11 @@ class Model(ABC):
 
     def run_epoch(self, data, batch_size):
 
-        i = 0
+        # i = 0
         for batched_x, batched_y in batch_data(data, batch_size, seed=self.seed):
-            if i % 1000 == 0:
-                print("batch " + str(i))
-            i += 1
+            # if i % 1000 == 0:
+            #     print("batch " + str(i))
+            # i += 1
             input_data = self.process_x(batched_x)
             target_data = self.process_y(batched_y)
             
