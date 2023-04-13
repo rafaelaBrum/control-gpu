@@ -38,7 +38,7 @@ cp setup_cloudlab/setup_femnist_dyn_sched_all.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
-COUNTER=4
+COUNTER=2
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -53,7 +53,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
-COUNTER=3
+COUNTER=1
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
