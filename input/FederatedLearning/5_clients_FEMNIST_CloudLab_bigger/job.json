@@ -1,0 +1,110 @@
+{
+    "job_id": 6005,
+    "job_name": "5 clients - FEMNIST (bigger dataset in CloudLab)",
+    "description": "5 clients executing CNN with Shakespeare dataset stored in CloudLab",
+    "server_msg_train": 0.02641736,
+    "server_msg_test": 0.02641736,
+    "client_msg_train": 0.026417824,
+    "client_msg_test": 0.000000752,
+    "tasks": {
+        "server": {
+            "task_name": "Task server FEMNIST",
+            "command": "python3.7 TF_femnist_server.py",
+            "runtime": {
+                "g4dn.xlarge": 65
+            },
+            "generic_checkpoint": "False",
+            "zip_file": "TF_femnist_server.zip",
+            "n_rounds": 100,
+            "n_clients": 5,
+            "comm_baseline": 0.0438870191574096675
+        },
+        "clients": {
+            "0" : {
+                "task_name": "Task FEMNIST CNN (client 0)",
+                "command": "python3.7 TF_femnist_client.py",
+                "generic_checkpoint": "False",
+                "zip_file": "TF_femnist_client.zip",
+                "batch": 10,
+                "bucket_name": "/mydata/",
+                "train_epochs": 100,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "baseline_exec": ,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+5-clients-femnist-big",
+                "trainset_dir": "",
+                "test_dir": "",
+                "split": "",
+                "net": ""
+            },
+            "1" : {
+                "task_name": "Task FEMNIST CNN (client 1)",
+                "command": "python3.7 TF_femnist_client.py",
+                "generic_checkpoint": "False",
+                "zip_file": "TF_femnist_client.zip",
+                "batch": 10,
+                "bucket_name": "/mydata/",
+                "train_epochs": 100,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "baseline_exec": ,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+5-clients-femnist-big-1",
+                "trainset_dir": "",
+                "test_dir": "",
+                "split": "",
+                "net": ""
+            },
+            "2" : {
+                "task_name": "Task FEMNIST CNN (client 2)",
+                "command": "python3.7 TF_femnist_client.py",
+                "generic_checkpoint": "False",
+                "zip_file": "TF_femnist_client.zip",
+                "batch": 10,
+                "bucket_name": "/mydata/",
+                "train_epochs": 100,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "baseline_exec": ,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+5-clients-femnist-big-2",
+                "trainset_dir": "",
+                "test_dir": "",
+                "split": "",
+                "net": ""
+            },
+            "3" : {
+                "task_name": "Task FEMNIST CNN (client 3)",
+                "command": "python3.7 TF_femnist_client.py",
+                "generic_checkpoint": "False",
+                "zip_file": "TF_femnist_client.zip",
+                "batch": 10,
+                "bucket_name": "/mydata/",
+                "train_epochs": 100,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "baseline_exec": ,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+5-clients-femnist-big-3",
+                "trainset_dir": "",
+                "test_dir": "",
+                "split": "",
+                "net": ""
+            },
+            "4" : {
+                "task_name": "Task FEMNIST CNN (client 4)",
+                "command": "python3.7 TF_femnist_client.py",
+                "generic_checkpoint": "False",
+                "zip_file": "TF_femnist_client.zip",
+                "batch": 10,
+                "bucket_name": "/mydata/",
+                "train_epochs": 100,
+                "bucket_provider": "CloudLab",
+                "bucket_region": "all",
+                "baseline_exec": ,
+                "dataset_urn": "urn:publicid:IDN+utah.cloudlab.us:multi-fedls-pg0+imdataset+5-clients-femnist-big-4",
+                "trainset_dir": "",
+                "test_dir": "",
+                "split": "",
+                "net": ""
+            }
+        }
+    }
+}
