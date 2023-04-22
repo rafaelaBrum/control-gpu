@@ -19,7 +19,7 @@ echo " ----------------------------
 Test Case 0 (without simulation)
 ---------------------------- "
 cp setup_cloudlab/setup_femnist_bigger.cfg setup.cfg
-COUNTER=4
+COUNTER=1
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -38,7 +38,7 @@ cp setup_cloudlab/setup_femnist_bigger_dyn_sched_all.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
-COUNTER=2
+COUNTER=1
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
