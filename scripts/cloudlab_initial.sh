@@ -14,23 +14,7 @@ export POSTGRES_PASS=rafaela123
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.json
 COUNTER=1
 echo " ----------------------------
-Test Case 1 (10 clients)
----------------------------- "
-cp setup_cloudlab/10_clients_setup.cfg setup.cfg
-while [  $COUNTER -lt 4 ]; do
-  echo " ----------------------------
-   Running test - Counter=$COUNTER
-  ----------------------------"
-  echo python3 client.py control --emulated --strategy FedAvg
-  python3 client.py control --emulated --strategy FedAvg
-  if [ $COUNTER -ne 3 ]; then
-    sleep 30m
-  fi
-  COUNTER=$((COUNTER+1))
-done
-COUNTER=1
-echo " ----------------------------
-Test Case 2 (4 clients)
+Test Case (4 clients)
 ---------------------------- "
 cp setup_cloudlab/4_clients_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do

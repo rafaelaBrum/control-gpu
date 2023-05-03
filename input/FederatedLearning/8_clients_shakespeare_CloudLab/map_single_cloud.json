@@ -39,24 +39,16 @@
             "instance_type": "c240g5",
             "provider": "CLOUDLAB",
             "region": "Wisconsin"
-        },
-        "8": {
-            "instance_type": "c240g5",
-            "provider": "CLOUDLAB",
-            "region": "Wisconsin"
-        },
-        "9": {
-            "instance_type": "c240g5",
-            "provider": "CLOUDLAB",
-            "region": "Wisconsin"
         }
     },
-    "cost": 2.8256042649443147,
-    "makespan": 66.08503600905769,
-    "obj_value": 0.026272321497681578,
+    "cost": 0.22249700239997147,
+    "makespan": 20.101265491227593,
+    "max_cost": 19.96049659721166,
+    "max_total_exec": 715.488212972194,
+    "obj_value": 0.019620670885120362,
     "server": {
-        "instance_type": "c220g1",
+        "instance_type": "r320",
         "provider": "CLOUDLAB",
-        "region": "Wisconsin"
+        "region": "APT"
     }
 }

@@ -26,11 +26,11 @@
             "region": "Wisconsin"
         }
     },
-    "cost": 0.6204117137818239,
-    "makespan": 85.79466318117409,
+    "cost": 0.6214343861669439,
+    "makespan": 85.7946631811741,
     "max_cost": 79.16453524092137,
     "max_total_exec": 4256.321328176899,
-    "obj_value": 0.013996994585001869,
+    "obj_value": 0.014003453742388492,
     "server": {
         "instance_type": "r320",
         "provider": "CLOUDLAB",

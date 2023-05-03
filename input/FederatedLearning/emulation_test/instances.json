@@ -574,10 +574,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "APT": 1.3785600000000002
+                    "APT": 1.28272
                 },
                 "preemptible": {
-                    "APT": 0.41356800000000005
+                    "APT": 0.384816
                 }
             },
             "restrictions": {
@@ -604,10 +604,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "APT": 0.61648
+                    "APT": 0.573568
                 },
                 "preemptible": {
-                    "APT": 0.184944
+                    "APT": 0.17207039999999998
                 }
             },
             "restrictions": {
@@ -634,10 +634,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Massachusetts": 3.0483200000000004
+                    "Massachusetts": 2.836608
                 },
                 "preemptible": {
-                    "Massachusetts": 0.9144960000000001
+                    "Massachusetts": 0.8509824
                 }
             },
             "restrictions": {
@@ -664,10 +664,10 @@
             "provider": "CloudLab",
             "prices": {
                 "on-demand": {
-                    "Massachusetts": 2.524
+                    "Massachusetts": 2.349112
                 },
                 "preemptible": {
-                    "Massachusetts": 0.7572
+                    "Massachusetts": 0.7047336
                 }
             },
             "restrictions": {
