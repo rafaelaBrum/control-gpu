@@ -1028,6 +1028,10 @@ class ScheduleManager:
         self.__end_of_execution()
 
     def __get_results(self):
+        # terminate simulation
+        if self.loader.simulation_conf.with_simulation:
+            self.simulator.stop_simulation()
+
         logging.info("<Scheduler Manager {}_{}>: - Getting results from VMS".format(self.loader.job.job_id,
                                                                                     self.loader.execution_id))
         folder_root = f"results/{self.loader.job.job_id}_{self.loader.execution_id}"
