@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-# from control.managers.ec2_manager import EC2Manager
+from control.managers.ec2_manager import EC2Manager
 from control.managers.cloud_manager import CloudManager
 from control.managers.gcp_manager import GCPManager
 
@@ -162,7 +162,7 @@ class Loader:
 
         self.__get_execution_id()
 
-        self.__update_prices()
+        # self.__update_prices()
         self.__update_zones()
 
         self.__update_command(args.strategy, args.num_seed)
@@ -373,23 +373,23 @@ class Loader:
                 zone = loc.zones[0]
 
                 if instance.provider == CloudManager.EC2 and loc.provider in (CloudManager.EC2, CloudManager.AWS):
-                    logging.error("Without account of EC2 configured")
+                    # logging.error("Without account of EC2 configured")
 
-                    # if instance.market_ondemand:
-                    #     instance.setup_ondemand_price(
-                    #         price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=region),
-                    #         region=region
-                    #     )
-                    #     # print(f"Final On-demand price: ", instance.price_ondemand)
-                    #
-                    # if instance.market_preemptible:
-                    #     instance.setup_preemptible_price(
-                    #         price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=zone,
-                    #                                                region=region)[0][1],
-                    #         region=region,
-                    #         zone=zone
-                    #     )
-                    #     # print(f"Final Preemptible price: ", instance.price_preemptible)
+                    if instance.market_ondemand:
+                        instance.setup_ondemand_price(
+                            price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=region),
+                            region=region
+                        )
+                        # print(f"Final On-demand price: ", instance.price_ondemand)
+
+                    if instance.market_preemptible:
+                        instance.setup_preemptible_price(
+                            price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=zone,
+                                                                   region=region)[0][1],
+                            region=region,
+                            zone=zone
+                        )
+                        # print(f"Final Preemptible price: ", instance.price_preemptible)
 
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP) \
                         and loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
@@ -449,8 +449,8 @@ class Loader:
         for region in self.loc.values():
 
             if region.provider == CloudManager.EC2 or region.provider == CloudManager.AWS:
-                logging.error("Without account of EC2 configured")
-                # region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
+                # logging.error("Without account of EC2 configured")
+                region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
 
             elif region.provider == CloudManager.GCLOUD or region.provider == CloudManager.GCP:
                 region.setup_zones(zones=gcp_manager.get_availability_zones(region.region))

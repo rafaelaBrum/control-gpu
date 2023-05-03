@@ -15,7 +15,7 @@ echo "Python 3.7 installed"
 
 # Installing Python dependencies
 sudo apt install wget -y
-wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_gcp/requirements_server_flower.txt
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_cloudlab/requirements_server_flower.txt
 sudo python3.7 -m pip install -U pip setuptools
 sudo python3.7 -m pip install -r requirements_server_flower.txt
 sudo apt install unzip -y

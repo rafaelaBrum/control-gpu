@@ -1,0 +1,166 @@
+{
+    "comm_slowdown": {
+        "AWS": {
+            "us-east-1": {
+                "AWS": {
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
+                },
+                "GCP": {
+                    "us-central1": 10000000,
+                    "us-west1": 10000000
+                }
+            },
+            "us-west-2": {
+                "AWS": {
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
+                },
+                "GCP": {
+                    "us-central1": 10000000,
+                    "us-west1": 10000000
+                }
+            }
+        },
+        "GCP": {
+            "us-central1": {
+                "AWS": {
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
+                },
+                "GCP": {
+                    "us-central1": 10000000,
+                    "us-west1": 10000000
+                }
+            },
+            "us-west1": {
+                "AWS": {
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
+                },
+                "GCP": {
+                    "us-central1": 10000000,
+                    "us-west1": 10000000
+                }
+            }
+        }
+    },
+    "cost_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g3.4xlarge": 0.00031666666666666665,
+                "g4dn.2xlarge": 0.00020888888888888888,
+                "t2.xlarge": 5.155555555555555e-05
+            }
+        },
+        "GCLOUD": {
+            "us-central1": {
+                "e2-standard-4": 3.7228566666666665e-05,
+                "n1-standard-16_p4": 0.00037777666666666666,
+                "n1-standard-8_t4": 0.0002027772222222222,
+                "n1-standard-8_v100": 0.0007944438888888889
+            },
+            "us-west1": {
+                "e2-standard-4": 3.7228566666666665e-05,
+                "n1-standard-8_t4": 0.0002027772222222222,
+                "n1-standard-8_v100": 0.0007944438888888889
+            }
+        }
+    },
+    "cpu_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g3.4xlarge": 16,
+                "g4dn.2xlarge": 8,
+                "t2.xlarge": 3
+            }
+        },
+        "GCLOUD": {
+            "us-central1": {
+                "e2-standard-4": 4,
+                "n1-standard-16_p4": 16,
+                "n1-standard-8_t4": 8,
+                "n1-standard-8_v100": 8
+            },
+            "us-west1": {
+                "e2-standard-4": 4,
+                "n1-standard-8_t4": 8,
+                "n1-standard-8_v100": 8
+            }
+        }
+    },
+    "gpu_vms": {
+        "AWS": {
+            "us-east-1": {
+                "g3.4xlarge": 1,
+                "g4dn.2xlarge": 1,
+                "t2.xlarge": 0
+            }
+        },
+        "GCLOUD": {
+            "us-central1": {
+                "e2-standard-4": 0,
+                "n1-standard-16_p4": 1,
+                "n1-standard-8_t4": 1,
+                "n1-standard-8_v100": 1
+            },
+            "us-west1": {
+                "e2-standard-4": 0,
+                "n1-standard-8_t4": 1,
+                "n1-standard-8_v100": 1
+            }
+        }
+    },
+    "pair_regions_baseline": {},
+    "slowdown": {
+        "AWS_us-east-1": {
+            "AWS": {
+                "us-east-1": {
+                    "g3.4xlarge": 5.090178106796931,
+                    "g4dn.2xlarge": 1.0
+                },
+                "us-west-2": {
+                    "g3.4xlarge": 4.441456413355492,
+                    "g4dn.2xlarge": 0.986537073408202
+                }
+            },
+            "GCP": {
+                "us-central1": {
+                    "n1-standard-16_p4": 1.2760235685148813,
+                    "n1-standard-8_t4": 1.0292927766866429,
+                    "n1-standard-8_v100": 1.0351681187154824
+                },
+                "us-west1": {
+                    "n1-standard-8_t4": 1.065115576371053,
+                    "n1-standard-8_v100": 1.0979503449665104
+                }
+            }
+        }
+    },
+    "time_aggreg": {
+        "AWS": {
+            "us-east-1": {
+                "g3.4xlarge": 0.5,
+                "g4dn.2xlarge": 0.5,
+                "t2.xlarge": 0.5
+            }
+        },
+        "GCLOUD": {
+            "us-central1": {
+                "e2-standard-4": 0.5,
+                "n1-standard-16_p4": 0.5,
+                "n1-standard-8_t4": 0.5,
+                "n1-standard-8_v100": 0.5
+            },
+            "us-west1": {
+                "e2-standard-4": 0.5,
+                "n1-standard-8_t4": 0.5,
+                "n1-standard-8_v100": 0.5
+            }
+        }
+    },
+    "vm_baseline": {
+        "location": "AWS_us-east-1",
+        "vm_name": "g4dn.2xlarge"
+    }
+}

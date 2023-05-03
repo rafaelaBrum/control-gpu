@@ -1948,27 +1948,39 @@ class PreSchedulingManager:
                 data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.vcpu
                 data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.count_gpu
                 data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]/3600
-                data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.5
+                data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.3
 
-        client_baseline = str(0)
-        time_baseline = 0.0
-        vm_baseline_chosen = False
+        for client_baseline in ['0', '2']:
+            time_baseline = 0.0
+            vm_baseline_chosen = False
+            if self.loader.emulated:
+                aux_location = 'CLOUDLAB_all'
+            elif client_baseline == '0':
+                aux_location = 'AWS_us-east-1'
+            else:
+                aux_location = 'GCP_us-central-1'
 
-        for vm_name in self.exec_times:
-            for loc in self.exec_times[vm_name]:
-                aux_provider = loc.split("_")[0].upper()
-                aux_region = loc.split("_")[1]
-                if client_baseline in self.exec_times[vm_name][loc]:
-                    if not vm_baseline_chosen:
-                        try:
-                            time_baseline = float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) + \
-                                            float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])
-                            vm_baseline_chosen = True
-                            data_dict['vm_baseline'] = {'vm_name': vm_name, 'location': loc}
-                        except Exception as e:
-                            logging.error(e)
-                    if self.loader.emulated:
-                        aux_location = 'CLOUDLAB_all'
+            if 'AWS' in data_dict['cpu_vms']:
+                vm_baseline_chosen = True
+                vm_name = 'g4dn.2xlarge'
+                loc = 'AWS_us-east-1'
+                time_baseline = float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) + \
+                                float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])
+                data_dict['vm_baseline'][aux_location] = {'vm_name': vm_name, 'location': loc}
+
+            for vm_name in self.exec_times:
+                for loc in self.exec_times[vm_name]:
+                    aux_provider = loc.split("_")[0].upper()
+                    aux_region = loc.split("_")[1]
+                    if client_baseline in self.exec_times[vm_name][loc]:
+                        if not vm_baseline_chosen:
+                            try:
+                                time_baseline = float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) + \
+                                                float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])
+                                vm_baseline_chosen = True
+                                data_dict['vm_baseline'][aux_location] = {'vm_name': vm_name, 'location': loc}
+                            except Exception as e:
+                                logging.error(e)
                         if aux_location not in data_dict['slowdown']:
                             data_dict['slowdown'][aux_location] = {}
                         if aux_provider not in data_dict['slowdown'][aux_location]:
@@ -1981,7 +1993,6 @@ class PreSchedulingManager:
 
         time_baseline = 0.0
         pair_regions_baseline_chosen = False
-
         aux_comm_slowdown = {}
 
         for loc_1 in self.rpc_times:

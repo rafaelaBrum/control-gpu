@@ -36,7 +36,7 @@ echo "cuDNN 7 installed"
 
 # Installing Python dependencies
 sudo apt install wget -y
-wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_gcp/requirements_client_flower.txt
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_cloudlab/requirements_client_flower.txt
 sudo python3.7 -m pip install -U pip setuptools
 sudo python3.7 -m pip install -r requirements_client_flower.txt
 sudo apt install unzip -y
