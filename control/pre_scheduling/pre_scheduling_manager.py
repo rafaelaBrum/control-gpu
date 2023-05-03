@@ -216,10 +216,10 @@ class PreSchedulingManager:
                 logging.error(f"PreSchedulerManager>: "
                               f"{vm_final.instance_type.provider} does not have support")
         # Start a new SSH Client
-        if vm_final.instance_type.provider == CloudManager.EC2:
+        if vm_final.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             vm_final.ssh = SSHClient(vm_final.instance_public_ip, self.loader.ec2_conf.key_path,
                                      key_final, self.loader.ec2_conf.vm_user)
-        elif vm_final.instance_type.provider == CloudManager.GCLOUD:
+        elif vm_final.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm_final.ssh = SSHClient(vm_final.instance_public_ip, self.loader.gcp_conf.key_path,
                                      key_final, self.loader.gcp_conf.vm_user)
 
@@ -245,7 +245,7 @@ class PreSchedulingManager:
                 return
 
             # Send files
-            if vm_final.instance_type.provider == CloudManager.EC2:
+            if vm_final.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
                 vm_final.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                       target=self.loader.ec2_conf.home_path,
@@ -266,7 +266,7 @@ class PreSchedulingManager:
                                                  item_key,
                                                  vm_user)
 
-            elif vm_final.instance_type.provider == CloudManager.GCLOUD:
+            elif vm_final.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
                 vm_final.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
                                       target=self.loader.gcp_conf.home_path,
@@ -501,10 +501,10 @@ class PreSchedulingManager:
                               f"{vm.instance_type.provider} does not have support")
 
         # Start a new SSH Client
-        if vm.instance_type.provider == CloudManager.EC2:
+        if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             vm.ssh = SSHClient(vm.instance_public_ip, self.loader.ec2_conf.key_path,
                                key, self.loader.ec2_conf.vm_user)
-        elif vm.instance_type.provider == CloudManager.GCLOUD:
+        elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm.ssh = SSHClient(vm.instance_public_ip, self.loader.gcp_conf.key_path,
                                key, self.loader.gcp_conf.vm_user)
         elif vm.instance_type.provider == CloudManager.CLOUDLAB:
@@ -857,10 +857,10 @@ class PreSchedulingManager:
             server_configured = True
         else:
             # Start a new SSH Client
-            if vm_server.instance_type.provider == CloudManager.EC2:
+            if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.ec2_conf.key_path,
                                           key_server, self.loader.ec2_conf.vm_user)
-            elif vm_server.instance_type.provider == CloudManager.GCLOUD:
+            elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.gcp_conf.key_path,
                                           key_server, self.loader.gcp_conf.vm_user)
             elif vm_server.instance_type.provider == CloudManager.CLOUDLAB:
@@ -868,10 +868,10 @@ class PreSchedulingManager:
                                           key_server, self.loader.cloudlab_conf.vm_user, emulated=True)
 
         # Start a new SSH Client
-        if vm_client.instance_type.provider == CloudManager.EC2:
+        if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.ec2_conf.key_path,
                                       key_client, self.loader.ec2_conf.vm_user)
-        elif vm_client.instance_type.provider == CloudManager.GCLOUD:
+        elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.gcp_conf.key_path,
                                       key_client, self.loader.gcp_conf.vm_user)
         elif vm_client.instance_type.provider == CloudManager.CLOUDLAB:
@@ -1333,10 +1333,10 @@ class PreSchedulingManager:
         times = {}
 
         # Start a new SSH Client
-        if vm_server.instance_type.provider == CloudManager.EC2:
+        if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.ec2_conf.key_path,
                                       region_server.key_file, self.loader.ec2_conf.vm_user)
-        elif vm_server.instance_type.provider == CloudManager.GCLOUD:
+        elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.gcp_conf.key_path,
                                       region_server.key_file, self.loader.gcp_conf.vm_user)
 
@@ -1466,10 +1466,10 @@ class PreSchedulingManager:
             vm_client.update_ip(zone=vm_client.zone)
 
             # Start a new SSH Client
-            if vm_client.instance_type.provider == CloudManager.EC2:
+            if vm_client.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.ec2_conf.key_path,
                                           region_client.key_file, self.loader.ec2_conf.vm_user)
-            elif vm_client.instance_type.provider == CloudManager.GCLOUD:
+            elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.gcp_conf.key_path,
                                           region_client.key_file, self.loader.gcp_conf.vm_user)
 
@@ -1958,7 +1958,7 @@ class PreSchedulingManager:
             elif client_baseline == '0':
                 aux_location = 'AWS_us-east-1'
             else:
-                aux_location = 'GCP_us-central-1'
+                aux_location = 'GCP_us-central1'
 
             if 'AWS' in data_dict['cpu_vms']:
                 vm_baseline_chosen = True

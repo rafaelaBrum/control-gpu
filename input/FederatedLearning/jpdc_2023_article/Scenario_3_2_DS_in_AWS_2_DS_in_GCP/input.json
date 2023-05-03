@@ -53,7 +53,7 @@
                 "t2.xlarge": 5.155555555555555e-05
             }
         },
-        "GCLOUD": {
+        "GCP": {
             "us-central1": {
                 "e2-standard-4": 3.7228566666666665e-05,
                 "n1-standard-16_p4": 0.00037777666666666666,
@@ -75,7 +75,7 @@
                 "t2.xlarge": 3
             }
         },
-        "GCLOUD": {
+        "GCP": {
             "us-central1": {
                 "e2-standard-4": 4,
                 "n1-standard-16_p4": 16,
@@ -97,7 +97,7 @@
                 "t2.xlarge": 0
             }
         },
-        "GCLOUD": {
+        "GCP": {
             "us-central1": {
                 "e2-standard-4": 0,
                 "n1-standard-16_p4": 1,
@@ -141,7 +141,7 @@
                 }
             }
         },
-        "GCP_us-central-1": {
+        "GCP_us-central1": {
             "AWS": {
                 "us-east-1": {
                     "g3.4xlarge": 1.5193991416309012,
@@ -173,7 +173,7 @@
                 "t2.xlarge": 0.3
             }
         },
-        "GCLOUD": {
+        "GCP": {
             "us-central1": {
                 "e2-standard-4": 0.3,
                 "n1-standard-16_p4": 0.3,
@@ -192,7 +192,7 @@
             "location": "AWS_us-east-1",
             "vm_name": "g4dn.2xlarge"
         },
-        "GCP_us-central-1": {
+        "GCP_us-central1": {
             "location": "AWS_us-east-1",
             "vm_name": "g4dn.2xlarge"
         }

@@ -5,7 +5,7 @@ import time
 from control.domain.instance_type import InstanceType
 
 from control.managers.cloud_manager import CloudManager
-# from control.managers.ec2_manager import EC2Manager
+from control.managers.ec2_manager import EC2Manager
 from control.managers.gcp_manager import GCPManager
 from control.managers.experiment_cloudlab import Experiment
 
@@ -75,10 +75,9 @@ class VirtualMachine:
 
         # Start cloud manager (if not emulated)
         if not self.emulated:
-            if instance_type.provider == CloudManager.EC2:
-                # self.manager = EC2Manager()
-                self.manager = None
-            elif instance_type.provider == CloudManager.GCLOUD:
+            if instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                self.manager = EC2Manager()
+            elif instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.manager = GCPManager()
                 if self.vm_name == '':
                     self.vm_name = f'vm-{self.instance_type.type.replace("_", "-")}'
@@ -237,12 +236,14 @@ class VirtualMachine:
 
                     if self.market not in (CloudManager.ON_DEMAND, CloudManager.PREEMPTIBLE):
                         raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
-                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.EC2:
+                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider in (CloudManager.EC2,
+                                                                                                   CloudManager.AWS):
                         self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
                                                                                   image_id=self.instance_type.image_id,
                                                                                   zone=zone,
                                                                                   key_name=key_name)
-                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider == CloudManager.GCLOUD:
+                    elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider in (CloudManager.GCLOUD,
+                                                                                                   CloudManager.GCP):
                         self.instance_id = \
                             self.manager.create_on_demand_instance(instance_type=self.instance_type.type.split('_')[0],
                                                                    image_id=self.instance_type.image_id,
@@ -250,11 +251,12 @@ class VirtualMachine:
                                                                    zone=zone,
                                                                    gpu_type=self.instance_type.gpu,
                                                                    gpu_count=self.instance_type.count_gpu)
-                    elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider == CloudManager.EC2:
+                    elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider in (CloudManager.EC2,
+                                                                                                     CloudManager.AWS):
                         self.instance_id = \
                             self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
                                                                      image_id=self.instance_type.image_id,
-                                                                     max_price=self.instance_type.price_preemptible +
+                                                                     max_price=self.instance_type.price_preemptible[self.region.region] +
                                                                      0.1)
                     else:
                         raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
@@ -298,7 +300,7 @@ class VirtualMachine:
 
                         logging.info(
                             "<VirtualMachine {}>: Attaching Volume {}".format(self.instance_id, self.volume_id))
-                        if self.instance_type.provider == CloudManager.EC2:
+                        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                             # attached new volume
                             # waiting until volume available
                             self.manager.wait_volume(volume_id=self.volume_id, zone=zone)
@@ -307,7 +309,7 @@ class VirtualMachine:
                                 volume_id=self.volume_id,
                                 zone=zone
                             )
-                        elif self.instance_type.provider == CloudManager.GCLOUD:
+                        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                             # attached new volume
                             # waiting until volume available
                             self.manager.wait_volume(volume_name=self.disk_name, zone=zone)
@@ -463,10 +465,12 @@ class VirtualMachine:
             # update instance IP
             self.update_ip()
             # Start a new SSH Client
-            if self.instance_type.provider == CloudManager.EC2:
+            if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                print("connecting to SSH", self.instance_public_ip, self.loader.ec2_conf.key_path,
+                      self.key_file, self.loader.ec2_conf.vm_user)
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
                                      self.key_file, self.loader.ec2_conf.vm_user)
-            elif self.instance_type.provider == CloudManager.GCLOUD:
+            elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
                                      self.key_file, self.loader.gcp_conf.vm_user)
             elif self.instance_type.provider == CloudManager.CLOUDLAB:
@@ -487,9 +491,9 @@ class VirtualMachine:
                     if self.loader.file_system_conf.type == CloudManager.EBS:
                         self.__create_ebs(self.loader.file_system_conf.path)
                     elif self.loader.file_system_conf.type == CloudManager.S3:
-                        if self.instance_type.provider == CloudManager.EC2:
+                        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                             self.__create_s3(self.loader.file_system_conf.path)
-                        elif self.instance_type.provider == CloudManager.GCLOUD:
+                        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                             self.__create_cloud_storage(self.loader.file_system_conf.path)
                     else:
                         logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
@@ -536,7 +540,7 @@ class VirtualMachine:
                                  f" (type_task {type_task})")
 
                 # Send files
-                if self.instance_type.provider == CloudManager.EC2:
+                if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.ec2_conf.home_path,
@@ -570,7 +574,7 @@ class VirtualMachine:
                                                            self.instance_id,
                                                            self.loader.communication_conf.socket_port)
 
-                elif self.instance_type.provider == CloudManager.GCLOUD:
+                elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
                                       target=self.loader.gcp_conf.home_path,
@@ -718,9 +722,9 @@ class VirtualMachine:
             status = self.manager.terminate_instance(self.instance_id, wait=wait, zone=zone)
 
             if delete_volume and self.volume_id is not None:
-                if self.instance_type.provider == CloudManager.EC2:
+                if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.manager.delete_volume(self.volume_id, zone=zone)
-                elif self.instance_type.provider == CloudManager.GCLOUD:
+                elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.manager.delete_volume(self.volume_id, volume_name=self.disk_name, zone=zone)
 
         self.terminate_overhead = datetime.now() - terminate_start
@@ -740,14 +744,14 @@ class VirtualMachine:
     # return the IP list of all running instance on the cloud provider
     def get_instances_ip(self):
 
-        if self.instance_type.provider == CloudManager.EC2:
+        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             filter_instance = {
                 'status': [CloudManager.PENDING, CloudManager.RUNNING],
                 'tags': [{'Key': self.loader.ec2_conf.tag_key,
                           'Value': self.loader.ec2_conf.tag_value
                           }]
             }
-        elif self.instance_type.provider == CloudManager.GCLOUD:
+        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             filter_instance = f'(status = {CloudManager.RUNNING}) OR (status = {CloudManager.PENDING})'
         else:
             filter_instance = ""
@@ -831,12 +835,12 @@ class VirtualMachine:
 
     @property
     def price(self):
-        if self.instance_type.provider == CloudManager.EC2:
+        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             if self.market == CloudManager.PREEMPTIBLE:
                 return self.manager.get_preemptible_price(self.instance_type.type, self.zone, self.region.region)[0][1]
             else:
                 return self.manager.get_ondemand_price(self.instance_type.type, self.region.region)
-        elif self.instance_type.provider == CloudManager.GCLOUD:
+        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             if self.market == CloudManager.PREEMPTIBLE:
                 vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type,
                                                                            self.region.region)
@@ -1037,10 +1041,10 @@ class VirtualMachine:
         # Start a new SSH Client
         if self.ssh is not None:
             return
-        if self.instance_type.provider == CloudManager.EC2:
+        if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
                                  self.key_file, self.loader.ec2_conf.vm_user)
-        elif self.instance_type.provider == CloudManager.GCLOUD:
+        elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
                                  self.key_file, self.loader.gcp_conf.vm_user)
         elif self.instance_type.provider == CloudManager.CLOUDLAB:

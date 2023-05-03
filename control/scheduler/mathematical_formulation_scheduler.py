@@ -19,8 +19,8 @@ class MathematicalFormulationScheduler(Scheduler):
 
         for client in self.clients:
             for prov, region, vm in self.prov_regions_vms:
-                # if self.gpu_vms[prov, region, vm] == 0:
-                #     continue
+                if not self.emulated and self.gpu_vms[prov, region, vm] == 0:
+                    continue
                 aux = (client, prov, region, vm)
                 # print(aux)
                 try:
@@ -41,6 +41,7 @@ class MathematicalFormulationScheduler(Scheduler):
         super().__init__(instance_types=loader.env, locations=loader.loc)
         self.clients = []
         self.location_ds_clients = {}
+        self.emulated = loader.emulated
         for client in loader.job.client_tasks.values():
             aux = client.client_id
             self.clients.append(aux)
@@ -410,8 +411,8 @@ class MathematicalFormulationScheduler(Scheduler):
                         test_prov = self.prov_regions_vms.count(aux_key)
                         if test_prov > 0:
                             self.gpu_vms[aux_key] = aux_data[provider][region][vm]
-                        else:
-                            raise Exception(f"Only GPU values to ({provider}, {region}. {vm})")
+                        # else:
+                        #     raise Exception(f"Only GPU values to ({provider}, {region}, {vm})")
 
             aux_data = json_data['cost_vms']
             for provider in aux_data:
@@ -424,8 +425,8 @@ class MathematicalFormulationScheduler(Scheduler):
                         test_prov = self.prov_regions_vms.count(aux_key)
                         if test_prov > 0:
                             self.cost_vms[aux_key] = aux_data[provider][region][vm]
-                        else:
-                            raise Exception(f"Only cost to ({provider}, {region}. {vm})")
+                        # else:
+                        #     raise Exception(f"Only cost to ({provider}, {region}, {vm})")
 
             aux_data = json_data['time_aggreg']
             for provider in aux_data:
@@ -438,8 +439,8 @@ class MathematicalFormulationScheduler(Scheduler):
                         test_prov = self.prov_regions_vms.count(aux_key)
                         if test_prov > 0:
                             self.time_aggreg[aux_key] = aux_data[provider][region][vm] * len(self.clients)
-                        else:
-                            raise Exception(f"Only time to aggregate to ({provider}, {region}. {vm})")
+                        # else:
+                        #     raise Exception(f"Only time to aggregate to ({provider}, {region}, {vm})")
 
             aux_data = json_data['slowdown']
             for ds_location in aux_data:
@@ -455,8 +456,8 @@ class MathematicalFormulationScheduler(Scheduler):
                             test_prov = self.prov_regions_vms.count(aux_key)
                             if test_prov > 0:
                                 self.slowdown[ds_location][aux_key] = aux_data[ds_location][provider][region][vm]
-                            else:
-                                raise Exception(f"Only slowdown time in {ds_location} to ({provider}, {region}. {vm})")
+                            # else:
+                            #     raise Exception(f"Only slowdown time in {ds_location} to ({provider}, {region}, {vm})")
 
             self.prov_regions_vms = gp.tuplelist(self.prov_regions_vms)
 

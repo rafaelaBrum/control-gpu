@@ -17,7 +17,7 @@
             "cluster_urn": "",
             "global_cpu_limit": -1,
             "global_gpu_limit": -1,
-            "regional_cpu_limit": 32,
+            "regional_cpu_limit": 36,
             "regional_gpu_limit": -1,
             "cost_transfer": 0.09
         },

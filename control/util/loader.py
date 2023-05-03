@@ -372,7 +372,7 @@ class Loader:
                 region = loc.region
                 zone = loc.zones[0]
 
-                if instance.provider == CloudManager.EC2 and loc.provider in (CloudManager.EC2, CloudManager.AWS):
+                if instance.provider in (CloudManager.EC2, CloudManager.AWS) and loc.provider in (CloudManager.EC2, CloudManager.AWS):
                     # logging.error("Without account of EC2 configured")
 
                     if instance.market_ondemand:

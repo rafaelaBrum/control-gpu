@@ -70,7 +70,7 @@ class Scheduler:
                                                                                                              region))
                                 self.current_vms['server'] = instance
                                 self.current_locations['server'] = loc
-                                return instance, CloudManager.ON_DEMAND, loc, zone
+                                return instance, CloudManager.PREEMPTIBLE, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
         elif provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
@@ -83,7 +83,7 @@ class Scheduler:
                                                                                                              region))
                                 self.current_vms['server'] = instance
                                 self.current_locations['server'] = loc
-                                return instance, CloudManager.ON_DEMAND, loc, zone
+                                return instance, CloudManager.PREEMPTIBLE, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
         elif provider.lower() in (CloudManager.CLOUDLAB.lower()):

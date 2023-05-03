@@ -173,10 +173,10 @@ class Executor:
                         current_time = current_time + elapsed_time
                         self.task.update_execution_time(elapsed_time.total_seconds())
 
-                    if ((self.vm.instance_type.provider == CloudManager.EC2 and
+                    if ((self.vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS) and
                          instance_action is not None and
                          instance_action != 'none') or
-                            (self.vm.instance_type.provider == CloudManager.GCLOUD and
+                            (self.vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP) and
                              instance_action == 'TRUE')):
                         self.vm.interrupt()
                         self.__stopped(Task.INTERRUPTED)
