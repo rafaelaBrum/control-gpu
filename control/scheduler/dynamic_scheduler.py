@@ -249,7 +249,6 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         #         logging.error(f"<Scheduler> Error removing {aux_loc} from "
         #                       f" {self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations}")
         #         logging.error(e)
-        #
         #     if not self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
         #         logging.info(f"Popping {current_inst.type} from possible future VMs")
         #         self.dynamic_scheduler_instances_server_cloudlab.pop(current_inst.type)

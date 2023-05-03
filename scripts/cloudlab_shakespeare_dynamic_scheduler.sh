@@ -1,4 +1,7 @@
 #!/bin/bash
+#echo "Sleeping"
+#sleep 3h
+#echo "Returning"
 echo " ----------------------------
   Starting docker
  ----------------------------"
