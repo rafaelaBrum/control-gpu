@@ -16,7 +16,7 @@ COUNTER=1
 echo " ----------------------------
 Test Case (4 clients)
 ---------------------------- "
-cp setup_cloudlab/4_clients_setup.cfg setup.cfg
+#cp setup_cloudlab/4_clients_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

@@ -85,7 +85,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(4 hours)
  ---------------------------- "
-COUNTER=4
+COUNTER=1
 while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -119,7 +119,7 @@ cp setup_cloudlab/4_clients_50_rounds_dyn_sched_cli.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
-COUNTER=3
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -134,7 +134,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(4 hours)
  ---------------------------- "
-COUNTER=2
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER
