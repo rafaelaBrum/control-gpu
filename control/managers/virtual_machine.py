@@ -466,8 +466,6 @@ class VirtualMachine:
             self.update_ip()
             # Start a new SSH Client
             if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
-                print("connecting to SSH", self.instance_public_ip, self.loader.ec2_conf.key_path,
-                      self.key_file, self.loader.ec2_conf.vm_user)
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.ec2_conf.key_path,
                                      self.key_file, self.loader.ec2_conf.vm_user)
             elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
@@ -498,8 +496,8 @@ class VirtualMachine:
                     else:
                         logging.error("<VirtualMachine {}>: - Storage type error".format(self.instance_id))
 
-                    raise Exception(
-                        "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
+                        raise Exception(
+                            "VM {} Storage {} not supported".format(self.instance_id, self.loader.file_system_conf.type))
 
                 # keep ssh live
                 # self.ssh.execute_command("$HOME/.ssh/config")

@@ -83,19 +83,19 @@ class DynamicScheduler(MathematicalFormulationScheduler):
 
         aux_loc = current_inst.provider + '_' + current_loc.region
 
-        # if current_inst.type in self.dynamic_scheduler_inst_cli_cloudlab[client_num]:
-        #     try:
-        #         if aux_loc in self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
-        #             self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations.remove(aux_loc)
-        #             logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
-        #     except Exception as e:
-        #         logging.error(f"<Scheduler> Error removing {aux_loc} from "
-        #                       f" {self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations}")
-        #         logging.error(e)
-        #
-        #     if not self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
-        #         logging.info(f"Popping {current_inst.type} from possible future VMs")
-        #         self.dynamic_scheduler_inst_cli_cloudlab[client_num].pop(current_inst.type)
+        if current_inst.type in self.dynamic_scheduler_inst_cli_cloudlab[client_num]:
+            try:
+                if aux_loc in self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
+                    self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations.remove(aux_loc)
+                    logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
+            except Exception as e:
+                logging.error(f"<Scheduler> Error removing {aux_loc} from "
+                              f" {self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations}")
+                logging.error(e)
+
+            if not self.dynamic_scheduler_inst_cli_cloudlab[client_num][current_inst.type].locations:
+                logging.info(f"Popping {current_inst.type} from possible future VMs")
+                self.dynamic_scheduler_inst_cli_cloudlab[client_num].pop(current_inst.type)
 
         current_time = self.time_exec[client_num,
                                       current_inst.provider.upper(),
@@ -240,18 +240,18 @@ class DynamicScheduler(MathematicalFormulationScheduler):
 
         aux_loc = current_inst.provider + '_' + current_loc.region
 
-        # if current_inst.type in self.dynamic_scheduler_instances_server_cloudlab:
-        #     try:
-        #         if aux_loc in self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
-        #             self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations.remove(aux_loc)
-        #             logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
-        #     except Exception as e:
-        #         logging.error(f"<Scheduler> Error removing {aux_loc} from "
-        #                       f" {self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations}")
-        #         logging.error(e)
-        #     if not self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
-        #         logging.info(f"Popping {current_inst.type} from possible future VMs")
-        #         self.dynamic_scheduler_instances_server_cloudlab.pop(current_inst.type)
+        if current_inst.type in self.dynamic_scheduler_instances_server_cloudlab:
+            try:
+                if aux_loc in self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
+                    self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations.remove(aux_loc)
+                    logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
+            except Exception as e:
+                logging.error(f"<Scheduler> Error removing {aux_loc} from "
+                              f" {self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations}")
+                logging.error(e)
+            if not self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
+                logging.info(f"Popping {current_inst.type} from possible future VMs")
+                self.dynamic_scheduler_instances_server_cloudlab.pop(current_inst.type)
 
         for instance_type, instance in self.dynamic_scheduler_instances_server_cloudlab.items():
             for aux_loc in instance.locations:

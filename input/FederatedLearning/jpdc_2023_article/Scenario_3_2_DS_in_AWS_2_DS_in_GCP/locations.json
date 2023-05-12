@@ -4,8 +4,8 @@
             "provider": "aws",
             "region": "us-east-1",
             "key_file": "rafaelabrum_key.pem",
-            "client_image_id": "ami-04e48ece6846ed512",
-            "server_image_id": "ami-00852be079646eb3a",
+            "client_image_id": "ami-097015d1c3e4f7ab6",
+            "server_image_id": "ami-034ba1768ee336f84",
             "zones": [
                 "us-east-1a",
                 "us-east-1b",

@@ -1009,9 +1009,10 @@ class ScheduleManager:
 
         self.__start_clients_dispatchers()
 
-        if self.loader.checkpoint_conf.extra_vm:
-            time.sleep(600)
-            self.__start_extra_vm()
+        if self.loader.checkpoint_conf.with_checkpoint:
+            if self.loader.checkpoint_conf.extra_vm:
+                time.sleep(600)
+                self.__start_extra_vm()
 
         # Call checkers loop
         self.__checkers()

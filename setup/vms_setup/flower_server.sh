@@ -9,7 +9,7 @@ echo '''
 
 # Instaling python and dev tools
 sudo apt update
-# sudo apt upgrade -y
+sudo apt upgrade -y
 sudo apt install python3.7 python3.7-dev python3-pip -y
 echo "Python 3.7 installed"
 
