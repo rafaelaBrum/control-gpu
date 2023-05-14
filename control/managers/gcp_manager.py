@@ -364,51 +364,159 @@ class GCPManager(CloudManager):
 
         return status
 
-    def create_preemptible_instance(self, instance_type, image_id, max_price, zone=''):
-        pass
+    def create_preemptible_instance(self, instance_type, image_id, zone='', vm_name='', gpu_type='', gpu_count=0):
 
-        # user_data = '''#!/bin/bash
-        # /usr/bin/enable-ec2-spot-hibernation
-        # echo "user-data" > $HOME/control-applications/test_user_data.txt
-        # '''
+        try:
 
-        # zone = self.ec2_conf.zone
-        # interruption_behaviour = 'stop'
-        #
-        # parameters = {
-        #     'ImageId': image_id,
-        #     'InstanceType': instance_type,
-        #     'KeyName': self.ec2_conf.key_name,
-        #     'MaxCount': 1,
-        #     'MinCount': 1,
-        #     'SecurityGroups': [
-        #         self.ec2_conf.security_group,
-        #         self.ec2_conf.security_vpc_group
-        #     ],
-        #     'InstanceMarketOptions':
-        #         {
-        #             'MarketType': 'spot',
-        #             'SpotOptions': {
-        #                 'MaxPrice': str(max_price),
-        #                 'SpotInstanceType': 'persistent',
-        #                 'InstanceInterruptionBehavior': interruption_behaviour
-        #             }
-        #         },
-        #     'Placement': {}
-        #     # 'UserData': user_data
-        # }
-        #
-        # if zone:
-        #     parameters['Placement'] = {'AvailabilityZone': zone}
-        #
-        # instances = self._create_instance(parameters, burstable)
-        #
-        # if instances is not None:
-        #     created_instances = [i for i in instances]
-        #     instance = created_instances[0]
-        #     return instance.id
-        # else:
-        #     return None
+            if zone == '':
+                zone = self.gcp_conf.zone
+            machine_type = f'zones/{zone}/machineTypes/{instance_type}'
+
+            self.mutex.acquire()
+
+            image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
+                                                              image=f'{image_id}').execute()
+            self.mutex.release()
+
+            source_disk_image = image_response['selfLink']
+
+            if gpu_count > 0:
+                # print("creating with GPU")
+                config = {
+                    'name': vm_name,
+                    'machineType': machine_type,
+
+                    # Not working. Still in Beta on GCP API!
+                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'sourceMachineImage': source_machine_image,
+
+                    # Specify the boot disk and the image to use as a source.
+                    'disks': [
+                        {
+                            'boot': True,
+                            'autoDelete': True,
+                            'initializeParams': {
+                                'sourceImage': source_disk_image,
+                            }
+
+                        }
+                    ],
+
+                    # Allowing SSH connection from third-parties
+                    "metadata": {
+                        "items": [
+                            {
+                                "key": 'enable-oslogin',
+                                "value": 'TRUE'
+                            }
+                        ]
+                    },
+
+                    # Allow the instance to access cloud storage.
+                    'serviceAccounts': [{
+                        'email': 'default',
+                        'scopes': [
+                            'https://www.googleapis.com/auth/devstorage.read_write'
+                        ]
+                    }],
+
+                    "guestAccelerators":
+                    [
+                        {
+                            "acceleratorCount": gpu_count,
+                            "acceleratorType": f"projects/{self.gcp_conf.project}/zones/{zone}/"
+                                               f"acceleratorTypes/{gpu_type}"
+                        }
+                    ],
+
+                    # Specify a network interface with NAT to access the public
+                    # internet.
+                    'networkInterfaces': [{
+                        'network': 'global/networks/default',
+                        'accessConfigs': [
+                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                        ]
+                    }],
+                    'tags': [{
+                        'items': ['http-server', 'https-server']
+                    }],
+                    "scheduling":
+                    {
+                        "onHostMaintenance": "terminate",
+                        "provisioningModel": "SPOT"
+                    }
+                }
+            else:
+                config = {
+                    'name': vm_name,
+                    'machineType': machine_type,
+
+                    # Not working. Still in Beta on GCP API!
+                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # 'sourceMachineImage': source_machine_image,
+
+                    # Specify the boot disk and the image to use as a source.
+                    'disks': [
+                        {
+                            'boot': True,
+                            'autoDelete': True,
+                            'initializeParams': {
+                                'sourceImage': source_disk_image,
+                            }
+
+                        }
+                    ],
+
+                    # Allowing SSH connection from third-parties
+                    "metadata": {
+                        "items": [
+                            {
+                                "key": 'enable-oslogin',
+                                "value": 'TRUE'
+                            }
+                        ]
+                    },
+
+                    # Allow the instance to access cloud storage.
+                    'serviceAccounts': [{
+                        'email': 'default',
+                        'scopes': [
+                            'https://www.googleapis.com/auth/devstorage.read_write'
+                        ]
+                    }],
+
+                    # Specify a network interface with NAT to access the public
+                    # internet.
+                    'networkInterfaces': [{
+                        'network': 'global/networks/default',
+                        'accessConfigs': [
+                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                        ]
+                    }],
+                    'tags': [{
+                        'items': ['http-server', 'https-server']
+                    }],
+                    "scheduling":
+                    {
+                        "onHostMaintenance": "terminate",
+                        "provisioningModel": "SPOT"
+                    }
+                }
+
+            instances = self._create_instance(config, zone)
+
+            if instances is not None:
+                created_instances = [i for i in instances]
+                instance = created_instances[0]
+                return instance['id']
+            else:
+                return None
+
+        except Exception as e:
+            logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()
+            return None
 
     def _terminate_instance(self, instance, zone):
         # if instance is spot, we have to remove its request

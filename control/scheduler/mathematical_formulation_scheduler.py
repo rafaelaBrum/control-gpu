@@ -303,7 +303,7 @@ class MathematicalFormulationScheduler(Scheduler):
                 self.input_data['clients'] = {}
                 var_tm = 0
                 for v in model.getVars():
-                    if v.x == 1:
+                    if abs(v.x - 1.0) < 0.000000000001:
                         # print("{0} = {1}".format(v.varName, v.x))
                         aux_var_name = v.varName[2:]
                         aux_var_name = aux_var_name[:-1]
