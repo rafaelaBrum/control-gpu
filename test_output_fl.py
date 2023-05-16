@@ -36,10 +36,13 @@ def __prepare_logging():
 def main():
     parser = argparse.ArgumentParser(description='Creating a t2.micro instance to check EBS content')
     parser.add_argument('--input_path', help="Path where there are all input files", type=str, default=None)
-    parser.add_argument('--job_file', help="Job file name", type=str, default=None)
+    parser.add_argument('--job_file', help="job file name", type=str, default=None)
     parser.add_argument('--env_file', help="env file name", type=str, default=None)
     parser.add_argument('--loc_file', help="loc file name", type=str, default=None)
     parser.add_argument('--pre_file', help="pre scheduling file name", type=str, default=None)
+    parser.add_argument('--input_file', help="input metrics file name", type=str, default=None)
+    parser.add_argument('--scheduler_name', help="Scheduler name", type=str, default=None)
+    parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
     # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",
     #                     type=int, default=None)
@@ -61,10 +64,16 @@ def main():
     parser.add_argument('--clients_region', help="Each client region", type=str, nargs='+', required=False)
     parser.add_argument('--clients_vm_name', help="Each client VM name", type=str, nargs='+', required=False)
 
-    parser.add_argument('--strategy', help="Each client VM name", type=str, default=None, required=False)
+    parser.add_argument('--strategy', help="Strategy to use in server aggregation", type=str, default=None,
+                        required=False)
+    parser.add_argument('--frequency_ckpt', help='Frequency of checkpointing when using FedAvgSave', type=int,
+                        default=None)
 
     parser.add_argument('--num_seed', help="Seed to be used by the clients to randomly shuffle their dataset",
                         default=None, required=False)
+
+    parser.add_argument('--emulated', action='store_true', dest='emulated',
+                        help='Using CloudLab to execute experiments', default=False)
 
     parser.add_argument('volume_id', help="Volume id to be attached", type=str)
     parser.add_argument('cloud_provider', help="Provider which the volume are (AWS or GCP). Default: AWS", type=str,

@@ -21,9 +21,16 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         self.expected_cost = 0.0
         self.__read_limits_json(loader.map_file)
         self.dynamic_scheduler_instances_server_cloudlab = deepcopy(self.instances_server_cloudlab)
+        self.dynamic_scheduler_instances_server_cloud = {k: v for d in (deepcopy(self.instances_server_aws),
+                                                                        deepcopy(self.instances_server_gcp))
+                                                         for k, v in d.items()}
         self.dynamic_scheduler_inst_cli_cloudlab: Dict[int, Dict[str, InstanceType]] = {}
+        self.dynamic_scheduler_inst_cli_cloud: Dict[int, Dict[str, InstanceType]] = {}
         for cli in self.clients:
             self.dynamic_scheduler_inst_cli_cloudlab[cli] = deepcopy(self.instances_client_cloudlab)
+            self.dynamic_scheduler_inst_cli_cloud[cli] = {k: v for d in (deepcopy(self.instances_client_aws),
+                                                                         deepcopy(self.instances_client_gcp))
+                                                          for k, v in d.items()}
 
     # def choose_client_new_instance(self, client_num):
     #     min_time_exec = inf
@@ -70,7 +77,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
     #                 instance_chosen = instance
     #                 location_chosen = loc
     #     return instance_chosen.provider, location_chosen, instance_chosen.type
-    def choose_client_new_instance(self, client_num):
+    def choose_client_new_instance_cloudlab(self, client_num):
         min_greedy_value = inf
         min_greedy_makespan = inf
         min_greedy_cost = inf
@@ -114,6 +121,102 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                                                               makespan=self.expected_makespan)
 
         for instance_type, instance in self.dynamic_scheduler_inst_cli_cloudlab[client_num].items():
+
+            for aux_loc in instance.locations:
+                loc = aux_loc.split('_')[-1]
+                try:
+                    current_time = self.time_exec[client_num,
+                                                  instance.provider.upper(),
+                                                  loc,
+                                                  instance.type] + \
+                                   self.time_comm[server_inst.provider.upper(),
+                                                  server_loc.region,
+                                                  instance.provider.upper(),
+                                                  loc] + \
+                                   self.time_aggreg[server_inst.provider.upper(),
+                                                    server_loc.region,
+                                                    server_inst.type]
+                    diff_time = current_time - self.expected_makespan
+                    if diff_time > 0:
+                        current_cost = self.__compute_new_expected_cost(skip=True,
+                                                                        client_num=client_num,
+                                                                        makespan=current_time)
+                        current_makespan = current_time
+                    else:
+                        current_cost = self.expected_cost
+                        current_makespan = self.expected_makespan
+
+                    current_cost += (self.cost_vms[instance.provider.upper(), loc, instance.type]
+                                     * current_makespan)
+                    current_cost += ((self.server_msg_train + self.server_msg_test)
+                                     * self.cost_transfer[server_inst.provider.upper()] +
+                                     (self.server_msg_train + self.server_msg_test)
+                                     * self.cost_transfer[instance.provider.upper()])
+
+                    current_value = self.alpha * (current_cost / self.max_cost) \
+                                     + (1 - self.alpha) * (current_makespan / self.max_total_exec)
+                except Exception as e:
+                    logging.error("<Scheduler> Error getting new client VM")
+                    logging.error(e)
+                    current_value = inf
+                    current_makespan = None
+                    current_cost = None
+                if current_value < min_greedy_value:
+                    min_greedy_value = current_value
+                    min_greedy_makespan = current_makespan
+                    min_greedy_cost = current_cost
+                    instance_chosen = instance
+                    location_chosen = loc
+
+        self.expected_makespan = min_greedy_makespan
+        self.expected_cost = min_greedy_cost
+
+        return instance_chosen.provider, location_chosen, instance_chosen.type
+
+    def choose_client_new_instance(self, client_num):
+        min_greedy_value = inf
+        min_greedy_makespan = inf
+        min_greedy_cost = inf
+        instance_chosen = None
+        location_chosen = None
+        server_inst = self.current_vms['server']
+        server_loc = self.current_locations['server']
+        current_inst = self.current_vms[str(client_num)]
+        current_loc = self.current_locations[str(client_num)]
+
+        aux_loc = current_inst.provider + '_' + current_loc.region
+
+        if current_inst.type in self.dynamic_scheduler_inst_cli_cloud[client_num]:
+            try:
+                if aux_loc in self.dynamic_scheduler_inst_cli_cloud[client_num][current_inst.type].locations:
+                    self.dynamic_scheduler_inst_cli_cloud[client_num][current_inst.type].locations.remove(aux_loc)
+                    logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
+            except Exception as e:
+                logging.error(f"<Scheduler> Error removing {aux_loc} from "
+                              f" {self.dynamic_scheduler_inst_cli_cloud[client_num][current_inst.type].locations}")
+                logging.error(e)
+
+            if not self.dynamic_scheduler_inst_cli_cloud[client_num][current_inst.type].locations:
+                logging.info(f"Popping {current_inst.type} from possible future VMs")
+                self.dynamic_scheduler_inst_cli_cloud[client_num].pop(current_inst.type)
+
+        current_time = self.time_exec[client_num,
+                                      current_inst.provider.upper(),
+                                      current_loc.region,
+                                      current_inst.type] + self.time_comm[server_inst.provider.upper(),
+                                                                          server_loc.region,
+                                                                          current_inst.provider.upper(),
+                                                                          current_loc.region]
+
+        if self.expected_makespan == current_time:
+            self.expected_makespan = self.__get_expected_makespan(skip=True,
+                                                                  client_num=client_num)
+
+        self.expected_cost = self.__compute_new_expected_cost(skip=True,
+                                                              client_num=client_num,
+                                                              makespan=self.expected_makespan)
+
+        for instance_type, instance in self.dynamic_scheduler_inst_cli_cloud[client_num].items():
 
             for aux_loc in instance.locations:
                 loc = aux_loc.split('_')[-1]
@@ -240,20 +343,20 @@ class DynamicScheduler(MathematicalFormulationScheduler):
 
         aux_loc = current_inst.provider + '_' + current_loc.region
 
-        if current_inst.type in self.dynamic_scheduler_instances_server_cloudlab:
+        if current_inst.type in self.dynamic_scheduler_instances_server_cloud:
             try:
-                if aux_loc in self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
-                    self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations.remove(aux_loc)
+                if aux_loc in self.dynamic_scheduler_instances_server_cloud[current_inst.type].locations:
+                    self.dynamic_scheduler_instances_server_cloud[current_inst.type].locations.remove(aux_loc)
                     logging.info(f"<Scheduler> Popping {aux_loc} from {current_inst.type}")
             except Exception as e:
                 logging.error(f"<Scheduler> Error removing {aux_loc} from "
-                              f" {self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations}")
+                              f" {self.dynamic_scheduler_instances_server_cloud[current_inst.type].locations}")
                 logging.error(e)
-            if not self.dynamic_scheduler_instances_server_cloudlab[current_inst.type].locations:
+            if not self.dynamic_scheduler_instances_server_cloud[current_inst.type].locations:
                 logging.info(f"Popping {current_inst.type} from possible future VMs")
-                self.dynamic_scheduler_instances_server_cloudlab.pop(current_inst.type)
+                self.dynamic_scheduler_instances_server_cloud.pop(current_inst.type)
 
-        for instance_type, instance in self.dynamic_scheduler_instances_server_cloudlab.items():
+        for instance_type, instance in self.dynamic_scheduler_instances_server_cloud.items():
             for aux_loc in instance.locations:
                 loc = aux_loc.split('_')[-1]
                 try:

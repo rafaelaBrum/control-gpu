@@ -391,10 +391,10 @@ class VirtualMachine:
 
         if client is not None:
             bucket_name = client.bucket_name
+            region_bucket = self.loader.loc.get('AWS_' + client.bucket_region)
         else:
             bucket_name = self.manager.bucket_config.bucket_name
-
-        region_bucket = self.loader.loc.get('AWS_' + client.bucket_region)
+            region_bucket = self.loader.loc.get('AWS_' + self.loader.ec2_conf.region)
 
         if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             # Mount the bucket within AWS
@@ -536,6 +536,30 @@ class VirtualMachine:
                                 logging.error(e)
                         else:
                             self.__create_s3(self.loader.file_system_conf.path_storage, client)
+
+                # connect to FT bucket if task is server and there will be checkpoint
+                if type_task == Job.SERVER and self.loader.checkpoint_conf.with_checkpoint:
+                    logging.info("<VirtualMachine {}>: "
+                                 "- Creating directory {}".format(self.instance_id,
+                                                                  self.loader.checkpoint_conf.folder_checkpoints))
+                    # create directory
+                    self.ssh.execute_command('mkdir -p {}'.format(self.loader.checkpoint_conf.folder_checkpoints),
+                                             output=True)
+
+                    if self.loader.checkpoint_conf.provider_bucket in (CloudManager.GCLOUD, CloudManager.GCP):
+                        self.__create_cloud_storage(self.loader.checkpoint_conf.folder_checkpoints)
+                    else:
+                        if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                            try:
+                                with open(os.path.join(self.loader.gcp_conf.key_path,
+                                                       self.loader.gcp_conf.aws_settings)) as f:
+                                    data = f.read()
+                                credentials = json.loads(data)
+                                self.__create_s3(self.loader.checkpoint_conf.folder_checkpoints, credentials=credentials)
+                            except Exception as e:
+                                logging.error(e)
+                        else:
+                            self.__create_s3(self.loader.checkpoint_conf.folder_checkpoints)
 
                 if type_task == Job.SERVER:
                     item = self.loader.job.server_task.zip_file
@@ -976,44 +1000,88 @@ class VirtualMachine:
         logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd))
         self.ssh.execute_command(cmd, output=True)
 
-    def prepare_ft_daemon(self, ip_address, restart=False):
+    def prepare_ft_daemon(self, ip_address=None, restart=False):
         task_id = self.loader.job.num_clients+1
         if self.ssh.open_connection():
-            item = self.loader.checkpoint_conf.daemon_fault_tolerance
+            if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                item = self.loader.checkpoint_conf.daemon_fault_tolerance_bucket
+                logging.info("<VirtualMachine {}>: - Sending item {}".format(self.instance_id, item))
+                self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                  target=self.loader.ec2_conf.home_path,
+                                  item=item)
 
-            self.ssh.put_file(source=self.loader.application_conf.daemon_path,
-                              target=self.loader.cloudlab_conf.home_path,
-                              item=item)
+                cmd_daemon = "python3.7 {} " \
+                             "--root_path {} " \
+                             "--job_id {} " \
+                             "--task_id {} " \
+                             "--execution_id {}  " \
+                             "--instance_id {} " \
+                             "--folder_checkpoints {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                            item),
+                                                               self.loader.file_system_conf.path,
+                                                               self.loader.job.job_id,
+                                                               task_id,
+                                                               self.loader.execution_id,
+                                                               self.instance_id,
+                                                               self.loader.checkpoint_conf.folder_checkpoints)
 
-            self.ssh.put_file(source=self.loader.ec2_conf.key_path,
-                              target=self.loader.cloudlab_conf.home_path,
-                              item=self.key_file)
+            elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                item = self.loader.checkpoint_conf.daemon_fault_tolerance_bucket
+                self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                  target=self.loader.gcp_conf.home_path,
+                                  item=item)
 
-            cmd = f"chmod 400 {self.key_file}"
-            self.ssh.execute_command(cmd, output=True)
+                cmd_daemon = "python3.7 {} " \
+                             "--root_path {} " \
+                             "--job_id {} " \
+                             "--task_id {} " \
+                             "--execution_id {}  " \
+                             "--instance_id {} " \
+                             "--folder_checkpoints {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                                                                            item),
+                                                               self.loader.file_system_conf.path,
+                                                               self.loader.job.job_id,
+                                                               task_id,
+                                                               self.loader.execution_id,
+                                                               self.instance_id,
+                                                               self.loader.checkpoint_conf.folder_checkpoints)
 
-            cmd_daemon = "python3.7 {} " \
-                         "--root_path {} " \
-                         "--job_id {} " \
-                         "--task_id {} " \
-                         "--execution_id {}  " \
-                         "--instance_id {} " \
-                         "--extra_address {} " \
-                         "--key_file {} " \
-                         "--key_path {} " \
-                         "--user {} " \
-                         "--folder_checkpoints {} ".format(os.path.join(self.loader.cloudlab_conf.home_path,
-                                                                        item),
-                                                           self.loader.file_system_conf.path,
-                                                           self.loader.job.job_id,
-                                                           task_id,
-                                                           self.loader.execution_id,
-                                                           self.instance_id,
-                                                           ip_address,
-                                                           self.key_file,
-                                                           self.loader.cloudlab_conf.home_path,
-                                                           self.loader.cloudlab_conf.vm_user,
-                                                           self.loader.checkpoint_conf.folder_checkpoints)
+            elif self.instance_type.provider == CloudManager.CLOUDLAB:
+                item = self.loader.checkpoint_conf.daemon_fault_tolerance_cloudlab
+
+                self.ssh.put_file(source=self.loader.application_conf.daemon_path,
+                                  target=self.loader.cloudlab_conf.home_path,
+                                  item=item)
+
+                self.ssh.put_file(source=self.loader.ec2_conf.key_path,
+                                  target=self.loader.cloudlab_conf.home_path,
+                                  item=self.key_file)
+
+                cmd = f"chmod 400 {self.key_file}"
+                self.ssh.execute_command(cmd, output=True)
+
+                cmd_daemon = "python3.7 {} " \
+                             "--root_path {} " \
+                             "--job_id {} " \
+                             "--task_id {} " \
+                             "--execution_id {}  " \
+                             "--instance_id {} " \
+                             "--extra_address {} " \
+                             "--key_file {} " \
+                             "--key_path {} " \
+                             "--user {} " \
+                             "--folder_checkpoints {} ".format(os.path.join(self.loader.cloudlab_conf.home_path,
+                                                                            item),
+                                                               self.loader.file_system_conf.path,
+                                                               self.loader.job.job_id,
+                                                               task_id,
+                                                               self.loader.execution_id,
+                                                               self.instance_id,
+                                                               ip_address,
+                                                               self.key_file,
+                                                               self.loader.cloudlab_conf.home_path,
+                                                               self.loader.cloudlab_conf.vm_user,
+                                                               self.loader.checkpoint_conf.folder_checkpoints)
 
             if restart:
                 cmd_daemon = f"{cmd_daemon} --get_file"

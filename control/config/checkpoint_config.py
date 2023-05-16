@@ -13,8 +13,12 @@ class CheckPointConfig(Config):
         return self.get_boolean(self._key, 'server_checkpoint')
 
     @property
-    def daemon_fault_tolerance(self):
-        return self.get_property(self._key, 'daemon_fault_tolerance')
+    def daemon_fault_tolerance_cloudlab(self):
+        return self.get_property(self._key, 'daemon_fault_tolerance_cloudlab')
+
+    @property
+    def daemon_fault_tolerance_bucket(self):
+        return self.get_property(self._key, 'daemon_fault_tolerance_bucket')
 
     @property
     def extra_vm(self):
@@ -35,3 +39,7 @@ class CheckPointConfig(Config):
     @property
     def folder_checkpoints(self):
         return self.get_property(self._key, 'folder_checkpoints')
+
+    @property
+    def provider_bucket(self):
+        return self.get_property(self._key, 'provider_bucket')

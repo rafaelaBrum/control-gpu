@@ -493,7 +493,10 @@ class ScheduleManager:
 
             logging.info("Entered terminated_handle to server VM")
 
-            new_provider, new_region, new_vm_name = self.scheduler.choose_server_new_instance()
+            if self.loader.emulated:
+                new_provider, new_region, new_vm_name = self.scheduler.choose_server_new_instance_cloudlab()
+            else:
+                new_provider, new_region, new_vm_name = self.scheduler.choose_server_new_instance()
 
             instance_type, market, region, zone = self.scheduler.get_server_instance(
                 provider=new_provider,
@@ -663,9 +666,14 @@ class ScheduleManager:
 
             logging.info("Entered terminated_handle to client VM")
 
-            new_provider, new_region, new_vm_name = self.scheduler.choose_client_new_instance(
-                affected_dispatcher.client_id
-            )
+            if self.loader.emulated:
+                new_provider, new_region, new_vm_name = self.scheduler.choose_client_new_instance_cloudlab(
+                    affected_dispatcher.client_id
+                )
+            else:
+                new_provider, new_region, new_vm_name = self.scheduler.choose_client_new_instance(
+                    affected_dispatcher.client_id
+                )
 
             instance_type, market, region, zone = self.scheduler.get_client_instance(
                 provider=new_provider,
@@ -1013,6 +1021,10 @@ class ScheduleManager:
             if self.loader.checkpoint_conf.extra_vm:
                 time.sleep(600)
                 self.__start_extra_vm()
+            else:
+                self.server_task_dispatcher.vm.prepare_ft_daemon()
+
+        logging.info("<Scheduler Manager {}_{}>: Finished prep extra VM")
 
         # Call checkers loop
         self.__checkers()
