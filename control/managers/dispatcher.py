@@ -345,7 +345,10 @@ class Executor:
                 #                                                          self.vm.instance_id,
                 #                                                          self.dict_info))
                 self.communicator.send(action=Daemon.START, value=self.dict_info)
-                time.sleep(300)
+                if self.loader.emulated:
+                    time.sleep(300)
+                else:
+                    time.sleep(60)
             except Exception as e:
                 logging.error(e)
             # if task was started with success
@@ -355,7 +358,10 @@ class Executor:
                 #                                                                     self.vm.instance_id))
                 self.status = Task.EXECUTING
                 return True
-            time.sleep(300)
+            if self.loader.emulated:
+                time.sleep(300)
+            else:
+                time.sleep(60)
         return False
 
     # def __get_task_usage(self):

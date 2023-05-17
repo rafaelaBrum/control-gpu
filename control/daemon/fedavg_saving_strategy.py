@@ -151,8 +151,16 @@ class FedAvgSave(Strategy):
         if self.evaluate_metrics_aggregation_fn is None:
             self.evaluate_metrics_aggregation_fn = weighted_metrics_avg
 
-        self.next_ckpt = frequency_ckpt
-        self.frequency_ckpt = frequency_ckpt
+        if frequency_ckpt is not None:
+            try:
+                self.next_ckpt = int(frequency_ckpt)
+                self.frequency_ckpt = int(frequency_ckpt)
+            except Exception as e:
+                print(e)
+                self.next_ckpt = 1
+                self.frequency_ckpt = 1
+        print("next_ckpt", self.next_ckpt)
+        print("frequency_ckpt", self.frequency_ckpt)
 
     def __repr__(self) -> str:
         rep = f"FedAvg(accept_failures={self.accept_failures})"

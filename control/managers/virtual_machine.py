@@ -1037,7 +1037,7 @@ class VirtualMachine:
                              "--task_id {} " \
                              "--execution_id {}  " \
                              "--instance_id {} " \
-                             "--folder_checkpoints {} ".format(os.path.join(self.loader.ec2_conf.home_path,
+                             "--folder_checkpoints {} ".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                             item),
                                                                self.loader.file_system_conf.path,
                                                                self.loader.job.job_id,

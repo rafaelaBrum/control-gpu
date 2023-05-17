@@ -111,6 +111,11 @@ def get_checkpoint(args):
     print(cmd)
     os.system(cmd)
 
+    cmd = f"rm {args.folder_checkpoints} -r"
+
+    print(cmd)
+    os.system(cmd)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Execute FT application to send checkpoint to other VM.')
@@ -134,8 +139,7 @@ def main():
 
     if args.get_file:
         get_checkpoint(args)
-    else:
-        mkdirs(args.folder_checkpoints)
+    mkdirs(args.folder_checkpoints)
     
     check_checkpoints(args)
 

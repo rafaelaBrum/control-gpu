@@ -549,30 +549,63 @@ class ScheduleManager:
                     # update number of rounds
                     server_ckpt_round = 0
                     client_ckpt_round = 0
+                    print("server_checkpoint", self.loader.checkpoint_conf.server_checkpoint)
+                    print("extra_vm", self.loader.checkpoint_conf.extra_vm)
                     if self.loader.checkpoint_conf.server_checkpoint:
+                        if self.loader.checkpoint_conf.extra_vm:
 
-                        self.extra_vm.open_connection()
+                            self.extra_vm.open_connection()
 
-                        if not self.extra_vm.ssh.is_active:
-                            self.extra_vm.ssh.open_connection()
-                        try:
-                            stdout, stderr, code_return = self.extra_vm.ssh.execute_command(
-                                "ls {} | grep '.npz$'".format(self.loader.checkpoint_conf.folder_checkpoints),
-                                output=True)
-                            print("stdout", stdout)
-                            print("stderr", stderr)
-                            print("code_return", code_return)
-                            aux_list = stdout.split('\n')
-                            # print("aux_list", aux_list)
-                            last_line = aux_list[-2].split('-')
-                            # print("last_line", last_line)
-                            server_ckpt_round = int(last_line[1])
-                        except Exception as e:
-                            logging.error(e)
-                            server_ckpt_round = 0
+                            if not self.extra_vm.ssh.is_active:
+                                self.extra_vm.ssh.open_connection()
+                            try:
+                                stdout, stderr, code_return = self.extra_vm.ssh.execute_command(
+                                    "ls {} | grep '.npz$'".format(self.loader.checkpoint_conf.folder_checkpoints),
+                                    output=True)
+                                print("stdout", stdout)
+                                print("stderr", stderr)
+                                print("code_return", code_return)
+                                aux_list = stdout.split('\n')
+                                # print("aux_list", aux_list)
+                                last_line = aux_list[-2].split('-')
+                                # print("last_line", last_line)
+                                server_ckpt_round = int(last_line[1])
+                            except Exception as e:
+                                logging.error(e)
+                                server_ckpt_round = 0
 
-                        self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip,
-                                                                         restart=True)
+                            self.server_task_dispatcher.vm.prepare_ft_daemon(ip_address=self.extra_vm.instance_public_ip,
+                                                                             restart=True)
+                        else:
+                            logging.info("Server checkpoint without extra VM")
+
+                            if not self.server_task_dispatcher.vm.ssh.is_active:
+                                self.server_task_dispatcher.vm.ssh.open_connection()
+
+                            logging.info("SSH server task is good: {}".format(self.server_task_dispatcher.vm.ssh.is_active))
+                            try:
+                                stdout, stderr, code_return = self.server_task_dispatcher.vm.ssh.execute_command(
+                                    "ls {} | grep '.npz$'".format(os.path.join(
+                                        self.loader.checkpoint_conf.folder_checkpoints,
+                                        "{}_{}".format(self.loader.job.job_id, self.loader.execution_id))),
+                                    output=True
+                                )
+                                print("stdout", stdout)
+                                print("stderr", stderr)
+                                print("code_return", code_return)
+                                aux_list = stdout.split('\n')
+                                # print("aux_list", aux_list)
+                                last_line = aux_list[-2].split('-')
+                                # print("last_line", last_line)
+                                server_ckpt_round = int(last_line[1])
+                            except Exception as e:
+                                logging.error(e)
+                                server_ckpt_round = 0
+
+                            if self.server_task_dispatcher.vm.ssh.is_active:
+                                self.server_task_dispatcher.vm.ssh.close_connection()
+
+                            self.server_task_dispatcher.vm.prepare_ft_daemon(restart=True)
 
                     if self.loader.checkpoint_conf.client_checkpoint:
                         for dispatcher in self.client_task_dispatchers:
@@ -600,9 +633,15 @@ class ScheduleManager:
 
                     logging.info(f"client_ckpt_round {client_ckpt_round} - server_ckpt_round {server_ckpt_round}")
 
-                    folder_ckpt = self.loader.checkpoint_conf.folder_checkpoints
-                    if folder_ckpt[-1] == '/':
-                        folder_ckpt = folder_ckpt[:-1]
+                    if self.loader.emulated:
+                        folder_ckpt = self.loader.checkpoint_conf.folder_checkpoints
+                        if folder_ckpt[-1] == '/':
+                            folder_ckpt = folder_ckpt[:-1]
+                    else:
+                        folder_ckpt = os.path.join(self.loader.checkpoint_conf.folder_checkpoints,
+                                                   "{}_{}".format(self.loader.job.job_id, self.loader.execution_id))
+                        if folder_ckpt[-1] == '/':
+                            folder_ckpt = folder_ckpt[:-1]
 
                     self.server_task_dispatcher.vm.open_connection()
 
@@ -611,8 +650,12 @@ class ScheduleManager:
 
                     if client_ckpt_round >= server_ckpt_round:
                         if self.loader.checkpoint_conf.server_checkpoint:
-                            self.extra_vm.ssh.execute_command(f'rm {folder_ckpt} -r')
-                            self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
+                            if self.loader.checkpoint_conf.extra_vm:
+                                self.extra_vm.ssh.execute_command(f'rm {folder_ckpt} -r')
+                                self.extra_vm.ssh.execute_command(f'mkdir {folder_ckpt}')
+                            else:
+                                self.server_task_dispatcher.vm.ssh.execute_command(f'rm {folder_ckpt} -r')
+                                self.server_task_dispatcher.vm.ssh.execute_command(f'mkdir {folder_ckpt}')
 
                         self.server_task_dispatcher.vm.ssh.execute_command(f"echo '' > name_checkpoint.txt")
 
@@ -717,34 +760,6 @@ class ScheduleManager:
                 time.sleep(60)
 
                 self.semaphore.release()
-
-        #
-        # if not self.loader.cudalign_task.has_task_finished():
-        #     new_vm = VirtualMachine(
-        #         instance_type=instance_type,
-        #         market=market,
-        #         loader=self.loader,
-        #         volume_id=self.ebs_volume_id
-        #     )
-        #
-        #     # logging.info("Created new VM!")
-        #
-        #     dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
-        #
-        #     # check if the VM need to be registered on the simulator
-        #     if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
-        #         self.simulator.register_vm(new_vm)
-        #
-        #     # self.semaphore.acquire()
-        #
-        #     self.terminated_dispatchers.append(self.task_dispatcher)
-        #     self.task_dispatcher = dispatcher
-        #
-        #     # self.semaphore.release()
-        #
-        #     self.__start_dispatcher()
-        #
-        # # self.semaphore.release()
 
     def __event_handle(self, event):
 
@@ -1023,8 +1038,6 @@ class ScheduleManager:
                 self.__start_extra_vm()
             else:
                 self.server_task_dispatcher.vm.prepare_ft_daemon()
-
-        logging.info("<Scheduler Manager {}_{}>: Finished prep extra VM")
 
         # Call checkers loop
         self.__checkers()
