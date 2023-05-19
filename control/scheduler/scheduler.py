@@ -85,7 +85,7 @@ class Scheduler:
                                                                                                              region))
                                 self.current_vms['server'] = instance
                                 self.current_locations['server'] = loc
-                                return instance, CloudManager.PREEMPTIBLE, loc, zone
+                                return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
         elif provider.lower() in (CloudManager.CLOUDLAB.lower()):
@@ -136,7 +136,7 @@ class Scheduler:
                                 if self.qtde_gpus_spot_gcloud < 1:
                                     self.qtde_gpus_spot_gcloud += 1
                                     self.client_id_spot_gpu = client_id
-                                    return instance, CloudManager.PREEMPTIBLE, loc, zone
+                                    return instance, CloudManager.ON_DEMAND, loc, zone
                                 else:
                                     return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))

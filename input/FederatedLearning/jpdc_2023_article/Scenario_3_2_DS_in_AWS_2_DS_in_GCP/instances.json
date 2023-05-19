@@ -94,11 +94,9 @@
             "provider": "gcp",
             "prices": {
                 "on-demand": {
-                    "us-west1": 0.7299979999999999,
                     "us-central1": 0.7299979999999999
                 },
                 "preemptible": {
-                    "us-west1": 0.1955,
                     "us-central1": 0.1955
                 }
             },
@@ -119,7 +117,6 @@
             "gpu": "nvidia-tesla-t4",
             "gpu_count": 1,
             "locations": [
-                "GCP_us-west1",
                 "GCP_us-central1"
             ]
         },

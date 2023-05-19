@@ -9,23 +9,13 @@
             "instance_type": "g4dn.2xlarge",
             "provider": "AWS",
             "region": "us-east-1"
-        },
-        "2": {
-            "instance_type": "g4dn.2xlarge",
-            "provider": "AWS",
-            "region": "us-east-1"
-        },
-        "3": {
-            "instance_type": "g4dn.2xlarge",
-            "provider": "AWS",
-            "region": "us-east-1"
         }
     },
-    "cost": 1.1337573617422223,
-    "makespan": 624.1700000000001,
-    "max_cost": 13.928045198249501,
-    "max_total_exec": 3192.6503505355404,
-    "obj_value": 0.1384515936977446,
+    "cost": 0.5826867964266671,
+    "makespan": 623.57,
+    "max_cost": 8.230783380295716,
+    "max_total_exec": 3192.0503505355405,
+    "obj_value": 0.1330722648964587,
     "server": {
         "instance_type": "t2.xlarge",
         "provider": "AWS",

@@ -11,8 +11,11 @@ export SETUP_PATH=$HOME/control-gpu/
 export NOTIFY_PWD='R1357908642@'
 export POSTGRES_USER=postgres
 export POSTGRES_PASS=rafaela123
+#echo " ----------------------------
+#4 clients running 30 rounds (server ckpt in aws)
+#---------------------------- "
 echo " ----------------------------
-4 clients running 30 rounds (server ckpt in aws)
+2 clients running 30 rounds (server ckpt in aws)
 ---------------------------- "
 echo " ----------------------------
 Test Case 0 (without simulation)
@@ -64,8 +67,11 @@ while [  $COUNTER -lt 4 ]; do
         fi
         COUNTER=$((COUNTER+1))
 done
+#echo " ----------------------------
+#4 clients running 30 rounds (server ckpt in gcp)
+#---------------------------- "
 echo " ----------------------------
-4 clients running 30 rounds (server ckpt in gcp)
+2 clients running 30 rounds (server ckpt in gcp)
 ---------------------------- "
 echo " ----------------------------
 Test Case 0 (without simulation)
