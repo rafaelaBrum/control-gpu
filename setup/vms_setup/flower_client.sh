@@ -9,8 +9,10 @@ echo '''
 
 # Instaling python and dev tools
 sudo apt update
-# sudo apt upgrade -y
-sudo apt install python3.7 python3.7-dev python3-pip -y
+sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev wget libbz2-dev -y
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.7 python3.7-dev python3-pip python3.7-distutils python3-testresources -y
 echo "Python 3.7 installed"
 
 # Installing CUDA 10.0 and cuDNN 7
@@ -44,7 +46,7 @@ echo "Flower client requirements installed"
 
 # Installing fuse for GCP
 export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
-echo "deb http://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.asc] https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 sudo apt update
 sudo apt install gcsfuse -y

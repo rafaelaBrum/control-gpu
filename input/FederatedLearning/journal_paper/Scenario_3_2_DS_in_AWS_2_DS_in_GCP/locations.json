@@ -1,0 +1,25 @@
+{
+    "locations": {
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "key_file": "rafaelabrum.pem",
+            "client_image_id": "ami-06efeaba2b83c55be",
+            "server_image_id": "ami-02f905bd271a8bded",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ],
+            "cluster_urn": "",
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": 64,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.09
+        }
+    }
+}
