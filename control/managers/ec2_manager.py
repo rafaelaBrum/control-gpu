@@ -295,12 +295,9 @@ class EC2Manager(CloudManager):
 
         return status
 
-    def create_preemptible_instance(self, instance_type, image_id, max_price, zone='', burstable=False):
+    def create_preemptible_instance(self, instance_type, image_id, max_price, zone='', burstable=False, key_name=''):
 
-        # user_data = '''#!/bin/bash
-        # /usr/bin/enable-ec2-spot-hibernation
-        # echo "user-data" > $HOME/control-applications/test_user_data.txt
-        # '''
+        print(f"Creating instance {instance_type} with image {image_id} in zone {zone}")
 
         if zone == '':
             zone = self.ec2_conf.zone
@@ -332,6 +329,9 @@ class EC2Manager(CloudManager):
 
         if zone:
             parameters['Placement'] = {'AvailabilityZone': zone}
+
+        if key_name != '':
+            parameters['KeyName'] = key_name
 
         instances = self._create_instance(parameters, burstable, region)
 

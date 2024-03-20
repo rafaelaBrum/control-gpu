@@ -338,7 +338,7 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
                 if env_id not in self.exec_times:
                     self.exec_times[env_id] = {}
-                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                vm = VirtualMachine(instance_type=env, market='preemptible', loader=self.loader)
                 for loc_id, region in loc_aws.items():
                     if loc_id in self.exec_times[env_id]:
                         skip_loc = True

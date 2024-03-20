@@ -4,10 +4,12 @@
             "provider": "aws",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752
+                    "us-east-1": 0.752,
+                    "us-west-2": 0.752
                 },
                 "preemptible": {
-                    "us-east-1": 0.3182
+                    "us-east-1": 0.3182,
+                    "us-west-2": 0.3182
                 }
             },
             "restrictions": {
@@ -27,17 +29,19 @@
             "gpu": "yes",
             "gpu_count": 1,
             "locations": [
-                "AWS_us-east-1"
+                "AWS_us-west-2"
             ]
         },
         "g3.4xlarge": {
             "provider": "aws",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 1.14
+                    "us-east-1": 1.14,
+                    "us-west-2": 1.14
                 },
                 "preemptible": {
-                    "us-east-1": 0.6381
+                    "us-east-1": 0.6381,
+                    "us-west-2": 0.6381
                 }
             },
             "restrictions": {
@@ -57,7 +61,7 @@
             "gpu": "yes",
             "gpu_count": 1,
             "locations": [
-                "AWS_us-east-1"
+                "AWS_us-west-2"
             ]
         },
         "t2.xlarge": {
@@ -87,7 +91,7 @@
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
-                "AWS_us-east-1"
+                "AWS_us-west-2"
             ]
         }
     }

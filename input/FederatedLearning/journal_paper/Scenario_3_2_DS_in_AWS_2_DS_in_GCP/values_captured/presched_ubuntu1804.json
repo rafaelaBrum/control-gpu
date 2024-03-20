@@ -1,0 +1,263 @@
+{
+    "exec_times": {},
+    "job_id": 220401,
+    "job_name": "1 client - VGG16 (in N. Virginia)",
+    "number_datacenters": 6,
+    "rpc": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": {
+                "client-server": {
+                    "TestMsg": "3.033966064453125",
+                    "TrainMsg": "5.5233330726623535"
+                },
+                "server-client": {
+                    "TestMsg": "2.9581851959228516",
+                    "TrainMsg": "5.496419191360474"
+                }
+            },
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "3.0248019695281982",
+                    "TrainMsg": "5.542353630065918"
+                },
+                "server-client": {
+                    "TestMsg": "3.004978895187378",
+                    "TrainMsg": "5.579028606414795"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "3.0885088443756104",
+                    "TrainMsg": "5.612966299057007"
+                },
+                "server-client": {
+                    "TestMsg": "2.9666826725006104",
+                    "TrainMsg": "5.507986545562744"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.964520215988159",
+                    "TrainMsg": "5.462051868438721"
+                },
+                "server-client": {
+                    "TestMsg": "2.929018497467041",
+                    "TrainMsg": "5.456239938735962"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.941819906234741",
+                    "TrainMsg": "5.441926002502441"
+                },
+                "server-client": {
+                    "TestMsg": "2.900453567504883",
+                    "TrainMsg": "5.407715320587158"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9885361194610596",
+                    "TrainMsg": "5.458686113357544"
+                },
+                "server-client": {
+                    "TestMsg": "2.9285736083984375",
+                    "TrainMsg": "5.4199488162994385"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "2.894554853439331",
+                    "TrainMsg": "5.347709655761719"
+                },
+                "server-client": {
+                    "TestMsg": "3.3993351459503174",
+                    "TrainMsg": "5.338544845581055"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "2.887209415435791",
+                    "TrainMsg": "5.379592418670654"
+                },
+                "server-client": {
+                    "TestMsg": "2.874207019805908",
+                    "TrainMsg": "5.349503517150879"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.901048421859741",
+                    "TrainMsg": "5.378164768218994"
+                },
+                "server-client": {
+                    "TestMsg": "2.9070510864257812",
+                    "TrainMsg": "5.379026889801025"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9742729663848877",
+                    "TrainMsg": "5.520735025405884"
+                },
+                "server-client": {
+                    "TestMsg": "2.996619701385498",
+                    "TrainMsg": "5.55757212638855"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9361014366149902",
+                    "TrainMsg": "5.5001747608184814"
+                },
+                "server-client": {
+                    "TestMsg": "2.9597127437591553",
+                    "TrainMsg": "5.427504539489746"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "2.874452829360962",
+                    "TrainMsg": "5.333442211151123"
+                },
+                "server-client": {
+                    "TestMsg": "2.8764781951904297",
+                    "TrainMsg": "5.380727291107178"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.884981155395508",
+                    "TrainMsg": "5.357019901275635"
+                },
+                "server-client": {}
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.824845314025879",
+                    "TrainMsg": "5.237769842147827"
+                },
+                "server-client": {
+                    "TestMsg": "2.8235456943511963",
+                    "TrainMsg": "5.249484300613403"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.878631830215454",
+                    "TrainMsg": "5.36785626411438"
+                },
+                "server-client": {
+                    "TestMsg": "2.90328311920166",
+                    "TrainMsg": "5.364906072616577"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.8918802738189697",
+                    "TrainMsg": "5.35613751411438"
+                },
+                "server-client": {
+                    "TestMsg": "2.8823251724243164",
+                    "TrainMsg": "5.380222320556641"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9043455123901367",
+                    "TrainMsg": "5.39838171005249"
+                },
+                "server-client": {
+                    "TestMsg": "2.907634735107422",
+                    "TrainMsg": "5.391805410385132"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.8939175605773926",
+                    "TrainMsg": "5.349390506744385"
+                },
+                "server-client": {
+                    "TestMsg": "2.893630027770996",
+                    "TrainMsg": "5.360217332839966"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.859527349472046",
+                    "TrainMsg": "5.267339706420898"
+                },
+                "server-client": {
+                    "TestMsg": "2.832892656326294",
+                    "TrainMsg": "5.266912937164307"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.839048147201538",
+                    "TrainMsg": "5.278672456741333"
+                },
+                "server-client": {
+                    "TestMsg": "2.841681718826294",
+                    "TrainMsg": "5.281136512756348"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9010350704193115",
+                    "TrainMsg": "5.344531059265137"
+                },
+                "server-client": {
+                    "TestMsg": "2.9222397804260254",
+                    "TrainMsg": "5.370912075042725"
+                }
+            }
+        }
+    },
+    "rpc_concurrent": {},
+    "rtt": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": 0.11643481254577637,
+            "AWS_us-east-1_us-east-1b": 0.0805959701538086,
+            "AWS_us-east-1_us-east-1c": 0.09621357917785645,
+            "AWS_us-east-1_us-east-1d": 0.08265972137451172,
+            "AWS_us-east-1_us-east-1e": 0.08025336265563965,
+            "AWS_us-east-1_us-east-1f": 0.0846095085144043
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": 0.10990643501281738,
+            "AWS_us-east-1_us-east-1c": 0.0873417854309082,
+            "AWS_us-east-1_us-east-1d": 0.07994699478149414,
+            "AWS_us-east-1_us-east-1e": 0.08225011825561523,
+            "AWS_us-east-1_us-east-1f": 0.08070683479309082
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": 0.12169528007507324,
+            "AWS_us-east-1_us-east-1d": 0.08351993560791016,
+            "AWS_us-east-1_us-east-1e": 0.08696818351745605,
+            "AWS_us-east-1_us-east-1f": 0.08835220336914062
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": 0.10700845718383789,
+            "AWS_us-east-1_us-east-1e": 0.08254599571228027,
+            "AWS_us-east-1_us-east-1f": 0.08299112319946289
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": 0.1232442855834961,
+            "AWS_us-east-1_us-east-1f": 0.08069944381713867
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": 0.10675191879272461
+        }
+    }
+}

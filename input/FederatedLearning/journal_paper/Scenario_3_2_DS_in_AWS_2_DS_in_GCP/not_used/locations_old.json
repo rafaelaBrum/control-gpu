@@ -4,8 +4,8 @@
             "provider": "aws",
             "region": "us-east-1",
             "key_file": "rafaelabrum.pem",
-            "client_image_id": "ami-06efeaba2b83c55be",
-            "server_image_id": "ami-02f905bd271a8bded",
+            "client_image_id": "",
+            "server_image_id": "",
             "zones": [
                 "us-east-1a",
                 "us-east-1b",
@@ -25,8 +25,8 @@
             "provider": "aws",
             "region": "us-west-2",
             "key_file": "rafaelabrum_west.pem",
-            "client_image_id": "ami-06180633d480b64ad",
-            "server_image_id": "ami-0970bde72424e89da",
+            "client_image_id": "ami-0834180af7ae49030",
+            "server_image_id": "",
             "zones": [
                 "us-west-2a",
                 "us-west-2b",
