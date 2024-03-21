@@ -1,11 +1,32 @@
 {
     "locations": {
+        "AWS_us-east-1": {
+            "provider": "aws",
+            "region": "us-east-1",
+            "key_file": "rafaelabrum.pem",
+            "client_image_id": "",
+            "server_image_id": "",
+            "zones": [
+                "us-east-1a",
+                "us-east-1b",
+                "us-east-1c",
+                "us-east-1d",
+                "us-east-1e",
+                "us-east-1f"
+            ],
+            "cluster_urn": "",
+            "global_cpu_limit": -1,
+            "global_gpu_limit": -1,
+            "regional_cpu_limit": 64,
+            "regional_gpu_limit": -1,
+            "cost_transfer": 0.09
+        },
         "AWS_us-west-2": {
             "provider": "aws",
             "region": "us-west-2",
             "key_file": "rafaelabrum_west.pem",
             "client_image_id": "ami-0834180af7ae49030",
-            "server_image_id": "",
+            "server_image_id": "ami-01cd71995712b7228",
             "zones": [
                 "us-west-2a",
                 "us-west-2b",

@@ -4,10 +4,12 @@
             "provider": "aws",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.752
+                    "us-east-1": 0.752,
+                    "us-west-2": 0.752
                 },
                 "preemptible": {
-                    "us-east-1": 0.3182
+                    "us-east-1": 0.3182,
+                    "us-west-2": 0.3182
                 }
             },
             "restrictions": {
@@ -58,18 +60,19 @@
             "gpu": "yes",
             "gpu_count": 1,
             "locations": [
-                "AWS_us-east-1",
-                "AWS_us-west-2"
+                "AWS_us-east-1"
             ]
         },
         "t2.xlarge": {
             "provider": "aws",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.1856
+                    "us-east-1": 0.1856,
+                    "us-west-2": 0.1856
                 },
                 "preemptible": {
-                    "us-east-1": 0.1395
+                    "us-east-1": 0.1395,
+                    "us-west-2": 0.1395
                 }
             },
             "restrictions": {

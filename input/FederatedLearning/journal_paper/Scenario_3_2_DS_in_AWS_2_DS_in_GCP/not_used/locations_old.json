@@ -26,7 +26,7 @@
             "region": "us-west-2",
             "key_file": "rafaelabrum_west.pem",
             "client_image_id": "ami-0834180af7ae49030",
-            "server_image_id": "",
+            "server_image_id": "ami-01cd71995712b7228",
             "zones": [
                 "us-west-2a",
                 "us-west-2b",
