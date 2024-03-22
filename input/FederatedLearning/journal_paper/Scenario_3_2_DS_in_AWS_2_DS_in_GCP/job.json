@@ -1,7 +1,7 @@
 {
-    "job_id": 220401,
-    "job_name": "1 client - VGG16 (in N. Virginia)",
-    "description": "1 client executing VGG16 with smaller dataset, stored in AWS east",
+    "job_id": 220402,
+    "job_name": "1 client - VGG16 (in Iowa)",
+    "description": "1 clients executing VGG16 with smaller dataset, stored in GCP central",
     "server_msg_train": 0.537082008,
     "server_msg_test": 0.537082008,
     "client_msg_train": 0.537082008,
@@ -21,20 +21,20 @@
         },
         "clients": {
             "0" : {
-                "task_name": "Task VGG16 (client 0)",
+                "task_name": "Task VGG16 (client 2)",
                 "command": "python3.7 TIL_VGG_client.py -i -v --train -d -tn -tdim 240 240 -f1 10",
                 "generic_checkpoint": "False",
                 "zip_file": "TIL_VGG_client.zip",
                 "split": "0.9 0.1 0.0",
                 "batch": 32,
-                "bucket_name": "rafaela-fl-client-0",
-                "trainset_dir": "data/CellRep/4_clients/0/trainset",
-                "test_dir": "data/CellRep/4_clients/0/testset",
+                "bucket_name": "fl_client_2_central",
+                "trainset_dir": "data/CellRep/4_clients/2/trainset",
+                "test_dir": "data/CellRep/4_clients/2/testset",
                 "train_epochs": 5,
-                "bucket_provider": "aws",
-                "bucket_region": "us-east-1",
+                "bucket_provider": "gcp",
+                "bucket_region": "us-central1",
                 "net": "VGG16",
-                "baseline_exec": 595.71,
+                "baseline_exec": 233.01,
                 "dataset_urn": ""
             }
         }

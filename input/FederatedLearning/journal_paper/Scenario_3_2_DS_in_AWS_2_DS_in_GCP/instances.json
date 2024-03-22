@@ -29,17 +29,50 @@
             "gpu": "yes",
             "gpu_count": 1,
             "locations": [
+                "AWS_us-east-1",
                 "AWS_us-west-2"
+            ]
+        },
+        "g3.4xlarge": {
+            "provider": "aws",
+            "prices": {
+                "on-demand": {
+                    "us-east-1": 1.14
+                },
+                "preemptible": {
+                    "us-east-1": 0.6381
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/xvdf",
+            "vcpu": 16,
+            "memory": 122,
+            "gpu": "yes",
+            "gpu_count": 1,
+            "locations": [
+                "AWS_us-east-1"
             ]
         },
         "t2.xlarge": {
             "provider": "aws",
             "prices": {
                 "on-demand": {
-                    "us-east-1": 0.1856
+                    "us-east-1": 0.1856,
+                    "us-west-2": 0.1856
                 },
                 "preemptible": {
-                    "us-east-1": 0.1395
+                    "us-east-1": 0.1395,
+                    "us-west-2": 0.1395
                 }
             },
             "restrictions": {
@@ -59,6 +92,7 @@
             "gpu": "no",
             "gpu_count": 0,
             "locations": [
+                "AWS_us-east-1",
                 "AWS_us-west-2"
             ]
         }
