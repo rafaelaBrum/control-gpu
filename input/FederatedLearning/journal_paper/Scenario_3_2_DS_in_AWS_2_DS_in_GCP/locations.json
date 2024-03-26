@@ -39,6 +39,43 @@
             "regional_cpu_limit": 12,
             "regional_gpu_limit": -1,
             "cost_transfer": 0.09
+        },
+        "GCP_us-west1": {
+            "provider": "gcp",
+            "region": "us-west1",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-v-0-19-0",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
+            "zones": [
+                "us-west1-a",
+                "us-west1-b",
+                "us-west1-c"
+            ],
+            "cluster_urn": "",
+            "global_cpu_limit": 40,
+            "global_gpu_limit": 4,
+            "regional_cpu_limit": 40,
+            "regional_gpu_limit": 4,
+            "cost_transfer": 0.12
+        },
+        "GCP_us-central1": {
+            "provider": "gcp",
+            "region": "us-central1",
+            "key_file": "my-ssh-key",
+            "client_image_id": "disk-ubuntu-flower-client-v-0-19-0",
+            "server_image_id": "disk-ubuntu-flower-server-v-0-19-0",
+            "zones": [
+                "us-central1-a",
+                "us-central1-b",
+                "us-central1-c",
+                "us-central1-f"
+            ],
+            "cluster_urn": "",
+            "global_cpu_limit": 40,
+            "global_gpu_limit": 4,
+            "regional_cpu_limit": 40,
+            "regional_gpu_limit": 4,
+            "cost_transfer": 0.12
         }
     }
 }

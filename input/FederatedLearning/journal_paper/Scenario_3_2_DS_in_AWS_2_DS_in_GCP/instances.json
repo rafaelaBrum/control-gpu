@@ -95,6 +95,137 @@
                 "AWS_us-east-1",
                 "AWS_us-west-2"
             ]
+        },
+        "n1-standard-8_t4": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.7299979999999999,
+                    "us-central1": 0.7299979999999999
+                },
+                "preemptible": {
+                    "us-west1": 0.1955,
+                    "us-central1": 0.1955
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-t4",
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
+        },
+        "e2-standard-4": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.13402284,
+                    "us-central1": 0.13402284
+                },
+                "preemptible": {
+                    "us-west1": 0.040206852,
+                    "us-central1": 0.040206852
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 4,
+            "memory": 16,
+            "gpu": "",
+            "gpu_count": 0,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
+        },
+        "n1-standard-8_v100": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 2.859998,
+                    "us-central1": 2.859998
+                },
+                "preemptible": {
+                    "us-west1": 0.857,
+                    "us-central1": 0.857
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-v100",
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
+        },
+        "n1-standard-16_p4": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 1.359996,
+                    "us-central1": 1.359996
+                },
+                "preemptible": {
+                    "us-west1": 0.3976,
+                    "us-central1": 0.3976
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 16,
+            "memory": 60,
+            "gpu": "nvidia-tesla-p4",
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-central1"
+            ]
         }
     }
 }

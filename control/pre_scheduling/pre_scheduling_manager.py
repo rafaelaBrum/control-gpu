@@ -340,10 +340,10 @@ class PreSchedulingManager:
                     self.exec_times[env_id] = {}
                 vm = VirtualMachine(instance_type=env, market='preemptible', loader=self.loader)
                 for loc_id, region in loc_aws.items():
+                    if loc_id not in env.locations:
+                        continue
                     if loc_id in self.exec_times[env_id]:
                         skip_loc = True
-                        if loc_id not in env.locations:
-                            continue
                         for cli in clients.values():
                             if str(cli.client_id) not in self.exec_times[env_id][loc_id]:
                                 skip_loc = False
@@ -395,8 +395,10 @@ class PreSchedulingManager:
                 logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
                 if env_id not in self.exec_times:
                     self.exec_times[env_id] = {}
-                vm = VirtualMachine(instance_type=env, market='on-demand', loader=self.loader)
+                vm = VirtualMachine(instance_type=env, market='preemptible', loader=self.loader)
                 for loc_id, region in loc_gcp.items():
+                    if loc_id not in env.locations:
+                        continue
                     if loc_id in self.exec_times[env_id]:
                         skip_loc = True
                         for cli in clients.values():
@@ -852,8 +854,8 @@ class PreSchedulingManager:
 
         server_configured = False
 
-        print(vm_server.ssh)
-        print(vm_client.ssh)
+        # print(vm_server.ssh)
+        # print(vm_client.ssh)
 
         if vm_server.ssh is not None:
             server_configured = True
