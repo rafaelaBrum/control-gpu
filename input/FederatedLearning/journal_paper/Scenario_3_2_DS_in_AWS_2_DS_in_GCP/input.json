@@ -3,44 +3,44 @@
         "AWS": {
             "us-east-1": {
                 "AWS": {
-                    "us-east-1": 1.0012063510284064,
-                    "us-west-2": 3.4347446260177854
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
                 },
                 "GCP": {
-                    "us-central1": 1.676337423145088,
-                    "us-west1": 2.943755860455445
+                    "us-central1": 10000000,
+                    "us-west1": 10000000
                 }
             },
             "us-west-2": {
                 "AWS": {
-                    "us-east-1": 3.4347446260177854,
-                    "us-west-2": 0.9862837601526008
+                    "us-east-1": 10000000,
+                    "us-west-2": 10000000
                 },
                 "GCP": {
-                    "us-central1": 2.250744302108236,
-                    "us-west1": 1.0794076696101966
+                    "us-central1": 0.9889573594598454,
+                    "us-west1": 0.532487448759301
                 }
             }
         },
         "GCP": {
             "us-central1": {
                 "AWS": {
-                    "us-east-1": 1.676337423145088,
-                    "us-west-2": 2.250744302108236
+                    "us-east-1": 10000000,
+                    "us-west-2": 0.9889573594598454
                 },
                 "GCP": {
-                    "us-central1": 0.8167920997131363,
-                    "us-west1": 1.6449920393010253
+                    "us-central1": 0.354719681440731,
+                    "us-west1": 10000000
                 }
             },
             "us-west1": {
                 "AWS": {
-                    "us-east-1": 2.943755860455445,
-                    "us-west-2": 1.0794076696101966
+                    "us-east-1": 10000000,
+                    "us-west-2": 0.532487448759301
                 },
                 "GCP": {
-                    "us-central1": 1.6449920393010253,
-                    "us-west1": 0.7772881294786588
+                    "us-central1": 10000000,
+                    "us-west1": 0.27841884639113723
                 }
             }
         }
@@ -124,53 +124,53 @@
         }
     },
     "pair_regions_baseline": {
-        "location_1": "AWS_us-east-1_us-east-1a",
-        "location_2": "AWS_us-east-1_us-east-1a",
+        "location_1": "AWS_us-west-2_us-west-2a",
+        "location_2": "GCP_us-central1_us-central1-a",
         "provider_1": "AWS",
-        "provider_2": "AWS"
+        "provider_2": "GCP"
     },
     "slowdown": {
         "AWS_us-east-1": {
             "AWS": {
                 "us-east-1": {
-                    "g3.4xlarge": 1.5476582536701373,
+                    "g3.4xlarge": 1.516103001181493,
                     "g4dn.2xlarge": 1.0
                 },
                 "us-west-2": {
-                    "g4dn.2xlarge": 1.0775173137392353
+                    "g4dn.2xlarge": 1.078385140397563
                 }
             },
             "GCP": {
                 "us-central1": {
-                    "n1-standard-16_p4": 1.4151211655789722,
-                    "n1-standard-8_t4": 1.197010883166075,
-                    "n1-standard-8_v100": 0.5216480597631891
+                    "n1-standard-16_p4": 1.4143928789893512,
+                    "n1-standard-8_t4": 1.1776006182035117,
+                    "n1-standard-8_v100": 0.5420762051967738
                 },
                 "us-west1": {
-                    "n1-standard-8_t4": 1.187463492075772,
-                    "n1-standard-8_v100": 0.5732342909134907
+                    "n1-standard-8_t4": 1.2070787780638403,
+                    "n1-standard-8_v100": 0.5181547388132717
                 }
             }
         },
         "GCP_us-central1": {
             "AWS": {
                 "us-east-1": {
-                    "g3.4xlarge": 1.2963735410233432,
+                    "g3.4xlarge": 1.2570449436806794,
                     "g4dn.2xlarge": 1.0
                 },
                 "us-west-2": {
-                    "g4dn.2xlarge": 1.444326211225565
+                    "g4dn.2xlarge": 1.6730978299063515
                 }
             },
             "GCP": {
                 "us-central1": {
-                    "n1-standard-16_p4": 0.9774171572194787,
-                    "n1-standard-8_t4": 0.8402960452569163,
-                    "n1-standard-8_v100": 0.42140401398725436
+                    "n1-standard-16_p4": 1.0407963864281402,
+                    "n1-standard-8_t4": 0.911359388443612,
+                    "n1-standard-8_v100": 0.39824576297763487
                 },
                 "us-west1": {
-                    "n1-standard-8_t4": 1.1905994950918044,
-                    "n1-standard-8_v100": 1.0461078996163669
+                    "n1-standard-8_t4": 1.2818987500425374,
+                    "n1-standard-8_v100": 0.8568165914897923
                 }
             }
         }
