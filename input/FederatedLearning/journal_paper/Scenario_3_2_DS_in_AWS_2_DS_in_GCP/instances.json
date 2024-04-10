@@ -8,8 +8,8 @@
                     "us-west-2": 0.752
                 },
                 "preemptible": {
-                    "us-east-1": 0.3182,
-                    "us-west-2": 0.3182
+                    "us-east-1": 0.319,
+                    "us-west-2": 0.2468
                 }
             },
             "restrictions": {
@@ -40,7 +40,7 @@
                     "us-east-1": 1.14
                 },
                 "preemptible": {
-                    "us-east-1": 0.6381
+                    "us-east-1": 0.4839
                 }
             },
             "restrictions": {
@@ -71,8 +71,8 @@
                     "us-west-2": 0.1856
                 },
                 "preemptible": {
-                    "us-east-1": 0.1395,
-                    "us-west-2": 0.1395
+                    "us-east-1": 0.0746,
+                    "us-west-2": 0.0661
                 }
             },
             "restrictions": {
@@ -104,8 +104,8 @@
                     "us-central1": 0.7299979999999999
                 },
                 "preemptible": {
-                    "us-west1": 0.1955,
-                    "us-central1": 0.1955
+                    "us-west1": 0.21597,
+                    "us-central1": 0.21597
                 }
             },
             "restrictions": {
@@ -170,8 +170,8 @@
                     "us-central1": 2.859998
                 },
                 "preemptible": {
-                    "us-west1": 0.857,
-                    "us-central1": 0.857
+                    "us-west1": 1.01837,
+                    "us-central1": 1.01837
                 }
             },
             "restrictions": {
@@ -203,8 +203,8 @@
                     "us-central1": 1.359996
                 },
                 "preemptible": {
-                    "us-west1": 0.3976,
-                    "us-central1": 0.3976
+                    "us-west1": 0.39193999999999996,
+                    "us-central1": 0.39193999999999996
                 }
             },
             "restrictions": {

@@ -3,6 +3,34 @@
         "g3.4xlarge": {
             "AWS_us-east-1": {
                 "0": {
+                    "eval_1": "12.88",
+                    "eval_2": "12.88",
+                    "fit_1": "172.00",
+                    "fit_2": "172.00"
+                },
+                "1": {
+                    "eval_1": "13.72",
+                    "eval_2": "13.72",
+                    "fit_1": "171.57",
+                    "fit_2": "171.57"
+                },
+                "2": {
+                    "eval_1": "34.63",
+                    "eval_2": "34.63",
+                    "fit_1": "204.63",
+                    "fit_2": "204.63"
+                },
+                "3": {
+                    "eval_1": "34.61",
+                    "eval_2": "34.61",
+                    "fit_1": "217.18",
+                    "fit_2": "217.18"
+                }
+            }
+        },
+        "g4dn.2xlarge": {
+            "AWS_us-east-1": {
+                "0": {
                     "eval_1": "13.32",
                     "eval_2": "13.32",
                     "fit_1": "114.30",
@@ -15,206 +43,178 @@
                     "fit_2": "111.20"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "35.52",
+                    "eval_2": "35.52",
+                    "fit_1": "148.19",
+                    "fit_2": "148.19"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
-                }
-            }
-        },
-        "g4dn.2xlarge": {
-            "AWS_us-east-1": {
-                "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
-                },
-                "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
-                },
-                "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
-                },
-                "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "35.04",
+                    "eval_2": "35.04",
+                    "fit_1": "148.38",
+                    "fit_2": "148.38"
                 }
             },
             "AWS_us-west-2": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "13.36",
+                    "eval_2": "13.36",
+                    "fit_1": "120.88",
+                    "fit_2": "120.88"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "13.81",
+                    "eval_2": "13.81",
+                    "fit_1": "118.80",
+                    "fit_2": "118.80"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "52.08",
+                    "eval_2": "52.08",
+                    "fit_1": "228.76",
+                    "fit_2": "228.76"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "53.60",
+                    "eval_2": "53.60",
+                    "fit_1": "221.99",
+                    "fit_2": "221.99"
                 }
             }
         },
         "n1-standard-16_p4": {
             "GCP_us-central1": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "12.04",
+                    "eval_2": "12.04",
+                    "fit_1": "158.76",
+                    "fit_2": "158.76"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "12.33",
+                    "eval_2": "12.33",
+                    "fit_1": "159.54",
+                    "fit_2": "159.54"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "22.09",
+                    "eval_2": "22.09",
+                    "fit_1": "161.27",
+                    "fit_2": "161.27"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "20.19",
+                    "eval_2": "20.19",
+                    "fit_1": "168.85",
+                    "fit_2": "168.85"
                 }
             }
         },
         "n1-standard-8_t4": {
             "GCP_us-central1": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "16.39",
+                    "eval_2": "16.39",
+                    "fit_1": "124.48",
+                    "fit_2": "124.48"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "15.41",
+                    "eval_2": "15.41",
+                    "fit_1": "122.74",
+                    "fit_2": "122.74"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "23.99",
+                    "eval_2": "23.99",
+                    "fit_1": "135.02",
+                    "fit_2": "135.02"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "24.01",
+                    "eval_2": "24.01",
+                    "fit_1": "130.06",
+                    "fit_2": "130.06"
                 }
             },
             "GCP_us-west1": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "16.16",
+                    "eval_2": "16.16",
+                    "fit_1": "129.56",
+                    "fit_2": "129.56"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "15.29",
+                    "eval_2": "15.29",
+                    "fit_1": "131.15",
+                    "fit_2": "131.15"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "42.95",
+                    "eval_2": "42.95",
+                    "fit_1": "183.29",
+                    "fit_2": "183.29"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "41.15",
+                    "eval_2": "41.15",
+                    "fit_1": "183.23",
+                    "fit_2": "183.23"
                 }
             }
         },
         "n1-standard-8_v100": {
             "GCP_us-central1": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "12.38",
+                    "eval_2": "12.38",
+                    "fit_1": "49.14",
+                    "fit_2": "49.14"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "14.57",
+                    "eval_2": "14.57",
+                    "fit_1": "49.09",
+                    "fit_2": "49.09"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "19.13",
+                    "eval_2": "19.13",
+                    "fit_1": "55.59",
+                    "fit_2": "55.59"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "20.67",
+                    "eval_2": "20.67",
+                    "fit_1": "57.51",
+                    "fit_2": "57.51"
                 }
             },
             "GCP_us-west1": {
                 "0": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "14.74",
+                    "eval_2": "14.74",
+                    "fit_1": "52.04",
+                    "fit_2": "52.04"
                 },
                 "1": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "10.74",
+                    "eval_2": "10.74",
+                    "fit_1": "53.67",
+                    "fit_2": "53.67"
                 },
                 "2": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "38.24",
+                    "eval_2": "38.24",
+                    "fit_1": "123.30",
+                    "fit_2": "123.30"
                 },
                 "3": {
-                    "eval_1": "",
-                    "eval_2": "",
-                    "fit_1": "",
-                    "fit_2": ""
+                    "eval_1": "38.03",
+                    "eval_2": "38.03",
+                    "fit_1": "131.35",
+                    "fit_2": "131.35"
                 }
             }
         }
@@ -224,191 +224,1568 @@
     "number_datacenters": 17,
     "rpc": {
         "AWS_us-east-1_us-east-1a": {
-            "AWS_us-east-1_us-east-1a": {},
-            "AWS_us-east-1_us-east-1b": {},
-            "AWS_us-east-1_us-east-1c": {},
-            "AWS_us-east-1_us-east-1d": {},
-            "AWS_us-east-1_us-east-1e": {},
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1a": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-east-1_us-east-1b": {
-            "AWS_us-east-1_us-east-1b": {},
-            "AWS_us-east-1_us-east-1c": {},
-            "AWS_us-east-1_us-east-1d": {},
-            "AWS_us-east-1_us-east-1e": {},
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-east-1_us-east-1c": {
-            "AWS_us-east-1_us-east-1c": {},
-            "AWS_us-east-1_us-east-1d": {},
-            "AWS_us-east-1_us-east-1e": {},
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-east-1_us-east-1d": {
-            "AWS_us-east-1_us-east-1d": {},
-            "AWS_us-east-1_us-east-1e": {},
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-east-1_us-east-1e": {
-            "AWS_us-east-1_us-east-1e": {},
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-east-1_us-east-1f": {
-            "AWS_us-east-1_us-east-1f": {},
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.43"
+                }
+            },
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                },
+                "server-client": {
+                    "TestMsg": "9.78",
+                    "TrainMsg": "19.34"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                },
+                "server-client": {
+                    "TestMsg": "4.28",
+                    "TrainMsg": "9.33"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                },
+                "server-client": {
+                    "TestMsg": "6.11",
+                    "TrainMsg": "15.76"
+                }
+            }
         },
         "AWS_us-west-2_us-west-2a": {
-            "AWS_us-west-2_us-west-2a": {},
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-west-2_us-west-2a": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            }
         },
         "AWS_us-west-2_us-west-2b": {
-            "AWS_us-west-2_us-west-2b": {},
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-west-2_us-west-2b": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            }
         },
         "AWS_us-west-2_us-west-2c": {
-            "AWS_us-west-2_us-west-2c": {},
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-west-2_us-west-2c": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            }
         },
         "AWS_us-west-2_us-west-2d": {
-            "AWS_us-west-2_us-west-2d": {},
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "AWS_us-west-2_us-west-2d": {
+                "client-server": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                },
+                "server-client": {
+                    "TestMsg": "2.9",
+                    "TrainMsg": "5.4"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                },
+                "server-client": {
+                    "TestMsg": "7.16",
+                    "TrainMsg": "11.48"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                },
+                "server-client": {
+                    "TestMsg": "3.47",
+                    "TrainMsg": "6.46"
+                }
+            }
         },
         "GCP_us-central1_us-central1-a": {
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {}
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            }
         },
         "GCP_us-central1_us-central1-b": {
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {}
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            }
         },
         "GCP_us-central1_us-central1-c": {
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {}
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            }
         },
         "GCP_us-central1_us-central1-f": {
-            "GCP_us-central1_us-central1-f": {}
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                },
+                "server-client": {
+                    "TestMsg": "1.96",
+                    "TrainMsg": "3.56"
+                }
+            }
         },
         "GCP_us-west1_us-west1-a": {
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-a": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            }
         },
         "GCP_us-west1_us-west1-b": {
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-b": {},
-            "GCP_us-west1_us-west1-c": {}
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            }
         },
         "GCP_us-west1_us-west1-c": {
-            "GCP_us-central1_us-central1-a": {},
-            "GCP_us-central1_us-central1-b": {},
-            "GCP_us-central1_us-central1-c": {},
-            "GCP_us-central1_us-central1-f": {},
-            "GCP_us-west1_us-west1-c": {}
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                },
+                "server-client": {
+                    "TestMsg": "4.47",
+                    "TrainMsg": "8.62"
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                },
+                "server-client": {
+                    "TestMsg": "2.19",
+                    "TrainMsg": "3.82"
+                }
+            }
         }
     },
     "rpc_concurrent": {},
