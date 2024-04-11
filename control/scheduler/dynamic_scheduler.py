@@ -1,3 +1,4 @@
+from control.managers.cloud_manager import CloudManager
 from control.util.loader import Loader
 from control.domain.instance_type import InstanceType
 
@@ -43,7 +44,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         current_inst = self.current_vms[str(client_num)]
         current_loc = self.current_locations[str(client_num)]
 
-        aux_loc = current_inst.provider + '_' + current_loc.region
+        # aux_loc = current_inst.provider + '_' + current_loc.region
 
         # if current_inst.type in self.dynamic_scheduler_inst_cli_cloudlab[client_num]:
         #     try:
@@ -108,8 +109,8 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                                      (self.server_msg_train + self.server_msg_test)
                                      * self.cost_transfer[instance.provider.upper()])
 
-                    current_value = self.alpha * (current_cost / self.max_cost) \
-                                     + (1 - self.alpha) * (current_makespan / self.max_total_exec)
+                    current_value = (self.alpha * (current_cost / self.max_cost) + (1 - self.alpha)
+                                     * (current_makespan / self.max_total_exec))
                 except Exception as e:
                     logging.error("<Scheduler> Error getting new client VM")
                     logging.error(e)
@@ -136,8 +137,18 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         location_chosen = None
         server_inst = self.current_vms['server']
         server_loc = self.current_locations['server']
-        current_inst = self.current_vms[str(client_num)]
+        current_inst = self.current_vms[str(client_num)][0]
+        current_market = self.current_vms[str(client_num)][1]
         current_loc = self.current_locations[str(client_num)]
+
+        if current_market == CloudManager.PREEMPTIBLE:
+            if current_inst.provider.lower() in (CloudManager.EC2, CloudManager.AWS):
+                self.qtde_gpus_spot_aws_east += 1
+            elif current_inst.provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
+                for name, instance in self.instances_client_gcp.items():
+                    if instance == current_inst:
+                        self.qtde_gpus_spot_gcloud[name][current_loc.region] += 1
+                        break
 
         aux_loc = current_inst.provider.upper() + '_' + current_loc.region
 
@@ -204,8 +215,8 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                                      (self.server_msg_train + self.server_msg_test)
                                      * self.cost_transfer[instance.provider.upper()])
 
-                    current_value = self.alpha * (current_cost / self.max_cost) \
-                                    + (1 - self.alpha) * (current_makespan / self.max_total_exec)
+                    current_value = (self.alpha * (current_cost / self.max_cost) + (1 - self.alpha)
+                                     * (current_makespan / self.max_total_exec))
                 except Exception as e:
                     logging.error("<Scheduler> Error getting new client VM")
                     logging.error(e)
@@ -256,8 +267,8 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                     current_cost = self.__compute_new_expected_cost(makespan=current_makespan, server_vm=instance,
                                                                     server_loc=loc)
 
-                    current_value = self.alpha * (current_cost / self.max_cost) \
-                                    + (1 - self.alpha) * (current_makespan / self.max_total_exec)
+                    current_value = (self.alpha * (current_cost / self.max_cost) + (1 - self.alpha)
+                                     * (current_makespan / self.max_total_exec))
                 except Exception as e:
                     logging.error("<Scheduler> Error getting new server VM")
                     logging.error(e)
@@ -282,10 +293,10 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         min_greedy_cost = inf
         instance_chosen = None
         location_chosen = None
-        current_inst = self.current_vms['server']
-        current_loc = self.current_locations['server']
+        # current_inst = self.current_vms['server']
+        # current_loc = self.current_locations['server']
 
-        aux_loc = current_inst.provider + '_' + current_loc.region
+        # aux_loc = current_inst.provider + '_' + current_loc.region
 
         # if current_inst.type in self.dynamic_scheduler_instances_server_cloudlab:
         #     try:
@@ -308,8 +319,8 @@ class DynamicScheduler(MathematicalFormulationScheduler):
                     current_cost = self.__compute_new_expected_cost(makespan=current_makespan, server_vm=instance,
                                                                     server_loc=loc)
 
-                    current_value = self.alpha * (current_cost / self.max_cost) \
-                                    + (1 - self.alpha) * (current_makespan / self.max_total_exec)
+                    current_value = (self.alpha * (current_cost / self.max_cost) + (1 - self.alpha)
+                                     * (current_makespan / self.max_total_exec))
                 except Exception as e:
                     logging.error("<Scheduler> Error getting new server VM")
                     logging.error(e)

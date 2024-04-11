@@ -24,12 +24,13 @@ class Scheduler:
         self.loc_aws: Dict[str, CloudRegion] = {}
         self.loc_gcp: Dict[str, CloudRegion] = {}
         self.loc_cloudlab: Dict[str, CloudRegion] = {}
+        self.qtde_gpus_spot_gcloud: Dict[str, Dict[str, int]] = {}
+        self.qtde_gpus_spot_aws_east = 1
         self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
         self.__separate_location_by_cloud(locations)
         self.index_extra_vm = []
-        self.current_vms: Dict[str, InstanceType] = {'server': None}
+        self.current_vms: Dict[str, (InstanceType, str)] = {'server': None}
         self.current_locations: Dict[str, CloudRegion] = {'server': None}
-        self.qtde_gpus_spot_aws_east = 1
 
     def __divide_instances_for_server_and_for_client_by_cloud(self, instance_types):
         # logging.info("<Scheduler>: Dividing instances types for server and client")
@@ -45,6 +46,7 @@ class Scheduler:
                     # logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.instances_client_gcp[name] = instance
+                    self.qtde_gpus_spot_gcloud[name] = {}
                     # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
@@ -69,7 +71,7 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(name,
                                                                                                                region))
-                                self.current_vms['server'] = instance
+                                self.current_vms['server'] = (instance, CloudManager.PREEMPTIBLE)
                                 self.current_locations['server'] = loc
                                 # if "west" in region:
                                 return instance, CloudManager.PREEMPTIBLE, loc, zone
@@ -85,7 +87,7 @@ class Scheduler:
                             for zone in loc.zones:
                                 logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(name,
                                                                                                                region))
-                                self.current_vms['server'] = instance
+                                self.current_vms['server'] = (instance, CloudManager.PREEMPTIBLE)
                                 self.current_locations['server'] = loc
                                 return instance, CloudManager.PREEMPTIBLE, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
@@ -99,8 +101,8 @@ class Scheduler:
                         # print("loc", loc)
                         if loc.region == region:
                             logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
-                                                                                                             region))
-                            self.current_vms['server'] = instance
+                                                                                                         region))
+                            self.current_vms['server'] = (instance, Experiment.MARKET)
                             self.current_locations['server'] = loc
                             return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
@@ -115,8 +117,6 @@ class Scheduler:
                     for loc in self.loc_aws.values():
                         if loc.region == region:
                             for zone in loc.zones:
-                                self.current_vms[str(client_id)] = instance
-                                self.current_locations[str(client_id)] = loc
                                 if self.qtde_gpus_spot_aws_east > 0:
                                     self.qtde_gpus_spot_aws_east -= 1
                                 if "west" in region or self.qtde_gpus_spot_aws_east >= 0:
@@ -124,12 +124,16 @@ class Scheduler:
                                         name,
                                         region)
                                     )
+                                    self.current_vms[str(client_id)] = (instance, CloudManager.PREEMPTIBLE)
+                                    self.current_locations[str(client_id)] = loc
                                     return instance, CloudManager.PREEMPTIBLE, loc, zone
                                 else:
                                     logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(
                                         name,
                                         region)
                                     )
+                                    self.current_vms[str(client_id)] = (instance, CloudManager.ON_DEMAND)
+                                    self.current_locations[str(client_id)] = loc
                                     return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
@@ -139,9 +143,23 @@ class Scheduler:
                     for loc in self.loc_gcp.values():
                         if loc.region == region:
                             for zone in loc.zones:
-                                logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(name,
-                                                                                                               region))
-                                return instance, CloudManager.PREEMPTIBLE, loc, zone
+                                if self.qtde_gpus_spot_gcloud[name][loc.region] > 0:
+                                    self.qtde_gpus_spot_gcloud[name][loc.region] -= 1
+                                    self.current_vms[str(client_id)] = (instance, CloudManager.PREEMPTIBLE)
+                                    self.current_locations[str(client_id)] = loc
+                                    logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(
+                                        name,
+                                        region)
+                                    )
+                                    return instance, CloudManager.PREEMPTIBLE, loc, zone
+                                else:
+                                    self.current_vms[str(client_id)] = (instance, CloudManager.ON_DEMAND)
+                                    self.current_locations[str(client_id)] = loc
+                                    logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(
+                                        name,
+                                        region)
+                                    )
+                                    return instance, CloudManager.ON_DEMAND, loc, zone
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
         elif provider.lower() in (CloudManager.CLOUDLAB.lower()):
             for name, instance in self.instances_client_cloudlab.items():
@@ -149,8 +167,8 @@ class Scheduler:
                     for loc in self.loc_cloudlab.values():
                         if loc.region == region:
                             logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
-                                                                                                             region))
-                            self.current_vms[str(client_id)] = instance
+                                                                                                         region))
+                            self.current_vms[str(client_id)] = (instance, Experiment.MARKET)
                             self.current_locations[str(client_id)] = loc
                             return instance, Experiment.MARKET, loc, ""
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
@@ -193,7 +211,7 @@ class Scheduler:
                 for loc in self.loc_cloudlab.values():
                     if loc.region == region:
                         logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(name,
-                                                                                                         region))
+                                                                                                     region))
                         return instance, Experiment.MARKET, loc, ""
                 logging.error("<Scheduler>: Location {} not included in environment".format(region))
 
@@ -203,6 +221,8 @@ class Scheduler:
                 self.loc_aws[loc_id] = loc
             elif loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.loc_gcp[loc_id] = loc
+                for instance, value in self.qtde_gpus_spot_gcloud.items():
+                    self.qtde_gpus_spot_gcloud[instance][loc.region] = 1
             elif loc.provider in CloudManager.CLOUDLAB:
                 self.loc_cloudlab[loc_id] = loc
             else:
