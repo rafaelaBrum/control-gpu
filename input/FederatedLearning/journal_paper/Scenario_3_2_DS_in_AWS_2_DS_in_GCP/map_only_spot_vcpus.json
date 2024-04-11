@@ -11,24 +11,24 @@
             "region": "us-central1"
         },
         "2": {
-            "instance_type": "n1-standard-8_t4",
+            "instance_type": "n1-standard-8_v100",
             "provider": "GCP",
             "region": "us-central1"
         },
         "3": {
-            "instance_type": "g4dn.2xlarge",
-            "provider": "AWS",
-            "region": "us-east-1"
+            "instance_type": "n1-standard-8_v100",
+            "provider": "GCP",
+            "region": "us-central1"
         }
     },
-    "cost": 0.8731002293621158,
-    "makespan": 332.9044892879578,
-    "max_cost": 2.603237197208392,
-    "max_total_exec": 959.48609688163,
-    "obj_value": 0.3411757188927527,
+    "cost": 0.8807241814557075,
+    "makespan": 93.92324050059848,
+    "max_cost": 1.7795173898655186,
+    "max_total_exec": 377.1061551248336,
+    "obj_value": 0.3719930936030008,
     "server": {
-        "instance_type": "t2.xlarge",
-        "provider": "AWS",
-        "region": "us-east-1"
+        "instance_type": "e2-standard-4",
+        "provider": "GCP",
+        "region": "us-central1"
     }
 }
