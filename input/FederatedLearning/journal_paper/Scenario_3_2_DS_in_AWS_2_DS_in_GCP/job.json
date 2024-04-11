@@ -34,7 +34,7 @@
                 "bucket_provider": "aws",
                 "bucket_region": "us-east-1",
                 "net": "VGG16",
-                "baseline_exec": 595.71,
+                "baseline_exec": 126.14,
                 "dataset_urn": ""
             },
             "1" : {
@@ -51,7 +51,7 @@
                 "bucket_provider": "aws",
                 "bucket_region": "us-east-1",
                 "net": "VGG16",
-                "baseline_exec": 595.71,
+                "baseline_exec": 126.14,
                 "dataset_urn": ""
             },
             "2" : {
@@ -68,7 +68,7 @@
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
                 "net": "VGG16",
-                "baseline_exec": 233.01,
+                "baseline_exec": 183.56,
                 "dataset_urn": ""
             },
             "3" : {
@@ -85,7 +85,7 @@
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
                 "net": "VGG16",
-                "baseline_exec": 233.01,
+                "baseline_exec": 183.56,
                 "dataset_urn": ""
             }
         }
