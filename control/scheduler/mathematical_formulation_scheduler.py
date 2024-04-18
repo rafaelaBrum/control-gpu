@@ -289,6 +289,18 @@ class MathematicalFormulationScheduler(Scheduler):
                 "constraint_slowest_client"
             )
 
+            #this constraint to only one VM per type in each region in GCP
+            for p, r, vm in self.prov_regions_vms:
+                if j == "GCP":
+                    model.addConstr(
+                        (
+                                gp.quicksum(x_client_vars[i, j, k, l] for i, j, k, l in self.client_prov_regions_vms if
+                                            j == p and k == r and l == vm)
+                                <= 1
+                        ),
+                        f"constraint_GCP_gpu_{p}_{r}_{vm}"
+                    )
+
             print(model.display())
 
             model.write("file.lp")
