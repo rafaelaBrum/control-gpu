@@ -870,9 +870,12 @@ class VirtualMachine:
     def price(self):
         if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
             if self.market == CloudManager.PREEMPTIBLE:
-                return self.manager.get_preemptible_price(self.instance_type.type, self.zone, self.region.region)[0][1]
+                # return self.manager.get_preemptible_price(self.instance_type.type,
+                # self.zone, self.region.region)[0][1]
+                return self.instance_type.price_preemptible[self.region.region]
             else:
-                return self.manager.get_ondemand_price(self.instance_type.type, self.region.region)
+                # return self.manager.get_ondemand_price(self.instance_type.type, self.region.region)
+                return self.instance_type.price_ondemand[self.region.region]
         elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             if self.market == CloudManager.PREEMPTIBLE:
                 vcpu_price, mem_price = self.manager.get_preemptible_price(self.instance_type.type,
