@@ -53,7 +53,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
-COUNTER=3
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER

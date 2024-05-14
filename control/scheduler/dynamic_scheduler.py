@@ -39,9 +39,9 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         min_greedy_cost = inf
         instance_chosen = None
         location_chosen = None
-        server_inst = self.current_vms['server']
+        server_inst = self.current_vms['server'][0]
         server_loc = self.current_locations['server']
-        current_inst = self.current_vms[str(client_num)]
+        current_inst = self.current_vms[str(client_num)][0]
         current_loc = self.current_locations[str(client_num)]
 
         # aux_loc = current_inst.provider + '_' + current_loc.region
@@ -135,7 +135,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         min_greedy_cost = inf
         instance_chosen = None
         location_chosen = None
-        server_inst = self.current_vms['server']
+        server_inst = self.current_vms['server'][0]
         server_loc = self.current_locations['server']
         current_inst = self.current_vms[str(client_num)][0]
         current_market = self.current_vms[str(client_num)][1]
@@ -241,7 +241,7 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         min_greedy_cost = inf
         instance_chosen = None
         location_chosen = None
-        current_inst = self.current_vms['server']
+        current_inst = self.current_vms['server'][0]
         current_loc = self.current_locations['server']
 
         aux_loc = current_inst.provider.upper() + '_' + current_loc.region
@@ -357,13 +357,13 @@ class DynamicScheduler(MathematicalFormulationScheduler):
     def __get_expected_makespan(self, skip=False, client_num=-1, server_vm=None, server_loc=None):
         max_makespan = -inf
         if server_vm is None:
-            server_vm = self.current_vms['server']
+            server_vm = self.current_vms['server'][0]
             server_loc = self.current_locations['server'].region
 
         for cli in self.clients:
             if skip and cli == client_num:
                 continue
-            cli_instance = self.current_vms[str(cli)]
+            cli_instance = self.current_vms[str(cli)][0]
             cli_loc = self.current_locations[str(cli)].region
             try:
                 current_time = self.time_exec[cli,
@@ -390,13 +390,13 @@ class DynamicScheduler(MathematicalFormulationScheduler):
         expected_cost = 0.0
 
         if server_vm is None:
-            server_vm = self.current_vms['server']
+            server_vm = self.current_vms['server'][0]
             server_loc = self.current_locations['server'].region
 
         for cli in self.clients:
             if skip and cli == client_num:
                 continue
-            vm_cli = self.current_vms[str(cli)]
+            vm_cli = self.current_vms[str(cli)][0]
             loc_cli = self.current_locations[str(cli)]
             expected_cost += (self.cost_vms[vm_cli.provider.upper(), loc_cli.region, vm_cli.type]
                               * makespan)
