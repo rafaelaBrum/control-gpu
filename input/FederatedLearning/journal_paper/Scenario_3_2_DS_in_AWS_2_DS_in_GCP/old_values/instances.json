@@ -96,6 +96,39 @@
                 "AWS_us-west-2"
             ]
         },
+        "n1-standard-8_t4": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.7299979999999999,
+                    "us-central1": 0.7299979999999999
+                },
+                "preemptible": {
+                    "us-west1": 0.21597,
+                    "us-central1": 0.21597
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-t4",
+            "gpu_count": 1,
+            "locations": [
+                "GCP_us-west1",
+                "GCP_us-central1"
+            ]
+        },
         "e2-standard-4": {
             "provider": "gcp",
             "prices": {
@@ -129,16 +162,16 @@
                 "GCP_us-central1"
             ]
         },
-        "n1-standard-16_p100": {
+        "n1-standard-8_v100": {
             "provider": "gcp",
             "prices": {
                 "on-demand": {
-                    "us-west1": 1.359996,
-                    "us-central1": 1.359996
+                    "us-west1": 2.859998,
+                    "us-central1": 2.859998
                 },
                 "preemptible": {
-                    "us-west1": 0.39193999999999996,
-                    "us-central1": 0.39193999999999996
+                    "us-west1": 1.01837,
+                    "us-central1": 1.01837
                 }
             },
             "restrictions": {
@@ -153,16 +186,16 @@
             },
             "image_id": "",
             "ebs_device_name": "/dev/sdb",
-            "vcpu": 16,
-            "memory": 60,
-            "gpu": "nvidia-tesla-p100",
+            "vcpu": 8,
+            "memory": 30,
+            "gpu": "nvidia-tesla-v100",
             "gpu_count": 1,
             "locations": [
-                "GCP_us-central1",
-                "GCP_us-west1"
+                "GCP_us-west1",
+                "GCP_us-central1"
             ]
         },
-        "g2-standard-4_l4": {
+        "n1-standard-16_p4": {
             "provider": "gcp",
             "prices": {
                 "on-demand": {
@@ -188,11 +221,10 @@
             "ebs_device_name": "/dev/sdb",
             "vcpu": 16,
             "memory": 60,
-            "gpu": "nvidia-l4",
+            "gpu": "nvidia-tesla-p4",
             "gpu_count": 1,
             "locations": [
-                "GCP_us-central1",
-                "GCP_us-west1"
+                "GCP_us-central1"
             ]
         }
     }

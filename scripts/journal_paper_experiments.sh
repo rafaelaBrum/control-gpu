@@ -72,7 +72,7 @@ cp setup_journal_paper/test_case_setup_simulation_checkpoint_all_gcp.cfg setup.c
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
-COUNTER=1
+COUNTER=4
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -87,7 +87,7 @@ done
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
-COUNTER=1
+COUNTER=2
 while [  $COUNTER -lt 4 ]; do
 	echo " ----------------------------
   Running test - Counter=$COUNTER
@@ -95,7 +95,7 @@ while [  $COUNTER -lt 4 ]; do
         echo python3 client.py control --strategy FedAvgSave --revocation_rate 0.0002777777777777778
         python3 client.py control --strategy FedAvgSave --revocation_rate 0.0002777777777777778
         if [ $COUNTER -ne 3 ]; then
-          sleep 30m
+          sleep 5m
         fi
         COUNTER=$((COUNTER+1))
 done
