@@ -1,6 +1,19 @@
 {
     "exec_times": {
-        "g2-standard-4_l4": {},
+        "g2-standard-4_l4": {
+            "GCP_us-central1": {
+                "0": {},
+                "1": {},
+                "2": {},
+                "3": {}
+            },
+            "GCP_us-west1": {
+                "0": {},
+                "1": {},
+                "2": {},
+                "3": {}
+            }
+        },
         "g3.4xlarge": {
             "AWS_us-east-1": {}
         },
@@ -1040,7 +1053,6 @@
             "GCP_us-central1_us-central1-b": 0.3980698585510254,
             "GCP_us-central1_us-central1-c": 0.304004430770874,
             "GCP_us-central1_us-central1-f": 0.3310999870300293,
-            "GCP_us-west1_us-west1-a": 0.6189630031585693,
             "GCP_us-west1_us-west1-b": 0.5555088520050049,
             "GCP_us-west1_us-west1-c": 0.5477855205535889
         },
@@ -1057,7 +1069,6 @@
             "GCP_us-central1_us-central1-b": 0.39903712272644043,
             "GCP_us-central1_us-central1-c": 0.3273446559906006,
             "GCP_us-central1_us-central1-f": 0.3092989921569824,
-            "GCP_us-west1_us-west1-a": 0.5801701545715332,
             "GCP_us-west1_us-west1-b": 0.5506997108459473,
             "GCP_us-west1_us-west1-c": -1
         },
@@ -1069,11 +1080,9 @@
             "AWS_us-west-2_us-west-2a": 0.5400965213775635,
             "AWS_us-west-2_us-west-2b": 0.5327672958374023,
             "AWS_us-west-2_us-west-2c": 0.5487551689147949,
-            "GCP_us-central1_us-central1-a": 0.3418290615081787,
             "GCP_us-central1_us-central1-b": 0.3283097743988037,
             "GCP_us-central1_us-central1-c": 0.32157158851623535,
             "GCP_us-central1_us-central1-f": 0.32950615882873535,
-            "GCP_us-west1_us-west1-a": 0.580054521560669,
             "GCP_us-west1_us-west1-b": 0.6417322158813477,
             "GCP_us-west1_us-west1-c": 0.5577337741851807
         },
@@ -1088,7 +1097,6 @@
             "GCP_us-central1_us-central1-b": -1,
             "GCP_us-central1_us-central1-c": 0.3254988193511963,
             "GCP_us-central1_us-central1-f": 0.3759169578552246,
-            "GCP_us-west1_us-west1-a": 0.6388089656829834,
             "GCP_us-west1_us-west1-b": 0.5568966865539551,
             "GCP_us-west1_us-west1-c": 0.5545060634613037
         },
@@ -1102,7 +1110,6 @@
             "GCP_us-central1_us-central1-b": 0.33937525749206543,
             "GCP_us-central1_us-central1-c": 0.33460235595703125,
             "GCP_us-central1_us-central1-f": 0.37583422660827637,
-            "GCP_us-west1_us-west1-a": 0.7651000022888184,
             "GCP_us-west1_us-west1-b": 0.5557816028594971,
             "GCP_us-west1_us-west1-c": 0.6179707050323486
         },
@@ -1169,8 +1176,7 @@
         },
         "GCP_us-central1_us-central1-b": {
             "GCP_us-central1_us-central1-b": 0.6506690979003906,
-            "GCP_us-central1_us-central1-c": 2.365875720977783,
-            "GCP_us-central1_us-central1-f": 0.35854268074035645
+            "GCP_us-central1_us-central1-c": 2.365875720977783
         },
         "GCP_us-central1_us-central1-c": {
             "GCP_us-central1_us-central1-c": 1.135183334350586,
