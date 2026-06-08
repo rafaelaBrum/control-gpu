@@ -1,0 +1,666 @@
+{
+    "exec_times": {
+        "g4dn.2xlarge": {
+            "AWS_us-east-1": {
+                "0": {}
+            }
+        },
+        "n1-standard-8": {
+            "GCP_us-central1": {
+                "0": {}
+            }
+        }
+    },
+    "job_id": 3,
+    "job_name": "Job teste de RPC",
+    "number_datacenters": 10,
+    "rpc": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": {
+                "client-server": {
+                    "TestMsg": "6.6815338134765625",
+                    "TrainMsg": "12.495748519897461"
+                },
+                "server-client": {
+                    "TestMsg": "4.377334117889404",
+                    "TrainMsg": "7.612472295761108"
+                }
+            },
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "8.623730897903442",
+                    "TrainMsg": "14.024315595626831"
+                },
+                "server-client": {
+                    "TestMsg": "7.114813566207886",
+                    "TrainMsg": "13.714242458343506"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "6.882293939590454",
+                    "TrainMsg": "13.62898564338684"
+                },
+                "server-client": {
+                    "TestMsg": "7.5403196811676025",
+                    "TrainMsg": "13.275262117385864"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "8.20043396949768",
+                    "TrainMsg": "14.031450986862183"
+                },
+                "server-client": {
+                    "TestMsg": "7.52069091796875",
+                    "TrainMsg": "14.293814897537231"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "7.65648889541626",
+                    "TrainMsg": "12.439558029174805"
+                },
+                "server-client": {
+                    "TestMsg": "6.587965965270996",
+                    "TrainMsg": "12.28032398223877"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "6.995575904846191",
+                    "TrainMsg": "12.984482526779175"
+                },
+                "server-client": {
+                    "TestMsg": "6.824861526489258",
+                    "TrainMsg": "12.647794008255005"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "6.907676935195923",
+                    "TrainMsg": "16.880995988845825"
+                },
+                "server-client": {
+                    "TestMsg": "10.36137342453003",
+                    "TrainMsg": "16.49865746498108"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "7.746825218200684",
+                    "TrainMsg": "18.70782995223999"
+                },
+                "server-client": {
+                    "TestMsg": "10.930915117263794",
+                    "TrainMsg": "17.817246913909912"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "6.599485397338867",
+                    "TrainMsg": "16.055049657821655"
+                },
+                "server-client": {
+                    "TestMsg": "10.667602062225342",
+                    "TrainMsg": "17.021162271499634"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "7.868611574172974",
+                    "TrainMsg": "18.892372608184814"
+                },
+                "server-client": {
+                    "TestMsg": "12.468645095825195",
+                    "TrainMsg": "20.060770988464355"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": {
+                "client-server": {
+                    "TestMsg": "6.767093181610107",
+                    "TrainMsg": "12.453525304794312"
+                },
+                "server-client": {
+                    "TestMsg": "6.920154571533203",
+                    "TrainMsg": "12.743147134780884"
+                }
+            },
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "8.131865978240967",
+                    "TrainMsg": "12.719780445098877"
+                },
+                "server-client": {
+                    "TestMsg": "6.888145923614502",
+                    "TrainMsg": "12.595043182373047"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "8.162909984588623",
+                    "TrainMsg": "13.327373504638672"
+                },
+                "server-client": {
+                    "TestMsg": "7.7169129848480225",
+                    "TrainMsg": "13.02253246307373"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "7.208716154098511",
+                    "TrainMsg": "13.83658480644226"
+                },
+                "server-client": {
+                    "TestMsg": "6.977286338806152",
+                    "TrainMsg": "14.328636407852173"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "8.049718618392944",
+                    "TrainMsg": "12.824064016342163"
+                },
+                "server-client": {
+                    "TestMsg": "6.778515100479126",
+                    "TrainMsg": "12.197409391403198"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "52.76748967170715",
+                    "TrainMsg": "66.61540341377258"
+                },
+                "server-client": {
+                    "TestMsg": "28.622315168380737",
+                    "TrainMsg": "65.42809462547302"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "40.58337187767029",
+                    "TrainMsg": "61.87923789024353"
+                },
+                "server-client": {
+                    "TestMsg": "31.624549388885498",
+                    "TrainMsg": "69.54395365715027"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "44.029173851013184",
+                    "TrainMsg": "65.68304204940796"
+                },
+                "server-client": {
+                    "TestMsg": "18.27912402153015",
+                    "TrainMsg": "59.16201448440552"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "42.95450830459595",
+                    "TrainMsg": "64.04963850975037"
+                },
+                "server-client": {
+                    "TestMsg": "31.1340594291687",
+                    "TrainMsg": "76.6915774345398"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": {
+                "client-server": {
+                    "TestMsg": "10.517285346984863",
+                    "TrainMsg": "17.721744298934937"
+                },
+                "server-client": {
+                    "TestMsg": "6.689335107803345",
+                    "TrainMsg": "15.057932376861572"
+                }
+            },
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "8.534687995910645",
+                    "TrainMsg": "13.030585765838623"
+                },
+                "server-client": {
+                    "TestMsg": "6.735940456390381",
+                    "TrainMsg": "12.336928844451904"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "8.379177331924438",
+                    "TrainMsg": "13.066867113113403"
+                },
+                "server-client": {
+                    "TestMsg": "6.78684139251709",
+                    "TrainMsg": "13.018198013305664"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "7.879835844039917",
+                    "TrainMsg": "12.371983528137207"
+                },
+                "server-client": {
+                    "TestMsg": "6.621442556381226",
+                    "TrainMsg": "12.305967330932617"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "50.411272287368774",
+                    "TrainMsg": "71.54152178764343"
+                },
+                "server-client": {
+                    "TestMsg": "27.849721431732178",
+                    "TrainMsg": "69.30501198768616"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "26.77669596672058",
+                    "TrainMsg": "57.48792123794556"
+                },
+                "server-client": {
+                    "TestMsg": "26.3190279006958",
+                    "TrainMsg": "59.44183897972107"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "41.82530450820923",
+                    "TrainMsg": "72.09129428863525"
+                },
+                "server-client": {
+                    "TestMsg": "27.246140480041504",
+                    "TrainMsg": "62.95635795593262"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "37.40858221054077",
+                    "TrainMsg": "64.79403233528137"
+                },
+                "server-client": {
+                    "TestMsg": "28.656522035598755",
+                    "TrainMsg": "65.94628381729126"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": {
+                "client-server": {
+                    "TestMsg": "11.504384994506836",
+                    "TrainMsg": "30.725605010986328"
+                },
+                "server-client": {
+                    "TestMsg": "7.1493308544158936",
+                    "TrainMsg": "12.99657130241394"
+                }
+            },
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "7.3782548904418945",
+                    "TrainMsg": "13.04831862449646"
+                },
+                "server-client": {
+                    "TestMsg": "6.810842990875244",
+                    "TrainMsg": "12.885458707809448"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "6.879291772842407",
+                    "TrainMsg": "14.056431531906128"
+                },
+                "server-client": {
+                    "TestMsg": "6.802873849868774",
+                    "TrainMsg": "12.551655530929565"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "40.532782316207886",
+                    "TrainMsg": "62.94134593009949"
+                },
+                "server-client": {
+                    "TestMsg": "27.07179880142212",
+                    "TrainMsg": "71.16484808921814"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "32.32058024406433",
+                    "TrainMsg": "56.41284108161926"
+                },
+                "server-client": {
+                    "TestMsg": "26.08352565765381",
+                    "TrainMsg": "61.85674715042114"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "43.656869411468506",
+                    "TrainMsg": "72.79794406890869"
+                },
+                "server-client": {
+                    "TestMsg": "29.80725073814392",
+                    "TrainMsg": "67.0729444026947"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "30.926271200180054",
+                    "TrainMsg": "60.76894664764404"
+                },
+                "server-client": {
+                    "TestMsg": "27.61140489578247",
+                    "TrainMsg": "58.65225696563721"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": {
+                "client-server": {
+                    "TestMsg": "6.723066568374634",
+                    "TrainMsg": "12.646093606948853"
+                },
+                "server-client": {
+                    "TestMsg": "8.700342893600464",
+                    "TrainMsg": "12.573963403701782"
+                }
+            },
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "9.1028733253479",
+                    "TrainMsg": "12.895873069763184"
+                },
+                "server-client": {
+                    "TestMsg": "6.740670680999756",
+                    "TrainMsg": "12.576151371002197"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "37.739503622055054",
+                    "TrainMsg": "63.654112100601196"
+                },
+                "server-client": {
+                    "TestMsg": "27.423728466033936",
+                    "TrainMsg": "69.23309397697449"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "36.22409510612488",
+                    "TrainMsg": "63.55083656311035"
+                },
+                "server-client": {
+                    "TestMsg": "26.652843713760376",
+                    "TrainMsg": "62.59762406349182"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "33.257590770721436",
+                    "TrainMsg": "60.68278908729553"
+                },
+                "server-client": {
+                    "TestMsg": "28.27875280380249",
+                    "TrainMsg": "64.62059307098389"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "35.98561358451843",
+                    "TrainMsg": "68.25553297996521"
+                },
+                "server-client": {
+                    "TestMsg": "25.445823431015015",
+                    "TrainMsg": "67.64478397369385"
+                }
+            }
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": {
+                "client-server": {
+                    "TestMsg": "9.279515504837036",
+                    "TrainMsg": "15.57532286643982"
+                },
+                "server-client": {
+                    "TestMsg": "6.521772146224976",
+                    "TrainMsg": "12.079172849655151"
+                }
+            },
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "43.3973593711853",
+                    "TrainMsg": "63.968201637268066"
+                },
+                "server-client": {
+                    "TestMsg": "23.74874520301819",
+                    "TrainMsg": "62.78566074371338"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "31.4696786403656",
+                    "TrainMsg": "59.6157066822052"
+                },
+                "server-client": {
+                    "TestMsg": "28.915114879608154",
+                    "TrainMsg": "63.499228715896606"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "36.81114363670349",
+                    "TrainMsg": "58.98738884925842"
+                },
+                "server-client": {
+                    "TestMsg": "26.331687211990356",
+                    "TrainMsg": "53.28241467475891"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "39.92899012565613",
+                    "TrainMsg": "55.76490640640259"
+                },
+                "server-client": {
+                    "TestMsg": "26.238332986831665",
+                    "TrainMsg": "62.763476848602295"
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "TestMsg": "2.5168397426605225",
+                    "TrainMsg": "4.685706615447998"
+                },
+                "server-client": {
+                    "TestMsg": "2.473328113555908",
+                    "TrainMsg": "4.696269989013672"
+                }
+            },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "3.3809924125671387",
+                    "TrainMsg": "5.878741979598999"
+                },
+                "server-client": {
+                    "TestMsg": "3.671358585357666",
+                    "TrainMsg": "6.734295845031738"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "3.259552240371704",
+                    "TrainMsg": "5.997098684310913"
+                },
+                "server-client": {
+                    "TestMsg": "3.376478672027588",
+                    "TrainMsg": "6.30506443977356"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "2.399857759475708",
+                    "TrainMsg": "5.304011821746826"
+                },
+                "server-client": {
+                    "TestMsg": "2.3884575366973877",
+                    "TrainMsg": "4.6297993659973145"
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "TestMsg": "4.373999118804932",
+                    "TrainMsg": "7.778429269790649"
+                },
+                "server-client": {
+                    "TestMsg": "4.48036789894104",
+                    "TrainMsg": "8.325301885604858"
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "3.7244930267333984",
+                    "TrainMsg": "6.5331199169158936"
+                },
+                "server-client": {
+                    "TestMsg": "3.2756900787353516",
+                    "TrainMsg": "6.096264600753784"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.177426338195801",
+                    "TrainMsg": "7.331004619598389"
+                },
+                "server-client": {
+                    "TestMsg": "4.007755756378174",
+                    "TrainMsg": "7.422980308532715"
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "TestMsg": "4.6129469871521",
+                    "TrainMsg": "8.159578561782837"
+                },
+                "server-client": {
+                    "TestMsg": "4.496115684509277",
+                    "TrainMsg": "8.378036260604858"
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.664681673049927",
+                    "TrainMsg": "7.9820029735565186"
+                },
+                "server-client": {
+                    "TestMsg": "4.531550407409668",
+                    "TrainMsg": "8.258758544921875"
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "TestMsg": "4.6424806118011475",
+                    "TrainMsg": "8.437764167785645"
+                },
+                "server-client": {
+                    "TestMsg": "4.646333932876587",
+                    "TrainMsg": "8.732848405838013"
+                }
+            }
+        }
+    },
+    "rtt": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": 0.16825294494628906,
+            "AWS_us-east-1_us-east-1b": 0.07576537132263184,
+            "AWS_us-east-1_us-east-1c": 0.035497426986694336,
+            "AWS_us-east-1_us-east-1d": 0.04554271697998047,
+            "AWS_us-east-1_us-east-1e": 0.03420758247375488,
+            "AWS_us-east-1_us-east-1f": 0.07060742378234863,
+            "GCP_us-central1_us-central1-a": 0.2981584072113037,
+            "GCP_us-central1_us-central1-b": 2.244678258895874,
+            "GCP_us-central1_us-central1-c": 0.24019289016723633,
+            "GCP_us-central1_us-central1-f": 0.24284720420837402
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": 0.16747641563415527,
+            "AWS_us-east-1_us-east-1c": 0.08438825607299805,
+            "AWS_us-east-1_us-east-1d": 0.04529571533203125,
+            "AWS_us-east-1_us-east-1e": 0.05289030075073242,
+            "AWS_us-east-1_us-east-1f": 0.03886079788208008,
+            "GCP_us-central1_us-central1-a": 0.3108091354370117,
+            "GCP_us-central1_us-central1-b": 1.722036361694336,
+            "GCP_us-central1_us-central1-c": 0.23622846603393555,
+            "GCP_us-central1_us-central1-f": 0.2325429916381836
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": 0.08924317359924316,
+            "AWS_us-east-1_us-east-1d": 0.03511667251586914,
+            "AWS_us-east-1_us-east-1e": 0.03572583198547363,
+            "AWS_us-east-1_us-east-1f": 0.042897701263427734,
+            "GCP_us-central1_us-central1-a": 0.29367971420288086,
+            "GCP_us-central1_us-central1-b": 1.7395431995391846,
+            "GCP_us-central1_us-central1-c": 0.29303789138793945,
+            "GCP_us-central1_us-central1-f": 0.38104796409606934
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": 0.10910224914550781,
+            "AWS_us-east-1_us-east-1e": 0.036069631576538086,
+            "AWS_us-east-1_us-east-1f": 0.0391535758972168,
+            "GCP_us-central1_us-central1-a": 2.22717022895813,
+            "GCP_us-central1_us-central1-b": 0.29557013511657715,
+            "GCP_us-central1_us-central1-c": 0.5901031494140625,
+            "GCP_us-central1_us-central1-f": 0.2279186248779297
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": 0.1249549388885498,
+            "AWS_us-east-1_us-east-1f": 0.043283939361572266,
+            "GCP_us-central1_us-central1-a": 0.3143761157989502,
+            "GCP_us-central1_us-central1-b": 0.7345688343048096,
+            "GCP_us-central1_us-central1-c": 0.24866724014282227,
+            "GCP_us-central1_us-central1-f": 1.9887957572937012
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": 0.1035761833190918,
+            "GCP_us-central1_us-central1-a": 0.3152799606323242,
+            "GCP_us-central1_us-central1-b": 1.2314515113830566,
+            "GCP_us-central1_us-central1-c": 0.22226548194885254,
+            "GCP_us-central1_us-central1-f": 0.25913572311401367
+        },
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": 4.738793611526489,
+            "GCP_us-central1_us-central1-b": 6.223597049713135,
+            "GCP_us-central1_us-central1-c": 2.832289934158325,
+            "GCP_us-central1_us-central1-f": 2.2911691665649414
+        },
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": 4.987071514129639,
+            "GCP_us-central1_us-central1-c": 12.500407695770264,
+            "GCP_us-central1_us-central1-f": 4.975939512252808
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": 6.079482316970825,
+            "GCP_us-central1_us-central1-f": 9.89746356010437
+        },
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-central1_us-central1-f": 11.743095874786377
+        }
+    }
+}

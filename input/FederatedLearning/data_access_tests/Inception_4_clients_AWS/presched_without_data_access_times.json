@@ -1,0 +1,160 @@
+{
+    "exec_times": {},
+    "job_id": 400,
+    "job_name": "4 clients - Inception (all AWS)",
+    "number_datacenters": 10,
+    "rpc": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": {},
+            "AWS_us-east-1_us-east-1b": {},
+            "AWS_us-east-1_us-east-1c": {},
+            "AWS_us-east-1_us-east-1d": {},
+            "AWS_us-east-1_us-east-1e": {},
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": {},
+            "AWS_us-east-1_us-east-1c": {},
+            "AWS_us-east-1_us-east-1d": {},
+            "AWS_us-east-1_us-east-1e": {},
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": {},
+            "AWS_us-east-1_us-east-1d": {},
+            "AWS_us-east-1_us-east-1e": {},
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": {},
+            "AWS_us-east-1_us-east-1e": {},
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": {},
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": {},
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-west-2_us-west-2a": {
+            "AWS_us-west-2_us-west-2a": {},
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-west-2_us-west-2b": {
+            "AWS_us-west-2_us-west-2b": {},
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-west-2_us-west-2c": {
+            "AWS_us-west-2_us-west-2c": {},
+            "AWS_us-west-2_us-west-2d": {}
+        },
+        "AWS_us-west-2_us-west-2d": {
+            "AWS_us-west-2_us-west-2d": {}
+        }
+    },
+    "rtt": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": -1,
+            "AWS_us-east-1_us-east-1b": -1,
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": -1,
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": -1,
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-west-2_us-west-2a": {
+            "AWS_us-west-2_us-west-2a": -1,
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-west-2_us-west-2b": {
+            "AWS_us-west-2_us-west-2b": -1,
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-west-2_us-west-2c": {
+            "AWS_us-west-2_us-west-2c": -1,
+            "AWS_us-west-2_us-west-2d": -1
+        },
+        "AWS_us-west-2_us-west-2d": {
+            "AWS_us-west-2_us-west-2d": -1
+        }
+    }
+}

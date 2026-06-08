@@ -1,0 +1,110 @@
+{
+    "exec_times": {
+        "g4dn.2xlarge": {
+            "AWS_us-east-1": {
+                "0": {
+                    "eval_1": "95.40392923355103",
+                    "eval_2": "137.90380430221558",
+                    "fit_1": "207.67298913002014",
+                    "fit_2": "93.12186884880066"
+                },
+                "1": {
+                    "eval_1": "51.01884698867798",
+                    "eval_2": "33.880502223968506",
+                    "fit_1": "140.63801860809326",
+                    "fit_2": "34.07857275009155"
+                }
+            }
+        },
+        "n1-standard-8": {
+            "GCP_us-central1": {
+                "0": {
+                    "eval_1": "111.82296419143677",
+                    "eval_2": "198.81154251098633",
+                    "fit_1": "163.38843989372253",
+                    "fit_2": "137.19206190109253"
+                }
+            }
+        }
+    },
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "number_datacenters": 10,
+    "rtt": {
+        "AWS_us-east-1_us-east-1a": {
+            "AWS_us-east-1_us-east-1a": -1,
+            "AWS_us-east-1_us-east-1b": -1,
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "AWS_us-east-1_us-east-1b": {
+            "AWS_us-east-1_us-east-1b": -1,
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": 0.30489110946655273
+        },
+        "AWS_us-east-1_us-east-1c": {
+            "AWS_us-east-1_us-east-1c": -1,
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "AWS_us-east-1_us-east-1d": {
+            "AWS_us-east-1_us-east-1d": -1,
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "AWS_us-east-1_us-east-1e": {
+            "AWS_us-east-1_us-east-1e": -1,
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "AWS_us-east-1_us-east-1f": {
+            "AWS_us-east-1_us-east-1f": -1,
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": -1,
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": -1,
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": -1,
+            "GCP_us-central1_us-central1-f": -1
+        },
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-central1_us-central1-f": -1
+        }
+    }
+}

@@ -12,6 +12,8 @@ from sklearn import metrics
 
 from pandas import DataFrame
 
+from time import time
+
 # Filter warnings
 import warnings
 
@@ -116,7 +118,7 @@ def get_args():
 
     train_args.add_argument('--train', action='store_true', dest='train', default=False,
                             help='Train model')
-    train_args.add_argument('-net', dest='network', type=str, default='Inception',
+    train_args.add_argument('-net', dest='network', type=str, default='VGG16',
                             help='Network name which should be trained.\n Check documentation for available models.')
     train_args.add_argument('-data', dest='data', type=str, help='Dataset name to train model.\n '
                                                                  'Check documentation for available datasets.',
@@ -189,6 +191,8 @@ def get_args():
     parser.add_argument('-d', action='store_true', dest='delay_load', default=False,
                         help='Delay the loading of images to the latest moment possible (memory efficiency).')
 
+    parser.add_argument('-num_seed', dest='num_seed', type=int, help='Seed number to shuffle dataset.')
+
     parser.add_argument('-pred_size', dest='pred_size', type=int,
                         help='Limit test set size to this number of images.', default=0)
     parser.add_argument('-test_dir', dest='testdir', type=str, default=None,
@@ -206,8 +210,7 @@ def get_args():
     flwr_args.add_argument("-server_address", dest='server_address', type=str, required=True,
                            help=f"gRPC server address", default='localhost:8080')
     flwr_args.add_argument("-epochs", type=int, required=True, default=10,
-                        help="Number of epochs per round of federated learning",
-    )
+                           help="Number of epochs per round of federated learning")
 
     args, unparsed = parser.parse_known_args()
     return args, unparsed
@@ -243,9 +246,9 @@ class Trainer(object):
         self._rex = r'{0}-t(?P<try>[0-9]+)e(?P<epoch>[0-9]+).h5'
 
     def load_modules(self):
-        self._ds = CellRep(self._args.predst, self._args.keepimg, self._args)
+        self._ds = CellRep(self._args.predst, self._args.keepimg, self._args, self._args.num_seed)
 
-        self._ds_test = CellRep(self._args.testdir, self._args.keepimg, self._args)
+        self._ds_test = CellRep(self._args.testdir, self._args.keepimg, self._args, self._args.num_seed)
 
         net_model = VGG16(self._args, self._ds)
 
@@ -262,7 +265,6 @@ class Trainer(object):
 
         net_model = self.load_modules()
 
-
         # Test set splitting done in the same code now, outside GenericDatasource
         self.x_test, self.y_test, X, Y = split_test(self._args, self._ds)
         # self.x_test, self.y_test, _, _ = split_test(self._args, self._ds_test, test=True)
@@ -270,7 +272,6 @@ class Trainer(object):
         self._rex = self._rex.format(net_model.name)
 
         # Define training data
-        train_data, val_data = None, None
         if self._args.sample != 1.0:
             X, Y, self.sample_idx = self._ds.sample_metadata(self._args.sample, data=(X, Y),
                                                              pos_rt=self._args.pos_rt)
@@ -477,7 +478,7 @@ class Trainer(object):
     def train(self, epochs):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('VGG16', old_e_offset + 1)
 
         # Define special behaviour CALLBACKS
         callbacks = []
@@ -514,7 +515,7 @@ class Trainer(object):
     def evaluate(self):
 
         old_e_offset = 0
-        wf_header = "{0}-t{1}".format('Inception', old_e_offset + 1)
+        wf_header = "{0}-t{1}".format('VGG16', old_e_offset + 1)
 
         hist = self.training_model.evaluate_generator(
             generator=self.test_generator,
@@ -570,7 +571,7 @@ class Trainer(object):
             pos_accuracy = m_conf[4][1]
             precision = m_conf[1][1] / m_conf[2][1]
             recall = m_conf[1][1] / m_conf[1][2]
-            f1_score = 2 * m_conf[1][1] / (m_conf[1][2] + m_conf[2][1])
+            f1_score = (2 * precision * recall) / (precision+recall)
 
             # print("False positive rates: {0}".format(fpr))
             # print("True positive rates: {0}".format(tpr))
@@ -625,11 +626,17 @@ def main_exec(args):
         if not os.path.isdir(args.model_path):
             os.mkdir(args.model_path)
 
+        time_start = time()
+
         trainer = Trainer(args)
         trainer.start_execution()
 
+        time_end = time()
+
+        print("TF configuration time:", str(time_end-time_start))
+
         # Start Flower client
-        client = InceptionClient(trainer)
+        client = VGG16Client(trainer)
         fl.client.start_numpy_client(args.server_address, client=client)
 
     if not args.train:
@@ -747,14 +754,27 @@ def split_test(args, ds, test=False):
 
 
 # Flower client
-class InceptionClient(fl.client.NumPyClient):
+class VGG16Client(fl.client.NumPyClient):
     def __init__(self, model:Trainer):
         self.model = model
 
     def get_parameters(self):
+        # print("tipo weights", type(self.model.get_model_weights()))
+        # weights = self.model.get_model_weights()
+        # import pickle
+        #
+        # # store list in binary file so 'wb' mode
+        # with open('weights.bin', 'wb') as fp:
+        #     pickle.dump(weights, fp)
+        #     print('Done writing list into a binary file')
         return self.model.get_model_weights()
 
     def fit(self, parameters, config):
+        timeout = int(config["timeout"]) if "timeout" in config else None
+        # partial_updates = bool(int(config["partial_updates"]))
+
+        time_start = time()
+
         self.model.set_model_weights(parameters)
 
         # Get hyperparameters for this round
@@ -765,9 +785,20 @@ class InceptionClient(fl.client.NumPyClient):
         # Return updated model parameters and results
         parameters_prime = self.model.get_model_weights()
         num_examples_train = self.model.get_train_data_length()
+
+        time_end = time()
+
+        fit_duration = time_end - time_start
+        if timeout is not None:
+            if fit_duration > timeout:
+                parameters_prime = []
+
         results = {
             "loss": history.history["loss"][0],
             "accuracy": history.history["acc"][0],
+            "num_examples_ceil": num_examples_train*epochs,
+            "num_examples": num_examples_train*epochs,
+            "fit_duration": fit_duration
         }
         print("num_examples fit:", num_examples_train)
         print("fit results: ", results)

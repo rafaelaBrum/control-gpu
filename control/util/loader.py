@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 
-from control.managers.ec2_manager import EC2Manager
+# from control.managers.ec2_manager import EC2Manager
+from control.managers.cloud_manager import CloudManager
+from control.managers.gcp_manager import GCPManager
 
 from control.config.application_config import ApplicationConfig
 from control.config.checkpoint_config import CheckPointConfig
@@ -9,15 +11,18 @@ from control.config.communication_config import CommunicationConfig
 from control.config.database_config import DataBaseConfig
 from control.config.debug_config import DebugConfig
 from control.config.ec2_config import EC2Config
+from control.config.gcp_config import GCPConfig
 from control.config.file_system_config import FileSystemConfig
 from control.config.input_config import InputConfig
 from control.config.logging_config import LoggingConfig
 from control.config.notify_config import NotifyConfig
 # from control.config.scheduler_config import SchedulerConfig
 from control.config.simulation_config import SimulationConfig
+from control.config.pre_sched_config import PreSchedConfig
 
 from control.domain.instance_type import InstanceType
-from control.domain.app_specific.cudalign_task import CUDAlignTask
+from control.domain.job import Job
+from control.domain.cloud_region import CloudRegion
 
 from control.repository.postgres_repo import PostgresRepo
 
@@ -36,15 +41,26 @@ class Loader:
     VERSION = '0.0.1'
 
     env: Dict[str, InstanceType]
-    cudalign_task: CUDAlignTask
+    job: Job
+    loc: Dict[str, CloudRegion]
 
     def __init__(self, args):
+
+        # print("Clients provider", args.clients_provider)
+        # print("Clients region", args.clients_region)
+        # print("Clients VM name", args.clients_vm_name)
+        #
+        # print("Server provider", args.server_provider)
+        # print("Server region", args.server_region)
+        # print("Server VM name", args.server_vm_name)
 
         """Command line args"""
         # input files parameters
         self.input_path = args.input_path
-        self.task_file = args.task_file
+        self.job_file = args.job_file
         self.env_file = args.env_file
+        self.loc_file = args.loc_file
+        self.pre_file = args.pre_file
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
@@ -59,8 +75,18 @@ class Loader:
         # self.scheduler_name = args.scheduler_name
         # # notify end of execution by email
         # self.notify = args.notify
+        # server provider and region
+        self.server_provider = args.server_provider
+        self.server_region = args.server_region
+        self.server_vm_name = args.server_vm_name
+        # clients provider and region
+        self.clients_provider = args.clients_provider
+        self.clients_region = args.clients_region
+        self.clients_vm_name = args.clients_vm_name
         # Client command
         self.client_command = args.command
+
+        self.num_clients_pre_sched = args.num_clients_pre_sched
 
         self.deadline_timedelta = None
 
@@ -81,15 +107,18 @@ class Loader:
         self.database_conf = DataBaseConfig()
         self.debug_conf = DebugConfig()
         self.ec2_conf = EC2Config()
+        self.gcp_conf = GCPConfig()
         self.file_system_conf = FileSystemConfig()
         self.input_conf = InputConfig()
         self.logging_conf = LoggingConfig()
         self.notify_conf = NotifyConfig()
         # self.scheduler_conf = SchedulerConfig()
         self.simulation_conf = SimulationConfig()
+        self.pre_sched_conf = PreSchedConfig()
 
         # local path where the daemon file is
-        self.daemon_file = None
+        self.daemon_aws_file = None
+        self.daemon_gcp_file = None
 
         '''
         Parameters of the execution
@@ -104,22 +133,30 @@ class Loader:
         self.env = None
 
         '''
-        Class domain.app_specific.CUDAlignTask contain the task that will be executed
-        and the information about it
+        Class domain.job contains all tasks that will be executed
+        and the information  about the job
         '''
-        self.cudalign_task: CUDAlignTask = None
+        self.job = None
+
+        '''
+        Dictionary with the domain.cloud_region that can be used in the execution
+        Read from loc.json
+        '''
+        self.loc = None
 
         self.__prepare_logging()
         self.__load_input_parameters()
 
-        self.__load_task()
+        self.__load_job()
         self.__load_env()
+        self.__load_loc()
 
         self.__get_execution_id()
 
         self.__update_prices()
+        self.__update_zones()
 
-        self.__update_command()
+        self.__update_command(args.strategy, args.num_seed)
 
     def __prepare_logging(self):
         """
@@ -150,15 +187,25 @@ class Loader:
         if self.input_path is None:
             self.input_path = self.input_conf.path
 
-        if self.task_file is None:
-            self.task_file = os.path.join(self.input_path, self.input_conf.task_file)
+        if self.job_file is None:
+            self.job_file = os.path.join(self.input_path, self.input_conf.job_file)
         else:
-            self.task_file = os.path.join(self.input_path, self.task_file)
+            self.job_file = os.path.join(self.input_path, self.job_file)
 
         if self.env_file is None:
             self.env_file = os.path.join(self.input_path, self.input_conf.env_file)
         else:
             self.env_file = os.path.join(self.input_path, self.env_file)
+
+        if self.loc_file is None:
+            self.loc_file = os.path.join(self.input_path, self.input_conf.loc_file)
+        else:
+            self.loc_file = os.path.join(self.input_path, self.loc_file)
+
+        if self.pre_file is None:
+            self.pre_file = os.path.join(self.input_path, self.input_conf.pre_file)
+        else:
+            self.pre_file = os.path.join(self.input_path, self.pre_file)
 
         # if self.map_file is None:
         #     self.map_file = os.path.join(self.input_path, self.input_conf.map_file)
@@ -168,7 +215,8 @@ class Loader:
         # if self.scheduler_name is None:
         #     self.scheduler_name = SchedulerConfig().name
 
-        self.daemon_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_file)
+        self.daemon_aws_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_aws_file)
+        self.daemon_gcp_file = os.path.join(self.application_conf.daemon_path, self.application_conf.daemon_gcp_file)
 
         if self.deadline_seconds is None:
             self.deadline_seconds = self.input_conf.deadline_seconds
@@ -181,19 +229,22 @@ class Loader:
         if self.revocation_rate is None:
             self.revocation_rate = self.simulation_conf.revocation_rate
 
-    def __load_task(self):
+        if self.num_clients_pre_sched is None:
+            self.num_clients_pre_sched = self.pre_sched_conf.num_clients
+
+    def __load_job(self):
         """
-        Read the file task_file and create the class CUDAlignTask
+        Read the file job_file and create the class Job
         """
 
         try:
-            with open(self.task_file) as f:
-                task_json = json.load(f)
+            with open(self.job_file) as f:
+                job_json = json.load(f)
         except Exception as e:
-            logging.error("<Loader>: Error file {} ".format(self.task_file))
+            logging.error("<Loader>: Error file {} ".format(self.job_file))
             raise Exception(e)
 
-        self.cudalign_task = CUDAlignTask.from_dict(task_json)
+        self.job = Job.from_dict(job_json)
 
     def __load_env(self):
         """
@@ -221,6 +272,23 @@ class Loader:
 
             self.instances_list.append(instance)
 
+    def __load_loc(self):
+        """
+        Read the file loc_file and create a dictionary with all available regions
+        """
+
+        try:
+            with open(self.loc_file) as f:
+                loc_json = json.load(f)
+        except Exception as e:
+            logging.error("<Loader>: Error file {} ".format(self.loc_file))
+            raise Exception(e)
+
+        self.loc = {}
+
+        for region in CloudRegion.from_dict(loc_json):
+            self.loc[region.id] = region
+
     def __get_execution_id(self):
         # """
         # Get next execution_id
@@ -233,7 +301,7 @@ class Loader:
         """
 
         repo = PostgresRepo()
-        row = repo.get_execution(filter={'task_id': self.cudalign_task.task_id, 'limit': 1, 'order': 'desc'})
+        row = repo.get_execution(filter={'job_id': self.job.job_id, 'limit': 1, 'order': 'desc'})
         if len(row) == 0:
             self.execution_id = 0
         else:
@@ -242,26 +310,75 @@ class Loader:
 
     def __update_prices(self):
         """
-        get current instances prices on EC2 and update the env dictionary and also the env.json input file
+        get current instances prices on EC2 and GCP and update the env dictionary and also the env.json input file
         """
 
-        zone = self.ec2_conf.zone
-        region = self.ec2_conf.region
+        # ec2_zone = self.ec2_conf.zone
+        # ec2_region = self.ec2_conf.region
+        # gcp_zone = self.gcp_conf.zone
+        # gcp_region = self.gcp_conf.region
 
         for instance in self.env.values():
 
-            if instance.market_ondemand:
-                instance.setup_ondemand_price(
-                    price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=region),
-                    region=region
-                )
+            # print(instance.type)
 
-            if instance.market_preemptible:
-                instance.setup_preemptible_price(
-                    price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=zone)[0][1],
-                    region=region,
-                    zone=zone
-                )
+            for loc in self.loc.values():
+
+                region = loc.region
+                zone = loc.zones[0]
+
+                if instance.provider == CloudManager.EC2 and loc.provider in (CloudManager.EC2, CloudManager.AWS):
+                    test = 1
+
+                    # if instance.market_ondemand:
+                    #     instance.setup_ondemand_price(
+                    #         price=EC2Manager.get_ondemand_price(instance_type=instance.type, region=region),
+                    #         region=region
+                    #     )
+                    #     # print(f"Final On-demand price: ", instance.price_ondemand)
+                    #
+                    # if instance.market_preemptible:
+                    #     instance.setup_preemptible_price(
+                    #         price=EC2Manager.get_preemptible_price(instance_type=instance.type, zone=zone,
+                    #                                                region=region)[0][1],
+                    #         region=region,
+                    #         zone=zone
+                    #     )
+                    #     # print(f"Final Preemptible price: ", instance.price_preemptible)
+
+                elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP) \
+                        and loc.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+
+                    if instance.market_ondemand:
+                        cpu_price, mem_price = GCPManager.get_ondemand_price(instance_type=instance.type,
+                                                                             region=region)
+                        gpu_price = 0.0
+                        if instance.have_gpu:
+                            # print("On-demand Price without GPU: ", instance.vcpu * cpu_price + instance.memory *
+                            #       mem_price)
+                            gpu_price = GCPManager.get_ondemand_gpu_price(gpu_type=instance.gpu, region=region)
+                        price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
+                        # print(f"Final On-demand price: ", instance.price_ondemand)
+                        instance.setup_ondemand_price(
+                            price=price,
+                            region=region
+                        )
+
+                    if instance.market_preemptible:
+                        cpu_price, mem_price = GCPManager.get_preemptible_price(instance_type=instance.type,
+                                                                                region=region)
+                        gpu_price = 0.0
+                        if instance.have_gpu:
+                            # print("Preemptible Price without GPU: ",
+                            #       instance.vcpu * cpu_price + instance.memory * mem_price)
+                            gpu_price = GCPManager.get_preemptible_gpu_price(gpu_type=instance.gpu, region=region)
+                        price = instance.vcpu * cpu_price + instance.memory * mem_price + instance.count_gpu * gpu_price
+                        # print(f"Final Preemptible price: ", instance.price_preemptible)
+                        instance.setup_preemptible_price(
+                            price=price,
+                            region=region,
+                            zone=zone
+                        )
 
         # Update env file
         with open(self.env_file, "r") as jsonFile:
@@ -278,25 +395,112 @@ class Loader:
         with open(self.env_file, "w") as jsonFile:
             json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
 
-    # update cudalign command
-    def __update_command(self):
-        self.cudalign_task.command = "{} --disk-size={} --work-dir={} {} {} > {} 2> {}"\
-            .format(self.cudalign_task.command,
-                    self.cudalign_task.disk_size,
-                    os.path.join(self.file_system_conf.path,
-                                 '{}_{}'.format(self.cudalign_task.task_id,
-                                                self.execution_id)),
-                    os.path.join(self.ec2_conf.input_path,
-                                 self.cudalign_task.seq0),
-                    os.path.join(self.ec2_conf.input_path,
-                                 self.cudalign_task.seq1),
-                    os.path.join(self.file_system_conf.path,
-                                 '{}_{}/output.txt'.format(self.cudalign_task.task_id,
-                                                           self.execution_id)),
-                    os.path.join(self.file_system_conf.path,
-                                 '{}_{}/error.txt'.format(self.cudalign_task.task_id,
-                                                          self.execution_id))
-                    )
+    def __update_zones(self):
+        """
+        get current zones within regions on EC2 and GCP and update the loc dictionary and also the loc.json input file
+        """
+        gcp_manager = GCPManager()
+
+        for region in self.loc.values():
+
+            if region.provider == CloudManager.EC2 or region.provider == CloudManager.AWS:
+                # region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
+                test = 1
+
+            elif region.provider == CloudManager.GCLOUD or region.provider == CloudManager.GCP:
+                region.setup_zones(zones=gcp_manager.get_availability_zones(region.region))
+
+        del gcp_manager
+
+        # Update loc file
+        with open(self.loc_file, "r") as jsonFile:
+            data = json.load(jsonFile)
+
+        # updating prices on env_file
+        tmp = data["locations"]
+        for region in tmp:
+            tmp[region]['zones'] = self.loc[region].zones
+
+        data["locations"] = tmp
+
+        with open(self.loc_file, "w") as jsonFile:
+            json.dump(data, jsonFile, sort_keys=False, indent=4, default=str)
+
+    # update Federated Learning command
+    def __update_command(self, strategy, num_seed):
+        if self.application_conf.fl_framework == 'flower':
+            if strategy is not None:
+                self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
+                                              " --min_num_clients {2} --server_address [::]:{3} --strategy {4}"\
+                    .format(self.job.server_task.simple_command,
+                            self.job.server_task.n_rounds,
+                            self.job.server_task.n_clients,
+                            self.application_conf.fl_port,
+                            strategy
+                            )
+            else:
+                self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
+                                              " --min_num_clients {2} --server_address [::]:{3}"\
+                    .format(self.job.server_task.simple_command,
+                            self.job.server_task.n_rounds,
+                            self.job.server_task.n_clients,
+                            self.application_conf.fl_port
+                            )
+            print("server command", self.job.server_task.command)
+            for i in range(self.job.num_clients):
+                if self.job.client_tasks[i].trainset_dir is not None and self.job.client_tasks[i].trainset_dir != "":
+                    predst = os.path.join(self.file_system_conf.path_storage,
+                                          self.job.client_tasks[i].trainset_dir)
+                else:
+                    predst = os.path.join(self.file_system_conf.path_storage)
+                if self.job.client_tasks[i].test_dir is not None and self.job.client_tasks[i].test_dir != "":
+                    if num_seed is not None:
+                        self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
+                                                           "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
+                                                           " -epochs {7} -num_seed {8}"\
+                            .format(self.job.client_tasks[i].simple_command,
+                                    predst,
+                                    self.job.client_tasks[i].split,
+                                    self.job.client_tasks[i].batch,
+                                    os.path.join(self.file_system_conf.path, 'logs'),
+                                    os.path.join(self.file_system_conf.path, 'results'),
+                                    os.path.join(self.file_system_conf.path_storage,
+                                                 self.job.client_tasks[i].test_dir),
+                                    self.job.client_tasks[i].train_epochs,
+                                    num_seed
+                                    )
+                    else:
+                        self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
+                                                           "-model_dir {5} -logdir {5} -cache {5} -test_dir {6} " \
+                                                           " -epochs {7}" \
+                            .format(self.job.client_tasks[i].simple_command,
+                                    predst,
+                                    self.job.client_tasks[i].split,
+                                    self.job.client_tasks[i].batch,
+                                    os.path.join(self.file_system_conf.path, 'logs'),
+                                    os.path.join(self.file_system_conf.path, 'results'),
+                                    os.path.join(self.file_system_conf.path_storage,
+                                                 self.job.client_tasks[i].test_dir),
+                                    self.job.client_tasks[i].train_epochs
+                                    )
+                else:
+                    self.job.client_tasks[i].command = "{0} -predst {1} -split {2} -b {3} -out {4} -wpath {5} " \
+                                                      "-model_dir {5} -logdir {5} -cache {5} -epochs {6} " \
+                                                      " > {7} 2> {8}" \
+                        .format(self.job.client_tasks[i].simple_command,
+                                predst,
+                                self.job.client_tasks[i].split,
+                                self.job.client_tasks[i].batch,
+                                os.path.join(self.file_system_conf.path, 'logs'),
+                                os.path.join(self.file_system_conf.path, 'results'),
+                                self.job.client_tasks[i].train_epochs,
+                                os.path.join(self.file_system_conf.path,
+                                             '{}_{}/output.txt'.format(self.job.client_tasks[i].task_id,
+                                                                       self.execution_id)),
+                                os.path.join(self.file_system_conf.path,
+                                             '{}_{}/error.txt'.format(self.job.client_tasks[i].task_id,
+                                                                      self.execution_id))
+                                )
 
     def print_execution_info(self):
         logging.info("\n")
@@ -310,19 +514,24 @@ class Loader:
         logging.info("\tExecuting type: '{}'".format(self.client_command))
         logging.info("")
         logging.info("\tInput Files:")
-        logging.info("\tTask: {}".format(self.task_file))
+        logging.info("\tJob: {}".format(self.job_file))
         logging.info("\tEnv: {}".format(self.env_file))
+        logging.info("\tLoc: {}".format(self.loc_file))
+        logging.info("\tPre: {}".format(self.pre_file))
         # logging.info("\tMap: {}".format(self.map_file))
         logging.info("\tLog File: {}".format(self.log_file))
-        logging.info("\tDaemon: {}".format(self.daemon_file))
+        logging.info("\tDaemon AWS: {}".format(self.daemon_aws_file))
+        logging.info("\tDaemon GCP: {}".format(self.daemon_gcp_file))
         logging.info("")
         logging.info("")
         logging.info("\t" + 30 * "*")
-        logging.info("\tTask id: {} Execution id: {}".format(self.cudalign_task.task_id, self.execution_id))
-        logging.info("\tCommand: {}".format(self.cudalign_task.command))
+        logging.info("\tJob id: {} Execution id: {}".format(self.job.job_id, self.execution_id))
+        logging.info("\tCommand: {}".format(self.job.server_task.command))
+        logging.info("\tNum. Clients: {}".format(self.job.num_clients))
+        for i in range(self.job.num_clients):
+            logging.info("\tClient {} Task id: {}".format(i, self.job.client_tasks[i].task_id))
+            logging.info("\tCommand: {}".format(self.job.client_tasks[i].command))
         logging.info("\tDeadline: {}".format(self.deadline_seconds))
-        # logging.info("\tDeadline: {} AC: {}".format(self.deadline_seconds,
-        #                                             self.ac_size_seconds))
         logging.info("\t" + 30 * "*")
 
         logging.info("")

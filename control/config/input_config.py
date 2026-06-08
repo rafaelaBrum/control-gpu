@@ -9,12 +9,20 @@ class InputConfig(Config):
         return self.get_property(self._key, 'path')
 
     @property
-    def task_file(self):
-        return self.get_property(self._key, 'task_file')
+    def job_file(self):
+        return self.get_property(self._key, 'job_file')
 
     @property
     def env_file(self):
         return self.get_property(self._key, 'env_file')
+
+    @property
+    def loc_file(self):
+        return self.get_property(self._key, 'loc_file')
+
+    @property
+    def pre_file(self):
+        return self.get_property(self._key, 'pre_file')
 
     # @property
     # def map_file(self):

@@ -18,7 +18,7 @@ class Task:
 
     # RESTARTED = 'restarted'
 
-    def __init__(self, task_id, task_name, command, generic_ckpt, runtime):
+    def __init__(self, task_id, task_name, command, generic_ckpt, runtime=None):
         self.task_id = task_id
         self.task_name = task_name
         # self.memory = memory
@@ -41,6 +41,8 @@ class Task:
 
         self.has_checkpoint = False
         self.do_checkpoint = True
+
+        self.server_ip = None
 
     def __compute_checkpoint_values(self):
 
@@ -101,3 +103,24 @@ class Task:
             return self.runtime[instance_type]
         else:
             return None
+
+    def is_running(self):
+        pass
+
+    def start_execution(self, instance_type):
+        pass
+
+    def stop_execution(self):
+        pass
+
+    def finish_execution(self):
+        pass
+
+    def has_task_finished(self):
+        pass
+
+    def get_running_instance(self):
+        pass
+
+    def update_execution_time(self, time_executed):
+        pass

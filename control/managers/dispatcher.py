@@ -4,6 +4,7 @@ from control.managers.virtual_machine import VirtualMachine
 # import tarfile
 
 from control.domain.task import Task
+from control.domain.job import Job
 
 # from control.scheduler.queue import Queue
 
@@ -48,7 +49,8 @@ class Executor:
 
         # socket.communicator
         # used to send commands to the ec2 instance
-        self.communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
+        self.communicator = Communicator(host=self.vm.instance_public_ip,
+                                         port=self.loader.communication_conf.socket_port)
 
         """Track INFO """
         # used to abort the execution loop
@@ -68,6 +70,7 @@ class Executor:
         self.repo.add_execution(
             ExecutionRepo(
                 execution_id=self.loader.execution_id,
+                job_id=self.loader.job.job_id,
                 task_id=self.task.task_id,
                 instance_id=self.vm.instance_id,
                 timestamp=datetime.now(),
@@ -83,7 +86,7 @@ class Executor:
         # logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
         self.repo = PostgresRepo()
-        current_time = None
+        # current_time = None
         action = Daemon.START
 
         # if self.task.has_checkpoint:
@@ -119,7 +122,7 @@ class Executor:
 
                 try:
                     # logging.info(
-                        # "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
+                    #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id, self.vm.instance_id))
                     command_status, current_stage = self.__get_task_status()
                     # logging.info(
                     #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
@@ -128,8 +131,8 @@ class Executor:
                     instance_action = None
                     if self.vm.market == CloudManager.PREEMPTIBLE:
                         # logging.info(
-                            # "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
-                            #                                                          self.vm.instance_id))
+                        #     "<Executor {}-{}>: Trying to get instance action".format(self.task.task_id,
+                        #                                                              self.vm.instance_id))
                         instance_action = self.__get_instance_action()
                         # logging.info(
                         #     "<Executor {}-{}>: Instance action {}".format(self.task.task_id, self.vm.instance_id,
@@ -149,29 +152,33 @@ class Executor:
 
                     self.status = status = Task.FINISHED
 
-                    self.loader.cudalign_task.finish_execution()
+                    self.task.finish_execution()
                     self.__stopped(status)
                     return
 
                 if command_status is not None and command_status == 'running':
                     elapsed_time = datetime.now() - current_time
                     current_time = current_time + elapsed_time
-                    self.loader.cudalign_task.update_execution_time(elapsed_time.total_seconds())
+                    self.task.update_execution_time(elapsed_time.total_seconds())
 
-                if instance_action is not None and instance_action != 'none':
+                if ((self.vm.instance_type.provider == CloudManager.EC2 and
+                     instance_action is not None and
+                     instance_action != 'none') or
+                        (self.vm.instance_type.provider == CloudManager.GCLOUD and
+                         instance_action == 'TRUE')):
                     self.vm.interrupt()
                     self.__stopped(Task.INTERRUPTED)
                     return
 
                 if command_status is not None and command_status != 'running':
-                    self.loader.cudalign_task.stop_execution()
+                    self.task.stop_execution()
                     self.__stopped(Task.RUNTIME_ERROR)
                     return
 
                 time.sleep(1)
 
             if self.status != Task.FINISHED:
-                self.loader.cudalign_task.stop_execution()
+                self.task.stop_execution()
 
         # if kill signal than checkpoint task (SIMULATION)
         # if self.stop_signal:
@@ -277,7 +284,7 @@ class Executor:
                 current_stage = result['value']['current_stage']
 
                 return command_status, current_stage
-            except:
+            except Exception:
                 logging.error("<Executor {}-{}>: Get task Status {}/3".format(self.task.task_id,
                                                                               self.vm.instance_id,
                                                                               i + 1))
@@ -299,7 +306,7 @@ class Executor:
                 instance_action = result['value']
 
                 return instance_action
-            except:
+            except Exception:
                 logging.error("<Executor {}-{}>: Get instance action {}/3".format(self.task.task_id,
                                                                                   self.vm.instance_id,
                                                                                   i + 1))
@@ -356,7 +363,10 @@ class Executor:
 
         info = {
             "task_id": self.task.task_id,
-            "command": self.task.command
+            "command": self.task.command,
+            "server_ip": self.task.server_ip,
+            "cpu": self.vm.instance_type.vcpu,
+            "gpu": self.vm.instance_type.count_gpu
         }
 
         return info
@@ -365,11 +375,17 @@ class Executor:
 class Dispatcher:
     executor: Executor
 
-    def __init__(self, vm: VirtualMachine, loader: Loader):
+    def __init__(self, vm: VirtualMachine, loader: Loader, type_task, client_id):
         self.loader = loader
 
         self.vm: VirtualMachine = vm  # Class that control a Virtual machine on the cloud
         # self.queue = queue  # Class with the scheduling plan
+
+        self.type_task = type_task
+        self.client_id = client_id
+        self.client = None
+        if client_id < self.loader.job.num_clients:
+            self.client = self.loader.job.client_tasks[client_id]
 
         # Control Flags
         self.working = False
@@ -471,7 +487,9 @@ class Dispatcher:
     def __notify(self, value):
 
         kwargs = {'instance_id': self.vm.instance_id,
-                  'dispatcher': self}
+                  'dispatcher': self,
+                  'type_task': self.type_task,
+                  'client_id': self.client_id}
 
         notify(
             Event(
@@ -487,8 +505,10 @@ class Dispatcher:
             time.sleep(self.loader.communication_conf.retry_interval)
 
             try:
-                communicator = Communicator(host=self.vm.instance_public_ip, port=self.loader.communication_conf.socket_port)
-                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None})
+                communicator = Communicator(host=self.vm.instance_public_ip,
+                                            port=self.loader.communication_conf.socket_port)
+                communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None,
+                                                             'server_ip': None, 'cpu': None, 'gpu': None})
 
                 if communicator.response['status'] == 'success':
                     return True
@@ -512,7 +532,22 @@ class Dispatcher:
     def __execution_loop(self):
 
         # Start the VM in the cloud
-        status = self.vm.deploy()
+        logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
+        logging.info("Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+
+        status = self.vm.deploy(type_task=self.type_task)
+
+        if not status:
+            for zone in self.vm.region.zones:
+                self.vm.instance_id = None
+                self.vm.zone = zone
+                self.vm.instance_type.zone = zone
+                logging.info("Deploying VM of {} in {}".format(self.type_task, self.vm.zone))
+                logging.info(
+                    "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
+                status = self.vm.deploy(type_task=self.type_task)
+                if status:
+                    break
 
         # self.expected_makespan_timestamp = self.vm.start_time + timedelta(seconds=self.queue.makespan_seconds)
 
@@ -532,8 +567,8 @@ class Dispatcher:
             self.working = True
 
             try:
-                self.vm.prepare_vm()
-                self.__prepare_daemon()
+                self.vm.prepare_vm(self.type_task, self.client)
+                status = self.__prepare_daemon()
             except Exception as e:
                 logging.error(e)
 
@@ -542,30 +577,40 @@ class Dispatcher:
                 # Notify abort!
                 self.__notify(CloudManager.ABORT)
 
+            if not status:
+                logging.error("<Dispatcher {}>: Daemon not working!".format(self.vm.instance_id))
+                self.__notify(CloudManager.ABORT)
+                self.working = False
+
             # indicate that the VM is ready to execute
             self.vm.ready = self.ready = True
-            cuda_task = self.loader.cudalign_task
+            if self.type_task == Job.SERVER:
+                task = self.loader.job.server_task
+            elif self.type_task == Job.CLIENT:
+                task = self.loader.job.client_tasks[self.client_id]
+            else:
+                task = None
 
-            if not cuda_task.has_task_finished() and self.working:
+            if not task.has_task_finished() and self.working:
                 if self.vm.state == CloudManager.RUNNING:
 
                     self.semaphore.acquire()
                     # # check running tasks
                     # self.__update_running_executors()
 
-                    if not cuda_task.is_running():
+                    if not task.is_running():
                         self.executor = Executor(
-                            task=cuda_task,
+                            task=task,
                             vm=self.vm,
                             loader=self.loader
                         )
                         # start the executor loop to execute the task
                         self.executor.thread.start()
-                        self.loader.cudalign_task.start_execution(self.vm.instance_type.type)
+                        task.start_execution(self.vm.instance_type.type)
 
                     self.semaphore.release()
 
-            while self.working and not self.loader.cudalign_task.has_task_finished():
+            while self.working and not task.has_task_finished() and task.is_running():
                 # waiting for work
                 # self.waiting_work.wait()
                 #
@@ -578,7 +623,8 @@ class Dispatcher:
                 # self.semaphore.release()
 
                 # Error: instance was not deployed or was terminated
-                if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN, CloudManager.TERMINATED):
+                if self.vm.state in (CloudManager.ERROR, CloudManager.SHUTTING_DOWN,
+                                     CloudManager.TERMINATED, CloudManager.STOPPING):
                     # waiting running tasks
                     self.executor.thread.join()
                     # VM was not created, raise a event

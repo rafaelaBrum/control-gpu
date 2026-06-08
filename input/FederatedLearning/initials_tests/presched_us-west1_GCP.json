@@ -1,0 +1,21 @@
+{
+    "exec_times": {
+        "n2-standard-1": [
+            234234,
+            23423423
+        ]
+    },
+    "job_id": 2,
+    "job_name": "Job de Teste de FL (1 client)",
+    "number_datacenters": 3,
+    "rtt": {
+        "GCP_us-west1_us-west1-a": {
+            "GCP_us-west1_us-west1-b": 8.299922466278076,
+            "GCP_us-west1_us-west1-c": 2.604447841644287
+        },
+        "GCP_us-west1_us-west1-b": {
+            "GCP_us-west1_us-west1-c": 3.956073522567749
+        },
+        "GCP_us-west1_us-west1-c": {}
+    }
+}

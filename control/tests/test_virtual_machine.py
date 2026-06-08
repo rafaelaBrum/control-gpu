@@ -31,18 +31,20 @@ def __prepare_logging():
     root_logger.addHandler(console_handler)
 
 
-def test_on_demand_virtual_machine():
+def test_on_demand_virtual_machine(loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0d1a4eacad59b7a5b',
-        memory=1,
-        vcpu=1,
+        image_id='ami-0c20212ac4ce26a60',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        gflops=0.0
+        ebs_device_name='/dev/xvdf',
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -55,14 +57,17 @@ def test_on_demand_virtual_machine():
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='on-demand'
+        market='on-demand',
+        loader=loader
     )
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server')
+
+    input("Enter to continue with VM termination")
 
     status = vm.terminate()
 
@@ -70,18 +75,19 @@ def test_on_demand_virtual_machine():
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
 
-def test_preemptible_virtual_machine():
+def test_preemptible_virtual_machine(loader):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-0d1a4eacad59b7a5b',
-        memory=1,
-        vcpu=1,
+        image_id='ami-05967bab0d693d334',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        gflops=0.0
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -94,14 +100,15 @@ def test_preemptible_virtual_machine():
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible'
+        market='preemptible',
+        loader=loader
     )
 
     __prepare_logging()
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server')
 
     status = vm.terminate()
 
@@ -109,19 +116,20 @@ def test_preemptible_virtual_machine():
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
 
 
-def test_vm_with_EBS(volume_id=''):
+def test_vm_with_EBS(volume_id='', loader=None):
     instance = InstanceType(
         provider=CloudManager.EC2,
         instance_type='t2.micro',
-        image_id='ami-09685b54c80020d8c',
-        memory=1,
-        vcpu=1,
+        image_id='ami-05967bab0d693d334',
         ebs_device_name='/dev/xvdf',
         restrictions={'on-demand': 1,
                       'preemptible': 1},
         prices={'on-demand': 0.001,
                 'preemptible': 0.000031},
-        gflops=0.0
+        count_gpu=0,
+        gpu='',
+        memory=0,
+        vcpu=2
     )
 
     # task = Task(
@@ -134,7 +142,8 @@ def test_vm_with_EBS(volume_id=''):
 
     vm = VirtualMachine(
         instance_type=instance,
-        market='preemptible'
+        market='preemptible',
+        loader=loader
     )
 
     __prepare_logging()
@@ -142,9 +151,9 @@ def test_vm_with_EBS(volume_id=''):
     if volume_id is not None:
         vm.volume_id = volume_id
 
-    vm.deploy()
+    vm.deploy(type_task='server')
 
-    vm.prepare_vm()
+    vm.prepare_vm(type_task='server')
 
     status = vm.terminate(delete_volume=False)
 

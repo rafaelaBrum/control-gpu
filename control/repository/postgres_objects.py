@@ -5,8 +5,24 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
+class Job(Base):
+    __tablename__ = 'job'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    description = Column(String)
+
+    tasks = relationship('Task', backref='job', lazy='dynamic')
+
+    # executions = relationship('Execution', backref='job')
+
+    def __repr__(self):
+        return "<Job(id='{}', name='{}', description={})>" \
+            .format(self.id, self.name, self.description)
+
+
 class Task(Base):
     __tablename__ = 'task'
+    job_id = Column(Integer, ForeignKey('job.id'), primary_key=True)
     task_id = Column(Integer, primary_key=True)
     task_name = Column(String)
     command = Column(String)
@@ -14,18 +30,22 @@ class Task(Base):
     executions = relationship('Execution', backref='task', lazy='dynamic')
 
     def __repr__(self):
-        return "<Task(task_id='{}' command='{}'>".format(self.task_id, self.task_name, self.command)
+        return "<Task(job_id='{}', task_id='{}' command='{}', task_name='{}')>" \
+            .format(self.job_id, self.task_id, self.command, self.task_name)
 
 
 class InstanceType(Base):
     __tablename__ = 'instance_type'
     type = Column(String, primary_key=True)
+    vcpu = Column(Integer)
+    memory = Column(Integer)
     provider = Column(String)
 
     instances = relationship('Instance', backref='instance_type', lazy='dynamic')
 
     def __repr__(self):
-        return "<InstanceType(type='{}'>".format(self.type)
+        return "<InstanceType(type='{}', vcpu='{}' memory='{}')>" \
+            .format(self.type, self.vcpu, self.memory)
 
 
 class Instance(Base):
@@ -38,6 +58,7 @@ class Instance(Base):
     market = Column(String)
     price = Column(Float)
 
+    instance_status = relationship('InstanceStatus', backref='instance', lazy='dynamic')
     execution = relationship('Execution', backref='instance', lazy='dynamic')
 
     def __repr__(self):
@@ -45,16 +66,32 @@ class Instance(Base):
             .format(self.id, self.type, self.region, self.zone, self.market, self.price)
 
 
+class InstanceStatus(Base):
+    __tablename__ = 'instance_status'
+    instance_id = Column(String, ForeignKey('instance.id'), primary_key=True)
+    timestamp = Column(TIMESTAMP, primary_key=True)
+
+    status = Column(String)
+
+    def __repr__(self):
+        return "InstanceStatus: <instance_id='{}', timestamp='{}' status='{}'>".format(
+            self.instance_id,
+            self.timestamp,
+            self.status)
+
+
 class Execution(Base):
     __tablename__ = 'execution'
     execution_id = Column(Integer, primary_key=True)
+    job_id = Column(Integer, primary_key=True)
     task_id = Column(Integer, primary_key=True)
     instance_id = Column(String, ForeignKey('instance.id'), primary_key=True)
     timestamp = Column(TIMESTAMP, primary_key=True)
 
     status = Column(String)
 
-    __table_args__ = (ForeignKeyConstraint(['task_id', ], [Task.task_id]),
+    __table_args__ = (ForeignKeyConstraint(['job_id', 'task_id'],
+                                           [Task.job_id, Task.task_id]),
                       {})
 
     def __repr__(self):
@@ -82,7 +119,7 @@ class InstanceStatistic(Base):
 class Statistic(Base):
     __tablename__ = 'statistic'
     execution_id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, primary_key=True)
+    job_id = Column(Integer, primary_key=True)
     start = Column(TIMESTAMP, primary_key=True)
     end = Column(TIMESTAMP)
     deadline = Column(Interval)

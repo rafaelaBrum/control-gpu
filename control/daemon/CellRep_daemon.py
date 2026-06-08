@@ -89,7 +89,7 @@ class CellRep:
     Class that parses label.txt text files and loads all images into memory
     """
 
-    def __init__(self, data_path, keep_img=False, config=None):
+    def __init__(self, data_path, keep_img=False, config=None, num_seed=None):
         """
         @param data_path <str>: path to directory where image patches are stored
         @param config <argparse>: configuration object
@@ -111,6 +111,8 @@ class CellRep:
         self._verbose = config.verbose if config is not None else 0
         self._config = config
         self.nclasses = 2
+        print("num_seed", num_seed)
+        random.seed(num_seed)
 
     def _load_metadata_from_dir(self, d):
         """
@@ -279,7 +281,7 @@ class CellRep:
     def _shuffle(self, X, Y):
         # Shuffle samples and labels maintaining relative order
         combined = list(zip(X, Y))
-        # random.shuffle(combined)
+        random.shuffle(combined)
         X[:], Y[:] = zip(*combined)
 
         return X, Y

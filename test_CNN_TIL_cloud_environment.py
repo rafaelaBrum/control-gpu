@@ -154,7 +154,7 @@ def __call_control():
 
 
 def __send_zip_file(vm: VirtualMachine, file):
-    vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+    vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                     target=vm.loader.ec2_conf.home_path,
                     item=file)
 
@@ -247,11 +247,11 @@ def __prepare_vm_server(vm: VirtualMachine, n_parties, rounds):
             # Send daemon file
             #
             # __send_zip_file(vm, vm.loader.application_conf.server_flower_file)
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+            vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                             target=vm.loader.ec2_conf.home_path,
                             item="fedavg_strategy.py")
 
-            vm.ssh.put_file(source=vm.loader.application_conf.flower_path,
+            vm.ssh.put_file(source=vm.loader.application_conf.daemon_path,
                             target=vm.loader.ec2_conf.home_path,
                             item=vm.loader.application_conf.server_flower_file.replace('.zip', '.py'))
 
@@ -325,11 +325,11 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
 
             # create directory
             vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path), output=True)
-            vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path_ebs), output=True)
+            vm.ssh.execute_command('mkdir -p {}'.format(vm.loader.file_system_conf.path_disk), output=True)
 
             __create_s3(vm, vm.loader.file_system_conf.path, client_id)
 
-            __create_ebs(vm, vm.loader.file_system_conf.path_ebs)
+            __create_ebs(vm, vm.loader.file_system_conf.path_disk)
 
             # keep ssh live
             # vm.ssh.execute_command("$HOME/.ssh/config")
@@ -348,8 +348,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Client".format(vm.instance_id))
 
-            cmd0 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'))
-            cmd1 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_ebs, 'results'))
+            cmd0 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_disk, 'logs'))
+            cmd1 = 'mkdir {}'.format(os.path.join(vm.loader.file_system_conf.path_disk, 'results'))
 
             stdout, stderr, code_return = vm.ssh.execute_command(cmd0, output=True)
             print(stdout)
@@ -364,8 +364,8 @@ def __prepare_vm_client(vm: VirtualMachine, server_ip, client_id, train_folder, 
                                                                          vm.loader.application_conf.client_flower_file.
                                                                          replace('.zip', '.py')),
                                                             os.path.join(vm.loader.ec2_conf.input_path, train_folder),
-                                                            os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'),
-                                                            os.path.join(vm.loader.file_system_conf.path_ebs,
+                                                            os.path.join(vm.loader.file_system_conf.path_disk, 'logs'),
+                                                            os.path.join(vm.loader.file_system_conf.path_disk,
                                                                          'results'),
                                                             server_ip,
                                                             os.path.join(vm.loader.ec2_conf.input_path, test_folder),

@@ -71,6 +71,9 @@ logs/
 venv/
 venv_hads/
 venv_novo/
+venv_gcp/
+venv_idea/
+venv*
 venv_flwr/
 
 # dataset folder
@@ -94,3 +97,16 @@ results/
 
 # screen log files
 screen*
+
+
+#PyCharm WSL folder
+%SystemDrive%/
+
+# temp pre_sched files
+control/pre_scheduling/*.json
+
+# trash files
+*~
+
+# gurobi file
+*.lp

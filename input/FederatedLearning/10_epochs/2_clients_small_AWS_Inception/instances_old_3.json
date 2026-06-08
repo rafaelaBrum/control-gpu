@@ -1,0 +1,50 @@
+{
+    "instances": {
+        "r5.12xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": 6.048,
+                "preemptible": 1.8692
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/nvme1n1",
+            "vcpu": 48,
+            "memory": 384,
+            "gpu": "yes",
+            "gpu_count": 1
+        },
+        "t2.xlarge": {
+            "provider": "ec2",
+            "prices": {
+                "on-demand": 0.1856,
+                "preemptible": 0.0558
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/xvdf",
+            "vcpu": 3,
+            "memory": 0,
+            "gpu": "no",
+            "gpu_count": 0
+        }
+    }
+}

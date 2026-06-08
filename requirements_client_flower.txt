@@ -10,7 +10,9 @@ ec2_metadata==2.3.0
 python-dateutil==2.8.1
 
 #flwr==0.15.0
-git+https://github.com/rafaelaBrum/flower.git
+git+https://github.com/rafaelaBrum/flower.git@update_version
+
+pympler
 
 h5py == 2.9.0
 imageio == 2.9.0
@@ -27,5 +29,6 @@ opencv-python == 4.5.1.48
 sklearn >= 0.0
 scikit-image >= 0.17.2
 scikit-learn >= 0.24.1
-tensorflow == 1.15.5
+# tensorflow == 1.15.5
+tensorflow-gpu == 1.15.5
 tqdm >= 4.56.2
