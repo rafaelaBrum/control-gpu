@@ -122,7 +122,7 @@ class Trainer(object):
 
         # After test set is separated, after data sampling is done, now split train and val
         if self._config.split[-1:][0] > 0:
-            train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y), test_size=len(self.test_x))
+            train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y), test_size=len(self.x_test))
         else:
             train_data, val_data = self._ds.split_metadata(self._config.split[:2], data=(X, Y))
 

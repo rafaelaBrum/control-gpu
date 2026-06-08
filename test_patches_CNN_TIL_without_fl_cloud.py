@@ -173,7 +173,7 @@ def finish_vm(vm: VirtualMachine, folder, item_name):
     except Exception as e:
         logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR - {}".format(vm.instance_id, e))
 
-    status = vm.terminate()
+    status = vm.terminate(delete_volume=False)
 
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
@@ -244,7 +244,7 @@ def __prepare_vm(vm: VirtualMachine, dataset_folder, n_epochs, split, neural_net
             print(stdout)
 
             # cmd_daemon = "ls tests"
-            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split {2} -d -b 32 -net {6} -tn " \
+            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split {2} -d -b 32 -net {3} -tn " \
                          "-data CellRep -out {4} -e {5} -cpu 2 -gpu 1 -wpath {6} -model_dir {6} -logdir {6} " \
                          "-tdim 240 240 -f1 10 -met 30 " \
                          "-cache {6} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,

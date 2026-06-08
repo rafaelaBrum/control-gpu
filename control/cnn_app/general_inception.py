@@ -460,8 +460,8 @@ class Inception(GenericEnsemble):
             if self._config.info:
                 print("Found previous learning rate: {0}".format(l_rate))
         
-        # opt = optimizers.SGD(lr=l_rate, decay=1.5e-4, momentum=0.9, nesterov=True)
-        opt = optimizers.Adam(lr=l_rate)
+        opt = optimizers.SGD(lr=l_rate, decay=1.0e-4, momentum=0.9, nesterov=True)
+        # opt = optimizers.Adam(lr=l_rate)
         # opt = optimizers.Adadelta(lr=l_rate)
 
         # Return parallel model if multiple GPUs are available
