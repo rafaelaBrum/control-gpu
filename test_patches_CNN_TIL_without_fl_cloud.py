@@ -38,7 +38,13 @@ def main():
 
     parser.add_argument('--instance_type', required=True)
 
-    # parser.add_argument('--epochs', dest='epochs', default=100)
+    parser.add_argument('--dataset_folder', required=True)
+
+    parser.add_argument('--neural_network', required=True)
+
+    parser.add_argument('--split', dest='split', nargs=3, type=float,
+                        help='Split data in as much as 3 sets (Default: 80%% train, 10%% validation, 10%% test).',
+                        default=(0.8, 0.1, 0.1), metavar=('Train', 'Validation', 'Test'))
 
     args = parser.parse_args()
 
@@ -46,7 +52,8 @@ def main():
 
     __prepare_logging()
 
-    vm = create_vm_on_demand(loader, args.epochs, args.instance_type)
+    vm = create_vm_on_demand(loader, args.epochs, args.instance_type,
+                             args.dataset_folder, args.split, args.neural_network)
 
     logging.info("VM created!")
 
@@ -166,7 +173,7 @@ def finish_vm(vm: VirtualMachine, folder, item_name):
     except Exception as e:
         logging.error("<VirtualMachine {}>:: SSH CONNECTION ERROR - {}".format(vm.instance_id, e))
 
-    status = vm.terminate(delete_volume=vm.loader.file_system_conf.ebs_delete)
+    status = vm.terminate(delete_volume=False)
 
     if status:
         logging.info("<VirtualMachine {}>: Terminated with Success".format(vm.instance_id, status))
@@ -185,7 +192,7 @@ def has_command_finished(vm: VirtualMachine):
 
 
 # Client functions
-def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
+def __prepare_vm(vm: VirtualMachine, dataset_folder, n_epochs, split, neural_network):
     if not vm.failed_to_created:
 
         # update instance IP
@@ -237,18 +244,19 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             print(stdout)
 
             # cmd_daemon = "ls tests"
-            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split 0.9 0.1 0.0 -d -b 32 -net VGG16 -tn " \
-                         "-data CellRep -out {2} -e {5} -cpu 12 -gpu 2 -wpath {3} -model_dir {3} -logdir {3} " \
+            cmd_daemon = "python3 {0} -i -v --train -predst {1} -split {2} -d -b 32 -net {3} -tn " \
+                         "-data CellRep -out {4} -e {5} -cpu 2 -gpu 1 -wpath {6} -model_dir {6} -logdir {6} " \
                          "-tdim 240 240 -f1 10 -met 30 " \
-                         "-cache {3} -test_dir {4} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
+                         "-cache {6} --pred ".format(os.path.join(vm.loader.ec2_conf.home_path,
                                                                          vm.loader.application_conf.
                                                                          centralized_app_file),
-                                                            os.path.join(vm.loader.ec2_conf.input_path, train_folder),
-                                                            os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'),
-                                                            os.path.join(vm.loader.file_system_conf.path_ebs,
-                                                                         'results'),
-                                                            os.path.join(vm.loader.ec2_conf.input_path, test_folder),
-                                                            n_epochs)
+                                                     os.path.join(vm.loader.ec2_conf.input_path, dataset_folder),
+                                                     f'{split[0]} {split[1]} {split[2]}',
+                                                     neural_network,
+                                                     os.path.join(vm.loader.file_system_conf.path_ebs, 'logs'),
+                                                     n_epochs,
+                                                     os.path.join(vm.loader.file_system_conf.path_ebs,
+                                                                  'results'))
 
             cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{}"'.format(cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
@@ -266,11 +274,11 @@ def __prepare_vm(vm: VirtualMachine, train_folder, test_folder, n_epochs):
             raise Exception("<VirtualMachine {}>:: SSH Exception ERROR".format(vm.instance_id))
 
 
-def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
-    if 'g4dn' in instance_type or instance_type == 'g2.8xlarge':
+def create_vm_on_demand(loader: Loader, n_epochs, instance_type, dataset_folder, split, neural_network):
+    if instance_type == 'g4dn.2xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
-            instance_type=instance_type,
+            instance_type='g4dn.2xlarge',
             image_id='ami-080af420cdfb56e39',
             ebs_device_name='/dev/nvme2n1',
             restrictions={'on-demand': 1,
@@ -278,10 +286,10 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
             prices={'on-demand': 0.752,
                     'preemptible': 0.2256}
         )
-    elif instance_type == 'p2.xlarge' or 'g3' in instance_type:
+    elif instance_type == 'p2.xlarge':
         instance = InstanceType(
             provider=CloudManager.EC2,
-            instance_type=instance_type,
+            instance_type='p2.xlarge',
             image_id='ami-080af420cdfb56e39',
             ebs_device_name='/dev/xvdf',
             restrictions={'on-demand': 1,
@@ -300,10 +308,7 @@ def create_vm_on_demand(loader: Loader, n_epochs, instance_type):
 
     vm.deploy()
 
-    train_folder = f'IMGs-EN-194/trainset'
-    test_folder = f'IMGs-EN-194/testset'
-
-    __prepare_vm(vm, train_folder, test_folder, n_epochs)
+    __prepare_vm(vm, dataset_folder, n_epochs, split, neural_network)
 
     return vm
 

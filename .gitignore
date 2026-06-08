@@ -71,6 +71,7 @@ logs/
 venv/
 venv_hads/
 venv_novo/
+venv_flwr/
 
 # dataset folder
 data_torch/

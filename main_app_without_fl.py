@@ -126,7 +126,7 @@ if __name__ == "__main__":
     train_args.add_argument('-b', dest='batch_size', type=int,
                             help='Batch size (Default: 8).', default=8)
     train_args.add_argument('-lr', dest='learn_r', type=float,
-                            help='Learning rate (Default: 0.00005).', default=0.00005)
+                            help='Learning rate (Default: 0.00005).', default=0.01)
     train_args.add_argument('-e', dest='epochs', type=int,
                             help='Number of epochs (Default: 1).', default=1)
     train_args.add_argument('-tn', action='store_true', dest='new_net',
