@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from control.managers.ec2_manager import EC2Manager
+# from control.managers.ec2_manager import EC2Manager
 from control.managers.cloud_manager import CloudManager
 from control.managers.gcp_manager import GCPManager
 
@@ -449,8 +449,8 @@ class Loader:
         for region in self.loc.values():
 
             if region.provider == CloudManager.EC2 or region.provider == CloudManager.AWS:
-                # logging.error("Without account of EC2 configured")
-                region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
+                logging.error("Without account of EC2 configured")
+                # region.setup_zones(zones=EC2Manager.get_availability_zones(region.region))
 
             elif region.provider == CloudManager.GCLOUD or region.provider == CloudManager.GCP:
                 region.setup_zones(zones=gcp_manager.get_availability_zones(region.region))
