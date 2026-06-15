@@ -1,4 +1,4 @@
-# Works with Ubuntu 
+# Works with Ubuntu 18.04 and Ubuntu 20.04 (?)
 echo '''
 \n\n
 ###########################################################################################################################################\n
@@ -12,18 +12,18 @@ echo '''
 sudo apt update
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt update
-# sudo apt install python3.7 python3.7-dev python3-pip python3.7-distutils -y
-# # sudo apt install python3.7 python3.7-dev python3-pip -y
-# echo "Python 3.7 installed"
+sudo apt install python3.7 python3.7-dev python3-pip python3.7-distutils -y
+# sudo apt install python3.7 python3.7-dev python3-pip -y
+echo "Python 3.7 installed"
 
-# # Installing Python dependencies
-# sudo apt install wget -y
-# wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_cloudlab/requirements_server_flower.txt
-# python3.7 -m pip install testresources cffi
-# python3.7 -m pip install -U pip setuptools
-# python3.7 -m pip install -r requirements_server_flower.txt
-# sudo apt install unzip -y
-# echo "Flower server requirements installed"
+# Installing Python dependencies
+sudo apt install wget -y
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_cloudlab/requirements_server_flower.txt
+python3.7 -m pip install testresources cffi
+python3.7 -m pip install -U pip setuptools
+python3.7 -m pip install -r requirements_server_flower.txt
+sudo apt install unzip -y
+echo "Flower server requirements installed"
 
 # Installing fuse for GCP
 export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
