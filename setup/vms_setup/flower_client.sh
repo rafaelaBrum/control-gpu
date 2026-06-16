@@ -8,44 +8,43 @@ echo '''
 ###########################################################################################################################################\n
 '''
 
-# Instaling python and dev tools
+# Instaling python virtual environment
 sudo apt update
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install python3.7 python3.7-dev python3-pip python3.7-distutils -y
-# sudo apt install python3.7 python3.7-dev python3-pip -y
-echo "Python 3.7 installed"
+sudo apt install python3.12-dev python3-pip python3.12-venv -y
+echo "Python 3.12 virtual environment installed"
 
-# Installing CUDA 10.0 and cuDNN 7
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
-sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/3bf863cc.pub
-sudo apt update
-sudo apt install cuda-10-0 -y
-echo "CUDA 10.0 installed"
+# # Installing CUDA 10.0 and cuDNN 7
+# wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
+# sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
+# sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/3bf863cc.pub
+# sudo apt update
+# sudo apt install cuda-10-0 -y
+# echo "CUDA 10.0 installed"
 
-wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
-wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
+# wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
+# wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
 
-sudo dpkg -i libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
-sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
+# sudo dpkg -i libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
+# sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
 
-echo "cuDNN 7 installed"
+# echo "cuDNN 7 installed"
 
 
 # Installing Python dependencies
 sudo apt install wget -y
-wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/devel_fl_cloudlab/requirements_client_flower.txt
-python3.7 -m pip install testresources cffi
-python3.7 -m pip install -U pip setuptools
-python3.7 -m pip install -r requirements_client_flower.txt
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/new_paper/requirements_client_flower.txt
+python3 -m venv venv
+source venv/bin/activate
+pip install -U pip setuptools
+pip install -r requirements_server_flower.txt
+deactivate
 sudo apt install unzip -y
 echo "Flower client requirements installed"
 
 # Installing fuse for GCP
 export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
-echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.asc] https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.asc
 sudo apt update
 sudo apt install gcsfuse -y
 echo "GCSFuse installed"
