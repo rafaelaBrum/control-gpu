@@ -34,10 +34,8 @@ echo "Python 3.12 virtual environment installed"
 sudo apt install wget -y
 wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/new_paper/requirements_client_flower.txt
 python3 -m venv venv
-source venv/bin/activate
-pip install -U pip setuptools
-pip install -r requirements_server_flower.txt
-deactivate
+venv/bin/python3.12 -m pip install -U pip setuptools
+venv/bin/python3.12 -m pip install -r requirements_client_flower.txt
 sudo apt install unzip -y
 echo "Flower client requirements installed"
 

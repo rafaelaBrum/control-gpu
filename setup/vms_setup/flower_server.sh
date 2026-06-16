@@ -17,10 +17,8 @@ echo "Python 3.12 virtual environment installed"
 wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/new_paper/requirements_server_flower.txt
 # python3.12 -m pip install testresources cffi
 python3 -m venv venv
-source venv/bin/activate
-pip install -U pip setuptools
-pip install -r requirements_server_flower.txt
-deactivate
+venv/bin/python3.12 -m pip install -U pip setuptools
+venv/bin/python3.12 -m pip install -r requirements_server_flower.txt
 sudo apt install unzip -y
 echo "Flower server requirements installed"
 
