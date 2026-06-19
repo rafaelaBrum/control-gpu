@@ -3,6 +3,7 @@
         "GCP_us-central1": {
             "provider": "gcp",
             "region": "us-central1",
+            "key_file": "",
             "client_image_id": "ubuntu-flower-client",
             "server_image_id": "ubuntu-flower-server",
             "zones": [
@@ -11,6 +12,7 @@
                 "us-central1-c",
                 "us-central1-f"
             ],
+            "cluster_urn": "",
             "global_cpu_limit": 16,
             "global_gpu_limit": 1,
             "regional_cpu_limit": 200,
