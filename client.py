@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from control.util.loader import Loader
 
-from control.scheduler.schedule_manager import ScheduleManager
+# from control.scheduler.schedule_manager import ScheduleManager
 
 from distutils.util import strtobool
 
-from control.util.recreate_database import RecreateDatabase
+# from control.util.recreate_database import RecreateDatabase
 
-from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
+# from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 
 import logging
 import argparse
@@ -119,13 +119,9 @@ def main():
     parser.add_argument('--scheduler_name', help="Scheduler name", type=str, default=None)
     parser.add_argument('--map_file', help="map file name", type=str, default=None)
     parser.add_argument('--deadline_seconds', help="deadline (seconds)", type=int, default=None)
-    # parser.add_argument('--ac_size_seconds', help="Define the size of the Logical Allocation Cycle (seconds)",
-    #                     type=int, default=None)
 
     parser.add_argument('--log_file', help="log file name", type=str, default=None)
 
-    # parser.add_argument('--resume_rate', help="Resume rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)",
-    #                     type=float, default=None)
     parser.add_argument('--revocation_rate',
                         help="Revocation rate of the spot VMs [0.0 - 1.0] (simulation-only parameter)", type=float,
                         default=None)
@@ -136,9 +132,6 @@ def main():
     #                     help="Scheduler name - Currently supported Schedulers are: " + ", ".join(
     #                         Scheduler.scheduler_names),
     #                     type=str, default=None)
-
-    # parser.add_argument('--notify', help='Send an email to notify the end of the execution (control mode)',
-    #                     action='store_true', default=False)
 
     parser.add_argument('--server_provider', help="Server provider", type=str, default=None, required=False)
     parser.add_argument('--server_region', help="Server region", type=str, default=None, required=False)

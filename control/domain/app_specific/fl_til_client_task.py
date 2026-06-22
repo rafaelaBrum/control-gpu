@@ -1,7 +1,7 @@
 from control.domain.task import Task
 
 
-class FLClientTask(Task):
+class FLTILClientTask(Task):
 
     def __init__(self, task_id, task_name, command, generic_checkpoint, bucket_name, trainset_dir, client_id,
                  zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net, dataset_urn):
@@ -73,7 +73,7 @@ class FLClientTask(Task):
         ]
 
     def __str__(self):
-        return "FLClientTask_id: {}, command: {}, generic_checkpoint: {}, " \
+        return "FLTILClientTask_id: {}, command: {}, generic_checkpoint: {}, " \
                "client_id: {}".format(self.task_id,
                                       self.command,
                                       self.generic_checkpoint,

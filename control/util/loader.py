@@ -47,14 +47,6 @@ class Loader:
 
     def __init__(self, args):
 
-        # print("Clients provider", args.clients_provider)
-        # print("Clients region", args.clients_region)
-        # print("Clients VM name", args.clients_vm_name)
-        #
-        # print("Server provider", args.server_provider)
-        # print("Server region", args.server_region)
-        # print("Server VM name", args.server_vm_name)
-
         """Command line args"""
         # input files parameters
         self.input_path = args.input_path
@@ -67,8 +59,6 @@ class Loader:
 
         # deadline in seconds parameter
         self.deadline_seconds = args.deadline_seconds
-        # # ac size in seconds
-        # self.ac_size_seconds = args.ac_size_seconds
         # log file name
         self.log_file = args.log_file
         # # simulation parameters
@@ -76,8 +66,6 @@ class Loader:
         self.revocation_rate = args.revocation_rate
         # # name of the scheduler
         # self.scheduler_name = args.scheduler_name
-        # # notify end of execution by email
-        # self.notify = args.notify
         # server provider and region
         self.server_provider = args.server_provider
         self.server_region = args.server_region
@@ -473,7 +461,7 @@ class Loader:
 
     # update Federated Learning command
     def __update_command(self, strategy, num_seed):
-        if self.application_conf.fl_framework == 'flower':
+        if self.application_conf.fl_framework == 'flower_old':
             if strategy is not None:
                 self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
                                               " --min_num_clients {2} --server_address [::]:{3} --strategy {4}"\
@@ -554,6 +542,9 @@ class Loader:
                         self.job.client_tasks[i].command,
                         self.job.client_tasks[i].client_id
                     )
+        elif self.application_conf.fl_framework == 'flower':
+            print("First server command", self.job.server_task.command[0])
+            print("Second server command", self.job.server_task.command[1])
 
     def print_execution_info(self):
         logging.info("\n")

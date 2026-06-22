@@ -1,5 +1,7 @@
 from control.domain.app_specific.fl_server_task import FLServerTask
-from control.domain.app_specific.fl_client_task import FLClientTask
+from control.domain.app_specific.fl_til_client_task import FLTILClientTask
+from control.domain.app_specific.fl_empty_client_task import FLEmptyClientTask
+from control.config.application_config import ApplicationConfig
 
 
 class Job:
@@ -9,6 +11,8 @@ class Job:
 
     def __init__(self, job_id, job_name, job_dict, server_msg_train, server_msg_test, client_msg_train, client_msg_test,
                  description=""):
+
+        self.app_config = ApplicationConfig()
         self.job_id = job_id
         self.job_name = job_name
 
@@ -25,8 +29,15 @@ class Job:
     def __load_tasks(self, job_dict):
         tasks = {}
 
-        for task in FLClientTask.from_dict(job_dict):
-            tasks[task.client_id] = task
+        if self.app_config.app == "TIL":
+            for task in FLTILClientTask.from_dict(job_dict):
+                tasks[task.client_id] = task
+        elif self.app_config.app == "empty":
+            for task in FLEmptyClientTask.from_dict(job_dict):
+                tasks[task.client_id] = task
+        else:
+            print("Need reading JSON for {} FL client application.".format(self.app_config.app))
+            exit()
 
         return tasks
 

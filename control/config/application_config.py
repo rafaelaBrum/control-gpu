@@ -55,3 +55,7 @@ class ApplicationConfig(Config):
     @property
     def daemon_cloudlab_file(self):
         return self.get_property(self._key, 'daemon_cloudlab_file')
+    
+    @property
+    def app(self):
+        return self.get_property(self._key, 'app')
