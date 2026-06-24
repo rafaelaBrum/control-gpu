@@ -14,7 +14,8 @@ from control.util.loader import Loader
 
 from control.domain.job import Job
 
-from control.domain.app_specific.fl_client_task import FLClientTask
+from control.domain.app_specific.fl_til_client_task import FLTILClientTask
+from control.domain.app_specific.fl_empty_client_task import FLEmptyClientTask
 from control.domain.cloud_region import CloudRegion
 
 from datetime import datetime, timedelta
@@ -894,7 +895,7 @@ class VirtualMachine:
     def type(self):
         return self.instance_type.type
 
-    def create_bucket_pre_scheduling(self, path, client: FLClientTask):
+    def create_bucket_pre_scheduling(self, path, client: FLTILClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 self.__create_s3(path, client)

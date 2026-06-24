@@ -1,20 +1,17 @@
-from control.domain.task import Task
+from control.domain.app_specific.fl_empty_client_task import FLEmptyClientTask
 
 
-class FLTILClientTask(Task):
+class FLTILClientTask(FLEmptyClientTask):
 
     def __init__(self, task_id, task_name, command, generic_checkpoint, bucket_name, trainset_dir, client_id,
                  zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net, dataset_urn):
-        super().__init__(task_id, task_name, command, generic_checkpoint)
+        super().__init__(task_id, task_name, command, generic_checkpoint, client_id, zip_file)
 
-        self.simple_command = command
 
         self.bucket_provider = bucket_provider
         self.bucket_region = bucket_region
         self.bucket_name = bucket_name
         self.trainset_dir = trainset_dir
-        self.client_id = client_id
-        self.zip_file = zip_file
         self.split = split
         self.batch = batch
         self.test_dir = test_dir

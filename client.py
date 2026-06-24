@@ -7,7 +7,7 @@ from distutils.util import strtobool
 
 # from control.util.recreate_database import RecreateDatabase
 
-# from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
+from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 
 import logging
 import argparse
