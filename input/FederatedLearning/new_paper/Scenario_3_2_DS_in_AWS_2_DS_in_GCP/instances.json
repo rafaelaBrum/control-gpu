@@ -1,0 +1,36 @@
+{
+    "instances": {
+        "e2-standard-4": {
+            "provider": "gcp",
+            "prices": {
+                "on-demand": {
+                    "us-west1": 0.13402284,
+                    "us-central1": 0.13402284
+                },
+                "preemptible": {
+                    "us-west1": 0.040206852,
+                    "us-central1": 0.040206852
+                }
+            },
+            "restrictions": {
+                "limits": {
+                    "on-demand": 999999999,
+                    "preemptible": 999999999
+                },
+                "markets": {
+                    "on-demand": "yes",
+                    "preemptible": "yes"
+                }
+            },
+            "image_id": "",
+            "ebs_device_name": "/dev/sdb",
+            "vcpu": 4,
+            "memory": 16,
+            "gpu": "",
+            "gpu_count": 0,
+            "locations": [
+                "GCP_us-central1"
+            ]
+        }
+    }
+}

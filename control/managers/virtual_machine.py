@@ -5,11 +5,11 @@ import time
 from control.domain.instance_type import InstanceType
 
 from control.managers.cloud_manager import CloudManager
-from control.managers.ec2_manager import EC2Manager
+# from control.managers.ec2_manager import EC2Manager
 from control.managers.gcp_manager import GCPManager
 from control.managers.experiment_cloudlab import Experiment
 
-from control.util.ssh_client import SSHClient
+# from control.util.ssh_client import SSHClient
 from control.util.loader import Loader
 
 from control.domain.job import Job
@@ -913,7 +913,7 @@ class VirtualMachine:
         elif client.bucket_provider in CloudManager.CLOUDLAB:
             self.__link_cloudlab_folder(path, client)
 
-    def remove_bucket_pre_scheduling(self, path, client: FLClientTask):
+    def remove_bucket_pre_scheduling(self, path, client: FLTILClientTask):
         if client.bucket_provider in (CloudManager.EC2, CloudManager.AWS):
             self.__detach_s3(path)
         elif client.bucket_provider in (CloudManager.GCLOUD, CloudManager.GCP):

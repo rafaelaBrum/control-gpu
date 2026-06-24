@@ -11,9 +11,9 @@ from control.managers.cloud_manager import CloudManager
 from control.managers.experiment_cloudlab import Experiment
 from control.managers.virtual_machine import VirtualMachine
 from control.util.loader import Loader
-from control.util.ssh_client import SSHClient
+# from control.util.ssh_client import SSHClient
 
-from control.domain.app_specific.fl_client_task import FLClientTask
+from control.domain.app_specific.fl_til_client_task import FLTILClientTask
 
 instance_aws = InstanceType(
     provider=CloudManager.EC2,
@@ -125,6 +125,8 @@ class PreSchedulingManager:
         loc_copy = deepcopy(self.loader.loc)
         for region_id, region in self.loader.loc.items():
             if region.provider in (CloudManager.EC2, CloudManager.AWS):
+                print("Mising testing new config in AWS")
+                exit()
                 vm_initial = VirtualMachine(instance_type=instance_aws, market='on-demand', loader=self.loader)
             elif region.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 vm_initial = VirtualMachine(instance_type=instance_gcp, market='on-demand', loader=self.loader)
@@ -173,9 +175,10 @@ class PreSchedulingManager:
                         if not vm_final.failed_to_created:
                             # update instance IP
                             vm_final.update_ip(zone=zone_copy)
-                            self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
-                                                                                        region.key_file,
-                                                                                        region_copy.key_file)
+                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            # self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
+                            #                                                             region.key_file,
+                            #                                                             region_copy.key_file)
                             status = vm_final.terminate(wait=False, zone=zone_copy)
                             if status:
                                 vm_final.instance_id = None
@@ -432,8 +435,9 @@ class PreSchedulingManager:
                                 continue
                             logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
                                          f"in region {region.region}")
-                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
-                                self.__compute_training_times(vm, key_file, cli)
+                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            # self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                            #     self.__compute_training_times(vm, key_file, cli)
                             vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
@@ -491,7 +495,7 @@ class PreSchedulingManager:
                 logging.error(f"<PreSchedulingManager>: {cli.bucket_provider} does not have support ({cli_id})")
         return cli_aws, cli_gcp
 
-    def __compute_training_times(self, vm: VirtualMachine, key, cli: FLClientTask):
+    def __compute_training_times(self, vm: VirtualMachine, key, cli: FLTILClientTask):
 
         if key == '':
             if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -820,9 +824,10 @@ class PreSchedulingManager:
                             if not vm_final.failed_to_created:
                                 # update instance IP
                                 vm_final.update_ip(zone=zone_copy)
-                                self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
-                                                                                           region.key_file,
-                                                                                           region_copy.key_file)
+                                logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                                # self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
+                                #                                                            region.key_file,
+                                #                                                            region_copy.key_file)
                                 status = vm_final.terminate(wait=True, zone=zone_copy)
                                 if status:
                                     vm_final.instance_id = None
