@@ -3,6 +3,7 @@ from control.managers.cloud_manager import CloudManager
 from control.config.gcp_config import GCPConfig
 from control.config.storage_config import StorageConfig
 
+import googleapiclient.discovery
 from oauth2client.client import GoogleCredentials
 
 from datetime import datetime
