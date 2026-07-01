@@ -239,10 +239,11 @@ class VirtualMachine:
                         raise Exception("<VirtualMachine>: Invalid Market - {}:".format(self.market))
                     elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider in (CloudManager.EC2,
                                                                                                    CloudManager.AWS):
-                        self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
-                                                                                  image_id=self.instance_type.image_id,
-                                                                                  zone=zone,
-                                                                                  key_name=key_name)
+                        logging.error("Without account of EC2 configured")
+                        # self.instance_id = self.manager.create_on_demand_instance(instance_type=self.instance_type.type,
+                        #                                                           image_id=self.instance_type.image_id,
+                        #                                                           zone=zone,
+                        #                                                           key_name=key_name)
                     elif self.market == CloudManager.ON_DEMAND and self.instance_type.provider in (CloudManager.GCLOUD,
                                                                                                    CloudManager.GCP):
                         self.instance_id = \
@@ -254,13 +255,14 @@ class VirtualMachine:
                                                                    gpu_count=self.instance_type.count_gpu)
                     elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider in (CloudManager.EC2,
                                                                                                      CloudManager.AWS):
-                        self.instance_id = \
-                            self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
-                                                                     image_id=self.instance_type.image_id,
-                                                                     max_price=self.instance_type.price_preemptible[self.region.region] +
-                                                                     0.1,
-                                                                     zone=zone,
-                                                                     key_name=key_name)
+                        logging.error("Without account of EC2 configured")
+                        # self.instance_id = \
+                        #     self.manager.create_preemptible_instance(instance_type=self.instance_type.type,
+                        #                                              image_id=self.instance_type.image_id,
+                        #                                              max_price=self.instance_type.price_preemptible[self.region.region] +
+                        #                                              0.1,
+                        #                                              zone=zone,
+                        #                                              key_name=key_name)
                     elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider in (CloudManager.GCLOUD,
                                                                                                      CloudManager.GCP):
                         self.instance_id = \

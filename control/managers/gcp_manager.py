@@ -199,6 +199,8 @@ class GCPManager(CloudManager):
 
         try:
 
+            client = compute_v1.machineImagesClient()
+
             if zone == '':
                 zone = self.gcp_conf.zone
             machine_type = f'zones/{zone}/machineTypes/{instance_type}'
@@ -207,7 +209,22 @@ class GCPManager(CloudManager):
 
             image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
                                                               image=f'{image_id}').execute()
+
+            # Initialize request argument(s)
+            request = compute_v1.GetMachineImageRequest(
+                machine_image=image_id,
+                project=self.gcp_conf.project,
+            )
+
+            # Make the request
+            response = client.get(request=request)
+
+            # Handle the response
+            print(response)
+
             self.mutex.release()
+
+            exit()
 
             source_disk_image = image_response['selfLink']
 
