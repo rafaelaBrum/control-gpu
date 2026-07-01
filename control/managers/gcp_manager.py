@@ -3,7 +3,8 @@ from control.managers.cloud_manager import CloudManager
 from control.config.gcp_config import GCPConfig
 from control.config.storage_config import StorageConfig
 
-from oauth2client.client import GoogleCredentials
+# from google.api_core.extended_operation import ExtendedOperation
+from google.cloud import compute_v1
 
 from datetime import datetime
 from dateutil.tz import tzutc
@@ -36,9 +37,6 @@ class GCPManager(CloudManager):
     bucket_config = storage_config
 
     mutex = threading.Lock()
-    credentials = GoogleCredentials.get_application_default()
-    compute_engine = googleapiclient.discovery.build('compute', 'v1',
-                                                     credentials=credentials, cache_discovery=True)
 
     def __init__(self):
 
@@ -919,45 +917,23 @@ class GCPManager(CloudManager):
     # Get availability zones of a GCP region
     def get_availability_zones(self, region):
         # Get zones info
-        request = self.compute_engine.regions().list(project=self.gcp_conf.project, filter=f'(description = {region})')
+        client = compute_v1.RegionZonesClient()
+        
+        # Initialize request argument(s)
+        request = compute_v1.ListRegionZonesRequest(
+            project=self.gcp_conf.project,
+            region=region,
+        )
+
+        # Make the request
+        page_result = client.list(request=request)
 
         zones = []
 
-        if request is not None:
-            response = request.execute()
-
-            for az in response['items'][0]['zones']:
-                zones.append(az.split('/')[-1])
+        # Handle the response
+        for response in page_result:
+            zones.append(response.name)
+        
+        zones.sort()
 
         return zones
-
-    # def get_cpu_credits(self, instance_id):
-    #
-    #     end_time = datetime.utcnow()
-    #
-    #     start_time = end_time - timedelta(minutes=5)
-    #
-    #     # print(start_time)
-    #     # print(end_time)
-    #
-    #     response = self.cloud_watch.get_metric_statistics(
-    #         Namespace='AWS/EC2',
-    #         MetricName='CPUCreditBalance',
-    #         Dimensions=[
-    #             {
-    #                 'Name': 'InstanceId',
-    #                 'Value': instance_id
-    #             },
-    #         ],
-    #         Period=60,
-    #         Statistics=['Average'],
-    #         StartTime=start_time,
-    #         EndTime=end_time
-    #     )
-    #
-    #     cpu_credits = 0
-    #
-    #     if len(response['Datapoints']) > 0:
-    #         cpu_credits = math.ceil(response['Datapoints'][-1]['Average'])
-    #
-    #     return cpu_credits
