@@ -265,13 +265,14 @@ class VirtualMachine:
                         #                                              key_name=key_name)
                     elif self.market == CloudManager.PREEMPTIBLE and self.instance_type.provider in (CloudManager.GCLOUD,
                                                                                                      CloudManager.GCP):
-                        self.instance_id = \
-                            self.manager.create_preemptible_instance(instance_type=self.instance_type.type.split('_')[0],
-                                                                     image_id=self.instance_type.image_id,
-                                                                     vm_name=self.vm_name,
-                                                                     zone=zone,
-                                                                     gpu_type=self.instance_type.gpu,
-                                                                     gpu_count=self.instance_type.count_gpu)
+                        logging.error("Not tested yet!")
+                        # self.instance_id = \
+                        #     self.manager.create_preemptible_instance(instance_type=self.instance_type.type.split('_')[0],
+                        #                                              image_id=self.instance_type.image_id,
+                        #                                              vm_name=self.vm_name,
+                        #                                              zone=zone,
+                        #                                              gpu_type=self.instance_type.gpu,
+                        #                                              gpu_count=self.instance_type.count_gpu)
                     else:
                         raise Exception(f"<VirtualMachine>: We do not support {self.market} instances on "
                                         f"{self.instance_type.provider} cloud provider yet")
