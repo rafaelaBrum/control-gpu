@@ -51,3 +51,11 @@ class GCPConfig(Config):
     @property
     def uid(self):
         return self.get_property(self._key, 'uid')
+
+    @property
+    def network(self):
+        return self.get_property(self._key, 'network')
+
+    @property
+    def disk_type(self):
+        return self.get_property(self._key, 'disk_type')

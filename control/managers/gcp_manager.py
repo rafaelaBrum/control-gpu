@@ -31,14 +31,16 @@ api_key = file.read()
 
 
 class GCPManager(CloudManager):
-    gcp_conf = GCPConfig()
+    gcp_config = GCPConfig()
     storage_config = StorageConfig()
-    vm_config = gcp_conf
+    vm_config = gcp_config
     bucket_config = storage_config
 
     mutex = threading.Lock()
 
     def __init__(self):
+        self.instance_client = compute_v1.InstancesClient()
+        self.image_client = compute_v1.ImagesClient()
 
         self.instances_history = {}
 
@@ -61,34 +63,19 @@ class GCPManager(CloudManager):
                     self.instances_history[instance['id']]['EndTime'] = \
                         datetime.now(tz=tzutc())
 
-    def _wait_for_operation(self, operation, zone):
-        # print('Waiting for operation to finish...')
-
-        while True:
-            result = self.compute_engine.zoneOperations().get(
-                project=self.gcp_conf.project,
-                zone=zone,
-                operation=operation).execute()
-
-            if result['status'] == 'DONE':
-                # print("done.")
-                if 'error' in result:
-                    raise Exception(result['error'])
-                return result
-
-            time.sleep(1)
-
-    def _create_instance(self, info, zone):
+    def _create_instance(self, instance, zone):
 
         self.mutex.acquire()
 
         try:
-            operation = self.compute_engine.instances().insert(
-                project=self.gcp_conf.project,
-                zone=zone,
-                body=info).execute()
+            request = compute_v1.InsertInstanceRequest()
+            request.zone = zone
+            request.project = self.gcp_config.project
+            request.instance_resource = instance
 
-            self._wait_for_operation(operation['name'], zone=zone)
+            operation = self.instance_client.insert(request=request)
+
+            wait_for_extended_operation(operation, "instance creation")
 
             self.mutex.release()
 
@@ -107,17 +94,17 @@ class GCPManager(CloudManager):
 
     def create_volume(self, size, volume_name='', zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         try:
             disk_body = {
                 'name': volume_name,
                 "sizeGb": size,
-                'type': f'projects/{self.gcp_conf.project}/zones/{zone}/diskTypes/pd-balanced'
+                'type': f'projects/{self.gcp_config.project}/zones/{zone}/diskTypes/pd-balanced'
             }
 
             self.mutex.acquire()
 
-            operation = self.compute_engine.disks().insert(project=self.gcp_conf.project, zone=zone,
+            operation = self.compute_engine.disks().insert(project=self.gcp_config.project, zone=zone,
                                                            body=disk_body).execute()
 
             self._wait_for_operation(operation['name'], zone=zone)
@@ -138,7 +125,7 @@ class GCPManager(CloudManager):
 
     def wait_volume(self, volume_name='', zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         disk = self.__get_disk(volume_name, zone=zone)
 
         ready = False
@@ -156,14 +143,14 @@ class GCPManager(CloudManager):
     def attach_volume(self, instance_id, zone='', volume_name=''):
 
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
 
         try:
             instance = self.__get_instance(instance_id, zone)
 
             self.mutex.acquire()
 
-            disk = self.compute_engine.disks().get(project=self.gcp_conf.project, zone=zone,
+            disk = self.compute_engine.disks().get(project=self.gcp_config.project, zone=zone,
                                                    disk=volume_name).execute()
 
             self.mutex.release()
@@ -175,7 +162,7 @@ class GCPManager(CloudManager):
 
                 self.mutex.acquire()
 
-                operation = self.compute_engine.instances().attachDisk(project=self.gcp_conf.project,
+                operation = self.compute_engine.instances().attachDisk(project=self.gcp_config.project,
                                                                        zone=zone,
                                                                        instance=instance['name'],
                                                                        body=attached_disk_body).execute()
@@ -200,7 +187,7 @@ class GCPManager(CloudManager):
         try:
 
             if zone == '':
-                zone = self.gcp_conf.zone
+                zone = self.gcp_config.zone
             machine_type = f'zones/{zone}/machineTypes/{instance_type}'
 
             self.mutex.acquire()
@@ -208,31 +195,68 @@ class GCPManager(CloudManager):
             # Initialize request argument(s)
             request = compute_v1.GetImageRequest(
                 image=f"{image_id}",
-                project=self.gcp_conf.project,
+                project=self.gcp_config.project,
             )
 
-            client = compute_v1.ImagesClient()
-
             # Make the request
-            response = client.get(request=request)
+            image = self.image_client.get(request=request)
 
             # Handle the response
-            print(type(response))
 
             self.mutex.release()
 
-            exit()
+            disk_type = f"zones/{zone}/diskTypes/{self.ec2_config.disk_type}"
+            boot_disk = compute_v1.AttachedDisk()
+            initialize_params = compute_v1.AttachedDiskInitializeParams()
+            initialize_params.source_image = image.self_link
+            # initialize_params.disk_type = disk_type
+            boot_disk.initialize_params = initialize_params
+            boot_disk.auto_delete = True
+            boot_disk.boot = True
+            disks = [boot_disk, ]
 
-            source_disk_image = image_response['selfLink']
+            network_interface = compute_v1.NetworkInterface()
+            network_interface.network = f"global/networks/{self.gcp_config.network}"
+
+            access = compute_v1.AccessConfig()
+            access.type_ = compute_v1.AccessConfig.Type.ONE_TO_ONE_NAT.name
+            access.name = "External NAT"
+            access.network_tier = access.NetworkTier.PREMIUM.name
+            network_interface.access_configs = [access]
+
+            # Collect information into the Instance object.
+            instance = compute_v1.Instance()
+            instance.network_interfaces = [network_interface]
+            instance.name = instance_name
+            instance.disks = disks
+            instance.machine_type = machine_type
+
+            instance.scheduling = compute_v1.Scheduling()
+
+            instance.metadata = compute_v1.Metadata({
+                "items": [
+                    {
+                        "key": 'enable-osconfig',
+                        "value": 'TRUE'
+                    },
+                    {
+                        "key": 'enable-oslogin',
+                        "value": 'true'
+                    }
+                ]
+            })
+
+            
+            instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
 
             if gpu_count > 0:
-                # print("creating with GPU")
+                logging.error("Not tested with GPU yet!")
                 config = {
                     'name': vm_name,
                     'machineType': machine_type,
 
                     # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
                     # 'sourceMachineImage': source_machine_image,
 
                     # Specify the boot disk and the image to use as a source.
@@ -269,7 +293,7 @@ class GCPManager(CloudManager):
                     [
                         {
                             "acceleratorCount": gpu_count,
-                            "acceleratorType": f"projects/{self.gcp_conf.project}/zones/{zone}/"
+                            "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
                                                f"acceleratorTypes/{gpu_type}"
                         }
                     ],
@@ -290,59 +314,8 @@ class GCPManager(CloudManager):
                         "onHostMaintenance": "terminate"
                     }
                 }
-            else:
-                config = {
-                    'name': vm_name,
-                    'machineType': machine_type,
 
-                    # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
-                    # 'sourceMachineImage': source_machine_image,
-
-                    # Specify the boot disk and the image to use as a source.
-                    'disks': [
-                        {
-                            'boot': True,
-                            'autoDelete': True,
-                            'initializeParams': {
-                                'sourceImage': source_disk_image,
-                            }
-
-                        }
-                    ],
-
-                    # Allowing SSH connection from third-parties
-                    "metadata": {
-                        "items": [
-                            {
-                                "key": 'enable-oslogin',
-                                "value": 'TRUE'
-                            }
-                        ]
-                    },
-
-                    # Allow the instance to access cloud storage.
-                    'serviceAccounts': [{
-                        'email': 'default',
-                        'scopes': [
-                            'https://www.googleapis.com/auth/devstorage.read_write'
-                        ]
-                    }],
-
-                    # Specify a network interface with NAT to access the public
-                    # internet.
-                    'networkInterfaces': [{
-                        'network': 'global/networks/default',
-                        'accessConfigs': [
-                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                        ]
-                    }],
-                    'tags': [{
-                        'items': ['http-server', 'https-server']
-                    }]
-                }
-
-            instances = self._create_instance(config, zone)
+            instances = self._create_instance(instance, zone)
 
             if instances is not None:
                 created_instances = [i for i in instances]
@@ -359,10 +332,10 @@ class GCPManager(CloudManager):
 
     def delete_volume(self, volume_id, zone='', volume_name=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         try:
             self.mutex.acquire()
-            self.compute_engine.disks().delete(project=self.gcp_conf.project, zone=zone,
+            self.compute_engine.disks().delete(project=self.gcp_config.project, zone=zone,
                                                disk=volume_name).execute()
             self.mutex.release()
             status = True
@@ -380,12 +353,12 @@ class GCPManager(CloudManager):
         try:
 
             if zone == '':
-                zone = self.gcp_conf.zone
+                zone = self.gcp_config.zone
             machine_type = f'zones/{zone}/machineTypes/{instance_type}'
 
             self.mutex.acquire()
 
-            image_response = self.compute_engine.images().get(project=self.gcp_conf.project,
+            image_response = self.compute_engine.images().get(project=self.gcp_config.project,
                                                               image=f'{image_id}').execute()
             self.mutex.release()
 
@@ -398,7 +371,7 @@ class GCPManager(CloudManager):
                     'machineType': machine_type,
 
                     # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
                     # 'sourceMachineImage': source_machine_image,
 
                     # Specify the boot disk and the image to use as a source.
@@ -435,7 +408,7 @@ class GCPManager(CloudManager):
                     [
                         {
                             "acceleratorCount": gpu_count,
-                            "acceleratorType": f"projects/{self.gcp_conf.project}/zones/{zone}/"
+                            "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
                                                f"acceleratorTypes/{gpu_type}"
                         }
                     ],
@@ -463,7 +436,7 @@ class GCPManager(CloudManager):
                     'machineType': machine_type,
 
                     # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_conf.project}/machineImages/{image_id}',
+                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
                     # 'sourceMachineImage': source_machine_image,
 
                     # Specify the boot disk and the image to use as a source.
@@ -544,7 +517,7 @@ class GCPManager(CloudManager):
 
             self.mutex.acquire()
 
-            operation = self.compute_engine.instances().delete(project=self.gcp_conf.project,
+            operation = self.compute_engine.instances().delete(project=self.gcp_config.project,
                                                                zone=zone,
                                                                instance=instance['name']).execute()
 
@@ -560,7 +533,7 @@ class GCPManager(CloudManager):
 
     def terminate_instance(self, instance_id, wait=True, zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         try:
             instance = self.__get_instance(instance_id, zone)
             operation = self._terminate_instance(instance, zone=zone)
@@ -602,18 +575,20 @@ class GCPManager(CloudManager):
 
     def __get_instances(self, get_filter=None, zone=''):
 
+        #TO DO !!!
+
         try:
 
             if zone == '':
-                zone = self.gcp_conf.zone
+                zone = self.gcp_config.zone
 
             self.mutex.acquire()
 
             if get_filter is None:
-                result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                result = self.compute_engine.instances().list(project=self.gcp_config.project,
                                                               zone=zone).execute()
             else:
-                result = self.compute_engine.instances().list(project=self.gcp_conf.project,
+                result = self.compute_engine.instances().list(project=self.gcp_config.project,
                                                               zone=zone,
                                                               filter=get_filter).execute()
 
@@ -631,7 +606,7 @@ class GCPManager(CloudManager):
             return None
 
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
 
         instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
 
@@ -652,7 +627,7 @@ class GCPManager(CloudManager):
 
         try:
             self.mutex.acquire()
-            ret = self.compute_engine.disks().get(project=self.gcp_conf.project,
+            ret = self.compute_engine.disks().get(project=self.gcp_config.project,
                                                   zone=zone, disk=disk_name).execute()
             self.mutex.release()
             return ret
@@ -665,14 +640,14 @@ class GCPManager(CloudManager):
 
     def list_instances_id(self, list_filter=None, zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         instances = self.__get_instances(list_filter, zone=zone)
 
         return [i['id'] for i in instances] if instances else []
 
     def get_public_instance_ip(self, instance_id, zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
         if instances is not None:
             instance = instances[0]
@@ -685,7 +660,7 @@ class GCPManager(CloudManager):
 
     def get_private_instance_ip(self, instance_id, zone=''):
         if zone == '':
-            zone = self.gcp_conf.zone
+            zone = self.gcp_config.zone
         instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
         if instances is not None:
             instance = instances[0]
@@ -935,7 +910,7 @@ class GCPManager(CloudManager):
         
         # Initialize request argument(s)
         request = compute_v1.ListRegionZonesRequest(
-            project=self.gcp_conf.project,
+            project=self.gcp_config.project,
             region=region,
         )
 

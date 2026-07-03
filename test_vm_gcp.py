@@ -28,10 +28,8 @@ def get_image_from_name(project: str, name: str) -> compute_v1.Image:
         project=project,
     )
 
-    client = compute_v1.ImagesClient()
-
     # Make the request
-    newest_image = client.get(request=request)
+    newest_image = image_client.get(request=request)
     return newest_image
 
 
@@ -204,7 +202,6 @@ def create_instance(
     # Use the network interface provided in the network_link argument.
     network_interface = compute_v1.NetworkInterface()
     network_interface.network = network_link
-    # network_interface.tags =  [{'items': ['http-server', 'https-server', 'all-in', 'all-out']}]
     if subnetwork_link:
         network_interface.subnetwork = subnetwork_link
 
@@ -275,10 +272,8 @@ def create_instance(
         ]
     })
 
-    # [{
-    #     "key": 'enable-oslogin',
-    #     "value": 'TRUE'
-    # }]
+    
+    instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
 
     # Prepare the request to insert an instance.
     request = compute_v1.InsertInstanceRequest()
@@ -312,7 +307,7 @@ def create_with_ssd(
         Instance object.
     """
     image = get_image_from_name(project=project_id, name=image_name)
-    disk_type = f"zones/{zone}/diskTypes/pd-standard"
+    disk_type = f"zones/{zone}/diskTypes/pd-balanced"
     disks = [
         disk_from_image(disk_type, 30, True, image.self_link, True),
         # local_ssd_disk(zone),
@@ -320,5 +315,33 @@ def create_with_ssd(
     instance = create_instance(project_id, zone, instance_name, disks)
     return instance
 
+def delete_instance(project_id, zone, instance_name):
+    # Create a client
+    client = compute_v1.InstancesClient()
+
+    # Initialize request argument(s)
+    request = compute_v1.DeleteInstanceRequest(
+        instance=instance_name,
+        project=project_id,
+        zone=zone,
+    )
+    
+    print(f"Deleting the {instance_name} instance in {zone}...")
+
+    # Make the request
+    operation = client.delete(request=request)
+
+    wait_for_extended_operation(operation, "instance deletion")
+
+    print(f"Instance {instance_name} deleted.")
+
+def send_file_to_instance(instance, file):
+    subprocess.run()
+
 if __name__ == '__main__':
-    print(create_with_ssd(project_id="multifedls", zone="us-central1-a",instance_name="teste", image_name=f"ubuntu-flower-server"))
+    instance_created = create_with_ssd(project_id="multifedls", zone="us-central1-a",instance_name="teste", image_name=f"ubuntu-flower-server")
+    # input("Pode enviar os arquivos?")
+    # send_file_to_instance(instance=instance_created, file="environment.env")
+    input("Pode excluir?")
+    delete_instance(project_id="multifedls", zone="us-central1-a",instance_name="teste")
+
