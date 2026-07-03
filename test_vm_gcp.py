@@ -150,7 +150,7 @@ def create_instance(
     network_link: str = "global/networks/default",
     subnetwork_link: str = None,
     internal_ip: str = None,
-    external_access: bool = False,
+    external_access: bool = True,
     external_ipv4: str = None,
     accelerators: list[compute_v1.AcceleratorConfig] = None,
     preemptible: bool = False,
@@ -204,6 +204,7 @@ def create_instance(
     # Use the network interface provided in the network_link argument.
     network_interface = compute_v1.NetworkInterface()
     network_interface.network = network_link
+    # network_interface.tags =  [{'items': ['http-server', 'https-server', 'all-in', 'all-out']}]
     if subnetwork_link:
         network_interface.subnetwork = subnetwork_link
 
@@ -261,7 +262,23 @@ def create_instance(
 
 
     #NEW!!!
-    instance.metadata = compute_v1.Metadata()
+    instance.metadata = compute_v1.Metadata({
+        "items": [
+            {
+                "key": 'enable-osconfig',
+                "value": 'TRUE'
+            },
+            {
+                "key": 'enable-oslogin',
+                "value": 'true'
+            }
+        ]
+    })
+
+    # [{
+    #     "key": 'enable-oslogin',
+    #     "value": 'TRUE'
+    # }]
 
     # Prepare the request to insert an instance.
     request = compute_v1.InsertInstanceRequest()
@@ -305,18 +322,3 @@ def create_with_ssd(
 
 if __name__ == '__main__':
     print(create_with_ssd(project_id="multifedls", zone="us-central1-a",instance_name="teste", image_name=f"ubuntu-flower-server"))
-
-    client = compute_v1.InstancesClient()
-
-    # Initialize request argument(s)
-    request = compute_v1.SetMetadataInstanceRequest(
-        instance="teste",
-        project="multifedls",
-        zone="us-central1-a",
-    )
-
-    # Make the request
-    response = client.set_metadata(request=request)
-
-    # Handle the response
-    print(response)
