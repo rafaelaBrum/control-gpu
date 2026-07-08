@@ -3,7 +3,7 @@ from control.managers.cloud_manager import CloudManager
 from control.config.gcp_config import GCPConfig
 from control.config.storage_config import StorageConfig
 
-# from google.api_core.extended_operation import ExtendedOperation
+from google.api_core.extended_operation import ExtendedOperation
 from google.cloud import compute_v1
 
 from datetime import datetime
@@ -47,6 +47,8 @@ class GCPManager(CloudManager):
     def _update_history(self, instances, status):
 
         for instance in instances:
+            print("Peguei uma instância - falta terminar isso!")
+            exit()
 
             if status == 'start':
                 self.instances_history = {
@@ -75,15 +77,15 @@ class GCPManager(CloudManager):
 
             operation = self.instance_client.insert(request=request)
 
-            wait_for_extended_operation(operation, "instance creation")
+            self._wait_for_operation(operation, "instance creation")
 
             self.mutex.release()
 
-            instances = self.__get_instances(get_filter=f'(name = {info["name"]})', zone=zone)
+            instance = self.__get_instance(instance_id=instance.name, zone=zone)
 
-            self._update_history(instances, 'start')
+            self._update_history([instance], 'start')
 
-            return instances
+            return instance
 
         except Exception as e:
             logging.error("<GCPManager>: Error to create instance")
@@ -205,7 +207,7 @@ class GCPManager(CloudManager):
 
             self.mutex.release()
 
-            disk_type = f"zones/{zone}/diskTypes/{self.ec2_config.disk_type}"
+            disk_type = f"zones/{zone}/diskTypes/{self.gcp_config.disk_type}"
             boot_disk = compute_v1.AttachedDisk()
             initialize_params = compute_v1.AttachedDiskInitializeParams()
             initialize_params.source_image = image.self_link
@@ -227,7 +229,7 @@ class GCPManager(CloudManager):
             # Collect information into the Instance object.
             instance = compute_v1.Instance()
             instance.network_interfaces = [network_interface]
-            instance.name = instance_name
+            instance.name = vm_name
             instance.disks = disks
             instance.machine_type = machine_type
 
@@ -315,12 +317,10 @@ class GCPManager(CloudManager):
                     }
                 }
 
-            instances = self._create_instance(instance, zone)
+            instance = self._create_instance(instance, zone)
 
-            if instances is not None:
-                created_instances = [i for i in instances]
-                instance = created_instances[0]
-                return instance['id']
+            if instance is not None:
+                return instance.name
             else:
                 return None
 
@@ -560,46 +560,13 @@ class GCPManager(CloudManager):
     def __get_instance(self, instance_id, zone):
         try:
 
-            instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
-
-            if instances is not None:
-                instance = instances[0]
-            else:
-                instance = None
+            instance = self.instance_client.get(project=self.gcp_config.project, zone=zone, instance=instance_id)
 
         except Exception as e:
             logging.info(e)
             return None
 
         return instance
-
-    def __get_instances(self, get_filter=None, zone=''):
-
-        #TO DO !!!
-
-        try:
-
-            if zone == '':
-                zone = self.gcp_config.zone
-
-            self.mutex.acquire()
-
-            if get_filter is None:
-                result = self.compute_engine.instances().list(project=self.gcp_config.project,
-                                                              zone=zone).execute()
-            else:
-                result = self.compute_engine.instances().list(project=self.gcp_config.project,
-                                                              zone=zone,
-                                                              filter=get_filter).execute()
-
-            self.mutex.release()
-            return result['items'] if result is not None and 'items' in result else None
-
-        except Exception as e:
-            logging.info(e)
-            if self.mutex.locked():
-                self.mutex.release()
-            return None
 
     def get_instance_status(self, instance_id, zone=''):
         if instance_id is None:
@@ -608,18 +575,13 @@ class GCPManager(CloudManager):
         if zone == '':
             zone = self.gcp_config.zone
 
-        instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
-
-        if instances is not None:
-            instance = instances[0]
-        else:
-            instance = None
+        instance = self.__get_instance(instance_id=instance_id, zone=zone)
 
         if instance is None:
-            # print("instance status", CloudManager.TERMINATED)
+            print("instance status", CloudManager.TERMINATED)
             return CloudManager.TERMINATED
         else:
-            # print("instance status", instance['status'])
+            print("instance status", instance['status'])
 
             return instance['status'].lower()
 
@@ -638,17 +600,17 @@ class GCPManager(CloudManager):
                 self.mutex.release()
             return None
 
-    def list_instances_id(self, list_filter=None, zone=''):
-        if zone == '':
-            zone = self.gcp_config.zone
-        instances = self.__get_instances(list_filter, zone=zone)
+    # def list_instances_id(self, list_filter=None, zone=''):
+    #     if zone == '':
+    #         zone = self.gcp_config.zone
+    #     instances = self.__get_instances(list_filter, zone=zone)
 
-        return [i['id'] for i in instances] if instances else []
+    #     return [i['id'] for i in instances] if instances else []
 
     def get_public_instance_ip(self, instance_id, zone=''):
         if zone == '':
             zone = self.gcp_config.zone
-        instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
+        instances = self.__get_instance(instance_id=instance_id, zone=zone)
         if instances is not None:
             instance = instances[0]
         else:
@@ -661,7 +623,7 @@ class GCPManager(CloudManager):
     def get_private_instance_ip(self, instance_id, zone=''):
         if zone == '':
             zone = self.gcp_config.zone
-        instances = self.__get_instances(get_filter=f'(id = {instance_id})', zone=zone)
+        instances = self.__get_instance(instance_id=instance_id, zone=zone)
         if instances is not None:
             instance = instances[0]
         else:
@@ -926,3 +888,24 @@ class GCPManager(CloudManager):
         zones.sort()
 
         return zones
+
+    def _wait_for_operation(self, operation: ExtendedOperation, verbose_name: str = "operation", timeout: int = 300):
+        # print('Waiting for operation to finish...')
+
+        result = operation.result(timeout=timeout)
+
+        if operation.error_code:
+            logging.error(
+                f"Error during {verbose_name}: [Code: {operation.error_code}]: {operation.error_message}",
+                file=sys.stderr,
+                flush=True,
+            )
+            logging.error(f"Operation ID: {operation.name}", file=sys.stderr, flush=True)
+            raise operation.exception() or RuntimeError(operation.error_message)
+
+        if operation.warnings:
+            logging.warning(f"Warnings during {verbose_name}:\n", file=sys.stderr, flush=True)
+            for warning in operation.warnings:
+                logging.warning(f" - {warning.code}: {warning.message}", file=sys.stderr, flush=True)
+
+        return result
