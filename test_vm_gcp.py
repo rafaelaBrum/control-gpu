@@ -8,6 +8,8 @@ import warnings
 from google.api_core.extended_operation import ExtendedOperation
 from google.cloud import compute_v1
 
+import subprocess
+
 
 def get_image_from_name(project: str, name: str) -> compute_v1.Image:
     """
@@ -144,7 +146,7 @@ def create_instance(
     zone: str,
     instance_name: str,
     disks: list[compute_v1.AttachedDisk],
-    machine_type: str = "n1-standard-1",
+    machine_type: str = "e2-medium",
     network_link: str = "global/networks/default",
     subnetwork_link: str = None,
     internal_ip: str = None,
@@ -307,7 +309,7 @@ def create_with_ssd(
         Instance object.
     """
     image = get_image_from_name(project=project_id, name=image_name)
-    disk_type = f"zones/{zone}/diskTypes/pd-balanced"
+    disk_type = f"zones/{zone}/diskTypes/pd-standard"
     disks = [
         disk_from_image(disk_type, 30, True, image.self_link, True),
         # local_ssd_disk(zone),
@@ -315,33 +317,41 @@ def create_with_ssd(
     instance = create_instance(project_id, zone, instance_name, disks)
     return instance
 
-def delete_instance(project_id, zone, instance_name):
+def delete_instance(project_id, zone, instance):
     # Create a client
     client = compute_v1.InstancesClient()
 
     # Initialize request argument(s)
     request = compute_v1.DeleteInstanceRequest(
-        instance=instance_name,
+        instance=instance.name,
         project=project_id,
         zone=zone,
     )
     
-    print(f"Deleting the {instance_name} instance in {zone}...")
+    print(f"Deleting the {instance.name} instance in {zone}...")
 
     # Make the request
     operation = client.delete(request=request)
 
     wait_for_extended_operation(operation, "instance deletion")
 
-    print(f"Instance {instance_name} deleted.")
+    print(f"Instance {instance.name} deleted.")
 
-def send_file_to_instance(instance, file):
-    subprocess.run()
+def send_file_to_instance(instance, file, zone, project_id):
+    subprocess.run(["gcloud","compute", "scp", f"{file}", "--zone", f"{zone}", "--project", f"{project_id}", f"{instance.name}:~"])
+
+def execute_command_instance(instance, command, zone, project_id):
+    print(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"")
+    subprocess.run(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"", shell=True)
 
 if __name__ == '__main__':
-    instance_created = create_with_ssd(project_id="multifedls", zone="us-central1-a",instance_name="teste", image_name=f"ubuntu-flower-server")
-    # input("Pode enviar os arquivos?")
-    # send_file_to_instance(instance=instance_created, file="environment.env")
+    project = "multifedls"
+    zone = "us-central1-a"
+    instance_created = create_with_ssd(project_id=project, zone=zone,instance_name="teste", image_name=f"ubuntu-flower-server")
+    input("Pode enviar os arquivos?")
+    send_file_to_instance(instance=instance_created, file="environment.env", zone=zone, project_id=project)
+    input("Pode executar o comando?")
+    execute_command_instance(instance=instance_created, command="ls -lh > saida.txt", zone=zone, project_id=project)
     input("Pode excluir?")
-    delete_instance(project_id="multifedls", zone="us-central1-a",instance_name="teste")
+    delete_instance(project_id=project, zone=zone,instance=instance_created)
 
