@@ -47,22 +47,23 @@ class GCPManager(CloudManager):
     def _update_history(self, instances, status):
 
         for instance in instances:
-            print("Peguei uma instância - falta terminar isso!")
-            exit()
+            # print("Peguei uma instância - falta terminar isso! - status: ", status)
+            # with open('instance.txt', 'w') as f:
+            #     print(instance, file=f)
 
             if status == 'start':
                 self.instances_history = {
-                    instance['id']: {
-                        'StartTime': instance['creationTimestamp'],
+                    instance.id: {
+                        'StartTime': instance.creation_timestamp,
                         'EndTime': None,
                         'Instance': instance,
-                        'Zone': instance['zone']
+                        'Zone': instance.zone
                     }
                 }
 
             if status == 'terminate':
-                if instance['id'] in self.instances_history:
-                    self.instances_history[instance['id']]['EndTime'] = \
+                if instance.id in self.instances_history:
+                    self.instances_history[instance.id]['EndTime'] = \
                         datetime.now(tz=tzutc())
 
     def _create_instance(self, instance, zone):
@@ -517,9 +518,13 @@ class GCPManager(CloudManager):
 
             self.mutex.acquire()
 
-            operation = self.compute_engine.instances().delete(project=self.gcp_config.project,
-                                                               zone=zone,
-                                                               instance=instance['name']).execute()
+            request = compute_v1.DeleteInstanceRequest(
+                instance=instance.name,
+                project=self.gcp_config.project,
+                zone=zone,
+            )
+
+            operation = self.instance_client.delete(request=request)
 
             self.mutex.release()
 
@@ -540,7 +545,7 @@ class GCPManager(CloudManager):
 
             if wait:
                 self.mutex.acquire()
-                self._wait_for_operation(operation['name'], zone=zone)
+                self.wait_for_extended_operation(operation, "instance deletion")
                 self.mutex.release()
 
             status = True
@@ -581,9 +586,9 @@ class GCPManager(CloudManager):
             print("instance status", CloudManager.TERMINATED)
             return CloudManager.TERMINATED
         else:
-            print("instance status", instance['status'])
+            # print("instance status", instance.status)
 
-            return instance['status'].lower()
+            return instance.status.lower()
 
     def __get_disk(self, disk_name, zone):
 
@@ -610,28 +615,20 @@ class GCPManager(CloudManager):
     def get_public_instance_ip(self, instance_id, zone=''):
         if zone == '':
             zone = self.gcp_config.zone
-        instances = self.__get_instance(instance_id=instance_id, zone=zone)
-        if instances is not None:
-            instance = instances[0]
-        else:
-            instance = None
+        instance = self.__get_instance(instance_id=instance_id, zone=zone)
         if instance is None:
             return None
         else:
-            return instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+            return instance.network_interfaces[0].access_configs[0].nat_i_p
 
     def get_private_instance_ip(self, instance_id, zone=''):
         if zone == '':
             zone = self.gcp_config.zone
-        instances = self.__get_instance(instance_id=instance_id, zone=zone)
-        if instances is not None:
-            instance = instances[0]
-        else:
-            instance = None
+        instance = self.__get_instance(instance_id=instance_id, zone=zone)
         if instance is None:
             return None
         else:
-            return instance['networkInterfaces'][0]['networkIP']
+            return instance.network_interfaces[0].network_i_p
 
     @staticmethod
     def get_preemptible_price(instance_type, region=None):
