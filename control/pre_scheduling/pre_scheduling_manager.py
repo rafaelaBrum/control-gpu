@@ -380,8 +380,9 @@ class PreSchedulingManager:
                                 continue
                             logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
                                          f"in region {region.region}")
-                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
-                                self.__compute_training_times(vm, key_file, cli)
+                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            # self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                            #     self.__compute_training_times(vm, key_file, cli)
                             vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
@@ -828,7 +829,7 @@ class PreSchedulingManager:
                                 # self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
                                 #                                                            region.key_file,
                                 #                                                            region_copy.key_file)
-                                status = vm_final.terminate(wait=True, zone=zone_copy)
+                                status = vm_final.terminate(wait=False, zone=zone_copy)
                                 if status:
                                     vm_final.instance_id = None
                                     vm_final.failed_to_created = False
@@ -839,7 +840,7 @@ class PreSchedulingManager:
                                 vm_final.ssh = None
                     loc_copy[region_id].zones.remove(zone)
                     if not vm_initial.failed_to_created:
-                        status = vm_initial.terminate(wait=True, zone=zone)
+                        status = vm_initial.terminate(wait=False, zone=zone)
                         if status:
                             vm_initial.instance_id = None
                             vm_initial.failed_to_created = False
@@ -1323,10 +1324,11 @@ class PreSchedulingManager:
                                 vm_initial.deploy(zone=zone, needs_volume=False, key_name=key_file_initial,
                                                   type_task='server')
                                 if not vm_initial.failed_to_created:
-                                    vm_initial.update_ip(zone=zone)
-                            self.rpc_times_concurrent[str(num_clients)][id_rpc][id_rpc_final] = \
-                                self.__exec_concurrent_rpc_vms(vm_initial, vms_clients,
-                                                               region, region_copy, num_clients)
+                                    vm_initial.update_ip(zone=zone)                            
+                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            # self.rpc_times_concurrent[str(num_clients)][id_rpc][id_rpc_final] = \
+                            #     self.__exec_concurrent_rpc_vms(vm_initial, vms_clients,
+                            #                                    region, region_copy, num_clients)
                     if not vm_initial.failed_to_created:
                         status = vm_initial.terminate(wait=False, zone=zone)
                         if status:

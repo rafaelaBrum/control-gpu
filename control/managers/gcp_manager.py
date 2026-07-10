@@ -545,7 +545,7 @@ class GCPManager(CloudManager):
 
             if wait:
                 self.mutex.acquire()
-                self.wait_for_extended_operation(operation, "instance deletion")
+                self._wait_for_operation(operation, "instance deletion")
                 self.mutex.release()
 
             status = True
