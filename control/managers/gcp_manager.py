@@ -25,6 +25,8 @@ from pathlib import Path
 
 import threading
 
+import subprocess
+
 
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
 api_key = file.read()
@@ -359,11 +361,62 @@ class GCPManager(CloudManager):
 
             self.mutex.acquire()
 
-            image_response = self.compute_engine.images().get(project=self.gcp_config.project,
-                                                              image=f'{image_id}').execute()
+            # Initialize request argument(s)
+            request = compute_v1.GetImageRequest(
+                image=f"{image_id}",
+                project=self.gcp_config.project,
+            )
+
+            # Make the request
+            image = self.image_client.get(request=request)
+
+            # Handle the response
             self.mutex.release()
 
-            source_disk_image = image_response['selfLink']
+            disk_type = f"zones/{zone}/diskTypes/{self.gcp_config.disk_type}"
+            boot_disk = compute_v1.AttachedDisk()
+            initialize_params = compute_v1.AttachedDiskInitializeParams()
+            initialize_params.source_image = image.self_link
+            # initialize_params.disk_type = disk_type
+            boot_disk.initialize_params = initialize_params
+            boot_disk.auto_delete = True
+            boot_disk.boot = True
+            disks = [boot_disk, ]
+
+            network_interface = compute_v1.NetworkInterface()
+            network_interface.network = f"global/networks/{self.gcp_config.network}"
+
+            access = compute_v1.AccessConfig()
+            access.type_ = compute_v1.AccessConfig.Type.ONE_TO_ONE_NAT.name
+            access.name = "External NAT"
+            access.network_tier = access.NetworkTier.PREMIUM.name
+            network_interface.access_configs = [access]
+
+            # Collect information into the Instance object.
+            instance = compute_v1.Instance()
+            instance.network_interfaces = [network_interface]
+            instance.name = vm_name
+            instance.disks = disks
+            instance.machine_type = machine_type
+
+            instance.scheduling = compute_v1.Scheduling()
+            instance.scheduling.provisioning_model = "SPOT"
+
+            instance.metadata = compute_v1.Metadata({
+                "items": [
+                    {
+                        "key": 'enable-osconfig',
+                        "value": 'TRUE'
+                    },
+                    {
+                        "key": 'enable-oslogin',
+                        "value": 'true'
+                    }
+                ]
+            })
+
+            
+            instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
 
             if gpu_count > 0:
                 # print("creating with GPU")
@@ -431,69 +484,11 @@ class GCPManager(CloudManager):
                         "provisioningModel": "SPOT"
                     }
                 }
-            else:
-                config = {
-                    'name': vm_name,
-                    'machineType': machine_type,
 
-                    # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
-                    # 'sourceMachineImage': source_machine_image,
+            instance = self._create_instance(instance, zone)
 
-                    # Specify the boot disk and the image to use as a source.
-                    'disks': [
-                        {
-                            'boot': True,
-                            'autoDelete': True,
-                            'initializeParams': {
-                                'sourceImage': source_disk_image,
-                            }
-
-                        }
-                    ],
-
-                    # Allowing SSH connection from third-parties
-                    "metadata": {
-                        "items": [
-                            {
-                                "key": 'enable-oslogin',
-                                "value": 'TRUE'
-                            }
-                        ]
-                    },
-
-                    # Allow the instance to access cloud storage.
-                    'serviceAccounts': [{
-                        'email': 'default',
-                        'scopes': [
-                            'https://www.googleapis.com/auth/devstorage.read_write'
-                        ]
-                    }],
-
-                    # Specify a network interface with NAT to access the public
-                    # internet.
-                    'networkInterfaces': [{
-                        'network': 'global/networks/default',
-                        'accessConfigs': [
-                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                        ]
-                    }],
-                    'tags': [{
-                        'items': ['http-server', 'https-server']
-                    }],
-                    "scheduling":
-                    {
-                        "onHostMaintenance": "terminate",
-                        "provisioningModel": "SPOT"
-                    }
-                }
-
-            instances = self._create_instance(config, zone)
-
-            if instances is not None:
-                created_instances = [i for i in instances]
-                instance = created_instances[0]
-                return instance['id']
+            if instance is not None:
+                return instance.name
             else:
                 return None
 
@@ -906,3 +901,10 @@ class GCPManager(CloudManager):
                 logging.warning(f" - {warning.code}: {warning.message}", file=sys.stderr, flush=True)
 
         return result
+
+    def execute_command(self, instance_name, command, zone=''):
+        if zone == '':
+            zone = self.gcp_config.zone
+        logging.info(f"<GCPManager> Executing command {command} in instance {instance_name}")
+        print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
+        subprocess.run(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"", shell=True, check=True, stderr=None)

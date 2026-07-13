@@ -1,5 +1,9 @@
 {
-    "exec_times": {},
+    "exec_times": {
+        "e2-standard-4": {
+            "GCP_us-central1": {}
+        }
+    },
     "job_id": 22040,
     "job_name": "2 clients - VGG16 (1 AWS in N. Virginia and 1 GCP in Iowa)",
     "number_datacenters": 4,

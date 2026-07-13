@@ -1,7 +1,9 @@
-import paramiko
+# import paramiko
 import logging
 
 from control.config.communication_config import CommunicationConfig
+from control.managers.gcp_manager import GCPManager
+from control.managers.cloud_manager import CloudManager
 
 import socket
 
@@ -13,24 +15,32 @@ import stat
 
 class SSHClient:
 
-    def __init__(self, ip_address, key_path, key_file, user, emulated=False):
-        ssh_conf = CommunicationConfig()
+    def __init__(self, ip_address, key_path, key_file, user, provider, project='', zone='', instance_name='', emulated=False):
+        ssh_config = CommunicationConfig()
 
         self.ip_address = ip_address
 
         if emulated:
             self.key = paramiko.Ed25519Key.from_private_key_file(key_path + key_file)
-        else:
+        elif provider in (CloudManager.EC2, CloudManager.AWS):
             self.key = paramiko.RSAKey.from_private_key_file(key_path + key_file)
         self.user = user
-        self.port = ssh_conf.ssh_port
-        self.repeat = ssh_conf.repeat
-        self.connection_timeout = ssh_conf.connection_timeout
-        self.retry_interval = ssh_conf.retry_interval
+        self.port = ssh_config.ssh_port
+        self.repeat = ssh_config.repeat
+        self.connection_timeout = ssh_config.connection_timeout
+        self.retry_interval = ssh_config.retry_interval
+        self.provider = provider
 
-        self.client = None
-        self.ssh_transport = None
-        self.chan = None
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            self.client = None
+            self.ssh_transport = None
+            self.chan = None
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.project = project
+            self.zone = zone
+            self.instance_name = instance_name
+            self.manager = GCPManager()
+
 
     """
     This will check if the connection is still available.
@@ -41,16 +51,24 @@ class SSHClient:
     @property
     def is_active(self):
 
-        # Check if client was initiated
-        if self.client is None:
-            return False
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            # Check if client was initiated
+            if self.client is None:
+                return False
 
-        try:
-            self.client.exec_command('ls', timeout=30)
-            return True
-        except Exception as e:
-            logging.error("<SSH Client>: Connection lost : " + str(e))
-            return False
+            try:
+                self.client.exec_command('ls', timeout=30)
+                return True
+            except Exception as e:
+                logging.error("<SSH Client>: Connection lost : " + str(e))
+                return False
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            try:
+                self.manager.execute_command(command='ls', instance_name=self.instance_name, zone=self.zone)
+                return True
+            except Exception as e:
+                logging.error("<SSH Client>: Connection lost : " + str(e))
+                return False
 
     '''
     Open a ssh connection
@@ -59,37 +77,41 @@ class SSHClient:
 
     def open_connection(self):
 
-        if not self.is_active:
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            if not self.is_active:
 
-            self.client = paramiko.SSHClient()
-            # self.client.load_system_host_keys()
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                self.client = paramiko.SSHClient()
+                # self.client.load_system_host_keys()
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            for x in range(self.repeat):
+                for x in range(self.repeat):
 
-                try:
-                    self.client.connect(
-                        hostname=self.ip_address,
-                        port=self.port,
-                        username=self.user,
-                        pkey=self.key,
-                        timeout=self.connection_timeout
-                    )
+                    try:
+                        self.client.connect(
+                            hostname=self.ip_address,
+                            port=self.port,
+                            username=self.user,
+                            pkey=self.key,
+                            timeout=self.connection_timeout
+                        )
 
-                    tr = self.client.get_transport()
-                    tr.default_max_packet_size = 100000000
-                    tr.default_window_size = 100000000
-                    return True
+                        tr = self.client.get_transport()
+                        tr.default_max_packet_size = 100000000
+                        tr.default_window_size = 100000000
+                        return True
 
-                except (paramiko.BadHostKeyException, paramiko.AuthenticationException,
-                        paramiko.SSHException, socket.error) as e:
+                    except (paramiko.BadHostKeyException, paramiko.AuthenticationException,
+                            paramiko.SSHException, socket.error) as e:
 
-                    logging.info("<SSH Client>:" + str(x) + "> " + str(e))
+                        logging.info("<SSH Client>:" + str(x) + "> " + str(e))
 
-                    sleep(self.retry_interval)
-        else:
-            logging.warning("<SSH Client>: Connection was already activated")
-
+                        sleep(self.retry_interval)
+            else:
+                logging.warning("<SSH Client>: Connection was already activated")
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            while not self.is_active:
+                sleep(1)
+            return True
         return False
 
     '''
@@ -98,38 +120,48 @@ class SSHClient:
     '''
 
     def close_connection(self):
-
-        try:
-            self.client.close()
-            self.client = None
-            return True
-        except Exception as e:
-            logging.error("<SSH Client>: closing connection error " + str(e))
-            return False
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            try:
+                self.client.close()
+                self.client = None
+                return True
+            except Exception as e:
+                logging.error("<SSH Client>: closing connection error " + str(e))
+                return False
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (close_onnection in GCP)")
 
     def execute_command(self, command, output=False):
-        self.ssh_transport = self.client.get_transport()
-        self.chan = self.ssh_transport.open_session()
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            self.ssh_transport = self.client.get_transport()
+            self.chan = self.ssh_transport.open_session()
 
-        self.chan.setblocking(0)
+            self.chan.setblocking(0)
 
-        self.chan.exec_command(command)
+            self.chan.exec_command(command)
 
-        if output:
-            sleep(1)
-            return self.get_output()
+            if output:
+                sleep(1)
+                return self.get_output()
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            self.manager.execute_command(instance_name=self.instance_name, command=command, zone=self.zone)
+            if output:
+                return cmd_output
 
     def put_file(self, source, target, item=None):
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
 
-        ftp_client = self.client.open_sftp()
+            ftp_client = self.client.open_sftp()
 
-        if item is not None:
-            source = os.path.join(source, item)
-            target = os.path.join(target, item)
+            if item is not None:
+                source = os.path.join(source, item)
+                target = os.path.join(target, item)
 
-        ftp_client.put(source, target)
+            ftp_client.put(source, target)
 
-        ftp_client.close()
+            ftp_client.close()
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (put_file in GCP)")
 
     def put_dir(self, source, target, ignore_existing=True):
         """
@@ -138,105 +170,115 @@ class SSHClient:
         created under target.
         """
 
-        ftp_client = self.client.open_sftp()
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            ftp_client = self.client.open_sftp()
 
-        for item in os.listdir(source):
-            if os.path.isfile(os.path.join(source, item)):
-                ftp_client.put(os.path.join(source, item), os.path.join(target, item), confirm=True)
-                self.client.exec_command('chmod +x {}'.format(os.path.join(target, item)))
+            for item in os.listdir(source):
+                if os.path.isfile(os.path.join(source, item)):
+                    ftp_client.put(os.path.join(source, item), os.path.join(target, item), confirm=True)
+                    self.client.exec_command('chmod +x {}'.format(os.path.join(target, item)))
 
-            else:
-                try:
-                    folder = os.path.join(target, item)
-                    ftp_client.mkdir(folder)
-                    # self.execute_command("sudo chmod 777 {} ".format(folder))
-                except IOError:
-                    if ignore_existing:
-                        pass
-                    else:
-                        raise
+                else:
+                    try:
+                        folder = os.path.join(target, item)
+                        ftp_client.mkdir(folder)
+                        # self.execute_command("sudo chmod 777 {} ".format(folder))
+                    except IOError:
+                        if ignore_existing:
+                            pass
+                        else:
+                            raise
 
-                self.put_dir(os.path.join(source, item), os.path.join(target, item))
+                    self.put_dir(os.path.join(source, item), os.path.join(target, item))
 
-        ftp_client.close()
+            ftp_client.close()
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (put_dir in GCP)")
 
     def get_output(self):
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
 
-        out_data = bytes()
-        err_data = bytes()
+            out_data = bytes()
+            err_data = bytes()
 
-        try:
-            while True:
-                while self.chan.recv_ready():
-                    out_data += self.chan.recv(1000)
-                while self.chan.recv_stderr_ready():
-                    err_data += self.chan.recv_stderr(1000)
-                if self.chan.exit_status_ready():
-                    break
+            try:
+                while True:
+                    while self.chan.recv_ready():
+                        out_data += self.chan.recv(1000)
+                    while self.chan.recv_stderr_ready():
+                        err_data += self.chan.recv_stderr(1000)
+                    if self.chan.exit_status_ready():
+                        break
 
-            ret_code = self.chan.recv_exit_status()
-            # self.ssh_transport.close()
+                ret_code = self.chan.recv_exit_status()
 
-            # logging.info("ApplicationConfig on instance {} return code: {} ".format(
-            #     self.ip_address,
-            #     ret_code
-            # ))
+            except Exception as e:
+                logging.error("<SSH Client> Get output error: except")
+                logging.error(e)
+                raise
 
-        except Exception as e:
-            logging.error("<SSH Client> Get output error: except")
-            logging.error(e)
-            raise
-
-        return out_data.decode('utf-8'), err_data.decode('utf-8'), ret_code
+            return out_data.decode('utf-8'), err_data.decode('utf-8'), ret_code
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (get_output in GCP)")
 
     def get_file(self, source, target, item=None):
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
 
-        ftp_client = self.client.open_sftp()
+            ftp_client = self.client.open_sftp()
 
-        if item is not None:
-            source = os.path.join(source, item)
-            target = os.path.join(target, item)
+            if item is not None:
+                source = os.path.join(source, item)
+                target = os.path.join(target, item)
 
-        ftp_client.get(source, target)
+            ftp_client.get(source, target)
 
-        ftp_client.close()
+            ftp_client.close()
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (get_file in GCP)")
 
     def get_dir(self, source, target):
         # logging.info(f"entering get_dir with source {source} and target {target}")
-        sftp_client = self.client.open_sftp()
-        # logging.info("Opened SFTP connection")
-        try:
-            sftp_client.stat(source)
-            # logging.info("Got source stat")
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            sftp_client = self.client.open_sftp()
+            # logging.info("Opened SFTP connection")
+            try:
+                sftp_client.stat(source)
+                # logging.info("Got source stat")
 
-            if not os.path.exists(target):
-                os.mkdir(target)
+                if not os.path.exists(target):
+                    os.mkdir(target)
 
-            # logging.info("Scanning all files in source")
-            for filename in sftp_client.listdir(source):
-                if stat.S_ISDIR(sftp_client.stat(source + filename).st_mode):
-                    # logging.info(f"Filename {filename} is directory")
-                    # uses '/' path delimiter for remote server
-                    self.get_dir(source + filename + '/', os.path.join(target, filename))
-                else:
-                    # logging.info(f"Filename {filename} is a file")
-                    if not os.path.isfile(os.path.join(target, filename)):
-                        # logging.info(f"Copying filename {filename}")
-                        sftp_client.get(source + filename, os.path.join(target, filename))
-                        # logging.info(f"Copied filename {filename}")
-        except Exception as e:
-            logging.error(f"<SSHClient> Error getting directory {source}")
-            logging.error(e)
+                # logging.info("Scanning all files in source")
+                for filename in sftp_client.listdir(source):
+                    if stat.S_ISDIR(sftp_client.stat(source + filename).st_mode):
+                        # logging.info(f"Filename {filename} is directory")
+                        # uses '/' path delimiter for remote server
+                        self.get_dir(source + filename + '/', os.path.join(target, filename))
+                    else:
+                        # logging.info(f"Filename {filename} is a file")
+                        if not os.path.isfile(os.path.join(target, filename)):
+                            # logging.info(f"Copying filename {filename}")
+                            sftp_client.get(source + filename, os.path.join(target, filename))
+                            # logging.info(f"Copied filename {filename}")
+            except Exception as e:
+                logging.error(f"<SSHClient> Error getting directory {source}")
+                logging.error(e)
 
-        sftp_client.close()
+            sftp_client.close()
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (get_dir in GCP)")
 
     @property
     def app_is_running(self):
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
 
-        try:
-            status = not self.chan.exit_status_ready()
-        except AttributeError:
-            status = False
+            try:
+                status = not self.chan.exit_status_ready()
+            except AttributeError:
+                status = False
 
-        # if exit_status is true: app is not running
-        return status
+            # if exit_status is true: app is not running
+            return status
+            
+        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+            logging.error("<SSH Client>: not implemented yet (app_is_running in GCP)")
