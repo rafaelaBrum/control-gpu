@@ -906,6 +906,6 @@ class GCPManager(CloudManager):
         if zone == '':
             zone = self.gcp_config.zone
         logging.info(f"<GCPManager> Executing command {command} in instance {instance_name}")
-        print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
+        # print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
         return subprocess.run(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"", 
                        shell=True, check=True, capture_output=True)

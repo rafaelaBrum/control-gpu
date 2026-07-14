@@ -11,7 +11,7 @@ from control.managers.cloud_manager import CloudManager
 from control.managers.experiment_cloudlab import Experiment
 from control.managers.virtual_machine import VirtualMachine
 from control.util.loader import Loader
-# from control.util.ssh_client import SSHClient
+from control.util.ssh_client import SSHClient
 
 from control.domain.app_specific.fl_til_client_task import FLTILClientTask
 
@@ -175,10 +175,10 @@ class PreSchedulingManager:
                         if not vm_final.failed_to_created:
                             # update instance IP
                             vm_final.update_ip(zone=zone_copy)
-                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
-                            # self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
-                            #                                                             region.key_file,
-                            #                                                             region_copy.key_file)
+                            # logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
+                                                                                        region.key_file,
+                                                                                        region_copy.key_file)
                             status = vm_final.terminate(wait=False, zone=zone_copy)
                             if status:
                                 vm_final.instance_id = None
@@ -224,7 +224,8 @@ class PreSchedulingManager:
                                      key_final, self.loader.ec2_conf.vm_user)
         elif vm_final.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm_final.ssh = SSHClient(vm_final.instance_public_ip, self.loader.gcp_conf.key_path,
-                                     key_final, self.loader.gcp_conf.vm_user)
+                                     key_final, self.loader.gcp_conf.vm_user, vm_final.instance_type.provider, 
+                                     self.loader.gcp_conf.project, vm_final.zone, vm_final.instance_id)
 
         # try to open the connection
         if vm_final.ssh.open_connection():
@@ -279,20 +280,32 @@ class PreSchedulingManager:
                                       target=self.loader.gcp_conf.home_path,
                                       item=item_key)
 
-                cmd_daemon = "python3.7 {} " \
-                             "--ip {} " \
-                             "--path {} " \
-                             "--file {} " \
-                             "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                              item),
-                                                 vm_initial.instance_public_ip,
-                                                 self.loader.gcp_conf.home_path,
-                                                 item_key,
-                                                 vm_user)
+                if self.loader.application_conf.fl_framework =='flower_old':
+                    cmd_daemon = "python3.7 {} " \
+                                "--ip {} " \
+                                "--path {} " \
+                                "--file {} " \
+                                "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                item),
+                                                    vm_initial.instance_public_ip,
+                                                    self.loader.gcp_conf.home_path,
+                                                    item_key,
+                                                    vm_user)
+                elif self.loader.application_conf.fl_framework == "flower":
+                    cmd_daemon = "source venv/bin/activate; python {} " \
+                                "--ip {} " \
+                                "--path {} " \
+                                "--file {} " \
+                                "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                item),
+                                                    vm_initial.instance_public_ip,
+                                                    self.loader.gcp_conf.home_path,
+                                                    item_key,
+                                                    vm_user)
             else:
                 cmd_daemon = ""
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                          vm_final.instance_id))
 
@@ -710,7 +723,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm.instance_id))
 
@@ -1004,7 +1017,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1113,7 +1126,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 
@@ -1173,7 +1186,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 
@@ -1222,7 +1235,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1414,7 +1427,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1550,7 +1563,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c "{} "'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 

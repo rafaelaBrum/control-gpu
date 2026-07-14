@@ -13,6 +13,10 @@ sudo apt update
 sudo apt install python3.12-dev python3-pip python3.12-venv -y
 echo "Python 3.12 virtual environment installed"
 
+# Instaling package to execute screen
+sudo apt install screen -y
+echo "Screen command installed"
+
 # # Installing CUDA 10.0 and cuDNN 7
 # wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
 # sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb

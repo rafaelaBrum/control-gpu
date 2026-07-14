@@ -13,6 +13,10 @@ sudo apt update
 sudo apt install python3.12-dev python3-pip python3.12-venv -y
 echo "Python 3.12 virtual environment installed"
 
+# Instaling package to execute screen
+sudo apt install screen -y
+echo "Screen command installed"
+
 # Installing Python dependencies
 wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/new_paper/requirements_server_flower.txt
 # python3.12 -m pip install testresources cffi
