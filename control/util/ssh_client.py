@@ -109,9 +109,10 @@ class SSHClient:
             else:
                 logging.warning("<SSH Client>: Connection was already activated")
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            while not self.is_active:
-                sleep(1)
-            return True
+            for x in range(self.repeat):
+                if self.is_active:
+                    return True
+                sleep(self.retry_interval)
         return False
 
     '''
@@ -144,9 +145,9 @@ class SSHClient:
                 sleep(1)
                 return self.get_output()
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            self.manager.execute_command(instance_name=self.instance_name, command=command, zone=self.zone)
+            ret = self.manager.execute_command(instance_name=self.instance_name, command=command, zone=self.zone)
             if output:
-                return cmd_output
+                return ret.stdout.decode('utf-8'), ret.stderr.decode('utf-8'), ret.returncode
 
     def put_file(self, source, target, item=None):
         if self.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -219,7 +220,7 @@ class SSHClient:
 
             return out_data.decode('utf-8'), err_data.decode('utf-8'), ret_code
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            logging.error("<SSH Client>: not implemented yet (get_output in GCP)")
+            logging.error("<SSH Client>: not implemented get_output in GCP")
 
     def get_file(self, source, target, item=None):
         if self.provider in (CloudManager.EC2, CloudManager.AWS):

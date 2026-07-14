@@ -394,8 +394,8 @@ class PreSchedulingManager:
                         vm.failed_to_created = False
             logging.info("<PreSchedulerManager>: Calculating GCP training times")
             for env_id, env in env_gcp.items():
-                if not env.have_gpu:
-                    continue
+                # if not env.have_gpu:
+                #     continue
                 logging.info(f"<PreSchedulerManager>: Using instance {env_id}")
                 if env_id not in self.exec_times:
                     self.exec_times[env_id] = {}
@@ -436,10 +436,10 @@ class PreSchedulingManager:
                                 continue
                             logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
                                          f"in region {region.region}")
-                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                            logging.error(f"<PreSchedulerManager>: Missing update VM connection")
                             # self.exec_times[env_id][loc_id][str(cli.client_id)] = \
                             #     self.__compute_training_times(vm, key_file, cli)
-                            vm.reboot()
+                            # vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
                         if status:
