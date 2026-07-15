@@ -150,19 +150,15 @@ class SSHClient:
                 return ret.stdout.decode('utf-8'), ret.stderr.decode('utf-8'), ret.returncode
 
     def put_file(self, source, target, item=None):
-        if self.provider in (CloudManager.EC2, CloudManager.AWS):
-
-            ftp_client = self.client.open_sftp()
-
-            if item is not None:
+        if item is not None:
                 source = os.path.join(source, item)
                 target = os.path.join(target, item)
-
+        if self.provider in (CloudManager.EC2, CloudManager.AWS):
+            ftp_client = self.client.open_sftp()
             ftp_client.put(source, target)
-
             ftp_client.close()
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            logging.error("<SSH Client>: not implemented yet (put_file in GCP)")
+            self.manager.send_file(self.instance_name, source, target, self.zone)
 
     def put_dir(self, source, target, ignore_existing=True):
         """

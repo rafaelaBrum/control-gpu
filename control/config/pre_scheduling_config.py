@@ -9,8 +9,12 @@ class PreSchedConfig(Config):
         return self.get_property(self._key, 'path')
 
     @property
-    def rtt_file(self):
-        return self.get_property(self._key, 'rtt_file')
+    def rtt_file_aws(self):
+        return self.get_property(self._key, 'rtt_file_aws')
+    
+    @property
+    def rtt_file_gcp(self):
+        return self.get_property(self._key, 'rtt_file_gcp')
 
     @property
     def train_file(self):

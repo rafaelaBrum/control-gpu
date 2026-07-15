@@ -5,34 +5,5 @@
     "number_datacenters": 7,
     "rpc": {},
     "rpc_concurrent": {},
-    "rtt": {
-        "GCP_us-central1_us-central1-a": {
-            "GCP_us-central1_us-central1-a": -1,
-            "GCP_us-west1_us-west1-a": -1,
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-central1_us-central1-b": {
-            "GCP_us-central1_us-central1-c": -1,
-            "GCP_us-west1_us-west1-a": -1,
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-central1_us-central1-c": {
-            "GCP_us-west1_us-west1-a": -1,
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-central1_us-central1-f": {
-            "GCP_us-west1_us-west1-a": -1,
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-west1_us-west1-a": {
-            "GCP_us-west1_us-west1-a": -1,
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-west1_us-west1-b": {
-            "GCP_us-west1_us-west1-c": -1
-        },
-        "GCP_us-west1_us-west1-c": {
-            "GCP_us-west1_us-west1-c": -1
-        }
-    }
+    "rtt": {}
 }

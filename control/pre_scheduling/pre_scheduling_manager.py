@@ -237,16 +237,16 @@ class PreSchedulingManager:
             logging.info("<VirtualMachine {}>: - Sending RTT test".format(vm_final.instance_id,
                                                                           self.loader.file_system_conf.path))
 
-            item = self.loader.pre_scheduling_conf.rtt_file
-
             if vm_initial.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 key_path = self.loader.ec2_conf.key_path
                 item_key = key_initial
                 vm_user = self.loader.ec2_conf.vm_user
+                item = self.loader.pre_scheduling_conf.rtt_file_aws
             elif vm_initial.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 key_path = self.loader.gcp_conf.key_path
                 item_key = key_initial
                 vm_user = self.loader.gcp_conf.vm_user
+                item = self.loader.pre_scheduling_conf.rtt_file_gcp
             else:
                 logging.error(f"PreSchedulerManager>: "
                               f"{vm_initial.instance_type.provider} does not have support")
@@ -296,16 +296,26 @@ class PreSchedulingManager:
                                                     item_key,
                                                     vm_user)
                 elif self.loader.application_conf.fl_framework == "flower":
-                    cmd_daemon = "source venv/bin/activate; python {} " \
-                                "--ip {} " \
-                                "--path {} " \
-                                "--file {} " \
-                                "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                item),
-                                                    vm_initial.instance_public_ip,
-                                                    self.loader.gcp_conf.home_path,
-                                                    item_key,
-                                                    vm_user)
+                    if '_aws' in item:
+                        cmd_daemon = "source venv/bin/activate; python {} " \
+                                    "--ip {} " \
+                                    "--path {} " \
+                                    "--file {} " \
+                                    "--user {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                    item),
+                                                        vm_initial.instance_public_ip,
+                                                        self.loader.gcp_conf.home_path,
+                                                        item_key,
+                                                        vm_user)
+                    elif '_gcp' in item:
+                        cmd_daemon = "source venv/bin/activate; python {} " \
+                                    "--instance_name {} " \
+                                    "--zone {} " \
+                                    "--project_id {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                           item),
+                                                                           vm_initial.instance_id,
+                                                                           vm_initial.zone,
+                                                                           self.loader.gcp_conf.project)
             else:
                 cmd_daemon = ""
 
@@ -317,7 +327,7 @@ class PreSchedulingManager:
             print(stdout)
 
             while not has_command_finished(vm_final):
-                continue
+                time.sleep(10)
 
             cmd = "cat screen_log"
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd,

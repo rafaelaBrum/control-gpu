@@ -338,7 +338,8 @@ def delete_instance(project_id, zone, instance):
     print(f"Instance {instance.name} deleted.")
 
 def send_file_to_instance(instance, file, zone, project_id):
-    subprocess.run(["gcloud","compute", "scp", f"{file}", "--zone", f"{zone}", "--project", f"{project_id}", f"{instance.name}:~"])
+    # subprocess.run(["gcloud","compute", "scp", f"{file}", "--zone", f"{zone}", "--project", f"{project_id}", f"{instance.name}:~"])
+    subprocess.run(f"gcloud compute scp {file} --zone {zone} --project {project_id} {instance.name}:~", shell=True)
 
 def execute_command_instance(instance, command, zone, project_id):
     print(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"")
@@ -346,7 +347,7 @@ def execute_command_instance(instance, command, zone, project_id):
 
 if __name__ == '__main__':
     project = "multifedls"
-    zone = "us-central1-a"
+    zone = "us-west1-a"
     instance_created = create_with_ssd(project_id=project, zone=zone,instance_name="teste", image_name=f"ubuntu-flower-server")
     input("Pode enviar os arquivos?")
     send_file_to_instance(instance=instance_created, file="environment.env", zone=zone, project_id=project)
