@@ -3,7 +3,7 @@
         "GCP_us-central1": {
             "provider": "gcp",
             "region": "us-central1",
-            "key_file": "",
+            "key_file": "gcp-ssh-key",
             "client_image_id": "ubuntu-flower-client",
             "server_image_id": "ubuntu-flower-server",
             "zones": [
@@ -11,6 +11,24 @@
                 "us-central1-b",
                 "us-central1-c",
                 "us-central1-f"
+            ],
+            "cluster_urn": "",
+            "global_cpu_limit": 16,
+            "global_gpu_limit": 1,
+            "regional_cpu_limit": 200,
+            "regional_gpu_limit": 1,
+            "cost_transfer": 0.12
+        },
+        "GCP_us-west1": {
+            "provider": "gcp",
+            "region": "us-west1",
+            "key_file": "gcp-ssh-key",
+            "client_image_id": "ubuntu-flower-client",
+            "server_image_id": "ubuntu-flower-server",
+            "zones": [
+                "us-west1-a",
+                "us-west1-b",
+                "us-west1-c"
             ],
             "cluster_urn": "",
             "global_cpu_limit": 16,

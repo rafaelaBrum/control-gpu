@@ -5,6 +5,7 @@ import threading
 import time
 from typing import Dict, List
 from copy import deepcopy
+from subprocess import CalledProcessError
 
 from control.domain.instance_type import InstanceType
 from control.managers.cloud_manager import CloudManager
@@ -99,7 +100,10 @@ instance_gcp_rpc = InstanceType(
 def has_command_finished(vm):
     cmd = "screen -list | grep test"
 
-    stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    try:
+        stdout, stderr, code_return = vm.ssh.execute_command(cmd, output=True)
+    except CalledProcessError as e:
+        stdout = e.stderr.decode('utf-8')
 
     if 'test' in stdout:
         finished = False
@@ -305,7 +309,7 @@ class PreSchedulingManager:
             else:
                 cmd_daemon = ""
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                          vm_final.instance_id))
 
@@ -315,7 +319,7 @@ class PreSchedulingManager:
             while not has_command_finished(vm_final):
                 continue
 
-            cmd = "cat $HOME/screen_log"
+            cmd = "cat screen_log"
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd,
                                                                                          vm_final.instance_id))
 
@@ -723,7 +727,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm.instance_id))
 
@@ -1017,7 +1021,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1126,7 +1130,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 
@@ -1186,7 +1190,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 
@@ -1235,7 +1239,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1427,7 +1431,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_server.instance_id))
 
@@ -1563,7 +1567,7 @@ class PreSchedulingManager:
                 else:
                     cmd_daemon = ""
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
                 logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                              vm_client.instance_id))
 

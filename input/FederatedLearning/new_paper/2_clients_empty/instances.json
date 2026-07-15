@@ -29,7 +29,8 @@
             "gpu": "",
             "gpu_count": 0,
             "locations": [
-                "GCP_us-central1"
+                "GCP_us-central1",
+                "GCP_us-west1"
             ]
         }
     }
