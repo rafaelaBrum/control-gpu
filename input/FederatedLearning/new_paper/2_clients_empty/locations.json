@@ -3,7 +3,7 @@
         "GCP_us-central1": {
             "provider": "gcp",
             "region": "us-central1",
-            "key_file": "gcp-ssh-key",
+            "key_file": "multifedls-838290f96392.json",
             "client_image_id": "ubuntu-flower-client",
             "server_image_id": "ubuntu-flower-server",
             "zones": [
@@ -22,7 +22,7 @@
         "GCP_us-west1": {
             "provider": "gcp",
             "region": "us-west1",
-            "key_file": "gcp-ssh-key",
+            "key_file": "multifedls-838290f96392.json",
             "client_image_id": "ubuntu-flower-client",
             "server_image_id": "ubuntu-flower-server",
             "zones": [

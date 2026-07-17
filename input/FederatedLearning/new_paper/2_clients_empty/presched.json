@@ -5,5 +5,40 @@
     "number_datacenters": 7,
     "rpc": {},
     "rpc_concurrent": {},
-    "rtt": {}
+    "rtt": {
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": 65.2668149471283,
+            "GCP_us-central1_us-central1-b": 42.2698974609375,
+            "GCP_us-west1_us-west1-a": 50.01119613647461,
+            "GCP_us-west1_us-west1-b": 47.49227952957153,
+            "GCP_us-west1_us-west1-c": 76.98383164405823
+        },
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-west1_us-west1-a": 69.01480555534363,
+            "GCP_us-west1_us-west1-b": 103.98817014694214,
+            "GCP_us-west1_us-west1-c": 30.581556797027588
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-west1_us-west1-a": -1.0,
+            "GCP_us-west1_us-west1-b": -1.0,
+            "GCP_us-west1_us-west1-c": -1.0
+        },
+        "GCP_us-central1_us-central1-f": {
+            "GCP_us-west1_us-west1-a": -1.0,
+            "GCP_us-west1_us-west1-b": -1.0,
+            "GCP_us-west1_us-west1-c": -1.0
+        },
+        "GCP_us-west1_us-west1-a": {
+            "GCP_us-west1_us-west1-a": 56.50659465789795,
+            "GCP_us-west1_us-west1-b": 62.98255109786987,
+            "GCP_us-west1_us-west1-c": 56.009963512420654
+        },
+        "GCP_us-west1_us-west1-b": {
+            "GCP_us-west1_us-west1-b": 56.50752925872803,
+            "GCP_us-west1_us-west1-c": 46.485799074172974
+        },
+        "GCP_us-west1_us-west1-c": {
+            "GCP_us-west1_us-west1-c": 56.0040922164917
+        }
+    }
 }

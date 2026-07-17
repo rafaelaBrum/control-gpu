@@ -209,7 +209,7 @@ class PreSchedulingManager:
             if vm_initial.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 key_initial = self.loader.ec2_conf.key_file
             elif vm_initial.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-                key_initial = self.loader.gcp_conf.key_file
+                key_initial = self.loader.gcp_conf.credentials_file
             else:
                 logging.error(f"PreSchedulerManager>: "
                               f"{vm_initial.instance_type.provider} does not have support")
@@ -218,7 +218,7 @@ class PreSchedulingManager:
             if vm_final.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
                 key_final = self.loader.ec2_conf.key_file
             elif vm_final.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-                key_final = self.loader.gcp_conf.key_file
+                key_final = self.loader.gcp_conf.credentials_file
             else:
                 logging.error(f"PreSchedulerManager>: "
                               f"{vm_final.instance_type.provider} does not have support")
@@ -318,6 +318,12 @@ class PreSchedulingManager:
                                                                            self.loader.gcp_conf.project)
             else:
                 cmd_daemon = ""
+
+            if vm_initial.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                cmd = f"gcloud auth activate-service-account --key-file={item_key} --project={self.loader.gcp_conf.project}"
+                logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd, vm_final.instance_id))
+
+                vm_final.ssh.execute_command(cmd, output=True)
 
             cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
             logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,

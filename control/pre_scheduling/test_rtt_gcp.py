@@ -1,6 +1,4 @@
-import socket
-
-from time import perf_counter, sleep
+from time import time, sleep
 
 import argparse
 import subprocess
@@ -9,24 +7,34 @@ import subprocess
 def test_rtt(instance_name, zone, project_id):
     # self.client.load_system_host_keys()
     # print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
-    subprocess.run(f"gcloud compute ssh --zone {zone} --project {project_id} {instance_name} --command=\"ls\"", 
-                    shell=True, check=True, capture_output=True)
+    try:
+        print(f"gcloud compute ssh --zone {zone} --project {project_id} {instance_name} --command=\"ls\" --quiet")
+        subprocess.run(f"gcloud compute ssh --zone {zone} --project {project_id} {instance_name} --command=\"ls\" --quiet", 
+                       shell=True, check=True, capture_output=True)
+
+    except Exception as e:
+
+        print(e.stdout)
+        print(e.stderr)
+        print(e.returncode)
     for x in range(5):
 
         try:
-            t1 = perf_counter()
+            t1 = time()
 
             subprocess.run(f"gcloud compute ssh --zone {zone} --project {project_id} {instance_name} --command=\"ls\"", 
-                    shell=True, check=True, capture_output=True)
+                           shell=True, check=True, capture_output=True)
 
             # time when connection is made
-            t2 = perf_counter()
+            t2 = time()
 
             return str(t2-t1)
 
         except Exception as e:
 
-            print(e)
+            print(e.stdout)
+            print(e.stderr)
+            print(e.returncode)
 
             sleep(10)
 
