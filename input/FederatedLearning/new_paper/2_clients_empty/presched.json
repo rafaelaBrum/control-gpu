@@ -9,24 +9,25 @@
         "GCP_us-central1_us-central1-a": {
             "GCP_us-central1_us-central1-a": 65.2668149471283,
             "GCP_us-central1_us-central1-b": 42.2698974609375,
+            "GCP_us-central1_us-central1-c": 40.24719738960266,
             "GCP_us-west1_us-west1-a": 50.01119613647461,
             "GCP_us-west1_us-west1-b": 47.49227952957153,
             "GCP_us-west1_us-west1-c": 76.98383164405823
         },
         "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": 54.012787103652954,
+            "GCP_us-central1_us-central1-c": 51.48259520530701,
+            "GCP_us-central1_us-central1-f": 34.72359561920166,
             "GCP_us-west1_us-west1-a": 69.01480555534363,
             "GCP_us-west1_us-west1-b": 103.98817014694214,
             "GCP_us-west1_us-west1-c": 30.581556797027588
         },
         "GCP_us-central1_us-central1-c": {
-            "GCP_us-west1_us-west1-a": -1.0,
-            "GCP_us-west1_us-west1-b": -1.0,
-            "GCP_us-west1_us-west1-c": -1.0
+            "GCP_us-central1_us-central1-c": 71.27254676818848,
+            "GCP_us-central1_us-central1-f": 46.53181862831116
         },
         "GCP_us-central1_us-central1-f": {
-            "GCP_us-west1_us-west1-a": -1.0,
-            "GCP_us-west1_us-west1-b": -1.0,
-            "GCP_us-west1_us-west1-c": -1.0
+            "GCP_us-central1_us-central1-f": 37.03458118438721
         },
         "GCP_us-west1_us-west1-a": {
             "GCP_us-west1_us-west1-a": 56.50659465789795,

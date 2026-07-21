@@ -14,6 +14,7 @@ from control.managers.virtual_machine import VirtualMachine
 from control.util.loader import Loader
 from control.util.ssh_client import SSHClient
 
+from control.domain.app_specific.fl_empty_client_task import FLEmptyClientTask
 from control.domain.app_specific.fl_til_client_task import FLTILClientTask
 
 instance_aws = InstanceType(
@@ -174,19 +175,19 @@ class PreSchedulingManager:
                                               type_task='server')
                             if not vm_initial.failed_to_created:
                                 vm_initial.update_ip(zone=zone)
-                        vm_final.zone = zone_copy
-                        vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
-                        if not vm_final.failed_to_created:
-                            # update instance IP
-                            vm_final.update_ip(zone=zone_copy)
-                            # logging.error(f"PreSchedulerManager>: Missing update VM connection")
-                            self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
-                                                                                        region.key_file,
-                                                                                        region_copy.key_file)
-                            status = vm_final.terminate(wait=False, zone=zone_copy)
-                            if status:
-                                vm_final.instance_id = None
-                                vm_final.failed_to_created = False
+                                vm_final.zone = zone_copy
+                                vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
+                                if not vm_final.failed_to_created:
+                                    # update instance IP
+                                    vm_final.update_ip(zone=zone_copy)
+                                    # logging.error(f"PreSchedulerManager>: Missing update VM connection")
+                                    self.rtt_values[id_rtt][id_rtt_final] = self.__exec_rtt_vms(vm_initial, vm_final,
+                                                                                                region.key_file,
+                                                                                                region_copy.key_file)
+                                    status = vm_final.terminate(wait=False, zone=zone_copy)
+                                    if status:
+                                        vm_final.instance_id = None
+                                        vm_final.failed_to_created = False
                         else:
                             vm_final.instance_id = None
                             vm_final.failed_to_created = False
@@ -413,9 +414,8 @@ class PreSchedulingManager:
                                 continue
                             logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
                                          f"in region {region.region}")
-                            logging.error(f"PreSchedulerManager>: Missing update VM connection")
-                            # self.exec_times[env_id][loc_id][str(cli.client_id)] = \
-                            #     self.__compute_training_times(vm, key_file, cli)
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
                             vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
@@ -469,10 +469,9 @@ class PreSchedulingManager:
                                 continue
                             logging.info(f"<PreSchedulerManager>: Testing client {cli.client_id} "
                                          f"in region {region.region}")
-                            logging.error(f"<PreSchedulerManager>: Missing update VM connection")
-                            # self.exec_times[env_id][loc_id][str(cli.client_id)] = \
-                            #     self.__compute_training_times(vm, key_file, cli)
-                            # vm.reboot()
+                            self.exec_times[env_id][loc_id][str(cli.client_id)] = \
+                                self.__compute_training_times(vm, key_file, cli)
+                            vm.reboot()
                         print("final_zone", final_zone)
                         status = vm.terminate(wait=True, zone=final_zone)
                         if status:
@@ -486,6 +485,9 @@ class PreSchedulingManager:
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside get_first_rounds_times')
             logging.error(e)
+            if isinstance(e, CalledProcessError):
+                print(e.stderr)
+                print(e.stdout)
 
     def separate_env_per_cloud(self):
         env_aws = {}
@@ -529,7 +531,7 @@ class PreSchedulingManager:
                 logging.error(f"<PreSchedulingManager>: {cli.bucket_provider} does not have support ({cli_id})")
         return cli_aws, cli_gcp
 
-    def __compute_training_times(self, vm: VirtualMachine, key, cli: FLTILClientTask):
+    def __compute_training_times(self, vm: VirtualMachine, key, cli: FLEmptyClientTask):
 
         if key == '':
             if vm.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -548,7 +550,8 @@ class PreSchedulingManager:
                                key, self.loader.ec2_conf.vm_user)
         elif vm.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm.ssh = SSHClient(vm.instance_public_ip, self.loader.gcp_conf.key_path,
-                               key, self.loader.gcp_conf.vm_user)
+                               key, self.loader.gcp_conf.vm_user, vm.instance_type.provider, 
+                                     self.loader.gcp_conf.project, vm.zone, vm.instance_id)
         elif vm.instance_type.provider == CloudManager.CLOUDLAB:
             vm.ssh = SSHClient(vm.instance_public_ip, self.loader.cloudlab_conf.key_path,
                                key, self.loader.cloudlab_conf.vm_user, emulated=True)
@@ -567,8 +570,9 @@ class PreSchedulingManager:
                 # create directory
                 vm.ssh.execute_command('mkdir -p {}'.format(self.loader.file_system_conf.path_storage),
                                        output=True)
-
-                vm.create_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
+                
+                if isinstance(cli, FLTILClientTask):
+                    vm.create_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
 
                 logging.info(f"<VirtualMachine {vm.instance_id}>: - Sending Files Training test")
 
@@ -639,14 +643,14 @@ class PreSchedulingManager:
                                     target=self.loader.gcp_conf.home_path,
                                     item=train_item)
 
-                    cmd_before_daemon = "mkdir results/"
+                    cmd_before_daemon = "mkdir results/ -p"
 
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_before_daemon))
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd_before_daemon, output=True)
                     print(stdout)
 
-                    cmd_remove = "rm results/*"
+                    cmd_remove = "rm results/* -f"
 
                     logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 
@@ -659,6 +663,8 @@ class PreSchedulingManager:
 
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
+
+                    #TODO: Parei aqui
 
                     cmd_daemon = "python3.7 {} " \
                                  "-i -v -predst {} " \
@@ -787,7 +793,7 @@ class PreSchedulingManager:
                 return times
             except Exception as e:
 
-                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_scheduling_conf.results_temp_file} -r"
+                cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_scheduling_conf.results_temp_file} -r -f"
 
                 logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm.instance_id, cmd_remove))
 

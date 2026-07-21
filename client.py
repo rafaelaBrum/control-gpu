@@ -65,9 +65,9 @@ def __call_pre_scheduling(loader: Loader):
 
             pre_sched.write_json()
 
-        #     pre_sched.get_first_rounds_times()
+            pre_sched.get_first_rounds_times()
 
-        #     pre_sched.write_json()
+            pre_sched.write_json()
 
         #     pre_sched.calculate_rpc_times()
 
