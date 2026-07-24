@@ -8,13 +8,9 @@ from google.cloud import compute_v1
 
 from datetime import datetime
 from dateutil.tz import tzutc
-# from datetime import timedelta
 
 import logging
-# import json
 
-# import math
-import time
 import iso8601
 
 import requests
@@ -26,7 +22,7 @@ from pathlib import Path
 import threading
 
 import subprocess
-
+import sys
 
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
 api_key = file.read()

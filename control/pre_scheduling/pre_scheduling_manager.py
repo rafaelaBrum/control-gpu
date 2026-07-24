@@ -877,10 +877,9 @@ class PreSchedulingManager:
                             if not vm_final.failed_to_created:
                                 # update instance IP
                                 vm_final.update_ip(zone=zone_copy)
-                                logging.error(f"PreSchedulerManager>: Missing update VM connection")
-                                # self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
-                                #                                                            region.key_file,
-                                #                                                            region_copy.key_file)
+                                self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
+                                                                                           region.key_file,
+                                                                                           region_copy.key_file)
                                 status = vm_final.terminate(wait=False, zone=zone_copy)
                                 if status:
                                     vm_final.instance_id = None
@@ -924,7 +923,8 @@ class PreSchedulingManager:
                                           key_server, self.loader.ec2_conf.vm_user)
             elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.gcp_conf.key_path,
-                                          key_server, self.loader.gcp_conf.vm_user)
+                                          key_server, self.loader.gcp_conf.vm_user, vm_server.instance_type.provider, 
+                                     self.loader.gcp_conf.project, vm_server.zone, vm_server.instance_id)
             elif vm_server.instance_type.provider == CloudManager.CLOUDLAB:
                 vm_server.ssh = SSHClient(vm_server.instance_public_ip, self.loader.cloudlab_conf.key_path,
                                           key_server, self.loader.cloudlab_conf.vm_user, emulated=True)
@@ -935,7 +935,8 @@ class PreSchedulingManager:
                                       key_client, self.loader.ec2_conf.vm_user)
         elif vm_client.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.gcp_conf.key_path,
-                                      key_client, self.loader.gcp_conf.vm_user)
+                                      key_client, self.loader.gcp_conf.vm_user, vm_client.instance_type.provider, 
+                                     self.loader.gcp_conf.project, vm_client.zone, vm_client.instance_id)
         elif vm_client.instance_type.provider == CloudManager.CLOUDLAB:
             vm_client.ssh = SSHClient(vm_client.instance_public_ip, self.loader.cloudlab_conf.key_path,
                                       key_client, self.loader.cloudlab_conf.vm_user, emulated=True)
@@ -994,14 +995,6 @@ class PreSchedulingManager:
                                                target=self.loader.gcp_conf.home_path,
                                                item=rpc_app_item)
 
-                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
-                                               target=self.loader.gcp_conf.home_path,
-                                               item=rpc_client_item)
-
-                        vm_server.ssh.put_file(source=self.loader.pre_scheduling_conf.path,
-                                               target=self.loader.gcp_conf.home_path,
-                                               item=rpc_server_item)
-
                         cmd1 = f'unzip {rpc_app_item} -d .'
 
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id, cmd1))
@@ -1009,10 +1002,12 @@ class PreSchedulingManager:
                         stdout, stderr, code_return = vm_server.ssh.execute_command(cmd1, output=True)
                         print(stdout)
                     else:
-                        cmd_json = f'rm {self.loader.pre_scheduling_conf.results_temp_file}'
+                        cmd_json = f'rm {self.loader.pre_scheduling_conf.results_temp_file} -f'
 
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
                                                                                          cmd_json))
+
+                    #TODO: Parei aqui
 
                     cmd_daemon = "python3.7 {} " \
                                  "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
