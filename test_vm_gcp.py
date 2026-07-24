@@ -345,14 +345,31 @@ def execute_command_instance(instance, command, zone, project_id):
     print(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"")
     subprocess.run(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"", shell=True)
 
+def start_instance(instance, zone, project_id):
+    client = compute_v1.InstancesClient()
+
+    # request = compute_v1.StartInstanceRequest(
+    #     instance=instance.name,
+    #     zone=zone,
+    #     project=project_id,
+    # )
+    request = compute_v1.StartInstanceRequest()
+    request.instance=instance.name
+    request.zone=zone
+    request.project=project_id
+
+    client.start(request=request)
+
 if __name__ == '__main__':
     project = "multifedls"
     zone = "us-west1-a"
-    instance_created = create_with_ssd(project_id=project, zone=zone,instance_name="teste", image_name=f"ubuntu-flower-server")
+    instance_created = create_with_ssd(project_id=project, zone=zone,instance_name="teste2", image_name=f"ubuntu-flower-server")
     input("Pode enviar os arquivos?")
     send_file_to_instance(instance=instance_created, file="environment.env", zone=zone, project_id=project)
     input("Pode executar o comando?")
     execute_command_instance(instance=instance_created, command="ls -lh > saida.txt", zone=zone, project_id=project)
+    input("Pode tentar resumir a VM?")
+    start_instance(instance=instance_created, zone=zone, project_id=project)
     input("Pode excluir?")
     delete_instance(project_id=project, zone=zone,instance=instance_created)
 

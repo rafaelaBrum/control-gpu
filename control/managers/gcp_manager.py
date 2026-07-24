@@ -917,3 +917,27 @@ class GCPManager(CloudManager):
         # print(f"gcloud compute scp {source} --zone {zone} --project {self.gcp_config.project} {instance_name}:{target}")
         subprocess.run(f"gcloud compute scp {source} --zone {zone} --project {self.gcp_config.project} {instance_name}:{target}", 
                        shell=True, check=True, capture_output=True)
+        
+    def restart_instance(self, instance_id, zone=''):
+        if zone == '':
+            zone = self.gcp_config.zone
+
+        self.mutex.acquire()
+
+        try:
+            instance = self.__get_instance(instance_id, zone)
+            request = compute_v1.StartInstanceRequest(
+                instance=instance.name,
+                zone=zone,
+                project=self.gcp_config.project,
+            )
+
+            self.instance_client.start(request=request)
+
+            self.mutex.release()
+
+        except Exception as e:
+            logging.error("<GCPManager>: Error to create instance")
+            logging.error(e)
+            if self.mutex.locked():
+                self.mutex.release()

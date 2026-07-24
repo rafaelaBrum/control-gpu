@@ -24,7 +24,10 @@
         },
         "GCP_us-central1_us-central1-c": {
             "GCP_us-central1_us-central1-c": 71.27254676818848,
-            "GCP_us-central1_us-central1-f": 46.53181862831116
+            "GCP_us-central1_us-central1-f": 46.53181862831116,
+            "GCP_us-west1_us-west1-a": 58.500707149505615,
+            "GCP_us-west1_us-west1-b": 55.75395107269287,
+            "GCP_us-west1_us-west1-c": 33.01743984222412
         },
         "GCP_us-central1_us-central1-f": {
             "GCP_us-central1_us-central1-f": 37.03458118438721

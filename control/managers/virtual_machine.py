@@ -950,8 +950,11 @@ class VirtualMachine:
         while not reboot_complete:
             if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 sleep(35)
+            print(self.state)
             if self.ssh.open_connection():
                 reboot_complete = True
+            elif self.state != CloudManager.RUNNING:
+                self.manager.restart_instance(self.instance_id, self.zone)
 
         reboot_overhead = datetime.now() - start_reboot
 

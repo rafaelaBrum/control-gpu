@@ -664,32 +664,38 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm.ssh.execute_command(cmd1, output=True)
                     print(stdout)
 
-                    #TODO: Parei aqui
+                    if isinstance(cli, FLTILClientTask):
 
-                    cmd_daemon = "python3.7 {} " \
-                                 "-i -v -predst {} " \
-                                 "-split 0.9 0.10 0.00 " \
-                                 "-net {} -data CellRep -d " \
-                                 "-e {} -b {} -tdim 240 240 " \
-                                 "-out logs/ -cpu {} -gpu {} " \
-                                 "-tn -wpath results " \
-                                 "-model_dir results " \
-                                 "-logdir results " \
-                                 "-cache results " \
-                                 "-test_dir {} " \
-                                 "-file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                 self.loader.pre_scheduling_conf.train_file),
-                                                    os.path.join(self.loader.file_system_conf.path_storage,
-                                                                 cli.trainset_dir),
-                                                    cli.net,
-                                                    cli.train_epochs,
-                                                    cli.batch,
-                                                    vm.instance_type.vcpu,
-                                                    vm.instance_type.count_gpu,
-                                                    os.path.join(self.loader.file_system_conf.path_storage,
-                                                                 cli.test_dir),
-                                                    self.loader.pre_scheduling_conf.results_temp_file
-                                                    )
+                        cmd_daemon = "python3.7 {} " \
+                                    "-i -v -predst {} " \
+                                    "-split 0.9 0.10 0.00 " \
+                                    "-net {} -data CellRep -d " \
+                                    "-e {} -b {} -tdim 240 240 " \
+                                    "-out logs/ -cpu {} -gpu {} " \
+                                    "-tn -wpath results " \
+                                    "-model_dir results " \
+                                    "-logdir results " \
+                                    "-cache results " \
+                                    "-test_dir {} " \
+                                    "-file {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                    self.loader.pre_scheduling_conf.train_file),
+                                                        os.path.join(self.loader.file_system_conf.path_storage,
+                                                                    cli.trainset_dir),
+                                                        cli.net,
+                                                        cli.train_epochs,
+                                                        cli.batch,
+                                                        vm.instance_type.vcpu,
+                                                        vm.instance_type.count_gpu,
+                                                        os.path.join(self.loader.file_system_conf.path_storage,
+                                                                    cli.test_dir),
+                                                        self.loader.pre_scheduling_conf.results_temp_file
+                                                        )
+                    
+                    elif isinstance(cli, FLEmptyClientTask):
+                        cmd_daemon = "source venv/bin/activate; python {} " \
+                                    "-file {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                    self.loader.pre_scheduling_conf.train_file),
+                                                        self.loader.pre_scheduling_conf.results_temp_file)
 
                 elif vm.instance_type.provider in CloudManager.CLOUDLAB:
 
@@ -771,8 +777,10 @@ class PreSchedulingManager:
                     vm.ssh.get_file(source=vm.loader.cloudlab_conf.home_path,
                                     target=self.loader.pre_scheduling_conf.path,
                                     item=self.loader.pre_scheduling_conf.results_temp_file)
-
-                vm.remove_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
+                    
+                
+                if isinstance(cli, FLTILClientTask):
+                    vm.remove_bucket_pre_scheduling(self.loader.file_system_conf.path_storage, cli)
 
                 cmd_remove = f"rm {app_item.split('.')[0]}* {self.loader.pre_scheduling_conf.results_temp_file} -r"
 
