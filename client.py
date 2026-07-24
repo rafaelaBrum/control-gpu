@@ -29,9 +29,9 @@ def __call_control(loader: Loader):
             loader.print_execution_info()
 
         # print("calling ScheduleManager")
-        manager = ScheduleManager(loader=loader)
+        # manager = ScheduleManager(loader=loader)
 
-        manager.start_execution()
+        # manager.start_execution()
 
         status = "SUCCESS"
     except Exception as e:
@@ -103,7 +103,7 @@ def __call_recreate_database(loader: Loader):
 
     try:
         if strtobool(answer):
-            RecreateDatabase.execute()
+            # RecreateDatabase.execute()
             logging.info("Database was recreated with success")
         else:
             logging.error("Answer should be: yes or no")

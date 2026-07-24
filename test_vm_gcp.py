@@ -73,7 +73,7 @@ def disk_from_image(
     return boot_disk
 
 
-def local_ssd_disk(zone: str) -> compute_v1.AttachedDisk():
+def local_ssd_disk(zone: str) -> compute_v1.AttachedDisk:
     """
     Create an AttachedDisk object to be used in VM instance creation. The created disk contains
     no data and requires formatting before it can be used.

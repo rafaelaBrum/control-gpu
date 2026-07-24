@@ -252,69 +252,69 @@ class GCPManager(CloudManager):
 
             if gpu_count > 0:
                 logging.error("Not tested with GPU yet!")
-                config = {
-                    'name': vm_name,
-                    'machineType': machine_type,
+                # config = {
+                #     'name': vm_name,
+                #     'machineType': machine_type,
 
-                    # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
-                    # 'sourceMachineImage': source_machine_image,
+                #     # Not working. Still in Beta on GCP API!
+                #     # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
+                #     # 'sourceMachineImage': source_machine_image,
 
-                    # Specify the boot disk and the image to use as a source.
-                    'disks': [
-                        {
-                            'boot': True,
-                            'autoDelete': True,
-                            'initializeParams': {
-                                'sourceImage': source_disk_image,
-                            }
+                #     # Specify the boot disk and the image to use as a source.
+                #     'disks': [
+                #         {
+                #             'boot': True,
+                #             'autoDelete': True,
+                #             'initializeParams': {
+                #                 'sourceImage': source_disk_image,
+                #             }
 
-                        }
-                    ],
+                #         }
+                #     ],
 
-                    # Allowing SSH connection from third-parties
-                    "metadata": {
-                        "items": [
-                            {
-                                "key": 'enable-oslogin',
-                                "value": 'TRUE'
-                            }
-                        ]
-                    },
+                #     # Allowing SSH connection from third-parties
+                #     "metadata": {
+                #         "items": [
+                #             {
+                #                 "key": 'enable-oslogin',
+                #                 "value": 'TRUE'
+                #             }
+                #         ]
+                #     },
 
-                    # Allow the instance to access cloud storage.
-                    'serviceAccounts': [{
-                        'email': 'default',
-                        'scopes': [
-                            'https://www.googleapis.com/auth/devstorage.read_write'
-                        ]
-                    }],
+                #     # Allow the instance to access cloud storage.
+                #     'serviceAccounts': [{
+                #         'email': 'default',
+                #         'scopes': [
+                #             'https://www.googleapis.com/auth/devstorage.read_write'
+                #         ]
+                #     }],
 
-                    "guestAccelerators":
-                    [
-                        {
-                            "acceleratorCount": gpu_count,
-                            "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
-                                               f"acceleratorTypes/{gpu_type}"
-                        }
-                    ],
+                #     "guestAccelerators":
+                #     [
+                #         {
+                #             "acceleratorCount": gpu_count,
+                #             "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
+                #                                f"acceleratorTypes/{gpu_type}"
+                #         }
+                #     ],
 
-                    # Specify a network interface with NAT to access the public
-                    # internet.
-                    'networkInterfaces': [{
-                        'network': 'global/networks/default',
-                        'accessConfigs': [
-                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                        ]
-                    }],
-                    'tags': [{
-                        'items': ['http-server', 'https-server']
-                    }],
-                    "scheduling":
-                    {
-                        "onHostMaintenance": "terminate"
-                    }
-                }
+                #     # Specify a network interface with NAT to access the public
+                #     # internet.
+                #     'networkInterfaces': [{
+                #         'network': 'global/networks/default',
+                #         'accessConfigs': [
+                #             {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                #         ]
+                #     }],
+                #     'tags': [{
+                #         'items': ['http-server', 'https-server']
+                #     }],
+                #     "scheduling":
+                #     {
+                #         "onHostMaintenance": "terminate"
+                #     }
+                # }
 
             instance = self._create_instance(instance, zone)
 
@@ -415,71 +415,72 @@ class GCPManager(CloudManager):
             instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
 
             if gpu_count > 0:
-                # print("creating with GPU")
-                config = {
-                    'name': vm_name,
-                    'machineType': machine_type,
+                logging.error("Not tested with GPU yet!")
+                # # print("creating with GPU")
+                # config = {
+                #     'name': vm_name,
+                #     'machineType': machine_type,
 
-                    # Not working. Still in Beta on GCP API!
-                    # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
-                    # 'sourceMachineImage': source_machine_image,
+                #     # Not working. Still in Beta on GCP API!
+                #     # # 'sourceMachineImage': f'projects/{self.gcp_config.project}/machineImages/{image_id}',
+                #     # 'sourceMachineImage': source_machine_image,
 
-                    # Specify the boot disk and the image to use as a source.
-                    'disks': [
-                        {
-                            'boot': True,
-                            'autoDelete': True,
-                            'initializeParams': {
-                                'sourceImage': source_disk_image,
-                            }
+                #     # Specify the boot disk and the image to use as a source.
+                #     'disks': [
+                #         {
+                #             'boot': True,
+                #             'autoDelete': True,
+                #             'initializeParams': {
+                #                 'sourceImage': source_disk_image,
+                #             }
 
-                        }
-                    ],
+                #         }
+                #     ],
 
-                    # Allowing SSH connection from third-parties
-                    "metadata": {
-                        "items": [
-                            {
-                                "key": 'enable-oslogin',
-                                "value": 'TRUE'
-                            }
-                        ]
-                    },
+                #     # Allowing SSH connection from third-parties
+                #     "metadata": {
+                #         "items": [
+                #             {
+                #                 "key": 'enable-oslogin',
+                #                 "value": 'TRUE'
+                #             }
+                #         ]
+                #     },
 
-                    # Allow the instance to access cloud storage.
-                    'serviceAccounts': [{
-                        'email': 'default',
-                        'scopes': [
-                            'https://www.googleapis.com/auth/devstorage.read_write'
-                        ]
-                    }],
+                #     # Allow the instance to access cloud storage.
+                #     'serviceAccounts': [{
+                #         'email': 'default',
+                #         'scopes': [
+                #             'https://www.googleapis.com/auth/devstorage.read_write'
+                #         ]
+                #     }],
 
-                    "guestAccelerators":
-                    [
-                        {
-                            "acceleratorCount": gpu_count,
-                            "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
-                                               f"acceleratorTypes/{gpu_type}"
-                        }
-                    ],
+                #     "guestAccelerators":
+                #     [
+                #         {
+                #             "acceleratorCount": gpu_count,
+                #             "acceleratorType": f"projects/{self.gcp_config.project}/zones/{zone}/"
+                #                                f"acceleratorTypes/{gpu_type}"
+                #         }
+                #     ],
 
-                    # Specify a network interface with NAT to access the public
-                    # internet.
-                    'networkInterfaces': [{
-                        'network': 'global/networks/default',
-                        'accessConfigs': [
-                            {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-                        ]
-                    }],
-                    'tags': [{
-                        'items': ['http-server', 'https-server']
-                    }],
-                    "scheduling":
-                    {
-                        "onHostMaintenance": "terminate",
-                        "provisioningModel": "SPOT"
-                    }
-                }
+                #     # Specify a network interface with NAT to access the public
+                #     # internet.
+                #     'networkInterfaces': [{
+                #         'network': 'global/networks/default',
+                #         'accessConfigs': [
+                #             {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+                #         ]
+                #     }],
+                #     'tags': [{
+                #         'items': ['http-server', 'https-server']
+                #     }],
+                #     "scheduling":
+                #     {
+                #         "onHostMaintenance": "terminate",
+                #         "provisioningModel": "SPOT"
+                #     }
+                # }
 
             instance = self._create_instance(instance, zone)
 

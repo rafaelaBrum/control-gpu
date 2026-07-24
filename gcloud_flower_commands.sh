@@ -13,3 +13,7 @@ flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address
 
 #Execution command - in the server VM
 flwr run . local-deployment --stream
+
+
+#PreScheduling execution
+flwr run . local-deployment --stream --run-config "length-parameters=10000 file='teste.json'"
