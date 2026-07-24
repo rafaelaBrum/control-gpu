@@ -219,19 +219,15 @@ class SSHClient:
             logging.error("<SSH Client>: not implemented get_output in GCP")
 
     def get_file(self, source, target, item=None):
+        if item is not None:
+            source = os.path.join(source, item)
+            target = os.path.join(target, item)
         if self.provider in (CloudManager.EC2, CloudManager.AWS):
-
             ftp_client = self.client.open_sftp()
-
-            if item is not None:
-                source = os.path.join(source, item)
-                target = os.path.join(target, item)
-
             ftp_client.get(source, target)
-
             ftp_client.close()
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            logging.error("<SSH Client>: not implemented yet (get_file in GCP)")
+            self.manager.download_file(self.instance_name, source, target, self.zone)
 
     def get_dir(self, source, target):
         # logging.info(f"entering get_dir with source {source} and target {target}")

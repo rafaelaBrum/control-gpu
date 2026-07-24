@@ -941,3 +941,11 @@ class GCPManager(CloudManager):
             logging.error(e)
             if self.mutex.locked():
                 self.mutex.release()
+
+    def download_file(self, instance_name, source, target, zone=''):
+            if zone == '':
+                zone = self.gcp_config.zone
+            logging.info(f"<GCPManager> Sending file {source} to {target} in instance {instance_name}")
+            # print(f"gcloud compute scp {source} --zone {zone} --project {self.gcp_config.project} {instance_name}:{target}")
+            subprocess.run(f"gcloud compute scp {instance_name}:{source} --zone {zone} --project {self.gcp_config.project} {target}", 
+                           shell=True, check=True, capture_output=True)

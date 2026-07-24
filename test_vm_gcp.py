@@ -338,8 +338,10 @@ def delete_instance(project_id, zone, instance):
     print(f"Instance {instance.name} deleted.")
 
 def send_file_to_instance(instance, file, zone, project_id):
-    # subprocess.run(["gcloud","compute", "scp", f"{file}", "--zone", f"{zone}", "--project", f"{project_id}", f"{instance.name}:~"])
     subprocess.run(f"gcloud compute scp {file} --zone {zone} --project {project_id} {instance.name}:~", shell=True)
+
+def download_file_to_instance(instance, file, zone, project_id):
+    subprocess.run(f"gcloud compute scp {instance.name}:{file} . --zone {zone} --project {project_id}", shell=True)
 
 def execute_command_instance(instance, command, zone, project_id):
     print(f"gcloud compute ssh --zone {zone} --project {project_id} {instance.name} --command=\"{command}\"")
@@ -368,6 +370,8 @@ if __name__ == '__main__':
     send_file_to_instance(instance=instance_created, file="environment.env", zone=zone, project_id=project)
     input("Pode executar o comando?")
     execute_command_instance(instance=instance_created, command="ls -lh > saida.txt", zone=zone, project_id=project)
+    input("Pode baixar o arquivo?")
+    download_file_to_instance(instance=instance_created, file="saida.txt", zone=zone, project_id=project)
     input("Pode tentar resumir a VM?")
     start_instance(instance=instance_created, zone=zone, project_id=project)
     input("Pode excluir?")

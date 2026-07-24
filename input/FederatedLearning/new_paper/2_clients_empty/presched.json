@@ -1,5 +1,36 @@
 {
-    "exec_times": {},
+    "exec_times": {
+        "e2-standard-4": {
+            "GCP_us-central1": {
+                "0": {
+                    "eval_1": "4.76837158203125e-05",
+                    "eval_2": "2.384185791015625e-05",
+                    "fit_1": "0.07555603981018066",
+                    "fit_2": "0.00017333030700683594"
+                },
+                "1": {
+                    "eval_1": "3.886222839355469e-05",
+                    "eval_2": "2.4080276489257812e-05",
+                    "fit_1": "0.11722421646118164",
+                    "fit_2": "0.00017309188842773438"
+                }
+            },
+            "GCP_us-west1": {
+                "0": {
+                    "eval_1": "3.8623809814453125e-05",
+                    "eval_2": "2.1696090698242188e-05",
+                    "fit_1": "0.17046833038330078",
+                    "fit_2": "0.0001430511474609375"
+                },
+                "1": {
+                    "eval_1": "3.647804260253906e-05",
+                    "eval_2": "2.4080276489257812e-05",
+                    "fit_1": "0.14219927787780762",
+                    "fit_2": "0.00018739700317382812"
+                }
+            }
+        }
+    },
     "job_id": 10,
     "job_name": "1 empty client with server",
     "number_datacenters": 7,
@@ -10,6 +41,7 @@
             "GCP_us-central1_us-central1-a": 65.2668149471283,
             "GCP_us-central1_us-central1-b": 42.2698974609375,
             "GCP_us-central1_us-central1-c": 40.24719738960266,
+            "GCP_us-central1_us-central1-f": 24.826950073242188,
             "GCP_us-west1_us-west1-a": 50.01119613647461,
             "GCP_us-west1_us-west1-b": 47.49227952957153,
             "GCP_us-west1_us-west1-c": 76.98383164405823
@@ -30,7 +62,10 @@
             "GCP_us-west1_us-west1-c": 33.01743984222412
         },
         "GCP_us-central1_us-central1-f": {
-            "GCP_us-central1_us-central1-f": 37.03458118438721
+            "GCP_us-central1_us-central1-f": 37.03458118438721,
+            "GCP_us-west1_us-west1-a": 33.974459409713745,
+            "GCP_us-west1_us-west1-b": 58.239476919174194,
+            "GCP_us-west1_us-west1-c": 66.26843309402466
         },
         "GCP_us-west1_us-west1-a": {
             "GCP_us-west1_us-west1-a": 56.50659465789795,

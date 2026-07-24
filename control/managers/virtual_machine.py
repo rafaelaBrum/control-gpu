@@ -9,7 +9,7 @@ from control.managers.cloud_manager import CloudManager
 from control.managers.gcp_manager import GCPManager
 from control.managers.experiment_cloudlab import Experiment
 
-# from control.util.ssh_client import SSHClient
+from control.util.ssh_client import SSHClient
 from control.util.loader import Loader
 
 from control.domain.job import Job

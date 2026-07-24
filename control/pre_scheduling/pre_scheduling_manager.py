@@ -794,6 +794,11 @@ class PreSchedulingManager:
                                            self.loader.pre_scheduling_conf.results_temp_file)) as f:
                         data = f.read()
                     times = json.loads(data)
+                    try:
+                        os.remove(os.path.join(self.loader.pre_scheduling_conf.path,
+                                               self.loader.pre_scheduling_conf.results_temp_file))
+                    except FileNotFoundError as e:
+                        pass
                 except Exception as e:
                     logging.error(e)
                     return {}
