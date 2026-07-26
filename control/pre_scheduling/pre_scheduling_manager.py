@@ -904,6 +904,9 @@ class PreSchedulingManager:
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside calculate_rpc_times')
             logging.error(e)
+        if isinstance(e, CalledProcessError):
+            print(e.stderr)
+            print(e.stdout)
 
     def __exec_rpc_vms(self, vm_server, vm_client, key_server, key_client):
 
@@ -1007,13 +1010,12 @@ class PreSchedulingManager:
                         logging.info("<PreScheduling - VirtualMachine {}>: - {} ".format(vm_server.instance_id,
                                                                                          cmd_json))
 
-                    #TODO: Parei aqui
                     if self.loader.application_conf.fl_framework == "flower_old":    
-                        cmd_daemon_server = "python3.7 {} " \
-                                            "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                                self.loader.pre_scheduling_conf.server_file),
-                                                                                self.loader.application_conf.fl_port
-                                                                                )
+                        cmd_daemon = "python3.7 {} " \
+                                    "--fl_port {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                        self.loader.pre_scheduling_conf.server_file),
+                                                                        self.loader.application_conf.fl_port
+                                                                        )
                         cmd_daemon_before_server = ""
                     elif self.loader.application_conf.fl_framework == "flower":
                         cmd_daemon_before_server = "source venv/bin/activate; flower-superlink " \
@@ -1021,7 +1023,6 @@ class PreSchedulingManager:
                                                 "--serverappio-api-address 0.0.0.0:9091 " \
                                                 "--fleet-api-address 0.0.0.0:{} " \
                                                 "--insecure".format(self.loader.application_conf.fl_port)
-                        cmd_daemon_server = "source venv/bin/activate; flwr run . local-deployment --stream"
 
                 elif vm_server.instance_type.provider in CloudManager.CLOUDLAB:
 
@@ -1067,7 +1068,7 @@ class PreSchedulingManager:
                     stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_screen, output=True)
                     print(stdout)
                 elif self.loader.application_conf.fl_framework == "flower":
-                    cmd_screen = 'screen -L -Logfile screen_log_before -S test -dm bash -c \'{}\''.format(cmd_daemon_before_server)
+                    cmd_screen = 'screen -L -Logfile screen_log_before -S before -dm bash -c \'{}\''.format(cmd_daemon_before_server)
                     logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
                                                                                                 vm_server.instance_id))
 
@@ -1208,10 +1209,51 @@ class PreSchedulingManager:
                         times['server-client'] = json.loads(data)
                     except Exception as e:
                         logging.error(e)
+                        if isinstance(e, CalledProcessError):
+                            print(e.stderr)
+                            print(e.stdout)
                         times['server-client'] = {}
                 elif self.loader.application_conf.fl_framework == "flower":
-                    #TODO: executar o comando pelo servidor
+                    cmd_daemon = "source venv/bin/activate; flwr run . local-deployment --stream"
                     logging.error("Falta executar o comando pelo servidor!")
+
+                    cmd_screen = 'screen -L -Logfile screen_log -S test -dm bash -c \'{}\''.format(cmd_daemon)
+                    logging.info("<PreScheduler>: - Executing '{}' on VirtualMachine {} ".format(cmd_screen,
+                                                                                                    vm_server.instance_id))
+    
+                    stdout, stderr, code_return = vm_server.ssh.execute_command(cmd_screen, output=True)
+                    print(stdout)
+
+                    while not has_command_finished(vm_server):
+                        continue
+
+                    try:
+                        if vm_server.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
+                            vm_server.ssh.get_file(source=vm_server.loader.ec2_conf.home_path,
+                                                target=self.loader.pre_scheduling_conf.path,
+                                                item=self.loader.pre_scheduling_conf.results_temp_file)
+                        elif vm_server.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+                            vm_server.ssh.get_file(source=vm_server.loader.gcp_conf.home_path,
+                                                target=self.loader.pre_scheduling_conf.path,
+                                                item=self.loader.pre_scheduling_conf.results_temp_file)
+                        elif vm_server.instance_type.provider in CloudManager.CLOUDLAB:
+                            vm_server.ssh.get_file(source=vm_server.loader.cloudlab_conf.home_path,
+                                                target=self.loader.pre_scheduling_conf.path,
+                                                item=self.loader.pre_scheduling_conf.results_temp_file)
+
+                        with open(os.path.join(self.loader.pre_scheduling_conf.path,
+                                            self.loader.pre_scheduling_conf.results_temp_file)) as f:
+                            data = f.read()
+                        times['server-client'] = json.loads(data)
+                    except Exception as e:
+                        logging.error(e)
+                        if isinstance(e, CalledProcessError):
+                            print(e.stderr)
+                            print(e.stdout)
+                        times['server-client'] = {}
+
+                print(times)
+                exit()
 
                 # Client-server
 
@@ -1320,6 +1362,9 @@ class PreSchedulingManager:
                     times['client-server'] = json.loads(data)
                 except Exception as e:
                     logging.error(e)
+                    if isinstance(e, CalledProcessError):
+                        print(e.stderr)
+                        print(e.stdout)
                     times['client-server'] = {}
 
                 vm_server.ssh.close_connection()
@@ -1329,6 +1374,9 @@ class PreSchedulingManager:
             except Exception as e:
 
                 logging.error(e)
+                if isinstance(e, CalledProcessError):
+                    print(e.stderr)
+                    print(e.stdout)
                 return times
 
         else:

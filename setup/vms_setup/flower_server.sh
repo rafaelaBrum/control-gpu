@@ -24,6 +24,8 @@ python3 -m venv venv
 venv/bin/python3.12 -m pip install -U pip setuptools
 venv/bin/python3.12 -m pip install -r requirements_server_flower.txt
 sudo apt install unzip -y
+wget https://raw.githubusercontent.com/rafaelaBrum/control-gpu/new_paper/config.toml
+cp config.toml .flwr/config.toml
 echo "Flower server requirements installed"
 
 # Installing fuse for GCP

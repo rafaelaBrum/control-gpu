@@ -1,0 +1,6 @@
+[superlink]
+default = "local-deployment"
+
+[superlink.local-deployment]
+address = "localhost:9093"
+insecure = true
