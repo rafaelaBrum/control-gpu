@@ -17,3 +17,6 @@ flwr run . local-deployment --stream
 
 #PreScheduling execution
 flwr run . local-deployment --stream --run-config "length-parameters=10000 file='teste.json'"
+
+#Quitting a screen
+screen -S screen_name -X quit
