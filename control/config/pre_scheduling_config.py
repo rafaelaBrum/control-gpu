@@ -47,3 +47,7 @@ class PreSchedConfig(Config):
     @property
     def num_clients(self):
         return int(self.get_property(self._key, 'num_clients'))
+    
+    @property
+    def num_rounds(self):
+        return int(self.get_property(self._key, 'num_rounds'))

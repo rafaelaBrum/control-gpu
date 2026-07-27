@@ -129,8 +129,6 @@ class SSHClient:
             except Exception as e:
                 logging.error("<SSH Client>: closing connection error " + str(e))
                 return False
-        elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            logging.error("<SSH Client>: not implemented yet (close_onnection in GCP)")
 
     def execute_command(self, command, output=False):
         if self.provider in (CloudManager.EC2, CloudManager.AWS):
