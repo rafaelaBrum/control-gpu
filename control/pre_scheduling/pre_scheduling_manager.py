@@ -904,9 +904,9 @@ class PreSchedulingManager:
         except Exception as e:
             logging.error(f'<PreSchedulerManager>: Error inside calculate_rpc_times')
             logging.error(e)
-        if isinstance(e, CalledProcessError):
-            print(e.stderr)
-            print(e.stdout)
+            if isinstance(e, CalledProcessError):
+                print(e.stderr)
+                print(e.stdout)
 
     def __exec_rpc_vms(self, vm_server, vm_client, key_server, key_client):
 

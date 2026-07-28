@@ -34,7 +34,81 @@
     "job_id": 10,
     "job_name": "1 empty client with server",
     "number_datacenters": 7,
-    "rpc": {},
+    "rpc": {
+        "GCP_us-central1_us-central1-a": {
+            "GCP_us-central1_us-central1-a": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.722043514251709",
+                        "TrainMsg": "11.835340976715088"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "6.394234895706177",
+                        "TrainMsg": "10.130222082138062"
+                    }
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.946666240692139",
+                        "TrainMsg": "11.390568256378174"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.697269439697266",
+                        "TrainMsg": "11.895553588867188"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.635664939880371",
+                        "TrainMsg": "14.17404556274414"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.919818162918091",
+                        "TrainMsg": "13.615094184875488"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.969398498535156",
+                        "TrainMsg": "14.385421991348267"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.803006172180176",
+                        "TrainMsg": "14.510588645935059"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.624640464782715",
+                        "TrainMsg": "15.296825647354126"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.8401100635528564",
+                        "TrainMsg": "16.880674600601196"
+                    }
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-b": {}
+    },
     "rpc_concurrent": {},
     "rtt": {
         "GCP_us-central1_us-central1-a": {
