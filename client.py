@@ -75,12 +75,14 @@ def __call_pre_scheduling(loader: Loader):
 
         #     if loader.num_clients_pre_scheduling > 1:
         #         pre_sched.calculate_concurrent_rpc_times()
+        #         pre_sched.write_json()
 
-        # pre_sched.write_json()
+        if loader.application_conf.fl_framework == "flower_old":
+            pre_sched.update_input_file()
+        elif loader.application_conf.fl_framework == "flower":
+            pre_sched.update_input_file_new()
 
-        # pre_sched.update_input_file()
-
-        # status = "SUCCESS"
+        status = "SUCCESS"
 
     except Exception as e:
         logging.error(e)

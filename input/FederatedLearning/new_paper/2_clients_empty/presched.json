@@ -107,7 +107,99 @@
                 }
             }
         },
-        "GCP_us-central1_us-central1-b": {}
+        "GCP_us-central1_us-central1-b": {},
+        "GCP_us-central1_us-central1-c": {},
+        "GCP_us-central1_us-central1-f": {},
+        "GCP_us-west1_us-west1-a": {
+            "GCP_us-west1_us-west1-a": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.451111078262329",
+                        "TrainMsg": "11.537562847137451"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "4.826534748077393",
+                        "TrainMsg": "12.225865364074707"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.723464250564575",
+                        "TrainMsg": "9.758103847503662"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.690788984298706",
+                        "TrainMsg": "9.598504304885864"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.547578573226929",
+                        "TrainMsg": "8.895266771316528"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "8.034489154815674",
+                        "TrainMsg": "10.203888416290283"
+                    }
+                }
+            }
+        },
+        "GCP_us-west1_us-west1-b": {
+            "GCP_us-west1_us-west1-b": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.692699193954468",
+                        "TrainMsg": "10.414758443832397"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.764938831329346",
+                        "TrainMsg": "9.507243633270264"
+                    }
+                }
+            },
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "5.387486696243286",
+                        "TrainMsg": "9.7448091506958"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "4.889108657836914",
+                        "TrainMsg": "10.477283000946045"
+                    }
+                }
+            }
+        },
+        "GCP_us-west1_us-west1-c": {
+            "GCP_us-west1_us-west1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "5.220748424530029",
+                        "TrainMsg": "9.188708066940308"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.716678619384766",
+                        "TrainMsg": "10.109274625778198"
+                    }
+                }
+            }
+        }
     },
     "rpc_concurrent": {},
     "rtt": {

@@ -872,19 +872,19 @@ class PreSchedulingManager:
                                                   type_task='server')
                                 if not vm_initial.failed_to_created:
                                     vm_initial.update_ip(zone=zone)
-                            vm_final.zone = zone_copy
-                            vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
-                            if not vm_final.failed_to_created:
-                                # update instance IP
-                                vm_final.update_ip(zone=zone_copy)
-                                self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
-                                                                                           region.key_file,
-                                                                                           region_copy.key_file)
-                                status = vm_final.terminate(wait=False, zone=zone_copy)
-                                if status:
-                                    vm_final.instance_id = None
-                                    vm_final.failed_to_created = False
-                                    vm_final.ssh = None
+                                    vm_final.zone = zone_copy
+                                    vm_final.deploy(zone=zone_copy, needs_volume=False, key_name=key_file, type_task='server')
+                                    if not vm_final.failed_to_created:
+                                        # update instance IP
+                                        vm_final.update_ip(zone=zone_copy)
+                                        self.rpc_times[id_rpc][id_rpc_final] = self.__exec_rpc_vms(vm_initial, vm_final,
+                                                                                                region.key_file,
+                                                                                                region_copy.key_file)
+                                        status = vm_final.terminate(wait=False, zone=zone_copy)
+                                        if status:
+                                            vm_final.instance_id = None
+                                            vm_final.failed_to_created = False
+                                            vm_final.ssh = None
                             else:
                                 vm_final.instance_id = None
                                 vm_final.failed_to_created = False
@@ -2401,3 +2401,254 @@ class PreSchedulingManager:
 
         with open(file_output, "w") as fp:
             json.dump(data_dict, fp, sort_keys=True, indent=4, default=str)
+
+
+    def update_input_file_new(self):
+            data_dict = {'cpu_vms': {},
+                         'gpu_vms': {},
+                         'cost_vms': {},
+                         'time_aggreg': {},
+                         'slowdown': {},
+                         'comm_slowdown': {},
+                         'vm_baseline': {},
+                         'pair_regions_baseline': {}}
+    
+            for key, instance_type in self.loader.env.items():
+                aux_provider = instance_type.provider.upper()
+                if aux_provider not in data_dict['cpu_vms']:
+                    data_dict['cpu_vms'][aux_provider] = {}
+                    data_dict['gpu_vms'][aux_provider] = {}
+                    data_dict['cost_vms'][aux_provider] = {}
+                    data_dict['time_aggreg'][aux_provider] = {}
+                for loc in instance_type.locations:
+                    aux_region = loc.split('_')[1]
+                    if aux_region not in data_dict['cpu_vms'][aux_provider]:
+                        data_dict['cpu_vms'][aux_provider][aux_region] = {}
+                        data_dict['gpu_vms'][aux_provider][aux_region] = {}
+                        data_dict['cost_vms'][aux_provider][aux_region] = {}
+                        data_dict['time_aggreg'][aux_provider][aux_region] = {}
+                    data_dict['cpu_vms'][aux_provider][aux_region][key] = instance_type.vcpu
+                    data_dict['gpu_vms'][aux_provider][aux_region][key] = instance_type.count_gpu
+                    data_dict['cost_vms'][aux_provider][aux_region][key] = instance_type.price_ondemand[aux_region]/3600
+                    data_dict['time_aggreg'][aux_provider][aux_region][key] = 0.3
+    
+            for client_baseline in self.loader.pre_scheduling_conf.clients_baseline:
+                time_baseline = 0.0
+                vm_baseline_chosen = False
+                if self.loader.emulated:
+                    aux_location = 'CLOUDLAB_all'
+                elif self.loader.application_conf.app == "TIL":
+                    aux_location = self.loader.job.client_tasks[client_baseline].bucket_region
+                elif self.loader.application_conf.app == "empty":
+                    aux_location = "none"
+                for key, value in self.exec_times.items():
+                    for region, clients_times in value.items():
+                        for client, times in clients_times.items():
+                            if client == client_baseline:
+                                vm_name = key
+                                loc = region
+                                time_baseline = float(times['eval_2']) + float(times['fit_2'])
+                                data_dict['vm_baseline'][aux_location] = {'vm_name': vm_name, 'location': loc}
+                                vm_baseline_chosen = True
+                                break
+                        if vm_baseline_chosen:
+                            break
+                    if vm_baseline_chosen:
+                        break
+
+                for vm_name in self.exec_times:
+                    for loc in self.exec_times[vm_name]:
+                        aux_provider = loc.split("_")[0].upper()
+                        aux_region = loc.split("_")[1]
+                        if client_baseline in self.exec_times[vm_name][loc]:
+                            if aux_location not in data_dict['slowdown']:
+                                data_dict['slowdown'][aux_location] = {}
+                            if aux_provider not in data_dict['slowdown'][aux_location]:
+                                data_dict['slowdown'][aux_location][aux_provider] = {}
+                            if aux_region not in data_dict['slowdown'][aux_location][aux_provider]:
+                                data_dict['slowdown'][aux_location][aux_provider][aux_region] = {}
+                            aux_slowdown = (float(self.exec_times[vm_name][loc][client_baseline]['eval_2']) +
+                                            float(self.exec_times[vm_name][loc][client_baseline]['fit_2'])) / time_baseline
+                            data_dict['slowdown'][aux_location][aux_provider][aux_region][vm_name] = aux_slowdown
+    
+            time_baseline = 0.0
+            pair_regions_baseline_chosen = False
+            aux_comm_slowdown = {}
+    
+            for loc_1 in self.rpc_times:
+                aux_provider_1 = loc_1.split("_")[0].upper()
+                aux_region_1 = loc_1.split("_")[1]
+                for loc_2 in self.rpc_times[loc_1]:
+                    aux_provider_2 = loc_2.split("_")[0].upper()
+                    aux_region_2 = loc_2.split("_")[1]
+                    if not pair_regions_baseline_chosen:
+                        try:
+                            time_baseline_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['1']['TestMsg']) +\
+                                                        float(self.rpc_times[loc_1][loc_2]['client-server']['1']['TrainMsg'])
+                            time_baseline_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['1']['TestMsg']) +\
+                                                        float(self.rpc_times[loc_1][loc_2]['server-client']['1']['TrainMsg'])
+                            time_baseline = (time_baseline_client_server + time_baseline_server_client) / 2
+                            pair_regions_baseline_chosen = True
+                            data_dict['pair_regions_baseline'] = {"provider_1": aux_provider_1,
+                                                                  "location_1": loc_1,
+                                                                  "provider_2": aux_provider_2,
+                                                                  "location_2": loc_2}
+                            # print("time_baseline", time_baseline)
+                        except Exception as e:
+                            logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")
+                            logging.error(e)
+                    if aux_provider_1 not in aux_comm_slowdown:
+                        aux_comm_slowdown[aux_provider_1] = {}
+                    if aux_region_1 not in aux_comm_slowdown[aux_provider_1]:
+                        aux_comm_slowdown[aux_provider_1][aux_region_1] = {}
+                    if aux_provider_2 not in aux_comm_slowdown[aux_provider_1][aux_region_1]:
+                        aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2] = {}
+                    if aux_region_2 not in aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2]:
+                        aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = {}
+    
+                    if aux_provider_2 not in aux_comm_slowdown:
+                        aux_comm_slowdown[aux_provider_2] = {}
+                    if aux_region_2 not in aux_comm_slowdown[aux_provider_2]:
+                        aux_comm_slowdown[aux_provider_2][aux_region_2] = {}
+                    if aux_provider_1 not in aux_comm_slowdown[aux_provider_2][aux_region_2]:
+                        aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1] = {}
+                    if aux_region_1 not in aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1]:
+                        aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1][aux_region_1] = {}
+                    if not aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2]:
+                        try:
+                            time_client_server = float(self.rpc_times[loc_1][loc_2]['client-server']['1']['TestMsg']) + \
+                                                float(self.rpc_times[loc_1][loc_2]['client-server']['1']['TrainMsg'])
+                            time_server_client = float(self.rpc_times[loc_1][loc_2]['server-client']['1']['TestMsg']) + \
+                                                float(self.rpc_times[loc_1][loc_2]['server-client']['1']['TrainMsg'])
+                            current_time = (time_client_server + time_server_client) / 2
+                            # print("current_time", current_time)
+        
+                            aux_slowdown = current_time / time_baseline
+                            aux_comm_slowdown[aux_provider_1][aux_region_1][aux_provider_2][aux_region_2] = aux_slowdown
+                            aux_comm_slowdown[aux_provider_2][aux_region_2][aux_provider_1][aux_region_1] = aux_slowdown
+                        except Exception as e:
+                            logging.error(f"<PreSchedulingModule> error getting rpc_times of {loc_1} and {loc_2}")
+                            logging.error(e)
+    
+            for provider_1 in aux_comm_slowdown:
+                for region_1 in aux_comm_slowdown[provider_1]:
+                    for provider_2 in aux_comm_slowdown[provider_1][region_1]:
+                        for region_2 in aux_comm_slowdown[provider_1][region_1][provider_2]:
+                            if provider_1 not in data_dict['comm_slowdown']:
+                                data_dict['comm_slowdown'][provider_1] = {}
+                            if region_1 not in data_dict['comm_slowdown'][provider_1]:
+                                data_dict['comm_slowdown'][provider_1][region_1] = {}
+                            if provider_2 not in data_dict['comm_slowdown'][provider_1][region_1]:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2] = {}
+                            if region_2 not in data_dict['comm_slowdown'][provider_1][region_1][provider_2]:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = {}
+                            if aux_comm_slowdown[provider_1][region_1][provider_2][region_2]:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = \
+                                    aux_comm_slowdown[provider_1][region_1][provider_2][region_2]
+                            else:
+                                data_dict['comm_slowdown'][provider_1][region_1][provider_2][region_2] = 10000000
+    
+                            if provider_2 not in data_dict['comm_slowdown']:
+                                data_dict['comm_slowdown'][provider_2] = {}
+                            if region_2 not in data_dict['comm_slowdown'][provider_2]:
+                                data_dict['comm_slowdown'][provider_2][region_2] = {}
+                            if provider_1 not in data_dict['comm_slowdown'][provider_2][region_2]:
+                                data_dict['comm_slowdown'][provider_2][region_2][provider_1] = {}
+                            if region_1 not in data_dict['comm_slowdown'][provider_2][region_2][provider_1]:
+                                data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = {}
+                            if aux_comm_slowdown[provider_2][region_2][provider_1][region_1]:
+                                data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = \
+                                    aux_comm_slowdown[provider_2][region_2][provider_1][region_1]
+                            else:
+                                data_dict['comm_slowdown'][provider_2][region_2][provider_1][region_1] = 10000000
+    
+            # print("data_dict")
+            # print(json.dumps(data_dict, sort_keys=False, indent=4))
+    
+            file_output = self.loader.input_file
+    
+            if os.path.exists(file_output):
+                logging.info(f"<PreSchedulerManager> File {file_output} already exists. Reading info")
+                try:
+                    with open(file_output) as f:
+                        data = f.read()
+                    json_data = json.loads(data)
+    
+                    if 'cpu_vms' in json_data:
+                        for provider in json_data['cpu_vms']:
+                            if provider in data_dict['cpu_vms']:
+                                for region in json_data['cpu_vms'][provider]:
+                                    if region in data_dict['cpu_vms'][provider]:
+                                        for vm in json_data['cpu_vms'][provider][region]:
+                                            if vm in data_dict['cpu_vms'][provider][region]:
+                                                data_dict['cpu_vms'][provider][region][vm] = \
+                                                    json_data['cpu_vms'][provider][region][vm]
+                    if 'gpu_vms' in json_data:
+                        for provider in json_data['gpu_vms']:
+                            if provider in data_dict['gpu_vms']:
+                                for region in json_data['gpu_vms'][provider]:
+                                    if region in data_dict['gpu_vms'][provider]:
+                                        for vm in json_data['gpu_vms'][provider][region]:
+                                            if vm in data_dict['gpu_vms'][provider][region]:
+                                                data_dict['gpu_vms'][provider][region][vm] = \
+                                                    json_data['gpu_vms'][provider][region][vm]
+                    if 'cost_vms' in json_data:
+                        for provider in json_data['cost_vms']:
+                            if provider in data_dict['cost_vms']:
+                                for region in json_data['cost_vms'][provider]:
+                                    if region in data_dict['cost_vms'][provider]:
+                                        for vm in json_data['cost_vms'][provider][region]:
+                                            if vm in data_dict['cost_vms'][provider][region]:
+                                                data_dict['cost_vms'][provider][region][vm] = \
+                                                    json_data['cost_vms'][provider][region][vm]
+                    if 'time_aggreg' in json_data:
+                        for provider in json_data['time_aggreg']:
+                            if provider in data_dict['time_aggreg']:
+                                for region in json_data['time_aggreg'][provider]:
+                                    if region in data_dict['time_aggreg'][provider]:
+                                        for vm in json_data['time_aggreg'][provider][region]:
+                                            if vm in data_dict['time_aggreg'][provider][region]:
+                                                data_dict['time_aggreg'][provider][region][vm] = \
+                                                    json_data['time_aggreg'][provider][region][vm]
+                    if 'vm_baseline' in json_data and aux_location in json_data['vm_baseline']:
+                        if data_dict['vm_baseline'][aux_location]['vm_name'] == json_data['vm_baseline'][aux_location]['vm_name'] and \
+                                data_dict['vm_baseline'][aux_location]['location'] == json_data['vm_baseline'][aux_location]['location']:
+                            if 'slowdown' in json_data:
+                                for location in json_data['slowdown']:
+                                    if location in data_dict['slowdown']:
+                                        for provider in json_data['slowdown'][location]:
+                                            if provider in data_dict['slowdown'][location]:
+                                                for region in json_data['slowdown'][location][provider]:
+                                                    if region in data_dict['slowdown'][location][provider]:
+                                                        for vm in json_data['slowdown'][location][provider][region]:
+                                                            if vm in data_dict['slowdown'][location][provider][region]:
+                                                                data_dict['slowdown'][location][provider][region][vm] = \
+                                                                    json_data['slowdown'][location][provider][region][vm]
+                    if 'pair_regions_baseline' in json_data:
+                        if data_dict['pair_regions_baseline']['provider_1'] == json_data['pair_regions_baseline'][
+                            'provider_1'] and data_dict['pair_regions_baseline']['provider_2'] == json_data[
+                            'pair_regions_baseline']['provider_2'] and data_dict['pair_regions_baseline'][
+                            'location_1'] == json_data['pair_regions_baseline']['location_1'] and data_dict[
+                                'pair_regions_baseline']['location_2'] == json_data['pair_regions_baseline']['location_2']:
+                            if 'comm_slowdown' in json_data:
+                                for provider1 in json_data['comm_slowdown']:
+                                    if provider1 in data_dict['comm_slowdown']:
+                                        for region1 in json_data['comm_slowdown'][provider1]:
+                                            if region1 in data_dict['comm_slowdown'][provider1]:
+                                                for provider2 in json_data['comm_slowdown'][provider1][region1]:
+                                                    if provider2 in data_dict['comm_slowdown'][provider1][region1]:
+                                                        for region2 in json_data['comm_slowdown'][provider1][region1][
+                                                                provider2]:
+                                                            if region2 in data_dict['comm_slowdown'][provider1][region1][
+                                                                    provider2]:
+                                                                data_dict['comm_slowdown'][provider1][region1][provider2] =\
+                                                                    json_data['comm_slowdown'][provider1][region1][
+                                                                        provider2]
+    
+                except Exception as e:
+                    logging.error(e)
+    
+            logging.info(f"<PreSchedulerManager> Writing {file_output} file")
+    
+            with open(file_output, "w") as fp:
+                json.dump(data_dict, fp, sort_keys=True, indent=4, default=str)
