@@ -6,11 +6,11 @@ from subprocess import CalledProcessError
 
 from control.util.loader import Loader
 
-# from control.scheduler.schedule_manager import ScheduleManager
+from control.scheduler.schedule_manager import ScheduleManager
 
 from distutils.util import strtobool
 
-# from control.util.recreate_database import RecreateDatabase
+from control.util.recreate_database import RecreateDatabase
 
 from control.pre_scheduling.pre_scheduling_manager import PreSchedulingManager
 
@@ -28,10 +28,10 @@ def __call_control(loader: Loader):
         else:
             loader.print_execution_info()
 
-        # print("calling ScheduleManager")
-        # manager = ScheduleManager(loader=loader)
+        print("calling ScheduleManager")
+        manager = ScheduleManager(loader=loader)
 
-        # manager.start_execution()
+        manager.start_execution()
 
         status = "SUCCESS"
     except Exception as e:
@@ -90,7 +90,7 @@ def __call_pre_scheduling(loader: Loader):
             print(e.stderr)
             print(e.stdout)
 
-        # status = "ERROR"
+        status = "ERROR"
 
     # if loader.dump:
     #     logging.info("Backup Database..")
@@ -105,7 +105,7 @@ def __call_recreate_database(loader: Loader):
 
     try:
         if strtobool(answer):
-            # RecreateDatabase.execute()
+            RecreateDatabase.execute()
             logging.info("Database was recreated with success")
         else:
             logging.error("Answer should be: yes or no")

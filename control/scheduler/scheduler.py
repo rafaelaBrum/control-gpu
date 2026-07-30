@@ -26,37 +26,68 @@ class Scheduler:
         self.loc_cloudlab: Dict[str, CloudRegion] = {}
         self.qtde_gpus_spot_gcloud: Dict[str, Dict[str, int]] = {}
         self.qtde_gpus_spot_aws_east = -1
-        self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
+        # self.__divide_instances_for_server_and_for_client_by_cloud(instance_types)
+        self.__distribute_instances_for_server_and_for_client_by_cloud(instance_types)
         self.__separate_location_by_cloud(locations)
         self.index_extra_vm = []
         self.current_vms: Dict[str, (InstanceType, str)] = {'server': None}
         self.current_locations: Dict[str, CloudRegion] = {'server': None}
 
-    def __divide_instances_for_server_and_for_client_by_cloud(self, instance_types):
-        # logging.info("<Scheduler>: Dividing instances types for server and client")
+    # def __divide_instances_for_server_and_for_client_by_cloud(self, instance_types):
+    #     # logging.info("<Scheduler>: Dividing instances types for server and client")
+
+    #     for name, instance in instance_types.items():
+    #         # logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
+    #         if instance.provider in CloudManager.CLOUDLAB:
+    #             self.instances_server_cloudlab[name] = instance
+    #             self.instances_client_cloudlab[name] = instance
+    #         elif instance.have_gpu:
+    #             if instance.provider in (CloudManager.EC2, CloudManager.AWS):
+    #                 self.instances_client_aws[name] = instance
+    #                 # logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
+    #             elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+    #                 self.instances_client_gcp[name] = instance
+    #                 self.qtde_gpus_spot_gcloud[name] = {}
+    #                 # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
+    #             else:
+    #                 logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
+    #         else:
+    #             if instance.provider in (CloudManager.EC2, CloudManager.AWS):
+    #                 self.instances_server_aws[name] = instance
+    #                 # logging.info("<Scheduler>: Instance type {} added to instances_server_aws".format(name))
+    #             elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
+    #                 self.instances_server_gcp[name] = instance
+    #                 # logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
+    #             else:
+    #                 logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
+
+    def __distribute_instances_for_server_and_for_client_by_cloud(self, instance_types):
+        logging.info("<Scheduler>: Dividing instances types for server and client")
 
         for name, instance in instance_types.items():
-            # logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
+            logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
             if instance.provider in CloudManager.CLOUDLAB:
                 self.instances_server_cloudlab[name] = instance
                 self.instances_client_cloudlab[name] = instance
             elif instance.have_gpu:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_client_aws[name] = instance
-                    # logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
+                    logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.instances_client_gcp[name] = instance
                     self.qtde_gpus_spot_gcloud[name] = {}
-                    # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
+                    logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
             else:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_server_aws[name] = instance
-                    # logging.info("<Scheduler>: Instance type {} added to instances_server_aws".format(name))
+                    logging.info("<Scheduler>: Instance type {} added to instances_server_aws".format(name))
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.instances_server_gcp[name] = instance
-                    # logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
+                    logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
+                    self.instances_client_gcp[name] = instance
+                    logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
@@ -109,8 +140,8 @@ class Scheduler:
             logging.error("<Scheduler>: Instance {} not included in environment".format(vm_name))
 
     def get_client_instance(self, provider, region, vm_name, client_id):
-        logging.info("<Scheduler>: Choosing instance for client task from provider {} in region {} "
-                     "with name {}".format(provider, region, vm_name))
+        logging.info("<Scheduler>: Choosing instance for client task ID {} from provider {} in region {} "
+                     "with name {}".format(client_id, provider, region, vm_name))
         if provider.lower() in (CloudManager.EC2, CloudManager.AWS):
             for name, instance in self.instances_client_aws.items():
                 if name == vm_name:
@@ -143,23 +174,33 @@ class Scheduler:
                     for loc in self.loc_gcp.values():
                         if loc.region == region:
                             for zone in loc.zones:
-                                # if self.qtde_gpus_spot_gcloud[name][loc.region] > 0:
-                                #     self.qtde_gpus_spot_gcloud[name][loc.region] -= 1
-                                #     self.current_vms[str(client_id)] = (instance, CloudManager.PREEMPTIBLE)
-                                #     self.current_locations[str(client_id)] = loc
-                                #     logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(
-                                #         name,
-                                #         region)
-                                #     )
-                                #     return instance, CloudManager.PREEMPTIBLE, loc, zone
-                                # else:
-                                self.current_vms[str(client_id)] = (instance, CloudManager.ON_DEMAND)
-                                self.current_locations[str(client_id)] = loc
-                                logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(
-                                    name,
-                                    region)
-                                )
-                                return instance, CloudManager.ON_DEMAND, loc, zone
+                                if instance.have_gpu:
+                                    if self.qtde_gpus_spot_gcloud[name][loc.region] > 0:
+                                        self.qtde_gpus_spot_gcloud[name][loc.region] -= 1
+                                        self.current_vms[str(client_id)] = (instance, CloudManager.PREEMPTIBLE)
+                                        self.current_locations[str(client_id)] = loc
+                                        logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(
+                                            name,
+                                            region)
+                                        )
+                                        return instance, CloudManager.PREEMPTIBLE, loc, zone
+                                    else:
+                                        self.current_vms[str(client_id)] = (instance, CloudManager.ON_DEMAND)
+                                        self.current_locations[str(client_id)] = loc
+                                        logging.info("<Scheduler>: On-demand instance chosen {} in region {}".format(
+                                            name,
+                                            region)
+                                        )
+                                        return instance, CloudManager.ON_DEMAND, loc, zone
+                                else:
+                                    self.current_vms[str(client_id)] = (instance, CloudManager.PREEMPTIBLE)
+                                    self.current_locations[str(client_id)] = loc
+                                    logging.info("<Scheduler>: Preemptible instance chosen {} in region {}".format(
+                                        name,
+                                        region)
+                                    )
+                                    return instance, CloudManager.PREEMPTIBLE, loc, zone
+
                     logging.error("<Scheduler>: Location {} not included in environment".format(region))
         elif provider.lower() in (CloudManager.CLOUDLAB.lower()):
             for name, instance in self.instances_client_cloudlab.items():

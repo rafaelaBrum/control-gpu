@@ -15,7 +15,7 @@ from control.domain.job import Job
 from control.managers.virtual_machine import VirtualMachine
 from control.managers.dispatcher import Dispatcher
 from control.managers.cloud_manager import CloudManager
-from control.managers.ec2_manager import EC2Manager
+# from control.managers.ec2_manager import EC2Manager
 from control.managers.experiment_cloudlab import Experiment
 
 from control.simulators.status_simulator import RevocationSim
@@ -57,10 +57,6 @@ class ScheduleManager:
         self.__load_scheduler()
         # print(self.scheduler)
 
-        # read expected_makespan on build_dispatcher()
-        # self.expected_makespan_seconds = None
-        # self.deadline_timestamp = None
-
         '''
            If the execution has simulation
            Prepare the simulation environment
@@ -83,7 +79,6 @@ class ScheduleManager:
 
         # Semaphore
         self.semaphore = threading.Semaphore()
-        # self.semaphore_count = threading.Semaphore()
 
         # TRACKERS VALUES
         self.n_interruptions = 0
@@ -102,10 +97,6 @@ class ScheduleManager:
         self.idle_dispatchers = []
 
         self.server_revoked = False
-        # self.server_task_status = Task.WAITING
-        # self.client_tasks_status = []
-        # for i in range(self.loader.job.num_clients):
-        #     self.client_tasks_status.append(Task.WAITING)
 
         # Prepare the control database and the folders structure in S3
         try:
@@ -127,22 +118,22 @@ class ScheduleManager:
         if self.loader.scheduler_name.upper() == Scheduler.FL_SIMPLE:
             if self.loader.server_provider is None:
                 logging.error("<Loader>: Server provider cannot be None")
-                return
+                exit()
             if self.loader.server_region is None:
                 logging.error("<Loader>: Server region cannot be None")
-                return
+                exit()
             if self.loader.server_vm_name is None:
                 logging.error("<Loader>: Server VM name cannot be None")
-                return
+                exit()
             if self.loader.clients_provider is None:
                 logging.error("<Loader>: Clients provider cannot be None")
-                return
+                exit()
             if self.loader.clients_region is None:
                 logging.error("<Loader>: Clients region cannot be None")
-                return
+                exit()
             if self.loader.clients_vm_name is None:
                 logging.error("<Loader>: Clients VM name cannot be None")
-                return
+                exit()
             self.scheduler = FLSimpleScheduler(instance_types=self.loader.env, locations=self.loader.loc)
 
         elif self.loader.scheduler_name.upper() == Scheduler.MAT_FORM:
@@ -169,8 +160,8 @@ class ScheduleManager:
         except Exception:
             json_data = None
         if json_data is None:
-            aux_provider = self.loader.server_provider,
-            aux_region = self.loader.server_region,
+            aux_provider = self.loader.server_provider
+            aux_region = self.loader.server_region
             aux_vm_name = self.loader.server_vm_name
         else:
             aux_provider = json_data['server']['provider']
@@ -212,10 +203,9 @@ class ScheduleManager:
         self.client_task_dispatchers = []
 
         for i in range(self.loader.job.num_clients):
-            # client = self.loader.job.client_tasks[i]
             if json_data is None:
-                aux_provider = self.loader.clients_provider[i],
-                aux_region = self.loader.clients_region[i],
+                aux_provider = self.loader.clients_provider[i]
+                aux_region = self.loader.clients_region[i]
                 aux_vm_name = self.loader.clients_vm_name[i]
             else:
                 aux_provider = json_data['clients'][str(i)]['provider']
@@ -312,9 +302,14 @@ class ScheduleManager:
                     assert task.task_name == t.task_name, "Consistency error (server task {} memory): " \
                                                           "{} <> {} ".format(task.task_id, t.task_name, task.task_name)
 
-                    assert task.simple_command == t.command, "Consistency error (server task {} command): " \
-                                                             "{} <> {} ".format(task.task_id, t.command,
-                                                                                task.simple_command)
+                    if self.loader.application_conf.fl_framework == 'flower_old':
+                        assert task.simple_command == t.command, "Consistency error (server task {} command): " \
+                                                                "{} <> {} ".format(task.task_id, t.command,
+                                                                                    task.simple_command)
+                    elif self.loader.application_conf.fl_framework == "flower":
+                        assert task.simple_command == t.command[1:-2].replace("\"", "").split(","), "Consistency error (server task {} command): " \
+                                                                "{} <> {} ".format(task.task_id, t.command[1:-2].replace("\"", "").split(","),
+                                                                                    task.simple_command)
 
                 # client tasks
                 else:
