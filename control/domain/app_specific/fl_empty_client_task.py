@@ -4,12 +4,13 @@ from control.domain.task import Task
 class FLEmptyClientTask(Task):
 
     def __init__(self, task_id, task_name, command, generic_checkpoint, client_id,
-                 zip_file):
+                 zip_file, dataset_urn):
         super().__init__(task_id, task_name, command, generic_checkpoint)
 
         self.simple_command = command
         self.client_id = client_id
         self.zip_file = zip_file
+        self.dataset_urn = dataset_urn
         
         self.running_instance = ""
         self.running = False
@@ -46,7 +47,8 @@ class FLEmptyClientTask(Task):
                 client_id=int(key),
                 command=a_dict['tasks']['clients'][key]['command'],
                 generic_checkpoint=a_dict['tasks']['clients'][key]['generic_checkpoint'],
-                zip_file=a_dict['tasks']['clients'][key]['zip_file']
+                zip_file=a_dict['tasks']['clients'][key]['zip_file'],
+                dataset_urn=a_dict['tasks']['clients'][key]['dataset_urn']
             )
             for key in a_dict['tasks']['clients']
         ]

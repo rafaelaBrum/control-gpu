@@ -477,76 +477,6 @@ class Dispatcher:
             self.loader.job.client_tasks[self.client_id].server_ip = server_ip
             if self.executor is not None:
                 self.executor.task.server_ip = server_ip
-            # if self.main_thread.is_alive():
-            #     logging.error("<Dispatcher {}>: Thread still alive".format(self.vm.instance_id))
-            # self.main_thread = threading.Thread(target=self.__restart_client_execution_loop, daemon=True)
-
-    # def __get_instance_usage(self):
-    #     memory = 0
-    #     cpu = 0
-    #
-    #     communicator = Communicator(self.vm.instance_public_ip,
-    #                                 self.loader.communication_conf.socket_port)
-    #
-    #     info = {
-    #         "task_id": 0,
-    #         "command": '',
-    #         'cpu_quota': 0
-    #     }
-    #
-    #     max_attempt = 1
-    #
-    #     for i in range(max_attempt):
-    #         try:
-    #             communicator.send(action=Daemon.INSTANCE_USAGE, value=info)
-    #
-    #             result = communicator.response
-    #
-    #             if result['status'] == 'success':
-    #                 memory = float(result['value']['memory'])
-    #                 cpu = float(result['value']['cpu'])
-    #         except:
-    #             logging.error("<Dispatcher {}>: Get Instance Usage {}/{}".format(self.vm.instance_id,
-    #                                                                              i + 1,
-    #                                                                              max_attempt))
-    #
-    #     return cpu, memory
-
-    # def __update_instance_status_table(self, state=None):
-    #     """
-    #     Update Instance Status table
-    #     """
-    #     if state is None:
-    #         state = self.vm.state
-    #
-    #     # Check if the update have to be done due to the time
-    #
-    #     time_diff = None
-    #     if self.timestamp_status_update is not None:
-    #         time_diff = datetime.now() - self.timestamp_status_update
-    #
-    #     if self.least_status is None or self.least_status != state or \
-    #         time_diff > timedelta(seconds=self.loader.scheduler_conf.status_update_time):
-    #         cpu = 0.0
-    #         memory = 0.0
-    #         # cpu, memory = self.__get_instance_usage()
-    #         # Update Instance_status Table
-    #         self.repo.add_instance_status(InstanceStatusRepo(instance_id=self.vm.instance_id,
-    #                                                          timestamp=datetime.now(),
-    #                                                          status=state,
-    #                                                          memory_footprint=memory,
-    #                                                          cpu_usage=cpu,
-    #                                                          cpu_credit=self.vm.get_cpu_credits()))
-    #
-    #         self.timestamp_status_update = datetime.now()
-    #         self.least_status = self.vm.state
-
-    # def __update_instance_statistics_table(self):
-    #
-    #     self.repo.add_instance_status(InstanceStatisticRepo(instance_id=self.vm.instance_id,
-    #                                                         deploy_overhead=self.vm.deploy_overhead.seconds,
-    #                                                         termination_overhead=self.vm.terminate_overhead.seconds,
-    #                                                         uptime=self.vm.uptime.seconds))
 
     def __notify(self, value):
 
@@ -619,7 +549,10 @@ class Dispatcher:
                 else:
                     logging.info(
                         "Vms region {} and image_id {}".format(self.vm.region.region, self.vm.region.client_image_id))
-                status = self.vm.deploy(type_task=self.type_task)
+                if self.client is None:
+                    status = self.vm.deploy(type_task=self.type_task)
+                else:
+                    status = self.vm.deploy(type_task=self.type_task, dataset_urn=self.client.dataset_urn)
                 if status:
                     break
 

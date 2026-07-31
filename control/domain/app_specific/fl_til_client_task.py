@@ -5,7 +5,7 @@ class FLTILClientTask(FLEmptyClientTask):
 
     def __init__(self, task_id, task_name, command, generic_checkpoint, bucket_name, trainset_dir, client_id,
                  zip_file, split, batch, test_dir, train_epochs, bucket_provider, bucket_region, net, dataset_urn):
-        super().__init__(task_id, task_name, command, generic_checkpoint, client_id, zip_file)
+        super().__init__(task_id, task_name, command, generic_checkpoint, client_id, zip_file, dataset_urn)
 
 
         self.bucket_provider = bucket_provider
@@ -17,7 +17,6 @@ class FLTILClientTask(FLEmptyClientTask):
         self.test_dir = test_dir
         self.train_epochs = train_epochs
         self.net = net
-        self.dataset_urn = dataset_urn
 
         self.running_instance = ""
         self.running = False

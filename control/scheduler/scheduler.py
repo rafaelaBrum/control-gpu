@@ -62,32 +62,32 @@ class Scheduler:
     #                 logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 
     def __distribute_instances_for_server_and_for_client_by_cloud(self, instance_types):
-        logging.info("<Scheduler>: Dividing instances types for server and client")
+        # logging.info("<Scheduler>: Dividing instances types for server and client")
 
         for name, instance in instance_types.items():
-            logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
+            # logging.info("<Scheduler>: Instance type {} has GPU? {}".format(name, instance.have_gpu))
             if instance.provider in CloudManager.CLOUDLAB:
                 self.instances_server_cloudlab[name] = instance
                 self.instances_client_cloudlab[name] = instance
             elif instance.have_gpu:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_client_aws[name] = instance
-                    logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
+                    # logging.info("<Scheduler>: Instance type {} added to instances_client_aws".format(name))
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.instances_client_gcp[name] = instance
                     self.qtde_gpus_spot_gcloud[name] = {}
-                    logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
+                    # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
             else:
                 if instance.provider in (CloudManager.EC2, CloudManager.AWS):
                     self.instances_server_aws[name] = instance
-                    logging.info("<Scheduler>: Instance type {} added to instances_server_aws".format(name))
+                    # logging.info("<Scheduler>: Instance type {} added to instances_server_aws".format(name))
                 elif instance.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                     self.instances_server_gcp[name] = instance
-                    logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
+                    # logging.info("<Scheduler>: Instance type {} added to instances_server_gcp".format(name))
                     self.instances_client_gcp[name] = instance
-                    logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
+                    # logging.info("<Scheduler>: Instance type {} added to instances_client_gcp".format(name))
                 else:
                     logging.error(f"<Scheduler>: {instance.provider} does not have support ({name})")
 

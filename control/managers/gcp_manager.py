@@ -39,6 +39,7 @@ class GCPManager(CloudManager):
     def __init__(self):
         self.instance_client = compute_v1.InstancesClient()
         self.image_client = compute_v1.ImagesClient()
+        self.disk_client = compute_v1.DisksClient()
 
         self.instances_history = {}
 
@@ -97,24 +98,29 @@ class GCPManager(CloudManager):
         if zone == '':
             zone = self.gcp_config.zone
         try:
-            disk_body = {
-                'name': volume_name,
-                "sizeGb": size,
-                'type': f'projects/{self.gcp_config.project}/zones/{zone}/diskTypes/pd-balanced'
-            }
+            disk = compute_v1.Disk()
+            disk.type_ = f'projects/{self.gcp_config.project}/zones/{zone}/diskTypes/pd-balanced'
+            disk.name = volume_name
+            disk.size_gb = size
 
             self.mutex.acquire()
 
-            operation = self.compute_engine.disks().insert(project=self.gcp_config.project, zone=zone,
-                                                           body=disk_body).execute()
+            request = compute_v1.InsertDiskRequest(
+                disk_resource=disk,
+                project=self.gcp_config.project,
+                zone=zone,
+            )
 
-            self._wait_for_operation(operation['name'], zone=zone)
+            # Make the request
+            operation = self.disk_client.insert(request=request)
+
+            self._wait_for_operation(operation, "disk insertion")
 
             self.mutex.release()
 
             disk = self.__get_disk(volume_name, zone=zone)
 
-            return disk['name'] if disk else None
+            return disk.name if disk else None
 
         except Exception as e:
 
@@ -132,9 +138,9 @@ class GCPManager(CloudManager):
         ready = False
 
         while disk is not None and not ready:
-            if 'lastAttachTimestamp' not in disk:
+            if not disk.last_attach_timestamp:
                 ready = True
-            elif 'lastDetachTimestamp' in disk:
+            elif disk.last_detach_timestamp:
                 last_attach_time = iso8601.parse_date(disk['lastAttachTimestamp'])
                 last_detach_time = iso8601.parse_date(disk['lastDetachTimestamp'])
                 ready = last_detach_time > last_attach_time
@@ -149,26 +155,25 @@ class GCPManager(CloudManager):
         try:
             instance = self.__get_instance(instance_id, zone)
 
-            self.mutex.acquire()
+            disk = self.__get_disk(volume_name, zone)
 
-            disk = self.compute_engine.disks().get(project=self.gcp_config.project, zone=zone,
-                                                   disk=volume_name).execute()
-
-            self.mutex.release()
 
             if disk is not None:
-                attached_disk_body = {
-                    'source': disk['selfLink']
-                }
+                attached_disk = compute_v1.AttachedDisk()
+                attached_disk.source = disk.self_link
+
+                request = compute_v1.AttachDiskInstanceRequest(
+                    attached_disk_resource=attached_disk,
+                    instance=instance.name,
+                    project=self.gcp_config.project,
+                    zone=zone,
+                )
 
                 self.mutex.acquire()
 
-                operation = self.compute_engine.instances().attachDisk(project=self.gcp_config.project,
-                                                                       zone=zone,
-                                                                       instance=instance['name'],
-                                                                       body=attached_disk_body).execute()
-
-                self._wait_for_operation(operation['name'], zone=zone)
+                operation = self.instance_client.attach_disk(request=request)
+                
+                self._wait_for_operation(operation, "disk attachment")
 
                 self.mutex.release()
 
@@ -330,6 +335,7 @@ class GCPManager(CloudManager):
             return None
 
     def delete_volume(self, volume_id, zone='', volume_name=''):
+        logging.error("<GCPManager> delete_volume not updated yet!")
         if zone == '':
             zone = self.gcp_config.zone
         try:
@@ -496,13 +502,6 @@ class GCPManager(CloudManager):
             return None
 
     def _terminate_instance(self, instance, zone):
-        # if instance is spot, we have to remove its request
-        # if instance.instance_lifecycle == 'spot':
-        #     self.client.cancel_spot_instance_requests(
-        #         SpotInstanceRequestIds=[
-        #             instance.spot_instance_request_id
-        #         ]
-        #     )
 
         try:
 
@@ -585,24 +584,21 @@ class GCPManager(CloudManager):
     def __get_disk(self, disk_name, zone):
 
         try:
+            request = compute_v1.GetDiskRequest(
+                disk=disk_name,
+                project=self.gcp_config.project,
+                zone=zone,
+            )
             self.mutex.acquire()
-            ret = self.compute_engine.disks().get(project=self.gcp_config.project,
-                                                  zone=zone, disk=disk_name).execute()
+            ret = self.disk_client.get(request=request)
             self.mutex.release()
             return ret
         except Exception as e:
-            logging.error("<GCPManager>: Error to find instance")
+            logging.error("<GCPManager>: Error to find disk")
             logging.error(e)
             if self.mutex.locked():
                 self.mutex.release()
             return None
-
-    # def list_instances_id(self, list_filter=None, zone=''):
-    #     if zone == '':
-    #         zone = self.gcp_config.zone
-    #     instances = self.__get_instances(list_filter, zone=zone)
-
-    #     return [i['id'] for i in instances] if instances else []
 
     def get_public_instance_ip(self, instance_id, zone=''):
         if zone == '':
