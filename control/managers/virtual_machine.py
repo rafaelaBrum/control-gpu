@@ -452,8 +452,8 @@ class VirtualMachine:
 
         if self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
             # Mount the bucket within GCP
-            cmd = 'gcsfuse --implicit-dirs {} {}'.format(bucket_name,
-                                                         path)
+            cmd = 'gcsfuse --implicit-dirs --max-retry-attempts 2 {} {}'.format(bucket_name,
+                                                                               path)
         else:
             # Mount bucket outside GCP
             if self.instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
@@ -488,7 +488,9 @@ class VirtualMachine:
                                      self.key_file, self.loader.ec2_conf.vm_user)
             elif self.instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.gcp_conf.key_path,
-                                     self.key_file, self.loader.gcp_conf.vm_user)
+                                     self.key_file, self.loader.gcp_conf.vm_user, 
+                                     self.instance_type.provider, self.loader.gcp_conf.project, 
+                                     self.zone, self.instance_id)
             elif self.instance_type.provider == CloudManager.CLOUDLAB:
                 self.ssh = SSHClient(self.instance_public_ip, self.loader.cloudlab_conf.key_path,
                                      self.key_file, self.loader.cloudlab_conf.vm_user, emulated=True)

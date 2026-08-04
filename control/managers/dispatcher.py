@@ -1,3 +1,5 @@
+from subprocess import CalledProcessError
+
 from control.managers.cloud_manager import CloudManager
 from control.managers.virtual_machine import VirtualMachine
 
@@ -578,6 +580,9 @@ class Dispatcher:
                 status = self.__prepare_daemon()
             except Exception as e:
                 logging.error(e)
+                if isinstance(e, CalledProcessError):
+                    print(e.stderr)
+                    print(e.stdout)
 
                 # stop working process
                 # self.waiting_work.clear()
