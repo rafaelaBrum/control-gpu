@@ -78,7 +78,8 @@ class VirtualMachine:
         # Start cloud manager (if not emulated)
         if not self.emulated:
             if instance_type.provider in (CloudManager.EC2, CloudManager.AWS):
-                self.manager = EC2Manager()
+                # self.manager = EC2Manager()
+                self.manager = None
             elif instance_type.provider in (CloudManager.GCLOUD, CloudManager.GCP):
                 self.manager = GCPManager()
                 if self.vm_name == '':

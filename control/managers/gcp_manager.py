@@ -24,6 +24,8 @@ import threading
 import subprocess
 import sys
 
+import json
+
 file = open(Path(Path.home(), 'gcloud_api_key'), 'r')
 api_key = file.read()
 
@@ -620,133 +622,205 @@ class GCPManager(CloudManager):
 
     @staticmethod
     def get_preemptible_price(instance_type, region=None):
-        params = {'pageToken': None}
+        params = {'pageToken': None,
+                  'filter': 'service="services/6F81-5844-456A"'}
 
+        sku_data_gcp = []
         instance_data_gcp = []
 
-        while len(instance_data_gcp) < 2:
+        termina = False
+
+        while len(sku_data_gcp) < 2 and not termina:
 
             if params['pageToken'] is None:
                 r = requests.get(
-                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+                    url=f'https://cloudbilling.googleapis.com/v2beta/skus?key={api_key}&pageSize=5000',
+                    params={'filter': 'service="services/6F81-5844-456A"'})
             else:
                 r = requests.get(
-                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    url=f'https://cloudbilling.googleapis.com/v2beta/skus?key={api_key}&pageSize=5000',
                     params=params)
 
             all_data_gcp = r.json()
 
-            params['pageToken'] = all_data_gcp['nextPageToken']
+            try:
+                params['pageToken'] = all_data_gcp['nextPageToken']
+            except Exception as e:
+                params['pageToken'] = None
+                termina = True
 
-            aux_list = [x for x in all_data_gcp['skus']
-                        if (f'{instance_type.split("-")[0].upper()} ' in x['description']
-                            and 'Instance' in x['description'])
-                        and 'Preemptible' in x['description']
-                        and 'Custom' not in x['description']]
+            aux_list_2 = [x for x in all_data_gcp['skus']
+                        if (x['displayName'].startswith(f'Spot Preemptible {instance_type.split("-")[0].upper()} Instance Core')
+                            or 
+                            x['displayName'].startswith(f'Spot Preemptible {instance_type.split("-")[0].upper()} Instance Ram'))
+                        ]
 
-            aux_list = [x for x in aux_list if region in x['serviceRegions']]
+            aux_list = []
+            
+            for x in aux_list_2:
+                if x['geoTaxonomy']['type'] == 'TYPE_MULTI_REGIONAL':
+                    for reg in x['geoTaxonomy']['multiRegionalMetadata']['regions']:
+                        if region == reg['region']:
+                            aux_list.append(x)
+                            break
+                if (x['geoTaxonomy']['type'] == 'TYPE_REGIONAL' and region in x['geoTaxonomy']['regionalMetadata']['region']):
+                    aux_list.append(x)
 
             for a in aux_list:
-                instance_data_gcp.append(a)
+                sku_data_gcp.append(a)
 
-        if 'Core' in instance_data_gcp[0]['description']:
-            int_price_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
-                                     ['pricingExpression']['tieredRates']
-                                     [0]['unitPrice']['units'])
-            cents_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
-                                 ['pricingExpression']['tieredRates'][0]
-                                 ['unitPrice']['nanos']) / 1000000000
+        # print(json.dumps(sku_data_gcp, indent=2))
+
+        for sku in sku_data_gcp:
+            sku_id = sku["skuId"]
+            r = requests.get(
+                url=f'https://cloudbilling.googleapis.com/v1beta/skus/{sku_id}/price?key={api_key}')
+                
+            sku_data = r.json()
+
+            instance_data_gcp.append(sku_data)
+
+        # print(json.dumps(instance_data_gcp, indent=2))
+
+        if 'Core' in sku_data_gcp[0]['displayName']:
+            try:
+                int_price_per_vcpu = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_vcpu = 0
+            cents_per_vcpu = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
-            int_price_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
-                                    ['pricingExpression']['tieredRates'][0]
-                                    ['unitPrice']['units'])
-            cents_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
-                                ['pricingExpression']['tieredRates'][0]
-                                ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_ram = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_ram = 0
+            cents_per_ram = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_ram = int_price_per_ram + cents_per_ram
         else:
-            int_price_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
-                                     ['pricingExpression']['tieredRates']
-                                     [0]['unitPrice']['units'])
-            cents_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
-                                 ['pricingExpression']['tieredRates'][0]
-                                 ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_vcpu = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_vcpu = 0
+            cents_per_vcpu = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
-            int_price_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
-                                    ['pricingExpression']['tieredRates'][0]
-                                    ['unitPrice']['units'])
-            cents_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
-                                ['pricingExpression']['tieredRates'][0]
-                                ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_ram = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_ram = 0
+            cents_per_ram = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_ram = int_price_per_ram + cents_per_ram
 
+        # print("price_per_vcpu: ", price_per_vcpu)
+        # print("price_per_ram: ", price_per_ram)
         return price_per_vcpu, price_per_ram
 
     # Get current GCP price for an on-demand instance
     @staticmethod
     def get_ondemand_price(instance_type, region):
 
-        params = {'pageToken': None}
+        params = {'pageToken': None,
+                  'filter': 'service="services/6F81-5844-456A"'}
 
+        sku_data_gcp = []
         instance_data_gcp = []
 
         # print("instance type:'", instance_type, "'")
         # print("region: ", region)
 
-        while len(instance_data_gcp) < 2:
+        termina = False
+
+        while len(sku_data_gcp) < 2 and not termina:
 
             if params['pageToken'] is None:
                 r = requests.get(
-                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}')
+                    url=f'https://cloudbilling.googleapis.com/v2beta/skus?key={api_key}&pageSize=5000',
+                    params={'filter': 'service="services/6F81-5844-456A"'})
             else:
                 r = requests.get(
-                    url=f'https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key={api_key}',
+                    url=f'https://cloudbilling.googleapis.com/v2beta/skus?key={api_key}&pageSize=5000',
                     params=params)
 
             all_data_gcp = r.json()
 
-            params['pageToken'] = all_data_gcp['nextPageToken']
+            try:
+                params['pageToken'] = all_data_gcp['nextPageToken']
+            except Exception as e:
+                params['pageToken'] = None
+                termina = True
 
-            aux_list = [x for x in all_data_gcp['skus']
-                        if (f'{instance_type.split("-")[0].upper()} ' in x['description']
-                            and 'Instance' in x['description'])
-                        and 'Preemptible' not in x['description']
-                        and 'Custom' not in x['description']]
+            aux_list_2 = [x for x in all_data_gcp['skus']
+                        if (x['displayName'].startswith(f'{instance_type.split("-")[0].upper()} Instance Core')
+                            or 
+                            x['displayName'].startswith(f'{instance_type.split("-")[0].upper()} Instance Ram'))
+                        ]
 
-            aux_list = [x for x in aux_list if region in x['serviceRegions']]
+            aux_list = []
+
+            for x in aux_list_2:
+                if x['geoTaxonomy']['type'] == 'TYPE_MULTI_REGIONAL':
+                    for reg in x['geoTaxonomy']['multiRegionalMetadata']['regions']:
+                        if region == reg['region']:
+                            aux_list.append(x)
+                            break
+                if (x['geoTaxonomy']['type'] == 'TYPE_REGIONAL' and region in x['geoTaxonomy']['regionalMetadata']['region']):
+                    aux_list.append(x)
 
             for a in aux_list:
-                instance_data_gcp.append(a)
+                sku_data_gcp.append(a)
 
-        if 'Core' in instance_data_gcp[0]['description']:
-            int_price_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
-                                     ['pricingExpression']['tieredRates']
-                                     [0]['unitPrice']['units'])
-            cents_per_vcpu = int(instance_data_gcp[0]['pricingInfo'][0]
-                                 ['pricingExpression']['tieredRates'][0]
-                                 ['unitPrice']['nanos']) / 1000000000
+        # print(json.dumps(sku_data_gcp, indent=2))
+
+        for sku in sku_data_gcp:
+            sku_id = sku["skuId"]
+            r = requests.get(
+                url=f'https://cloudbilling.googleapis.com/v1beta/skus/{sku_id}/price?key={api_key}')
+                
+            sku_data = r.json()
+
+            instance_data_gcp.append(sku_data)
+
+        # print(json.dumps(instance_data_gcp, indent=2))
+
+        if 'Core' in sku_data_gcp[0]['displayName']:
+            try:
+                int_price_per_vcpu = int(instance_data_gcp[0]['rate']['tiers']
+                                         [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_vcpu = 0
+            cents_per_vcpu = int(instance_data_gcp[0]['rate']['tiers']
+                                         [0]['listPrice']['nanos']) / 1000000000
             price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
-            int_price_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
-                                    ['pricingExpression']['tieredRates'][0]
-                                    ['unitPrice']['units'])
-            cents_per_ram = int(instance_data_gcp[1]['pricingInfo'][0]
-                                ['pricingExpression']['tieredRates'][0]
-                                ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_ram = int(instance_data_gcp[1]['rate']['tiers']
+                                         [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_ram = 0
+            cents_per_ram = int(instance_data_gcp[1]['rate']['tiers']
+                                         [0]['listPrice']['nanos']) / 1000000000
             price_per_ram = int_price_per_ram + cents_per_ram
         else:
-            int_price_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
-                                     ['pricingExpression']['tieredRates']
-                                     [0]['unitPrice']['units'])
-            cents_per_vcpu = int(instance_data_gcp[1]['pricingInfo'][0]
-                                 ['pricingExpression']['tieredRates'][0]
-                                 ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_vcpu = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_vcpu = 0
+            cents_per_vcpu = int(instance_data_gcp[1]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_vcpu = int_price_per_vcpu + cents_per_vcpu
-            int_price_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
-                                    ['pricingExpression']['tieredRates'][0]
-                                    ['unitPrice']['units'])
-            cents_per_ram = int(instance_data_gcp[0]['pricingInfo'][0]
-                                ['pricingExpression']['tieredRates'][0]
-                                ['unitPrice']['nanos']) / 1000000000
+            try:
+                int_price_per_ram = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['units'])
+            except Exception as e:
+                int_price_per_ram = 0
+            cents_per_ram = int(instance_data_gcp[0]['rate']['tiers']
+                                            [0]['listPrice']['nanos']) / 1000000000
             price_per_ram = int_price_per_ram + cents_per_ram
 
         # print("price_per_vcpu: ", price_per_vcpu)

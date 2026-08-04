@@ -419,7 +419,7 @@ class ScheduleManager:
         # # logging.info("Entered interruption_handle")
         #
         # # getting volume-id
-        # if self.loader.file_system_conf.type == EC2Manager.EBS:
+        # if self.loader.file_system_conf.type == CloudManager.EBS:
         #     self.ebs_volume_id = self.task_dispatcher.vm.volume_id
         #
         # # logging.info("Got EBS id: {}".format(self.ebs_volume_id))
@@ -914,7 +914,7 @@ class ScheduleManager:
                 terminated_dispatcher.main_thread.join()
 
             # getting volume-id
-            if self.loader.file_system_conf.type == EC2Manager.EBS:
+            if self.loader.file_system_conf.type == CloudManager.EBS:
                 self.ebs_volumes.append(terminated_dispatcher.vm.volume_id)
 
         # if self.extra_vm is not None:

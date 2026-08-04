@@ -8,8 +8,8 @@
                     "us-central1": 0.13402284
                 },
                 "preemptible": {
-                    "us-west1": 0.040206852,
-                    "us-central1": 0.040206852
+                    "us-west1": 0.080424,
+                    "us-central1": 0.080424
                 }
             },
             "restrictions": {

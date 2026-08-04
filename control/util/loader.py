@@ -150,7 +150,7 @@ class Loader:
 
         self.__get_execution_id()
 
-        # self.__update_prices()
+        self.__update_prices()
         self.__update_zones()
 
         self.__update_command(args.strategy, args.num_seed)
