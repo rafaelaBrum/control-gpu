@@ -633,22 +633,40 @@ class VirtualMachine:
                                       target=self.loader.gcp_conf.home_path,
                                       item=self.loader.application_conf.daemon_gcp_file)
 
-                    cmd_daemon = "python3.7 {} " \
-                                 "--vm_user {} " \
-                                 "--root_path {} " \
-                                 "--job_id {} " \
-                                 "--task_id {} " \
-                                 "--execution_id {}  " \
-                                 "--instance_id {} " \
-                                 "--socket_port {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                    if self.loader.application_conf.fl_framework =='flower_old':
+                        cmd_daemon = "python3.7 {} " \
+                                    "--vm_user {} " \
+                                    "--root_path {} " \
+                                    "--job_id {} " \
+                                    "--task_id {} " \
+                                    "--execution_id {}  " \
+                                    "--instance_id {} " \
+                                    "--socket_port {}".format(os.path.join(self.loader.gcp_conf.home_path,
                                                                         self.loader.application_conf.daemon_gcp_file),
-                                                           self.loader.gcp_conf.vm_user,
-                                                           self.loader.file_system_conf.path,
-                                                           self.loader.job.job_id,
-                                                           client_id,
-                                                           self.loader.execution_id,
-                                                           self.instance_id,
-                                                           self.loader.communication_conf.socket_port)
+                                                            self.loader.gcp_conf.vm_user,
+                                                            self.loader.file_system_conf.path,
+                                                            self.loader.job.job_id,
+                                                            client_id,
+                                                            self.loader.execution_id,
+                                                            self.instance_id,
+                                                            self.loader.communication_conf.socket_port)
+                    elif self.loader.application_conf.fl_framework == "flower":
+                        cmd_daemon = "source venv/bin/activate; python {} " \
+                                    "--vm_user {} " \
+                                    "--root_path {} " \
+                                    "--job_id {} " \
+                                    "--task_id {} " \
+                                    "--execution_id {}  " \
+                                    "--instance_id {} " \
+                                    "--socket_port {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                            self.loader.application_conf.daemon_gcp_file),
+                                                            self.loader.gcp_conf.vm_user,
+                                                            self.loader.file_system_conf.path,
+                                                            self.loader.job.job_id,
+                                                            client_id,
+                                                            self.loader.execution_id,
+                                                            self.instance_id,
+                                                            self.loader.communication_conf.socket_port)
                 elif self.instance_type.provider == CloudManager.CLOUDLAB:
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
@@ -702,7 +720,7 @@ class VirtualMachine:
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
-                stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True)
+                stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True, simple_quotes=True)
                 print(stdout)
 
                 self.deploy_overhead = datetime.now() - self.start_deploy

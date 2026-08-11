@@ -130,7 +130,7 @@ class SSHClient:
                 logging.error("<SSH Client>: closing connection error " + str(e))
                 return False
 
-    def execute_command(self, command, output=False):
+    def execute_command(self, command, output=False, simple_quotes=False):
         if self.provider in (CloudManager.EC2, CloudManager.AWS):
             self.ssh_transport = self.client.get_transport()
             self.chan = self.ssh_transport.open_session()
@@ -143,7 +143,7 @@ class SSHClient:
                 sleep(1)
                 return self.get_output()
         elif self.provider in (CloudManager.GCLOUD, CloudManager.GCP):
-            ret = self.manager.execute_command(instance_name=self.instance_name, command=command, zone=self.zone)
+            ret = self.manager.execute_command(instance_name=self.instance_name, command=command, zone=self.zone, simple_quotes=simple_quotes)
             if output:
                 return ret.stdout.decode('utf-8'), ret.stderr.decode('utf-8'), ret.returncode
 

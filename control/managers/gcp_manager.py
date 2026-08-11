@@ -969,13 +969,18 @@ class GCPManager(CloudManager):
 
         return result
 
-    def execute_command(self, instance_name, command, zone=''):
+    def execute_command(self, instance_name, command, zone='', simple_quotes=False):
         if zone == '':
             zone = self.gcp_config.zone
         logging.info(f"<GCPManager> Executing command {command} in instance {instance_name}")
-        # print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
-        return subprocess.run(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\" --quiet", 
-                       shell=True, check=True, capture_output=True)
+        if simple_quotes:
+            # print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\'{command}\'")
+            return subprocess.run(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\'{command}\' --quiet", 
+                                   shell=True, check=True, capture_output=True)
+        else:    
+            # print(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\"")
+            return subprocess.run(f"gcloud compute ssh --zone {zone} --project {self.gcp_config.project} {instance_name} --command=\"{command}\" --quiet", 
+                        shell=True, check=True, capture_output=True)
     
     def send_file(self, instance_name, source, target, zone=''):
         if zone == '':
