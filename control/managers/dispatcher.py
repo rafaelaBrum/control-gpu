@@ -87,21 +87,18 @@ class Executor:
     def __run(self):
         # START task execution
 
-        # logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
+        logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
         self.repo = PostgresRepo()
         # current_time = None
         action = Daemon.START
 
-        # if self.task.has_checkpoint:
-        #     action = Daemon.RESTART
         try:
             # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
             #                                                                     self.vm.instance_id))
-            # if self.type_task == Job.CLIENT:
-            #     logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
-            #                                                          self.vm.instance_id,
-            #                                                          self.dict_info))
+            # logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+            #                                                     self.vm.instance_id,
+            #                                                     self.dict_info))
             self.communicator.send(action=action, value=self.dict_info)
             current_time = datetime.now()
             # logging.info("<Executor {}-{}>: Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
@@ -618,8 +615,6 @@ class Dispatcher:
                 if self.vm.state == CloudManager.RUNNING:
 
                     self.semaphore.acquire()
-                    # # check running tasks
-                    # self.__update_running_executors()
 
                     # logging.info('<Dispatcher {}>: task is running? {}'.format(self.vm.instance_id,
                     #                                                            task.is_running()))
@@ -733,8 +728,6 @@ class Dispatcher:
             if self.vm.state == CloudManager.RUNNING:
 
                 self.semaphore.acquire()
-                # # check running tasks
-                # self.__update_running_executors()
 
                 if not task.is_running():
                     self.executor = Executor(
