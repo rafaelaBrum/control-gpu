@@ -3,14 +3,9 @@ from subprocess import CalledProcessError
 from control.managers.cloud_manager import CloudManager
 from control.managers.virtual_machine import VirtualMachine
 
-# import tarfile
-
 from control.domain.task import Task
 from control.domain.job import Job
 
-# from control.scheduler.queue import Queue
-
-# from control.util.linked_list import LinkedList
 from control.util.event import Event
 from control.util.loader import Loader
 
@@ -20,16 +15,10 @@ from control.daemon.communicator import Communicator
 from control.repository.postgres_repo import PostgresRepo
 from control.repository.postgres_objects import Execution as ExecutionRepo
 from control.repository.postgres_objects import Instance as InstanceRepo
-# from control.repository.postgres_objects import InstanceStatus as InstanceStatusRepo
-# from control.repository.postgres_objects import InstanceStatistic as InstanceStatisticRepo
-# from control.repository.postgres_objects import TaskStatistic as TaskStatisticRepo
 
-# from typing import List
 import threading
 import time
 import logging
-# import os
-# import math
 
 from datetime import datetime
 
@@ -52,7 +41,7 @@ class Executor:
         self.status = Task.WAITING
 
         # socket.communicator
-        # used to send commands to the ec2 instance
+        # used to send commands to the cloud instance
         self.communicator = Communicator(host=self.vm.instance_public_ip,
                                          port=self.loader.communication_conf.socket_port)
 
@@ -61,8 +50,6 @@ class Executor:
         self.stop_signal = False
         # checkpoint tracker
         self.next_checkpoint_datetime = None
-        # # used to start fl execution after clients start
-        # self.start_exec = False
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
         self.thread_executing = False
@@ -84,16 +71,30 @@ class Executor:
             )
         )
 
-        # repo.close_session()
-
     def __run(self):
         # START task execution
 
         logging.info("<Executor {}-{}>: __run function".format(self.task.task_id, self.vm.instance_id))
 
         self.repo = PostgresRepo()
-        # current_time = None
-        action = Daemon.START
+
+        if self.type_task == Job.SERVER and self.loader.application_conf.fl_framework == 'flower':
+            action = Daemon.START
+            
+            try:
+                # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
+                #                                                                     self.vm.instance_id))
+                # logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+                #                                                     self.vm.instance_id,
+                #                                                     self.dict_info))
+                aux_dict_info = self.dict_info
+                aux_dict_info['command_part'] = 0
+                self.communicator.send(action=action, value=aux_dict_info)
+                # logging.info("<Executor {}-{}>: Second Action Daemon.START sent".format(self.task.task_id, self.vm.instance_id))
+            except Exception as e:
+                logging.error(e)
+                self.__stopped(Task.ERROR)
+                return
 
         try:
             # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
@@ -108,25 +109,6 @@ class Executor:
             logging.error(e)
             self.__stopped(Task.ERROR)
             return
-
-        if self.type_task == Job.SERVER and self.loader.application_conf.fl_framework == 'flower':
-            action = Daemon.START
-            
-            try:
-                # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
-                #                                                                     self.vm.instance_id))
-                # logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
-                #                                                     self.vm.instance_id,
-                #                                                     self.dict_info))
-                aux_dict_info = self.dict_info
-                aux_dict_info['command_part'] = 1
-                self.communicator.send(action=action, value=self.dict_info)
-            except Exception as e:
-                logging.error(e)
-                self.__stopped(Task.ERROR)
-                return
-            # self.wait_clients_to_start()
-            # self.start_execution()
 
         # if task was started with success
         # start execution loop
@@ -255,59 +237,10 @@ class Executor:
 
     def __stopped(self, status):
         self.status = status
-    #     # update execution time
-    #
-    #     # if task had Migrated, not to do
-    #     if self.status == Task.MIGRATED:
-    #         self.repo.close_session()
-    #         return
-    #
-        self.status = status
 
         self.update_status_table()
         # close repo
         self.repo.close_session()
-
-        # Check if condition is true to checkpoint the task
-
-    # def __checkpoint_task(self):
-    #
-    #     if self.next_checkpoint_datetime is None:
-    #         # compute next_checkpoint datetime
-    #         self.next_checkpoint_datetime = datetime.now() + timedelta(seconds=self.task.checkpoint_interval)
-    #
-    #     elif datetime.now() > self.next_checkpoint_datetime:
-    #
-    #         self.__checkpoint()
-    #         self.next_checkpoint_datetime = datetime.now() + timedelta(seconds=self.task.checkpoint_interval)
-
-    # def __checkpoint(self, stop_task=False):
-    #
-    #     for i in range(3):
-    #         try:
-    #
-    #             action = Daemon.CHECKPOINT_STOP if stop_task else Daemon.CHECKPOINT
-    #
-    #             logging.info("<Executor {}-{}>: Checkpointing task...".format(self.task.task_id,
-    #                                                                           self.vm.instance_id))
-    #
-    #             start_ckp = datetime.now()
-    #             self.communicator.send(action, value=self.dict_info)
-    #
-    #             if self.communicator.response['status'] == 'success':
-    #                 end_ckp = datetime.now()
-    #
-    #                 logging.info("<Executor {}-{}>: Checkpoint with success. Time: {}".format(self.task.task_id,
-    #                                                                                           self.vm.instance_id,
-    #                                                                                           end_ckp - start_ckp))
-    #                 self.task.has_checkpoint = True
-    #                 self.task.update_task_time()
-    #
-    #             return
-    #         except:
-    #             pass
-    #
-    #     raise Exception("<Executor {}-{}>: Checkpoint error".format(self.task.task_id, self.vm.instance_id))
 
     def __get_task_status(self):
 
@@ -438,6 +371,11 @@ class Executor:
             "cpu": self.vm.instance_type.vcpu,
             "gpu": self.vm.instance_type.count_gpu
         }
+
+        if self.type_task == Job.SERVER:
+            info['command_part'] = 1
+        else:
+            info['command_part'] = 0
 
         return info
 

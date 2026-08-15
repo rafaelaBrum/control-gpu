@@ -29,14 +29,13 @@ class DaemonGCP:
     ERROR = 'error'
     INSTANCE_ACTION = 'instance_action'
 
-    def __init__(self, vm_user, root_path, job_id, task_id, execution_id, instance_id, command_part):
+    def __init__(self, vm_user, root_path, job_id, task_id, execution_id, instance_id):
         self.vm_user = vm_user
 
         self.job_id = job_id
         self.task_id = task_id
         self.execution_id = execution_id
         self.instance_id = instance_id
-        self.command_part = command_part
 
         self.root_path = os.path.join(root_path, "{}_{}_{}".format(self.job_id, self.task_id, self.execution_id))
 
@@ -69,11 +68,12 @@ class DaemonGCP:
         server_ip = value['server_ip']
         cpu = value['cpu']
         gpu = value['gpu']
+        command_part = value['command_part']
         session = ''
 
         if command is not None:
             if isinstance(command, list):
-                command = command[self.command_part]
+                command = command[command_part]
             session = command.split()[0]
 
         session_name = "Session_{}_{}_{}_{}_{}".format(
@@ -111,7 +111,7 @@ class DaemonGCP:
 
                 print("Final command:", command)
 
-                self.__start_command(session_name, command)
+                self.__start_command(session_name, command, command_part)
 
                 status_return = DaemonGCP.SUCCESS
                 value_return = "VM '{}' starts task with success".format(vm_name)
@@ -124,7 +124,7 @@ class DaemonGCP:
         elif action == DaemonGCP.STATUS:
             try:
 
-                value_return = self.__get_command_status(session_name, server_ip)
+                value_return = self.__get_command_status(session_name, server_ip, command_part)
                 status_return = DaemonGCP.SUCCESS
             except Exception as e:
                 logging.error(e)
@@ -193,7 +193,7 @@ class DaemonGCP:
     #         "cpu": cpu_usage
     #     }
 
-    def __get_command_status(self, session_name, server_ip):
+    def __get_command_status(self, session_name, server_ip, command_part):
 
         # check if our screen session is still running
         cmd = f"screen -list | grep {session_name}"
@@ -213,7 +213,7 @@ class DaemonGCP:
             else:
                 # job task
                 search_string = 'Disconnect and shut down'
-            cmd = f"cat {self.root_path}/screen_task_log_{self.command_part} | grep '{search_string}'"
+            cmd = f"cat {self.root_path}/screen_task_log_{command_part} | grep '{search_string}'"
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
 
@@ -223,12 +223,6 @@ class DaemonGCP:
                 status = 'finished'
             else:
                 status = 'not running'
-            # CUDAlign task
-            # path = os.path.join(self.root_path, "alignment.00.txt")
-            # if Path(path).is_file():
-            #     status = 'finished'
-            # else:
-            #     status = 'not running'
 
         current_stage = 0
 
@@ -259,29 +253,21 @@ class DaemonGCP:
 
         return {"msg": msg, "duration": str(operation_time)}
 
-    def __start_command(self, session_name, command):
+    def __start_command(self, session_name, command, command_part):
         # start application without checkpoint
 
         # Get PATH and LD_LIBRARY_PATH environment variables
         path = os.getenv('PATH')
-        # ld_library_path = os.getenv('LD_LIBRARY_PATH')
-        #
-        # if ld_library_path is None:
-        #     ld_library_path = '/usr/local/cuda-10.0/lib64'
-        # else:
-        #     ld_library_path = ld_library_path + ":/usr/local/cuda-10.0/lib64"
 
         path = path + ":/home/sa_109649273287045369425/.local/bin"
 
         # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
         os.environ['PATH'] = path
-        # os.environ['LD_LIBRARY_PATH'] = ld_library_path
 
-        # logging.info("PATH env: {} - LD_LIBRARY_PATH: {}".format(os.getenv('PATH'), os.getenv('LD_LIBRARY_PATH')))
         logging.info("PATH env: {}".format(os.getenv('PATH')))
 
-        cmd = "screen -L -Logfile {}/screen_task_log -S {} -dm bash -c {}".format(
-            self.root_path, session_name, command
+        cmd = "screen -L -Logfile {}/screen_task_log_{} -S {} -dm bash -c {}".format(
+            self.root_path, command_part, session_name, command
         )
 
         logging.info(cmd)
@@ -319,8 +305,7 @@ class MyWebService(object):
             job_id=args.job_id,
             task_id=args.task_id,
             execution_id=args.execution_id,
-            instance_id=args.instance_id,
-            command_part=args.command_part
+            instance_id=args.instance_id
         )
 
     @cherrypy.expose
@@ -344,8 +329,6 @@ def main():
 
     parser.add_argument('--vm_user', type=str, required=True)
     parser.add_argument('--socket_port', type=str, required=True)
-
-    parser.add_argument('--command_part', type=int, required=False, default=0)
 
     args = parser.parse_args()
 
