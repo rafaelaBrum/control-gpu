@@ -72,10 +72,9 @@ class DaemonGCP:
         session = ''
 
         if command is not None:
-            if self.task_id == -1:
-                session = command[self.command_part].split()[0]
-            else:
-                session = command.split()[0]
+            if isinstance(command, list):
+                command = command[self.command_part]
+            session = command.split()[0]
 
         session_name = "Session_{}_{}_{}_{}_{}".format(
             session,
@@ -214,7 +213,7 @@ class DaemonGCP:
             else:
                 # job task
                 search_string = 'Disconnect and shut down'
-            cmd = f"cat {self.root_path}/screen_task_log | grep '{search_string}'"
+            cmd = f"cat {self.root_path}/screen_task_log_{self.command_part} | grep '{search_string}'"
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
 
@@ -272,7 +271,7 @@ class DaemonGCP:
         # else:
         #     ld_library_path = ld_library_path + ":/usr/local/cuda-10.0/lib64"
 
-        path = path + ":/home/rafinhacbrum_gmail_com/.local/bin"
+        path = path + ":/home/sa_109649273287045369425/.local/bin"
 
         # Set PATH and LD_LIBRARY_PATH environment variables to see cudalign
         os.environ['PATH'] = path
@@ -321,7 +320,7 @@ class MyWebService(object):
             task_id=args.task_id,
             execution_id=args.execution_id,
             instance_id=args.instance_id,
-            coomand_part=args.command_part
+            command_part=args.command_part
         )
 
     @cherrypy.expose

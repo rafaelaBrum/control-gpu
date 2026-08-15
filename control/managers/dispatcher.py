@@ -61,6 +61,8 @@ class Executor:
         self.stop_signal = False
         # checkpoint tracker
         self.next_checkpoint_datetime = None
+        # # used to start fl execution after clients start
+        # self.start_exec = False
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
         self.thread_executing = False
@@ -106,6 +108,25 @@ class Executor:
             logging.error(e)
             self.__stopped(Task.ERROR)
             return
+
+        if self.type_task == Job.SERVER and self.loader.application_conf.fl_framework == 'flower':
+            action = Daemon.START
+            
+            try:
+                # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
+                #                                                                     self.vm.instance_id))
+                # logging.info("<Executor {}-{}>: dict_info {}".format(self.task.task_id,
+                #                                                     self.vm.instance_id,
+                #                                                     self.dict_info))
+                aux_dict_info = self.dict_info
+                aux_dict_info['command_part'] = 1
+                self.communicator.send(action=action, value=self.dict_info)
+            except Exception as e:
+                logging.error(e)
+                self.__stopped(Task.ERROR)
+                return
+            # self.wait_clients_to_start()
+            # self.start_execution()
 
         # if task was started with success
         # start execution loop
