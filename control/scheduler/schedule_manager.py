@@ -671,8 +671,7 @@ class ScheduleManager:
                     self.server_task_dispatcher.start_execution = True
                     time.sleep(20)
 
-                    server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:" \
-                                f"{self.loader.application_conf.fl_port}"
+                    server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}"
                     print("new server_ip:", server_ip)
                     for i in range(self.loader.job.num_clients):
                         self.loader.job.client_tasks[i].server_ip = server_ip
@@ -838,7 +837,7 @@ class ScheduleManager:
             time.sleep(1)
             # print("Testing vm.ready: ", self.server_task_dispatcher.vm.ready)
         if not self.server_task_dispatcher.vm.failed_to_created:
-            server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}:{self.loader.application_conf.fl_port}"
+            server_ip = f"{self.server_task_dispatcher.vm.instance_public_ip}"
             print("server_ip:", server_ip)
             for i in range(self.loader.job.num_clients):
                 self.loader.job.client_tasks[i].server_ip = server_ip

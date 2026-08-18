@@ -78,8 +78,9 @@ class Executor:
 
         self.repo = PostgresRepo()
 
+        action = Daemon.START
+
         if self.type_task == Job.SERVER and self.loader.application_conf.fl_framework == 'flower':
-            action = Daemon.START
             
             try:
                 # logging.info("<Executor {}-{}>: Sending action Daemon.START".format(self.task.task_id,
@@ -460,7 +461,8 @@ class Dispatcher:
                 communicator = Communicator(host=self.vm.instance_public_ip,
                                             port=self.loader.communication_conf.socket_port)
                 communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None,
-                                                             'server_ip': None, 'cpu': None, 'gpu': None})
+                                                             'server_ip': None, 'cpu': None, 
+                                                             'gpu': None, 'command_part': None})
 
                 if communicator.response['status'] == 'success':
                     return True

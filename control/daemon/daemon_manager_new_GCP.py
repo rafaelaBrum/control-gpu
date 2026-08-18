@@ -29,13 +29,15 @@ class DaemonGCP:
     ERROR = 'error'
     INSTANCE_ACTION = 'instance_action'
 
-    def __init__(self, vm_user, root_path, job_id, task_id, execution_id, instance_id):
+    def __init__(self, vm_user, root_path, job_id, task_id, execution_id, instance_id, num_rounds):
         self.vm_user = vm_user
 
         self.job_id = job_id
         self.task_id = task_id
         self.execution_id = execution_id
         self.instance_id = instance_id
+
+        self.num_rounds = num_rounds
 
         self.root_path = os.path.join(root_path, "{}_{}_{}".format(self.job_id, self.task_id, self.execution_id))
 
@@ -90,9 +92,6 @@ class DaemonGCP:
             self.execution_id,
             task_id
         )
-        # task_path = os.path.join(self.root_path, "{}/".format(task_id))
-        # data_path = os.path.join(self.root_path, "{}/data/".format(task_id))
-        # backup_path = os.path.join(self.root_path, "{}/backup/".format(task_id))
 
         logging.info("VM {}: Action {}".format(vm_name, action))
 
@@ -100,14 +99,11 @@ class DaemonGCP:
 
         if action == DaemonGCP.START:
 
-            if self.task_id != -1:
-                command = command + f' -cpu {cpu} -gpu {gpu}'
-
             # Starting job
             try:
 
                 if "client" in command:
-                    command = command.replace("-epochs", f" -server_address {server_ip} -epochs")
+                    command = command.replace("IP_SERVER", f"{server_ip}")
 
                 print("Final command:", command)
 
@@ -151,16 +147,6 @@ class DaemonGCP:
                 value_return = "Error stop command {} in VM {} status".format(command, vm_name)
                 status_return = DaemonGCP.ERROR
 
-        # elif action == DaemonGCP.INSTANCE_USAGE:
-        #     try:
-        #
-        #         value_return = self.__get_instance_usage()
-        #         status_return = DaemonGCP.SUCCESS
-        #     except Exception as e:
-        #         logging.error(e)
-        #         value_return = "Error to get instance {} usage".format(self.instance_id)
-        #         status_return = DaemonGCP.ERROR
-
         elif action == DaemonGCP.TEST:
             value_return = "Hello world"
             status_return = DaemonGCP.SUCCESS
@@ -174,53 +160,55 @@ class DaemonGCP:
 
         return {"status": status_return, "value": value_return, "duration": str(duration)}
 
-    # def __get_instance_status(self, command):
-    #     # check container status
-    #     cmd_cpu = "top -b -n 10 -d.2 | grep 'Cpu'|  awk 'NR==3{ print($2)}'"
-    #     cmd_memory = "top -b -n 10 -d.2 | grep 'Mem' |  awk 'NR==3{ print($4)}'"
-    #
-    #     ps = subprocess.Popen(cmd_cpu, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #     out1 = ps.communicate()[0]
-    #
-    #     ps = subprocess.Popen(cmd_memory, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #     out2, err = ps.communicate()[0]
-    #
-    #     cpu_usage = out1
-    #     memory_usage = out2
-    #
-    #     return {
-    #         "memory": memory_usage,
-    #         "cpu": cpu_usage
-    #     }
-
     def __get_command_status(self, session_name, server_ip, command_part):
 
         # check if our screen session is still running
         cmd = f"screen -list | grep {session_name}"
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        out, err = process.communicate()
+        out_session, err = process.communicate()
 
-        test = str.encode(session_name)
+        test_session = str.encode(session_name)
 
-        # if cmd command return 0 it means that the screen session is still running
-        if test in out:
-            status = 'running'
-        else:
-            if server_ip is None:
-                # server task
-                search_string = 'FL finished'
+        if server_ip is None:
+            #server task
+            if test_session in out_session:
+                status = 'running'
             else:
-                # job task
-                search_string = 'Disconnect and shut down'
+                search_string = 'Strategy execution finished'
+                cmd = f"cat {self.root_path}/screen_task_log_{command_part} | grep '{search_string}'"
+                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+                out, err = process.communicate()
+
+                test = str.encode(search_string)
+
+                if test in out:
+                    status = 'finished'
+                else:
+                    status = 'not running'
+        else:
+            #client task
+            search_string = 'Sent successfully'
             cmd = f"cat {self.root_path}/screen_task_log_{command_part} | grep '{search_string}'"
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
 
-            test = str.encode(search_string)
+            print(out.decode('utf-8'))
 
-            if test in out:
+            out = out.decode('utf-8')
+
+            rounds = 0
+
+            if search_string in out:
+                print(out.split('\n'))
+                rounds = len(out.split('\n')) - 1
+
+                print("Rounds = ", rounds)
+
+            if rounds == (2 * self.num_rounds):
                 status = 'finished'
+            elif test_session in out_session:
+                status = 'running'
             else:
                 status = 'not running'
 
@@ -305,7 +293,8 @@ class MyWebService(object):
             job_id=args.job_id,
             task_id=args.task_id,
             execution_id=args.execution_id,
-            instance_id=args.instance_id
+            instance_id=args.instance_id,
+            num_rounds=args.num_rounds
         )
 
     @cherrypy.expose
@@ -329,6 +318,8 @@ def main():
 
     parser.add_argument('--vm_user', type=str, required=True)
     parser.add_argument('--socket_port', type=str, required=True)
+
+    parser.add_argument('--num_rounds', type=int, required=True)
 
     args = parser.parse_args()
 
