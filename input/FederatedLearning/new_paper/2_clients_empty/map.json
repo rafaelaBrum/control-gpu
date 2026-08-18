@@ -1,0 +1,24 @@
+{
+    "clients": {
+        "0": {
+            "instance_type": "e2-standard-4",
+            "provider": "GCP",
+            "region": "us-central1"
+        },
+        "1": {
+            "instance_type": "e2-standard-4",
+            "provider": "GCP",
+            "region": "us-west1"
+        }
+    },
+    "cost": 8.97599711350572e-05,
+    "makespan": 0.8036836509513502,
+    "max_cost": 9.159664044581899e-05,
+    "max_total_exec": 0.8201286328135025,
+    "obj_value": 0.9799482895680196,
+    "server": {
+        "instance_type": "e2-standard-4",
+        "provider": "GCP",
+        "region": "us-central1"
+    }
+}

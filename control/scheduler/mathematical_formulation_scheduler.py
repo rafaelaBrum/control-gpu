@@ -19,8 +19,8 @@ class MathematicalFormulationScheduler(Scheduler):
 
         for client in self.clients:
             for prov, region, vm in self.prov_regions_vms:
-                if not self.emulated and self.gpu_vms[prov, region, vm] == 0:
-                    continue
+                # if not self.emulated and self.gpu_vms[prov, region, vm] == 0:
+                #     continue
                 aux = (client, prov, region, vm)
                 # print(aux)
                 try:
@@ -45,7 +45,10 @@ class MathematicalFormulationScheduler(Scheduler):
         for client in loader.job.client_tasks.values():
             aux = client.client_id
             self.clients.append(aux)
-            self.location_ds_clients[aux] = client.bucket_provider.upper() + "_" + client.bucket_region
+            try:
+                self.location_ds_clients[aux] = client.bucket_provider.upper() + "_" + client.bucket_region
+            except Exception:
+                self.location_ds_clients[aux] = 'none'
         self.clients = gp.tuplelist(self.clients)
 
         # self.baseline_exec = baseline_exec
