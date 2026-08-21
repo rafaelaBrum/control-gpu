@@ -143,8 +143,8 @@ class GCPManager(CloudManager):
             if not disk.last_attach_timestamp:
                 ready = True
             elif disk.last_detach_timestamp:
-                last_attach_time = iso8601.parse_date(disk['lastAttachTimestamp'])
-                last_detach_time = iso8601.parse_date(disk['lastDetachTimestamp'])
+                last_attach_time = iso8601.parse_date(disk.last_attach_timestamp)
+                last_detach_time = iso8601.parse_date(disk.last_detach_timestamp)
                 ready = last_detach_time > last_attach_time
             if not ready:
                 disk = self.__get_disk(volume_name, zone=zone)

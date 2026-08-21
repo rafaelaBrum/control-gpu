@@ -408,60 +408,6 @@ class ScheduleManager:
         elif affected_client_id in self.loader.job.client_tasks:
             self.loader.job.client_tasks[affected_client_id].finish_execution()
 
-    def __interruption_handle(self):
-        pass
-        # # Move task to other VM
-        # # self.semaphore.acquire()
-        #
-        # if not self.loader.cudalign_task.has_task_finished():
-        #     self.loader.cudalign_task.stop_execution()
-        #
-        # # logging.info("Entered interruption_handle")
-        #
-        # # getting volume-id
-        # if self.loader.file_system_conf.type == CloudManager.EBS:
-        #     self.ebs_volume_id = self.task_dispatcher.vm.volume_id
-        #
-        # # logging.info("Got EBS id: {}".format(self.ebs_volume_id))
-        #
-        # # See in which VM we will restart
-        # current_time = self.start_timestamp - datetime.now()
-        #
-        # instance_type, market = self.scheduler.choose_restart_best_instance_type(
-        #     cudalign_task=self.loader.cudalign_task,
-        #     deadline=self.loader.deadline_seconds,
-        #     current_time=current_time.total_seconds()
-        # )
-        #
-        # # logging.info("Chose instance {} of type {}".format(instance_type.type, market))
-        #
-        # if self.loader.cudalign_task.has_task_finished():
-        #     new_vm = VirtualMachine(
-        #         instance_type=instance_type,
-        #         market=market,
-        #         loader=self.loader,
-        #         volume_id=self.ebs_volume_id
-        #     )
-        #
-        #     # logging.info("Created new VM!")
-        #
-        #     dispatcher = Dispatcher(vm=new_vm, loader=self.loader)
-        #
-        #     # check if the VM need to be registered on the simulator
-        #     if self.loader.simulation_conf.with_simulation and new_vm.market == CloudManager.PREEMPTIBLE:
-        #         self.simulator.register_vm(new_vm)
-        #
-        #     # self.semaphore.acquire()
-        #
-        #     self.terminated_dispatchers.append(self.task_dispatcher)
-        #     self.task_dispatcher = dispatcher
-        #
-        #     # self.semaphore.release()
-        #
-        #     self.__start_dispatcher()
-        #
-        # # self.semaphore.release()
-
     def __terminated_handle(self, affected_dispatcher: Dispatcher, terminate_vm):
         # Move task to other VM
         # # self.semaphore.acquire()
@@ -778,18 +724,6 @@ class ScheduleManager:
                                                                                        self.loader.execution_id))
                 self.__idle_handle(affected_dispatcher, type_affected_task, affected_client_id)
 
-            # self.client_tasks_status[i] = Task.FINISHED
-        # elif event.value == CloudManager.STOPPED:
-        #     # self.semaphore_count.acquire()
-        #     self.n_interruptions += 1
-        #     # self.semaphore_count.release()
-        #
-        #     self.task_dispatcher.vm.terminate(delete_volume=self.loader.file_system_conf.ebs_delete)
-        #
-        #     logging.info("<Scheduler Manager {}_{}>: - Calling Interruption Handle"
-        #                  .format(self.loader.cudalign_task.task_id, self.loader.execution_id))
-        #     # self.__interruption_handle()
-        #
         elif event.value in [CloudManager.TERMINATED, CloudManager.ERROR, CloudManager.STOPPING]:
             logging.info("<Scheduler Manager {}_{}>: - Calling Terminate Handle"
                          .format(self.loader.job.job_id, self.loader.execution_id))

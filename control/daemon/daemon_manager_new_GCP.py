@@ -105,6 +105,10 @@ class DaemonGCP:
                 if "client" in command:
                     command = command.replace("IP_SERVER", f"{server_ip}")
 
+                if "flwr run" in command:
+                    command = command.replace("--stream", f"--stream --run-config  \"num-server-rounds={self.num_rounds}\"")
+                    
+
                 print("Final command:", command)
 
                 self.__start_command(session_name, command, command_part)

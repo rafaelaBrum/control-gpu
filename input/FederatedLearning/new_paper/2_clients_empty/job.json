@@ -15,7 +15,7 @@
             },
             "generic_checkpoint": "False",
             "zip_file": "empty_server_files.zip",
-            "n_rounds": 3,
+            "n_rounds": 10,
             "n_clients": 2,
             "comm_baseline": 0.1
         },
