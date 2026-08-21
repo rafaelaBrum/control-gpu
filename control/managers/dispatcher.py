@@ -138,10 +138,10 @@ class Executor:
                         # logging.info(
                         #     "<Executor {}-{}>: Trying to get task status".format(self.task.task_id,
                         #                                                          self.vm.instance_id))
-                        command_status, current_stage = self.__get_task_status()
+                        command_status, current_stage, rounds = self.__get_task_status()
                         # logging.info(
-                        #     "<Executor {}-{}>: Command status {}".format(self.task.task_id, self.vm.instance_id,
-                        #                                                  command_status))
+                        #     "<Executor {}-{}>: Command status {} - rounds {}".format(self.task.task_id, self.vm.instance_id,
+                        #                                                              command_status, rounds))
 
                         instance_action = None
                         if self.vm.market == CloudManager.PREEMPTIBLE:
@@ -162,8 +162,10 @@ class Executor:
                         self.__stopped(Task.ERROR)
                         return
 
+                    self.task.update_rounds(rounds)
+
                     # check task status
-                    if command_status is not None and command_status == 'finished':
+                    if command_status is not None and ((command_status == 'finished') or (command_status == 'running' and self.task.has_task_finished())):
 
                         self.status = status = Task.FINISHED
 
@@ -201,29 +203,11 @@ class Executor:
                 return
 
             if self.status != Task.FINISHED:
+                self.__stop()
                 self.task.stop_execution()
 
-        # if kill signal than checkpoint task (SIMULATION)
-        # if self.stop_signal:
-        #     # check is task is running
-        #     try:
-        #         command_status, current_stage = self.__get_task_status()
-        #         if command_status is not None and command_status == 'running':
-        #             self.__stop()  # Checkpoint and stop task
-        #             # self.__stopped(Task.HIBERNATED)
-        #         # else:
-        #             # self.__stopped(Task.FINISHED)
-        #
-        #     except Exception as e:
-        #         logging.error(e)
-        #         # self.__stopped(Task.STOP_SIGNAL)
-        #
-        #     return
-
-        # self.__stopped(Task.ERROR)
-
     def __stop(self):
-        # START task execution
+        # STOP task execution
 
         self.repo = PostgresRepo()
 
@@ -256,8 +240,12 @@ class Executor:
 
                 command_status = result['value']['status']
                 current_stage = result['value']['current_stage']
+                try:
+                    rounds = result['value']['rounds']
+                except Exception:
+                    rounds = 0
 
-                return command_status, current_stage
+                return command_status, current_stage, rounds
             except Exception:
                 logging.error("<Executor {}-{}>: Get task Status {}/3".format(self.task.task_id,
                                                                               self.vm.instance_id,

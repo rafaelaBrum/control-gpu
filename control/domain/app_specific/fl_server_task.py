@@ -16,10 +16,16 @@ class FLServerTask(Task):
         self.running = False
         self.finished = False
 
+        self.current_round = 0
+        self.vm_changed = False
+        self.last_vm_rounds = 0
+
     def is_running(self):
         return self.running
 
     def start_execution(self, instance_type):
+        if self.running_instance != "":
+            self.change_exec_vm()
         self.running_instance = instance_type
         self.running = True
 
@@ -62,3 +68,13 @@ class FLServerTask(Task):
             screen += "{}: {} s\n".format(key, value)
 
         return screen
+
+    def change_exec_vm(self):
+        self.vm_changed = True
+        self.last_vm_rounds = self.current_round
+
+    def update_rounds(self, rounds):
+        if self.vm_changed:
+            self.current_round = self.last_vm_rounds + rounds
+        else:
+            self.current_round = rounds

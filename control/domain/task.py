@@ -52,27 +52,6 @@ class Task:
         self.checkpoint_interval = 0.0
         self.checkpoint_dump = 0.0
         self.checkpoint_overhead = 0.0
-        # # get max_runtime of the tasks
-        # max_runtime = max([time for time in self.runtime.values()])
-        #
-        # # get checkpoint factor define by the user
-        # self.checkpoint_factor = self.checkpoint_config.overhead_factor
-        # # computing checkpoint overhead
-        # self.checkpoint_overhead = self.checkpoint_factor * max_runtime
-        #
-        # # computing checkpoint dump_time
-        # self.checkpoint_dump = 12.99493 + 0.04 * self.memory
-        #
-        # # define checkpoint number
-        # self.checkpoint_number = int(math.floor(self.checkpoint_overhead / self.checkpoint_dump))
-        #
-        # # check if checkpoint number is != 0
-        # if self.checkpoint_number > 0:
-        #     # define checkpoint interval
-        #     self.checkpoint_interval = math.floor(max_runtime / self.checkpoint_number)
-        # else:
-        #     # since there is no checkpoint to take (checkpoint_number = 0) the overhead is set to zero
-        #     self.checkpoint_overhead = 0.0
 
     @classmethod
     def from_dict(cls, a_dict):
@@ -82,8 +61,6 @@ class Task:
             cls(
                 task_id=int(task_id),
                 task_name=a_dict['tasks'][task_id]['task_name'],
-                # memory=a_dict['tasks'][task_id]['memory'],
-                # io=a_dict['tasks'][task_id]['io'],
                 command=a_dict['tasks'][task_id]['command'],
                 runtime=a_dict['tasks'][task_id]['runtime'],
                 generic_checkpoint=a_dict['tasks'][task_id]['generic_checkpoint']
@@ -124,4 +101,7 @@ class Task:
         pass
 
     def update_execution_time(self, time_executed):
+        pass
+
+    def update_rounds(self, rounds):
         pass

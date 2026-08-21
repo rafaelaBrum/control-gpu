@@ -717,7 +717,7 @@ class VirtualMachine:
                 # Start Daemon
                 logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-                cmd_screen = 'screen -L -Logfile $HOME/screen_log -dm bash -c "{}"'.format(cmd_daemon)
+                cmd_screen = 'screen -L -Logfile $HOME/{}screen_log -dm bash -c "{}"'.format(self.loader.file_system_conf.path, cmd_daemon)
                 # cmd_screen = '{}'.format(cmd_daemon)
 
                 logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
@@ -1136,7 +1136,7 @@ class VirtualMachine:
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-            cmd_screen = 'screen -L -Logfile $HOME/screen_log_FT -dm bash -c "{}"'.format(cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/{}screen_log_FT -dm bash -c "{}"'.format(self.loader.file_system_conf.path, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))

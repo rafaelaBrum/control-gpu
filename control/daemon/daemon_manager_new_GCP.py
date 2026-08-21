@@ -144,7 +144,7 @@ class DaemonGCP:
         elif action == DaemonGCP.STOP:
 
             try:
-                value_return = self.___stop_command(session_name, command, server_ip)
+                value_return = self.___stop_command(session_name, command, server_ip, command_part)
                 status_return = DaemonGCP.SUCCESS
             except Exception as e:
                 logging.error(e)
@@ -190,6 +190,22 @@ class DaemonGCP:
                     status = 'finished'
                 else:
                     status = 'not running'
+            
+            search_string = '\\[ROUND'
+            cmd = f"cat {self.root_path}/screen_task_log_{command_part} | grep '{search_string}'"
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            out, err = process.communicate()
+
+            print(out.decode('utf-8'))
+
+            out = out.decode('utf-8')
+
+            rounds = 0
+            
+            print(out.split('\n'))
+            rounds = len(out.split('\n')) - 1
+
+            print("Rounds = ", rounds)
         else:
             #client task
             search_string = 'Sent successfully'
@@ -218,13 +234,13 @@ class DaemonGCP:
 
         current_stage = 0
 
-        return {"status": status, "current_stage": current_stage}
+        return {"status": status, "current_stage": current_stage, "rounds": rounds}
 
-    def ___stop_command(self, session_name, command, server_ip):
+    def ___stop_command(self, session_name, command, server_ip, command_part):
 
         operation_time = timedelta(seconds=0.0)
 
-        values = self.__get_command_status(session_name, server_ip)
+        values = self.__get_command_status(session_name, server_ip, command_part)
 
         if values['status'] == 'running':
 
