@@ -1,3 +1,5 @@
+from math import inf
+
 from control.config.checkpoint_config import CheckPointConfig
 
 from typing import Dict
@@ -94,7 +96,7 @@ class Task:
     def finish_execution(self):
         pass
 
-    def has_task_finished(self):
+    def has_task_finished(self, total_rounds=inf):
         pass
 
     def get_running_instance(self):
@@ -104,4 +106,7 @@ class Task:
         pass
 
     def update_rounds(self, rounds):
+        pass
+
+    def get_current_round(self):
         pass

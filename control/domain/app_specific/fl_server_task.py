@@ -1,3 +1,5 @@
+from math import inf
+
 from control.domain.task import Task
 
 
@@ -17,7 +19,6 @@ class FLServerTask(Task):
         self.finished = False
 
         self.current_round = 0
-        self.vm_changed = False
         self.last_vm_rounds = 0
 
     def is_running(self):
@@ -36,8 +37,8 @@ class FLServerTask(Task):
         self.finished = True
         self.running = False
 
-    def has_task_finished(self):
-        return self.finished is True
+    def has_task_finished(self, total_rounds=inf):
+        return (self.finished or self.current_round == 2*total_rounds)
 
     def get_running_instance(self):
         return self.running_instance
@@ -70,11 +71,10 @@ class FLServerTask(Task):
         return screen
 
     def change_exec_vm(self):
-        self.vm_changed = True
         self.last_vm_rounds = self.current_round
 
     def update_rounds(self, rounds):
-        if self.vm_changed:
-            self.current_round = self.last_vm_rounds + rounds
-        else:
-            self.current_round = rounds
+        self.current_round = self.last_vm_rounds + rounds
+
+    def get_current_round(self):
+        return self.current_round

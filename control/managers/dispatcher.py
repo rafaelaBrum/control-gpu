@@ -163,9 +163,12 @@ class Executor:
                         return
 
                     self.task.update_rounds(rounds)
+                    # logging.info(
+                    #     "<Executor {}-{}>: Task rounds {}".format(self.task.task_id, self.vm.instance_id, 
+                    #                                               self.task.get_current_round()))
 
                     # check task status
-                    if command_status is not None and ((command_status == 'finished') or (command_status == 'running' and self.task.has_task_finished())):
+                    if command_status is not None and ((command_status == 'finished') or (command_status == 'running' and self.task.has_task_finished(total_rounds=self.loader.job.server_task.n_rounds))):
 
                         self.status = status = Task.FINISHED
 
@@ -215,6 +218,11 @@ class Executor:
 
         try:
             self.communicator.send(action=action, value=self.dict_info)
+            result = self.communicator.response
+            self.task.update_rounds(result['value']['rounds'])
+            # logging.info(
+            #     "<Executor {}-{}>: Task rounds {}".format(self.task.task_id, self.vm.instance_id, 
+            #                                                 self.task.get_current_round()))
         except Exception as e:
             logging.error(e)
             self.__stopped(Task.ERROR)

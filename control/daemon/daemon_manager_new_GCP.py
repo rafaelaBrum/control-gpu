@@ -254,12 +254,15 @@ class DaemonGCP:
 
             operation_time = end_time - start_time
 
+            while values['status'] == 'running':
+                values = self.__get_command_status(session_name, server_ip, command_part)
+
             msg = "Screen session {} that was running command '{}' stopped".format(session_name, command)
 
         else:
             msg = "Screen session {} with command '{}' is not running".format(session_name, command)
 
-        return {"msg": msg, "duration": str(operation_time)}
+        return {"msg": msg, "duration": str(operation_time), "rounds":values["rounds"]}
 
     def __start_command(self, session_name, command, command_part):
         # start application without checkpoint
