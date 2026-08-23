@@ -759,13 +759,14 @@ class Dispatcher:
             self.loader.job.server_task.n_rounds = self.loader.job.server_task.n_rounds - rounds_done
             logging.info('<Dispatcher {}>: Updating num rounds to {}'.format(self.vm.instance_id,
                                                                              self.loader.job.server_task.n_rounds))
-            aux_split = self.loader.job.server_task.command.split(' --rounds ')
-            space_split = aux_split[-1].split(" ")
-            aux_split[-1] = " ".join(space_split[1:])
-            final_command = aux_split[0] + f" --rounds {self.loader.job.server_task.n_rounds} " + aux_split[-1]
-            if ckpt_restore:
-                final_command = final_command + " --ckpt_restore "
-            print("final_command", final_command)
-            self.loader.job.server_task.command = final_command
-            if self.executor is not None:
-                self.executor.task.command = final_command
+            if self.loader.application_conf.fl_framework == "flower_old":
+                aux_split = self.loader.job.server_task.command.split(' --rounds ')
+                space_split = aux_split[-1].split(" ")
+                aux_split[-1] = " ".join(space_split[1:])
+                final_command = aux_split[0] + f" --rounds {self.loader.job.server_task.n_rounds} " + aux_split[-1]
+                if ckpt_restore:
+                    final_command = final_command + " --ckpt_restore "
+                print("final_command", final_command)
+                self.loader.job.server_task.command = final_command
+                if self.executor is not None:
+                    self.executor.task.command = final_command

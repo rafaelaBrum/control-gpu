@@ -21,6 +21,8 @@ class FLServerTask(Task):
         self.current_round = 0
         self.last_vm_rounds = 0
 
+        self.total_rounds = self.n_rounds
+
     def is_running(self):
         return self.running
 

@@ -651,24 +651,44 @@ class VirtualMachine:
                                                             self.instance_id,
                                                             self.loader.communication_conf.socket_port)
                     elif self.loader.application_conf.fl_framework == "flower":
-                        cmd_daemon = "source venv/bin/activate; python {} " \
-                                    "--vm_user {} " \
-                                    "--root_path {} " \
-                                    "--job_id {} " \
-                                    "--task_id {} " \
-                                    "--execution_id {}  " \
-                                    "--instance_id {} " \
-                                    "--socket_port {} " \
-                                    "--num_rounds {}".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                            self.loader.application_conf.daemon_gcp_file),
-                                                            self.loader.gcp_conf.vm_user,
-                                                            self.loader.file_system_conf.path,
-                                                            self.loader.job.job_id,
-                                                            client_id,
-                                                            self.loader.execution_id,
-                                                            self.instance_id,
-                                                            self.loader.communication_conf.socket_port,
-                                                            self.loader.job.server_task.n_rounds)
+                        if type_task == Job.SERVER:
+                            cmd_daemon = "source venv/bin/activate; python {} " \
+                                        "--vm_user {} " \
+                                        "--root_path {} " \
+                                        "--job_id {} " \
+                                        "--task_id {} " \
+                                        "--execution_id {}  " \
+                                        "--instance_id {} " \
+                                        "--socket_port {} " \
+                                        "--num_rounds {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                                self.loader.application_conf.daemon_gcp_file),
+                                                                self.loader.gcp_conf.vm_user,
+                                                                self.loader.file_system_conf.path,
+                                                                self.loader.job.job_id,
+                                                                client_id,
+                                                                self.loader.execution_id,
+                                                                self.instance_id,
+                                                                self.loader.communication_conf.socket_port,
+                                                                self.loader.job.server_task.n_rounds)
+                        elif type_task == Job.CLIENT:
+                            cmd_daemon = "source venv/bin/activate; python {} " \
+                                        "--vm_user {} " \
+                                        "--root_path {} " \
+                                        "--job_id {} " \
+                                        "--task_id {} " \
+                                        "--execution_id {}  " \
+                                        "--instance_id {} " \
+                                        "--socket_port {} " \
+                                        "--num_rounds {}".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                                self.loader.application_conf.daemon_gcp_file),
+                                                                self.loader.gcp_conf.vm_user,
+                                                                self.loader.file_system_conf.path,
+                                                                self.loader.job.job_id,
+                                                                client_id,
+                                                                self.loader.execution_id,
+                                                                self.instance_id,
+                                                                self.loader.communication_conf.socket_port,
+                                                                self.loader.job.server_task.total_rounds)
                 elif self.instance_type.provider == CloudManager.CLOUDLAB:
 
                     self.ssh.put_file(source=self.loader.application_conf.daemon_path,
