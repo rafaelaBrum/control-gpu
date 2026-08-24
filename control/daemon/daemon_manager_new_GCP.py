@@ -212,15 +212,11 @@ class DaemonGCP:
             cmd = f"cat {self.root_path}/screen_task_log_{command_part} | grep '{search_string}'"
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
-
-            print(out.decode('utf-8'))
-
             out = out.decode('utf-8')
 
             rounds = 0
 
             if search_string in out:
-                print(out.split('\n'))
                 rounds = len(out.split('\n')) - 1
 
                 print("Rounds = ", rounds)

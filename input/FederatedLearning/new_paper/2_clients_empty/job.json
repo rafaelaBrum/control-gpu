@@ -22,7 +22,7 @@
         "clients": {
             "0" : {
                 "task_name": "Empty Task (client 0)",
-                "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094",
+                "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094  --max-retries 1",
                 "generic_checkpoint": "False",
                 "zip_file": "empty_client_files.zip",
                 "bucket_name": "",
@@ -40,7 +40,7 @@
             },
             "1" : {
                 "task_name": "Empty Task (client 1)",
-                "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094",
+                "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094  --max-retries 1",
                 "generic_checkpoint": "False",
                 "zip_file": "empty_client_files.zip",
                 "bucket_name": "",

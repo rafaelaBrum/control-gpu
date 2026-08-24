@@ -9,7 +9,7 @@ gcloud compute ssh --zone INSTANCE_ZONE INSTANCE_NAME
 flower-superlink --control-api-address 0.0.0.0:9093 --serverappio-api-address 0.0.0.0:9091 --fleet-api-address 0.0.0.0:9092 --insecure
 
 #SuperNode command (one per client)
-flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094
+flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094 --max-retries 1
 
 #Execution command - in the server VM
 flwr run . local-deployment --stream

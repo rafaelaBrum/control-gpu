@@ -757,6 +757,8 @@ class Dispatcher:
     def update_rounds(self, rounds_done, ckpt_restore=False):
         if self.type_task == Job.SERVER:
             self.loader.job.server_task.n_rounds = self.loader.job.server_task.n_rounds - rounds_done
+            for client_id in self.loader.job.client_tasks.keys():
+                self.loader.job.client_tasks[client_id].current_round = 2*rounds_done
             logging.info('<Dispatcher {}>: Updating num rounds to {}'.format(self.vm.instance_id,
                                                                              self.loader.job.server_task.n_rounds))
             if self.loader.application_conf.fl_framework == "flower_old":
