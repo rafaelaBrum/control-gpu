@@ -365,8 +365,10 @@ class Executor:
             "task_id": self.task.task_id,
             "command": self.task.command,
             "server_ip": self.task.server_ip,
-            "cpu": self.vm.instance_type.vcpu,
-            "gpu": self.vm.instance_type.count_gpu
+            "server_ckpt": self.loader.checkpoint_conf.server_checkpoint,
+            "client_ckpt": self.loader.checkpoint_conf.client_checkpoint,
+            "frequency_ckpt": self.loader.checkpoint_conf.frequency_ckpt,
+            "restore_ckpt": False
         }
 
         if self.type_task == Job.SERVER:
@@ -457,8 +459,9 @@ class Dispatcher:
                 communicator = Communicator(host=self.vm.instance_public_ip,
                                             port=self.loader.communication_conf.socket_port)
                 communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None,
-                                                             'server_ip': None, 'cpu': None, 
-                                                             'gpu': None, 'command_part': None})
+                                                             'server_ip': None, 'command_part': None, 
+                                                             "server_ckpt": None, "client_ckpt": None,
+                                                             "frequency_ckpt": None, "restore_ckpt": None})
 
                 if communicator.response['status'] == 'success':
                     return True

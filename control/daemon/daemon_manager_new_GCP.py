@@ -68,9 +68,11 @@ class DaemonGCP:
         task_id = value['task_id']
         command = value['command']
         server_ip = value['server_ip']
-        cpu = value['cpu']
-        gpu = value['gpu']
         command_part = value['command_part']
+        server_ckpt = value['server_ckpt']
+        client_ckpt = value['client_ckpt']
+        frequency_ckpt = value['frequency_ckpt']
+        restore_ckpt = value['restore_ckpt']
         session = ''
 
         if command is not None:
@@ -106,7 +108,8 @@ class DaemonGCP:
                     command = command.replace("IP_SERVER", f"{server_ip}")
 
                 if "flwr run" in command:
-                    command = command.replace("--stream", f"--stream --run-config  \"num-server-rounds={self.num_rounds}\"")
+                    run_configs = f"--stream --run-config \"num-server-rounds={self.num_rounds} server-checkpoint={str(server_ckpt).lower()} restore-ckpt={str(restore_ckpt).lower()} frequency-ckpt={(frequency_ckpt)} client-checkpoint={str(client_ckpt).lower()}\""
+                    command = command.replace("--stream", run_configs)
                     
 
                 print("Final command:", command)
@@ -196,13 +199,8 @@ class DaemonGCP:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
 
-            print(out.decode('utf-8'))
-
-            out = out.decode('utf-8')
-
             rounds = 0
             
-            print(out.split('\n'))
             rounds = len(out.split('\n')) - 1
 
             print("Rounds = ", rounds)
@@ -273,7 +271,7 @@ class DaemonGCP:
 
         logging.info("PATH env: {}".format(os.getenv('PATH')))
 
-        cmd = "screen -L -Logfile {}/screen_task_log_{} -S {} -dm bash -c {}".format(
+        cmd = "screen -L -Logfile {}/screen_task_log_{} -S {} -dm bash -c source venv/bin/activate; {}".format(
             self.root_path, command_part, session_name, command
         )
 

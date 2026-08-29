@@ -257,6 +257,11 @@ class GCPManager(CloudManager):
             
             instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
 
+            instance.service_accounts = [compute_v1.ServiceAccount({
+                'email': 'default',
+                'scopes': ["https://www.googleapis.com/auth/devstorage.read_write"]
+            })]
+
             if gpu_count > 0:
                 logging.error("Not tested with GPU yet!")
                 # config = {
@@ -421,6 +426,11 @@ class GCPManager(CloudManager):
 
             
             instance.tags =  compute_v1.Tags({'items': ['http-server', 'https-server', 'all-in', 'all-out']})
+
+            instance.service_accounts = [compute_v1.ServiceAccount({
+                'email': 'default',
+                'scopes': ["https://www.googleapis.com/auth/devstorage.read_write"]
+            })]
 
             if gpu_count > 0:
                 logging.error("Not tested with GPU yet!")

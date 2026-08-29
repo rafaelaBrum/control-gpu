@@ -1090,20 +1090,37 @@ class VirtualMachine:
                                   target=self.loader.gcp_conf.home_path,
                                   item=item)
 
-                cmd_daemon = "python3.7 {} " \
-                             "--root_path {} " \
-                             "--job_id {} " \
-                             "--task_id {} " \
-                             "--execution_id {}  " \
-                             "--instance_id {} " \
-                             "--folder_checkpoints {} ".format(os.path.join(self.loader.gcp_conf.home_path,
-                                                                            item),
-                                                               self.loader.file_system_conf.path,
-                                                               self.loader.job.job_id,
-                                                               task_id,
-                                                               self.loader.execution_id,
-                                                               self.instance_id,
-                                                               self.loader.checkpoint_conf.folder_checkpoints)
+                if self.loader.application_conf.fl_framework == "flower_old":
+                    cmd_daemon = "python3.7 {} " \
+                                    "--root_path {} " \
+                                    "--job_id {} " \
+                                    "--task_id {} " \
+                                    "--execution_id {}  " \
+                                    "--instance_id {} " \
+                                    "--folder_checkpoints {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                                item),
+                                                                    self.loader.file_system_conf.path,
+                                                                    self.loader.job.job_id,
+                                                                    task_id,
+                                                                    self.loader.execution_id,
+                                                                    self.instance_id,
+                                                                    self.loader.checkpoint_conf.folder_checkpoints)
+                elif self.loader.application_conf.fl_framework == "flower":
+                    cmd_daemon = "source venv/bin/activate; python {} " \
+                    "--root_path {} " \
+                    "--job_id {} " \
+                    "--task_id {} " \
+                    "--execution_id {}  " \
+                    "--instance_id {} " \
+                    "--folder_checkpoints {} ".format(os.path.join(self.loader.gcp_conf.home_path,
+                                                                item),
+                                                    self.loader.file_system_conf.path,
+                                                    self.loader.job.job_id,
+                                                    task_id,
+                                                    self.loader.execution_id,
+                                                    self.instance_id,
+                                                    self.loader.checkpoint_conf.folder_checkpoints)
+                
 
             elif self.instance_type.provider == CloudManager.CLOUDLAB:
                 item = self.loader.checkpoint_conf.daemon_fault_tolerance_cloudlab
@@ -1156,7 +1173,7 @@ class VirtualMachine:
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-            cmd_screen = 'screen -L -Logfile $HOME/{}screen_log_FT -dm bash -c "{}"'.format(self.loader.file_system_conf.path, cmd_daemon)
+            cmd_screen = "screen -L -Logfile $HOME/{}screen_log_FT -dm bash -c '{}'".format(self.loader.file_system_conf.path, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
