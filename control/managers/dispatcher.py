@@ -27,7 +27,7 @@ from zope.event import notify
 
 class Executor:
 
-    def __init__(self, task: Task, vm: VirtualMachine, loader: Loader, type_task):
+    def __init__(self, task: Task, vm: VirtualMachine, loader: Loader, type_task, restore_ckpt):
 
         self.loader = loader
 
@@ -53,6 +53,8 @@ class Executor:
 
         self.thread = threading.Thread(target=self.__run, daemon=True)
         self.thread_executing = False
+
+        self.restore_ckpt = restore_ckpt
 
     def update_status_table(self):
         """
@@ -368,7 +370,8 @@ class Executor:
             "server_ckpt": self.loader.checkpoint_conf.server_checkpoint,
             "client_ckpt": self.loader.checkpoint_conf.client_checkpoint,
             "frequency_ckpt": self.loader.checkpoint_conf.frequency_ckpt,
-            "restore_ckpt": False
+            "restore_ckpt": self.restore_ckpt,
+            "num_rounds": self.loader.job.server_task.n_rounds
         }
 
         if self.type_task == Job.SERVER:
@@ -461,7 +464,8 @@ class Dispatcher:
                 communicator.send(action=Daemon.TEST, value={'task_id': None, 'command': None,
                                                              'server_ip': None, 'command_part': None, 
                                                              "server_ckpt": None, "client_ckpt": None,
-                                                             "frequency_ckpt": None, "restore_ckpt": None})
+                                                             "frequency_ckpt": None, "restore_ckpt": None,
+                                                             "num_rounds": None})
 
                 if communicator.response['status'] == 'success':
                     return True
@@ -584,7 +588,8 @@ class Dispatcher:
                             task=task,
                             vm=self.vm,
                             loader=self.loader,
-                            type_task=self.type_task
+                            type_task=self.type_task,
+                            restore_ckpt=self.needs_external_transfer
                         )
                         # start the executor loop to execute the task
                         self.executor.thread.start()
@@ -694,7 +699,8 @@ class Dispatcher:
                         task=task,
                         vm=self.vm,
                         loader=self.loader,
-                        type_task=self.type_task
+                        type_task=self.type_task,
+                        restore_ckpt=self.needs_external_transfer
                     )
                     # start the executor loop to execute the task
                     self.executor.thread.start()

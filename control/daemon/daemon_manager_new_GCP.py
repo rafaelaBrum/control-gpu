@@ -73,6 +73,7 @@ class DaemonGCP:
         client_ckpt = value['client_ckpt']
         frequency_ckpt = value['frequency_ckpt']
         restore_ckpt = value['restore_ckpt']
+        num_rounds = value['num_rounds']
         session = ''
 
         if command is not None:
@@ -108,6 +109,8 @@ class DaemonGCP:
                     command = command.replace("IP_SERVER", f"{server_ip}")
 
                 if "flwr run" in command:
+                    if num_rounds < self.num_rounds:
+                        self.num_rounds = num_rounds
                     run_configs = f"--stream --run-config \"num-server-rounds={self.num_rounds} server-checkpoint={str(server_ckpt).lower()} restore-ckpt={str(restore_ckpt).lower()} frequency-ckpt={(frequency_ckpt)} client-checkpoint={str(client_ckpt).lower()}\""
                     command = command.replace("--stream", run_configs)
                     
@@ -199,6 +202,8 @@ class DaemonGCP:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             out, err = process.communicate()
 
+            out = out.decode('utf-8')
+
             rounds = 0
             
             rounds = len(out.split('\n')) - 1
@@ -217,9 +222,9 @@ class DaemonGCP:
             if search_string in out:
                 rounds = len(out.split('\n')) - 1
 
-                print("Rounds = ", rounds)
+            print("Rounds = ", rounds)
 
-            if rounds == (2 * self.num_rounds):
+            if rounds >= (2 * self.num_rounds):
                 status = 'finished'
             elif test_session in out_session:
                 status = 'running'
