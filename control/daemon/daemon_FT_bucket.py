@@ -6,6 +6,8 @@ import logging
 
 import shutil
 
+import numpy as np
+
 from time import sleep
 
 COUNT_WAITING = 5000
@@ -99,6 +101,17 @@ def get_checkpoint(args):
 
     if ckpt_file_name == "":
         return
+
+    while not os.path.exists(os.path.join(args.folder_checkpoints, ckpt_file_name)):
+            continue
+
+    reads_array = False
+    while not reads_array:
+        try:
+            aux_data = np.load(os.path.join(args.folder_checkpoints, ckpt_file_name))
+            reads_array = True
+        except Exception as e:
+            print(e)
 
     get_file(source=args.folder_checkpoints,
              target=os.getcwd(),

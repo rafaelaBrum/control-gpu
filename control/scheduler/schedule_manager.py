@@ -302,7 +302,7 @@ class ScheduleManager:
                     assert task.task_name == t.task_name, "Consistency error (server task {} memory): " \
                                                           "{} <> {} ".format(task.task_id, t.task_name, task.task_name)
 
-                    if self.loader.application_conf.fl_framework == 'flower_old':
+                    if self.loader.application_conf.fl_framework == "flower_old":
                         assert task.simple_command == t.command, "Consistency error (server task {} command): " \
                                                                 "{} <> {} ".format(task.task_id, t.command,
                                                                                     task.simple_command)
@@ -549,6 +549,7 @@ class ScheduleManager:
                             self.server_task_dispatcher.vm.prepare_ft_daemon(restart=True)
 
                     if self.loader.checkpoint_conf.client_checkpoint:
+                        client_dispatcher: Dispatcher = None
                         for dispatcher in self.client_task_dispatchers:
                             try:
                                 dispatcher.vm.open_connection()
@@ -566,6 +567,7 @@ class ScheduleManager:
                                 last_line = aux_list[-1].split('-')
                                 # print("last_line", last_line)
                                 client_ckpt_round = int(last_line[1])
+                                client_dispatcher = dispatcher
                                 break
                             except Exception as e:
                                 logging.error(e)
@@ -589,7 +591,7 @@ class ScheduleManager:
                     if not self.server_task_dispatcher.vm.ssh.is_active:
                         self.server_task_dispatcher.vm.ssh.open_connection()
 
-                    if client_ckpt_round >= server_ckpt_round:
+                    if client_ckpt_round > server_ckpt_round:
                         if self.loader.checkpoint_conf.server_checkpoint:
                             if self.loader.checkpoint_conf.extra_vm:
                                 self.extra_vm.ssh.execute_command(f'rm {folder_ckpt} -r')
@@ -598,10 +600,17 @@ class ScheduleManager:
                                 self.server_task_dispatcher.vm.ssh.execute_command(f'rm {folder_ckpt} -r')
                                 self.server_task_dispatcher.vm.ssh.execute_command(f'mkdir {folder_ckpt}')
 
-                        self.server_task_dispatcher.vm.ssh.execute_command(f"echo '' > name_checkpoint.txt")
-
                         # Restarts from client checkpoint
-                        self.server_task_dispatcher.update_rounds(client_ckpt_round)
+                        if self.loader.application_conf.fl_framework == "flower_old":
+                            self.server_task_dispatcher.vm.ssh.execute_command(f"echo '' > name_checkpoint.txt")
+                            self.server_task_dispatcher.update_rounds(client_ckpt_round)
+                        elif self.loader.application_conf.fl_framework == "flower":
+                            ckpt_file = f"round-{client_ckpt_round}-weights.npz"
+                            command = f"gcloud compute scp {client_dispatcher.vm.instance_id}:~/{ckpt_file} ~/{folder_ckpt} --zone={client_dispatcher.vm.zone} --quiet"
+                            self.server_task_dispatcher.vm.ssh.execute_command(f"echo {ckpt_file} > name_checkpoint.txt")
+                            self.server_task_dispatcher.vm.ssh.execute_command(command)
+
+                            self.server_task_dispatcher.update_rounds(client_ckpt_round, ckpt_restore=True)
                     else:
                         try:
                             # Restarts from server checkpoint

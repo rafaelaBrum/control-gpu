@@ -633,7 +633,7 @@ class VirtualMachine:
                                       target=self.loader.gcp_conf.home_path,
                                       item=self.loader.application_conf.daemon_gcp_file)
 
-                    if self.loader.application_conf.fl_framework =='flower_old':
+                    if self.loader.application_conf.fl_framework =="flower_old":
                         cmd_daemon = "python3.7 {} " \
                                     "--vm_user {} " \
                                     "--root_path {} " \
@@ -1173,12 +1173,12 @@ class VirtualMachine:
             # Start Daemon
             logging.info("<VirtualMachine {}>: - Starting Daemon".format(self.instance_id))
 
-            cmd_screen = "screen -L -Logfile $HOME/{}screen_log_FT -dm bash -c '{}'".format(self.loader.file_system_conf.path, cmd_daemon)
+            cmd_screen = 'screen -L -Logfile $HOME/{}screen_log_FT -dm bash -c "{}"'.format(self.loader.file_system_conf.path, cmd_daemon)
             # cmd_screen = '{}'.format(cmd_daemon)
 
             logging.info("<VirtualMachine {}>: - {}".format(self.instance_id, cmd_screen))
 
-            stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True)
+            stdout, stderr, code_return = self.ssh.execute_command(cmd_screen, output=True, simple_quotes=True)
             print(stdout)
             self.ssh.close_connection()
         else:

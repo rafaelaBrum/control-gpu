@@ -461,7 +461,7 @@ class Loader:
 
     # update Federated Learning command
     def __update_command(self, strategy, num_seed):
-        if self.application_conf.fl_framework == 'flower_old':
+        if self.application_conf.fl_framework == "flower_old":
             if strategy is not None:
                 self.job.server_task.command = "{0} --rounds {1} --sample_fraction 1 --min_sample_size {2}" \
                                               " --min_num_clients {2} --server_address [::]:{3} --strategy {4}"\
@@ -542,7 +542,7 @@ class Loader:
                         self.job.client_tasks[i].command,
                         self.job.client_tasks[i].client_id
                     )
-        elif self.application_conf.fl_framework == 'flower':
+        elif self.application_conf.fl_framework == "flower":
             print("First server command", self.job.server_task.command[0])
             print("Second server command", self.job.server_task.command[1])
 

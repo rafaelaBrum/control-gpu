@@ -36,7 +36,11 @@ def __call_control(loader: Loader):
         status = "SUCCESS"
     except Exception as e:
         logging.error(e)
-        # status = "ERROR"
+        status = "ERROR"
+        if isinstance(e, CalledProcessError):
+            print(e.stderr)
+            print(e.stdout)
+
 
     # if loader.dump:
     #     logging.info("Backup Database..")
