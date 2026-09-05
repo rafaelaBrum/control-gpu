@@ -147,7 +147,10 @@ class DynamicScheduler(MathematicalFormulationScheduler):
             elif current_inst.provider.lower() in (CloudManager.GCLOUD, CloudManager.GCP):
                 for name, instance in self.instances_client_gcp.items():
                     if instance == current_inst:
-                        self.qtde_gpus_spot_gcloud[name][current_loc.region] += 1
+                        try:
+                            self.qtde_gpus_spot_gcloud[name][current_loc.region] += 1
+                        except Exception as e:
+                            logging.error(e)
                         break
 
         aux_loc = current_inst.provider.upper() + '_' + current_loc.region
