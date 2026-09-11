@@ -20,7 +20,7 @@ Shakespeare app (8 clients running 20 rounds)
 echo " ----------------------------
 Test Case 1 (server and clients are faulty)
 ---------------------------- "
-cp setup_cloudlab/setup_shakespeare_dyn_sched_all.cfg setup.cfg
+cp setup_files/setup_cloudlab/setup_shakespeare_dyn_sched_all.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
@@ -54,7 +54,7 @@ done
 echo " ----------------------------
 Test Case 2 (only server is faulty)
 ---------------------------- "
-cp setup_cloudlab/setup_shakespeare_dyn_sched_server.cfg setup.cfg
+cp setup_files/setup_cloudlab/setup_shakespeare_dyn_sched_server.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "
@@ -88,7 +88,7 @@ done
 echo " ----------------------------
 Test Case 3 (only clients are faulty)
 ---------------------------- "
-cp setup_cloudlab/setup_shakespeare_dyn_sched_cli.cfg setup.cfg
+cp setup_files/setup_cloudlab/setup_shakespeare_dyn_sched_cli.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(1 hour)
  ---------------------------- "

@@ -18,7 +18,7 @@ echo " ----------------------------
 echo " ----------------------------
 Test Case 0 (without simulation)
 ---------------------------- "
-cp setup_journal_paper/test_case_setup_no_simulation_no_checkpoint.cfg setup.cfg
+cp setup_files/setup_journal_paper/test_case_setup_no_simulation_no_checkpoint.cfg setup.cfg
 COUNTER=4
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
@@ -34,7 +34,7 @@ done
 echo " ----------------------------
 Test Case 1 (server and clients are faulty - server ckpt in aws)
 ---------------------------- "
-cp setup_journal_paper/test_case_setup_simulation_checkpoint_all_aws.cfg setup.cfg
+cp setup_files/setup_journal_paper/test_case_setup_simulation_checkpoint_all_aws.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
@@ -68,7 +68,7 @@ done
 echo " ----------------------------
 Test Case 2 (server and clients are faulty - server ckpt in gcp)
 ---------------------------- "
-cp setup_journal_paper/test_case_setup_simulation_checkpoint_all_gcp.cfg setup.cfg
+cp setup_files/setup_journal_paper/test_case_setup_simulation_checkpoint_all_gcp.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "

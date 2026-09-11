@@ -19,7 +19,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 1 (every 10 rounds)
 ---------------------------- "
-cp setup_cloudlab/4_clients_50_rounds_ckpt_10_setup.cfg setup.cfg
+cp setup_files/setup_cloudlab/4_clients_50_rounds_ckpt_10_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -35,7 +35,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 2 (every 20 rounds)
 ---------------------------- "
-cp setup_cloudlab/4_clients_50_rounds_ckpt_20_setup.cfg setup.cfg
+cp setup_files/setup_cloudlab/4_clients_50_rounds_ckpt_20_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -51,7 +51,7 @@ COUNTER=1
 echo " ----------------------------
 Test Case 3 (every 30 rounds)
 ---------------------------- "
-cp setup_cloudlab/4_clients_50_rounds_ckpt_30_setup.cfg setup.cfg
+cp setup_files/setup_cloudlab/4_clients_50_rounds_ckpt_30_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -67,7 +67,7 @@ COUNTER=1
 echo " ----------------------------
 Test Case 4 (every 40 rounds)
 ---------------------------- "
-cp setup_cloudlab/4_clients_50_rounds_ckpt_40_setup.cfg setup.cfg
+cp setup_files/setup_cloudlab/4_clients_50_rounds_ckpt_40_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

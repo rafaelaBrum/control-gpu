@@ -19,7 +19,7 @@ COUNTER=1
 echo " ----------------------------
 Test Case 1 - clients checkpointing
 ---------------------------- "
-cp setup_cloudlab/4_clients_50_rounds_ckpt_client.cfg setup.cfg
+cp setup_files/setup_cloudlab/4_clients_50_rounds_ckpt_client.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

@@ -16,7 +16,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 1 (4 clients in AWS east - server in AWS east)
 ---------------------------- "
-cp setup_compas_article/test_case_1_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_1_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -32,7 +32,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 2 (2 clients in AWS east, 2 clients in AWS east - server in AWS east)
 ---------------------------- "
-cp setup_compas_article/test_case_2_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_2_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -48,7 +48,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 3 (2 clients in AWS east, 2 clients in AWS east - server in AWS east)
 ---------------------------- "
-cp setup_compas_article/test_case_3_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_3_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -64,7 +64,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 4 (4 clients in GCP central - server in GCP central)
 ---------------------------- "
-cp setup_compas_article/test_case_4_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_4_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -80,7 +80,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 5 (2 clients in GCP central, 2 clients in GCP east - server in GCP central)
 ---------------------------- "
-cp setup_compas_article/test_case_5_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_5_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -96,7 +96,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 6 (2 clients in GCP central, 2 clients in GCP east - server in GCP east)
 ---------------------------- "
-cp setup_compas_article/test_case_6_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_6_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -112,7 +112,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 7 (3 clients in AWS east, 1 clients in GCP central - server in AWS east)
 ---------------------------- "
-cp setup_compas_article/test_case_7_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_7_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -128,7 +128,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 8 (2 clients in AWS east, 2 clients in GCP central - server in AWS east)
 ---------------------------- "
-cp setup_compas_article/test_case_8_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_8_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -144,7 +144,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 9 (2 clients in AWS east, 2 clients in GCP central - server in GCP central)
 ---------------------------- "
-cp setup_compas_article/test_case_9_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_9_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER
@@ -160,7 +160,7 @@ COUNTER=4
 echo " ----------------------------
 Test Case 10 (1 client in AWS east, 3 clients in GCP central - server in GCP central)
 ---------------------------- "
-cp setup_compas_article/test_case_10_setup.cfg setup.cfg
+cp setup_files/setup_compas_article/test_case_10_setup.cfg setup.cfg
 while [  $COUNTER -lt 4 ]; do
   echo " ----------------------------
    Running test - Counter=$COUNTER

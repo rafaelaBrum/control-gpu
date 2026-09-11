@@ -21,7 +21,7 @@ echo " ----------------------------
 echo " ----------------------------
 Test Case 0 (without simulation)
 ---------------------------- "
-cp setup_jpdc_2023/test_case_3_setup_bucket_aws.cfg setup.cfg
+cp setup_files/setup_jpdc_2023/test_case_3_setup_bucket_aws.cfg setup.cfg
 COUNTER=1
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
@@ -37,7 +37,7 @@ done
 echo " ----------------------------
 Test Case 1 (server and clients are faulty)
 ---------------------------- "
-cp setup_jpdc_2023/test_case_3_setup_bucket_aws_all_revoking.cfg setup.cfg
+cp setup_files/setup_jpdc_2023/test_case_3_setup_bucket_aws_all_revoking.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "
@@ -77,7 +77,7 @@ echo " ----------------------------
 echo " ----------------------------
 Test Case 0 (without simulation)
 ---------------------------- "
-cp setup_jpdc_2023/test_case_3_setup_bucket_gcp.cfg setup.cfg
+cp setup_files/setup_jpdc_2023/test_case_3_setup_bucket_gcp.cfg setup.cfg
 COUNTER=1
 while [  $COUNTER -lt 4 ]; do
         echo " ----------------------------
@@ -93,7 +93,7 @@ done
 echo " ----------------------------
 Test Case 1 (server and clients are faulty)
 ---------------------------- "
-cp setup_jpdc_2023/test_case_3_setup_bucket_gcp_all_revoking.cfg setup.cfg
+cp setup_files/setup_jpdc_2023/test_case_3_setup_bucket_gcp_all_revoking.cfg setup.cfg
 echo " ----------------------------
   Failure rate of 1/(2 hours)
  ---------------------------- "

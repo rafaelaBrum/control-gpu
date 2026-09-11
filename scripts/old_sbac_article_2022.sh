@@ -15,7 +15,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$HOME/bustling-icon-331608-97742b8ca898.js
 echo " ----------------------------
 Scenario 1 (all DS in AWS east)
 ---------------------------- "
-cp setup_sbac_2022/test_case_1_setup.cfg setup.cfg
+cp setup_files/setup_sbac_2022/test_case_1_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
@@ -121,7 +121,7 @@ done
 echo " ----------------------------
 Scenario 2 (all DS in GCP central)
 ---------------------------- "
-cp setup_sbac_2022/test_case_2_setup.cfg setup.cfg
+cp setup_files/setup_sbac_2022/test_case_2_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
@@ -227,7 +227,7 @@ done
 echo " ----------------------------
 Scenario 3 (2 DS in AWS east and 2 DS in GCP central)
 ---------------------------- "
-cp setup_sbac_2022/test_case_3_setup.cfg setup.cfg
+cp setup_files/setup_sbac_2022/test_case_3_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
@@ -333,7 +333,7 @@ done
 echo " ----------------------------
 Scenario 4 (3 DS in AWS east and 1 DS in GCP central)
 ---------------------------- "
-cp setup_sbac_2022/test_case_4_setup.cfg setup.cfg
+cp setup_files/setup_sbac_2022/test_case_4_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
@@ -439,7 +439,7 @@ done
 echo " ----------------------------
 Scenario 5 (1 DS in AWS east and 3 DS in GCP central)
 ---------------------------- "
-cp setup_sbac_2022/test_case_5_setup.cfg setup.cfg
+cp setup_files/setup_sbac_2022/test_case_5_setup.cfg setup.cfg
 echo " ----------------------------
 Optimal solution
 ---------------------------- "
