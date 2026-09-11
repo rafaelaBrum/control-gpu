@@ -17,19 +17,21 @@ echo "Python 3.12 virtual environment installed"
 sudo apt install screen -y
 echo "Screen command installed"
 
-# # Installing CUDA 13.4
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-sudo dpkg -i cuda-keyring_1.1-1_all.deb
-sudo apt update
+# # Installing CUDA 10.0 and cuDNN 7
+# wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
+# sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
+# sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/3bf863cc.pub
+# sudo apt update
+# sudo apt install cuda-10-0 -y
+# echo "CUDA 10.0 installed"
 
-sudo apt install -y nvidia-driver-pinning-615
-sudo apt install -y nvidia-open
+# wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
+# wget https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
 
-echo "CUDA Driver installed"
+# sudo dpkg -i libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb
+# sudo dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb
 
-sudo apt -y install cuda-toolkit-13-4
-
-echo "CUDA 13.4 installed"
+# echo "cuDNN 7 installed"
 
 
 # Installing Python dependencies
