@@ -50,6 +50,20 @@
                     }
                 }
             },
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.705277919769287",
+                        "TrainMsg": "9.577562093734741"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.571803092956543",
+                        "TrainMsg": "10.174443244934082"
+                    }
+                }
+            },
             "GCP_us-central1_us-central1-c": {
                 "client-server": {
                     "1": {
@@ -61,6 +75,20 @@
                     "1": {
                         "TestMsg": "7.697269439697266",
                         "TrainMsg": "11.895553588867188"
+                    }
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.604451894760132",
+                        "TrainMsg": "11.899685859680176"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.534374237060547",
+                        "TrainMsg": "10.014082431793213"
                     }
                 }
             },
@@ -107,8 +135,80 @@
                 }
             }
         },
-        "GCP_us-central1_us-central1-b": {},
-        "GCP_us-central1_us-central1-c": {},
+        "GCP_us-central1_us-central1-b": {
+            "GCP_us-central1_us-central1-b": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.585851430892944",
+                        "TrainMsg": "9.700908899307251"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.481814622879028",
+                        "TrainMsg": "9.879230260848999"
+                    }
+                }
+            },
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "4.746810436248779",
+                        "TrainMsg": "9.280765295028687"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.504751443862915",
+                        "TrainMsg": "11.758464813232422"
+                    }
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.578477621078491",
+                        "TrainMsg": "12.293157815933228"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "7.51483416557312",
+                        "TrainMsg": "11.858584642410278"
+                    }
+                }
+            }
+        },
+        "GCP_us-central1_us-central1-c": {
+            "GCP_us-central1_us-central1-c": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "5.0343523025512695",
+                        "TrainMsg": "10.609928369522095"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "10.629582166671753",
+                        "TrainMsg": "12.230998039245605"
+                    }
+                }
+            },
+            "GCP_us-central1_us-central1-f": {
+                "client-server": {
+                    "1": {
+                        "TestMsg": "7.552198648452759",
+                        "TrainMsg": "12.24186372756958"
+                    }
+                },
+                "server-client": {
+                    "1": {
+                        "TestMsg": "4.745733022689819",
+                        "TrainMsg": "10.30055546760559"
+                    }
+                }
+            }
+        },
         "GCP_us-central1_us-central1-f": {},
         "GCP_us-west1_us-west1-a": {
             "GCP_us-west1_us-west1-a": {
