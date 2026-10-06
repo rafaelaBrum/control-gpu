@@ -37,12 +37,12 @@
             "provider": "gcloud",
             "prices": {
                 "on-demand": {
-                    "us-west1": 1.359996,
-                    "us-central1": 1.359996
+                    "us-west1": 0.8536242709999999,
+                    "us-central1": 0.8536242709999999
                 },
                 "preemptible": {
-                    "us-west1": 0.376,
-                    "us-central1": 0.376
+                    "us-west1": 0.486496,
+                    "us-central1": 0.486496
                 }
             },
             "restrictions": {

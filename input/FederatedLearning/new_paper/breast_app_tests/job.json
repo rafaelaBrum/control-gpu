@@ -26,15 +26,8 @@
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
                 "bucket_name": "breast-app-client-0",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -43,16 +36,9 @@
                 "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --host 0.0.0.0 --port 9094  --max-retries 1",
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
-                "bucket_name": "breast-app-client-1",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
+                "bucket_name": "breast-app-client-1",                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -62,15 +48,8 @@
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
                 "bucket_name": "breast-app-client-2",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -80,15 +59,8 @@
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
                 "bucket_name": "breast-app-client-3",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -98,15 +70,8 @@
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
                 "bucket_name": "breast-app-client-4",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -116,15 +81,8 @@
                 "generic_checkpoint": "False",
                 "zip_file": "breast_client_files.zip",
                 "bucket_name": "breast-app-client-5",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
                 "bucket_provider": "gcp",
                 "bucket_region": "us-central1",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             }

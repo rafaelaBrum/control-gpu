@@ -25,16 +25,6 @@
                 "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094  --max-retries 1",
                 "generic_checkpoint": "False",
                 "zip_file": "empty_client_files.zip",
-                "bucket_name": "",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
-                "bucket_provider": "",
-                "bucket_region": "",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             },
@@ -43,16 +33,6 @@
                 "command": "flower-supernode --insecure --superlink IP_SERVER:9092 --clientappio-api-address 0.0.0.0:9094  --max-retries 1",
                 "generic_checkpoint": "False",
                 "zip_file": "empty_client_files.zip",
-                "bucket_name": "",
-                "trainset_dir": "",
-                "test_dir": "",
-                "split": "",
-                "batch": 0,
-                "train_epochs": 0,
-                
-                "bucket_provider": "",
-                "bucket_region": "",
-                "net": "",
                 "dataset_urn": "",
                 "baseline_exec": 0.1
             }

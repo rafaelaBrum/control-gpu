@@ -1,6 +1,7 @@
 from control.domain.app_specific.fl_server_task import FLServerTask
 from control.domain.app_specific.fl_til_client_task import FLTILClientTask
 from control.domain.app_specific.fl_empty_client_task import FLEmptyClientTask
+from control.domain.app_specific.fl_breast_client_task import FLBreastClientTask
 from control.config.application_config import ApplicationConfig
 
 
@@ -34,6 +35,9 @@ class Job:
                 tasks[task.client_id] = task
         elif self.app_config.app == "empty":
             for task in FLEmptyClientTask.from_dict(job_dict):
+                tasks[task.client_id] = task
+        elif self.app_config.app == "breast":
+            for task in FLBreastClientTask.from_dict(job_dict):
                 tasks[task.client_id] = task
         else:
             print("Need reading JSON for {} FL client application.".format(self.app_config.app))
